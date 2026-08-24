@@ -1,0 +1,29 @@
+# dependencies
+/node_modules
+
+# next
+/.next
+/out
+
+# production
+/build
+
+# database (local SQLite)
+*.db
+*.db-shm
+*.db-wal
+
+# drizzle generated migrations are kept; uncomment to ignore
+# /drizzle
+
+# env
+.env
+.env.local
+.env*.local
+
+# misc
+.DS_Store
+*.log
+.vscode
+
+.vercel

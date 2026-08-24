@@ -1,0 +1,38 @@
+# Fly.io config for Mizan (SQLite on a persistent volume).
+# https://fly.io/docs/reference/configuration/
+
+app = "mizan-app"
+primary_region = "iad"
+
+[build]
+
+[env]
+  NODE_ENV = "production"
+  PORT = "3000"
+  HOSTNAME = "0.0.0.0"
+  DATABASE_PATH = "/data/mizan.db"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+  [[http_service.checks]]
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "30s"
+    method = "GET"
+    path = "/api/health"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
+  cpus = 1
+
+[mounts]
+  source = "mizan_data"
+  destination = "/data"
+  initial_size = "1GB"

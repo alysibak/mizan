@@ -1,0 +1,15 @@
+services:
+  mizan:
+    build: .
+    ports:
+      - "${PORT:-3080}:3000"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: file:/data/mizan.db
+      APP_SECRET: ${APP_SECRET:-change-me-in-production}
+    volumes:
+      - mizan-data:/data
+    restart: unless-stopped
+
+volumes:
+  mizan-data:
