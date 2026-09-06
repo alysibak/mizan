@@ -34,12 +34,22 @@ async function main() {
     goldPricePerGram: 90,
     silverPricePerGram: 1.05,
     hawlStartDate: hawlStart,
+    madhhab: "general",
+    setupComplete: true,
+    trustedAckAt: new Date().toISOString(),
   });
 
   await db.insert(assets).values([
     { userId: user.id, category: "cash", label: "Cash on hand", amount: 1500 },
     { userId: user.id, category: "bank", label: "Chequing + savings", amount: 9500 },
     { userId: user.id, category: "gold", label: "Gold coins", amount: 3200 },
+    {
+      userId: user.id,
+      category: "jewellery",
+      label: "Wedding jewellery",
+      amount: 4000,
+      zakatablePortion: 0,
+    },
     { userId: user.id, category: "stocks_trading", label: "Active brokerage", amount: 6000 },
     {
       userId: user.id,
@@ -47,6 +57,7 @@ async function main() {
       label: "Index funds (long-term)",
       amount: 12000,
       zakatablePortion: 0.3,
+      hawlStartDate: hawlStart,
     },
   ]);
 

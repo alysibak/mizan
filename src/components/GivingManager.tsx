@@ -1,33 +1,66 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { formatMoney } from "@/lib/money";
+import { ASNAF, asnafLabel } from "@/lib/asnaf";
 import type { GivingRecord } from "@/db/schema";
+
+function typeLabel(type: string) {
+  if (type === "zakat") return "Zakat";
+  if (type === "purification") return "Purification";
+  return "Sadaqah";
+}
 
 export default function GivingManager({
   records,
   currency,
+  defaultType = "sadaqah",
+  defaultAmount,
+  defaultAsnaf,
+  cycleOutstanding = 0,
+  cyclePayable = false,
 }: {
   records: GivingRecord[];
   currency: string;
+  defaultType?: "zakat" | "sadaqah" | "purification";
+  defaultAmount?: number;
+  defaultAsnaf?: string | null;
+  cycleOutstanding?: number;
+  cyclePayable?: boolean;
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [justCleared, setJustCleared] = useState(false);
+  const [type, setType] = useState(defaultType);
   const today = new Date().toISOString().slice(0, 10);
+  const recipients = [
+    ...new Set(records.map((r) => r.recipient).filter((x): x is string => Boolean(x))),
+  ];
+
+  const asnafHint = useMemo(() => {
+    if (type !== "zakat") return null;
+    return ASNAF.find((a) => a.key === "faqir")?.note ?? null;
+  }, [type]);
 
   async function addRecord(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
     setBusy(true);
+    setJustCleared(false);
     const form = new FormData(e.currentTarget);
+    const amount = Number(form.get("amount"));
+    const giftType = String(form.get("type"));
+    const asnafRaw = String(form.get("asnaf") || "");
     const res = await fetch("/api/giving", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         amount: form.get("amount"),
-        type: form.get("type"),
+        type: giftType,
+        asnaf: giftType === "zakat" && asnafRaw ? asnafRaw : null,
         recipient: form.get("recipient"),
         note: form.get("note"),
         date: form.get("date"),
@@ -35,7 +68,18 @@ export default function GivingManager({
     });
     setBusy(false);
     if (res.ok) {
+      if (
+        giftType === "zakat" &&
+        cyclePayable &&
+        cycleOutstanding > 0 &&
+        amount >= cycleOutstanding - 0.005
+      ) {
+        setJustCleared(true);
+      }
       (e.target as HTMLFormElement).reset();
+      setType(defaultType);
+      const q = defaultType === "sadaqah" ? "/giving" : `/giving?type=${defaultType}`;
+      router.replace(q);
       router.refresh();
     } else {
       const data = await res.json().catch(() => ({}));
@@ -43,13 +87,59 @@ export default function GivingManager({
     }
   }
 
-  async function removeRecord(id: string) {
+  async function removeRecord(id: string, label: string) {
+    if (!window.confirm(`Remove this gift (${label})?`)) return;
     await fetch(`/api/giving/${id}`, { method: "DELETE" });
     router.refresh();
   }
 
   return (
     <div className="space-y-8">
+      {justCleared && (
+        <section className="border border-pine/40 bg-pine/5 px-5 py-5">
+          <p className="label text-pine">Cycle cleared</p>
+          <p className="mt-1 font-serif text-xl text-ink">
+            That payment covers this cycle’s outstanding zakat.
+          </p>
+          <p className="mt-1 text-sm text-sage">
+            Next: freeze → roll the ledger hawl → print statement.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Link href="/year#freeze-year" className="btn-primary">
+              Freeze on The year
+            </Link>
+            <Link href="/statement" className="btn-ghost">
+              Print statement
+            </Link>
+            <button
+              type="button"
+              className="text-xs text-sage hover:text-ink"
+              onClick={() => setJustCleared(false)}
+            >
+              Dismiss
+            </button>
+          </div>
+        </section>
+      )}
+
+      {cyclePayable && cycleOutstanding > 0 && !justCleared && (
+        <section className="border border-mist px-5 py-4">
+          <p className="text-sm text-sage">
+            Still{" "}
+            <span className="nums text-ink">
+              {formatMoney(cycleOutstanding, currency)}
+            </span>{" "}
+            zakat outstanding this cycle. After you pay, freeze on The year.
+          </p>
+          <Link
+            href="/year#freeze-year"
+            className="mt-2 inline-block text-sm text-pine hover:underline"
+          >
+            Open freeze step
+          </Link>
+        </section>
+      )}
+
       <section className="card p-5">
         <h2 className="font-serif text-lg text-ink">Record a gift</h2>
         <form onSubmit={addRecord} className="mt-4 space-y-4">
@@ -58,15 +148,34 @@ export default function GivingManager({
               <label className="label mb-1.5" htmlFor="amount">
                 Amount ({currency})
               </label>
-              <input id="amount" name="amount" type="number" step="0.01" min="0.01" className="field nums" placeholder="0.00" required />
+              <input
+                id="amount"
+                name="amount"
+                type="number"
+                step="0.01"
+                min="0.01"
+                className="field nums"
+                placeholder="0.00"
+                defaultValue={defaultAmount ?? ""}
+                required
+              />
             </div>
             <div>
               <label className="label mb-1.5" htmlFor="type">
                 Type
               </label>
-              <select id="type" name="type" className="field" defaultValue="sadaqah">
+              <select
+                id="type"
+                name="type"
+                className="field"
+                value={type}
+                onChange={(e) =>
+                  setType(e.target.value as typeof defaultType)
+                }
+              >
                 <option value="sadaqah">Sadaqah (voluntary)</option>
                 <option value="zakat">Zakat (obligatory)</option>
+                <option value="purification">Purification / interest</option>
               </select>
             </div>
             <div>
@@ -76,12 +185,55 @@ export default function GivingManager({
               <input id="date" name="date" type="date" defaultValue={today} className="field" required />
             </div>
           </div>
+
+          {type === "zakat" && (
+            <div>
+              <label className="label mb-1.5" htmlFor="asnaf">
+                Recipient category (optional)
+              </label>
+              <select
+                id="asnaf"
+                name="asnaf"
+                className="field"
+                defaultValue={defaultAsnaf ?? ""}
+              >
+                <option value="">Not specified</option>
+                {ASNAF.map((a) => (
+                  <option key={a.key} value={a.key}>
+                    {a.label}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-1.5 text-xs text-sage">
+                The eight asnaf from the Qur’an — for your record, not a ruling
+                on who qualifies.{" "}
+                <Link href="/tools/asnaf" className="text-pine hover:underline">
+                  Read the list
+                </Link>
+                {asnafHint ? "." : "."}
+              </p>
+            </div>
+          )}
+
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="label mb-1.5" htmlFor="recipient">
                 Recipient (optional)
               </label>
-              <input id="recipient" name="recipient" className="field" placeholder="e.g. local food bank" />
+              <input
+                id="recipient"
+                name="recipient"
+                className="field"
+                placeholder="e.g. local food bank"
+                list="past-recipients"
+              />
+              {recipients.length > 0 && (
+                <datalist id="past-recipients">
+                  {recipients.map((name) => (
+                    <option key={name} value={name} />
+                  ))}
+                </datalist>
+              )}
             </div>
             <div>
               <label className="label mb-1.5" htmlFor="note">
@@ -114,10 +266,11 @@ export default function GivingManager({
               <li key={r.id} className="flex items-center justify-between gap-4 p-4">
                 <div className="min-w-0">
                   <p className="truncate font-medium text-ink">
-                    {r.recipient || (r.type === "zakat" ? "Zakat" : "Sadaqah")}
+                    {r.recipient || typeLabel(r.type)}
                   </p>
                   <p className="text-xs text-sage">
                     {r.date}
+                    {r.asnaf ? ` · ${asnafLabel(r.asnaf)}` : ""}
                     {r.note ? ` · ${r.note}` : ""}
                   </p>
                 </div>
@@ -129,14 +282,20 @@ export default function GivingManager({
                     <p
                       className={
                         "text-xs " +
-                        (r.type === "zakat" ? "text-pine" : "text-brass")
+                        (r.type === "zakat"
+                          ? "text-pine"
+                          : r.type === "purification"
+                            ? "text-sage"
+                            : "text-brass")
                       }
                     >
-                      {r.type}
+                      {typeLabel(r.type)}
                     </p>
                   </div>
                   <button
-                    onClick={() => removeRecord(r.id)}
+                    onClick={() =>
+                      removeRecord(r.id, formatMoney(r.amount, currency))
+                    }
                     className="text-sage transition hover:text-danger"
                     aria-label="Remove record"
                   >

@@ -27,6 +27,11 @@ export async function POST(request: Request) {
     );
   }
 
+  await db
+    .update(users)
+    .set({ lastLoginAt: new Date().toISOString() })
+    .where(eq(users.id, user.id));
+
   await createSession(user.id);
   return NextResponse.json({ ok: true });
 }

@@ -35,7 +35,11 @@ export const DEFAULT_SETTINGS: Omit<Settings, "userId" | "updatedAt"> = {
   calendarBasis: "lunar",
   goldPricePerGram: 90,
   silverPricePerGram: 1.05,
+  metalsUpdatedAt: null,
   hawlStartDate: null,
+  madhhab: "general",
+  setupComplete: false,
+  trustedAckAt: null,
 };
 
 export async function getUserSettings(userId: string): Promise<Settings> {
@@ -44,7 +48,15 @@ export async function getUserSettings(userId: string): Promise<Settings> {
     .from(settings)
     .where(eq(settings.userId, userId))
     .limit(1);
-  if (row[0]) return row[0];
+  if (row[0]) {
+    return {
+      ...row[0],
+      madhhab: row[0].madhhab || "general",
+      setupComplete: row[0].setupComplete !== false,
+      trustedAckAt: row[0].trustedAckAt ?? null,
+      metalsUpdatedAt: row[0].metalsUpdatedAt ?? null,
+    };
+  }
   return {
     userId,
     updatedAt: new Date().toISOString(),

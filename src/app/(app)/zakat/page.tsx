@@ -1,19 +1,29 @@
 import Link from "next/link";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
-import { assets, liabilities } from "@/db/schema";
+import { assets, liabilities, givingRecords } from "@/db/schema";
 import { getCurrentUser, getUserSettings } from "@/lib/session";
 import { calculateZakat } from "@/lib/zakat";
 import { categoryMeta } from "@/lib/categories";
 import { formatMoney, formatPercent } from "@/lib/money";
+import EstimateBanner from "@/components/EstimateBanner";
+import CycleActions from "@/components/CycleActions";
+import {
+  duePhase,
+  duePhaseLabel,
+  paymentWindow,
+  sumZakatInWindow,
+} from "@/lib/giving-window";
+import { hawlStatus } from "@/lib/hijri";
 
 export default async function ZakatPage() {
   const user = (await getCurrentUser())!;
   const settings = await getUserSettings(user.id);
 
-  const [assetRows, liabilityRows] = await Promise.all([
+  const [assetRows, liabilityRows, givingRows] = await Promise.all([
     db.select().from(assets).where(eq(assets.userId, user.id)),
     db.select().from(liabilities).where(eq(liabilities.userId, user.id)),
+    db.select().from(givingRecords).where(eq(givingRecords.userId, user.id)),
   ]);
 
   const r = calculateZakat({
@@ -36,6 +46,14 @@ export default async function ZakatPage() {
     basis: settings.calendarBasis as "lunar" | "solar",
   });
   const c = settings.currency;
+  const phase = duePhase({
+    meetsNisab: r.isDue,
+    hawlStartDate: settings.hawlStartDate,
+  });
+  const hawl = settings.hawlStartDate ? hawlStatus(settings.hawlStartDate) : null;
+  const window = paymentWindow(settings.hawlStartDate);
+  const paid = sumZakatInWindow(givingRows, window);
+  const outstanding = Math.max(0, r.zakatDue - paid);
 
   const Row = ({
     label,
@@ -81,9 +99,15 @@ export default async function ZakatPage() {
           <Link href="/settings" className="text-pine hover:underline">
             settings
           </Link>
+          .{" "}
+          <Link href="/statement" className="text-pine hover:underline">
+            Yearly statement
+          </Link>
           .
         </p>
       </header>
+
+      <EstimateBanner />
 
       {assetRows.length === 0 ? (
         <div className="card border-dashed p-6 text-center">
@@ -161,15 +185,29 @@ export default async function ZakatPage() {
           >
             {r.isDue ? (
               <>
-                <p className="label text-pine">Zakat due</p>
+                <p className="label text-pine">
+                  {phase === "payable" ? "Zakat payable" : "Indicative zakat"}
+                </p>
                 <p className="mt-1 font-serif text-4xl text-pine nums">
                   {formatMoney(r.zakatDue, c)}
                 </p>
                 <p className="mt-2 text-sm text-sage">
                   {formatMoney(r.netZakatable, c)} ×{" "}
                   {formatPercent(r.rate, r.basis === "solar" ? 3 : 1)} (
-                  {r.basis} year). Due once a full hawl has passed.
+                  {r.basis} year).{" "}
+                  {duePhaseLabel(phase, Boolean(settings.hawlStartDate))}.
+                  {phase === "indicative" && hawl
+                    ? ` About ${hawl.remainingDays} days of hawl remain.`
+                    : ""}
+                  {phase === "payable" && outstanding > 0
+                    ? ` ${formatMoney(outstanding, c)} still outstanding this cycle.`
+                    : ""}
                 </p>
+                <CycleActions
+                  currency={c}
+                  outstanding={outstanding}
+                  phase={phase}
+                />
               </>
             ) : (
               <>
@@ -188,8 +226,11 @@ export default async function ZakatPage() {
 
           <p className="text-xs leading-relaxed text-sage">
             This is an estimate to help you plan. Rulings differ on long-term
-            investments, retirement funds, and debt. For your specific situation,
-            consult a qualified scholar.
+            investments, retirement funds, and debt.{" "}
+            <Link href="/trust" className="text-pine hover:underline">
+              What is verified
+            </Link>
+            . For your specific situation, consult a qualified scholar.
           </p>
         </>
       )}

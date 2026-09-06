@@ -8,6 +8,48 @@
       "when": 1785079705446,
       "tag": "0000_init",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1787700000000,
+      "tag": "0001_user_last_login",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1787800000000,
+      "tag": "0002_year_snapshots",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1787900000000,
+      "tag": "0003_madhhab_asset_hawl",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1788000000000,
+      "tag": "0004_setup_complete",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1788100000000,
+      "tag": "0005_giving_asnaf",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1788200000000,
+      "tag": "0006_metals_updated_at",
+      "breakpoints": true
     }
   ]
 }

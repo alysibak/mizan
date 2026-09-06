@@ -10,6 +10,7 @@ export type CategoryKey =
   | "bank"
   | "gold"
   | "silver"
+  | "jewellery"
   | "stocks_trading"
   | "stocks_longterm"
   | "crypto"
@@ -48,11 +49,11 @@ export const CATEGORIES: Record<CategoryKey, CategoryMeta> = {
   },
   gold: {
     key: "gold",
-    label: "Gold",
+    label: "Gold (investment)",
     group: "metals",
     defaultZakatablePortion: 1,
     portionEditable: false,
-    note: "Investment gold is zakatable on its full market value. Jewellery in regular personal use is treated differently across schools; enter only what you intend to count.",
+    note: "Investment gold is zakatable on its full market value.",
   },
   silver: {
     key: "silver",
@@ -61,6 +62,14 @@ export const CATEGORIES: Record<CategoryKey, CategoryMeta> = {
     defaultZakatablePortion: 1,
     portionEditable: false,
     note: "Investment silver is zakatable on its full market value.",
+  },
+  jewellery: {
+    key: "jewellery",
+    label: "Jewellery (personal use)",
+    group: "metals",
+    defaultZakatablePortion: 0,
+    portionEditable: true,
+    note: "Schools differ on jewellery worn for adornment. Default is not counted; pick a school in settings or set the portion yourself.",
   },
   stocks_trading: {
     key: "stocks_trading",
@@ -76,7 +85,7 @@ export const CATEGORIES: Record<CategoryKey, CategoryMeta> = {
     group: "investments",
     defaultZakatablePortion: 0.25,
     portionEditable: true,
-    note: "For shares held for dividends and long-term growth, many scholars zakat only the company's underlying zakatable assets, not the full share price. A common simplification is roughly 25 to 40 percent of value. Adjust the portion to match guidance you follow, or use your fund's published zakatable percentage.",
+    note: "For shares held for dividends and long-term growth, a common modern simplification is roughly 25 to 40 percent of market value. This is not classical madhhab stock law — adjust to guidance you follow or your fund's published zakatable percentage.",
   },
   crypto: {
     key: "crypto",

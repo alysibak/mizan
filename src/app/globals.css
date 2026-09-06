@@ -13,13 +13,14 @@
 
   body {
     @apply bg-porcelain text-ink font-sans antialiased;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    background-blend-mode: multiply;
   }
 
   ::selection {
     background-color: rgba(169, 135, 79, 0.22);
   }
 
-  /* Tabular figures for all monetary readouts. */
   .nums {
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum";
@@ -27,22 +28,27 @@
 }
 
 @layer components {
+  /* Ruled panel — hairline, almost no radius, no soft SaaS shadow. */
   .card {
-    @apply rounded-card border border-mist bg-paper shadow-card;
+    @apply rounded-card border border-mist bg-paper;
+  }
+
+  .panel {
+    @apply border-y border-mist bg-transparent py-5;
   }
 
   .label {
-    @apply block text-xs font-medium uppercase tracking-[0.12em] text-sage;
+    @apply block text-[0.7rem] font-medium uppercase tracking-[0.14em] text-sage;
   }
 
   .field {
-    @apply w-full rounded-lg border border-mist bg-white px-3 py-2 text-ink
-      outline-none transition focus:border-pine focus:ring-2 focus:ring-pine/15
+    @apply w-full rounded-card border border-mist bg-white px-3 py-2 text-ink
+      outline-none transition focus:border-pine focus:ring-1 focus:ring-pine/20
       placeholder:text-sage/60;
   }
 
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2
+    @apply inline-flex items-center justify-center gap-2 rounded-card px-4 py-2
       text-sm font-medium transition focus-visible:outline-none
       focus-visible:ring-2 focus-visible:ring-pine/30 disabled:opacity-50
       disabled:pointer-events-none;
@@ -60,14 +66,30 @@
     @apply btn border border-danger/30 bg-paper text-danger hover:bg-danger/5;
   }
 
-  /* The signature rule: a hairline with a centered diamond, evoking a balance. */
   .balance-rule {
-    @apply relative h-px w-full bg-mist;
+    @apply relative h-px w-full origin-left bg-mist;
   }
   .balance-rule::after {
     content: "";
-    @apply absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2
+    @apply absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2
       rotate-45 border border-brass bg-paper;
+  }
+
+  .ledger-row {
+    @apply flex items-center justify-between gap-4 border-b border-mist/80 py-3;
+  }
+  .ledger-row:last-child {
+    @apply border-b-0;
+  }
+
+  .bg-grain {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  }
+
+  .bg-pine-wash {
+    background-image:
+      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(18, 70, 58, 0.14), transparent 55%),
+      radial-gradient(ellipse 50% 40% at 100% 100%, rgba(169, 135, 79, 0.08), transparent 45%);
   }
 }
 
@@ -79,13 +101,11 @@
 }
 
 @layer base {
-  /* Comfortable tap targets and no blue tap flash on touch. */
   body {
     -webkit-tap-highlight-color: transparent;
     overscroll-behavior-y: none;
   }
 
-  /* Inputs must be at least 16px on mobile or iOS zooms in on focus. */
   @media (max-width: 767px) {
     input,
     select,
@@ -96,11 +116,32 @@
 }
 
 @layer components {
-  /* Make form controls and buttons finger-friendly. */
   .field {
     @apply min-h-[44px];
   }
   .btn {
     @apply min-h-[42px];
+  }
+}
+
+@media print {
+  body {
+    background: white !important;
+  }
+  .card,
+  .panel,
+  section {
+    break-inside: avoid;
+  }
+  .document-print {
+    max-width: none !important;
+  }
+  .document-print header {
+    border-bottom: 1px solid #d8e0da;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  a[href]::after {
+    content: none !important;
   }
 }

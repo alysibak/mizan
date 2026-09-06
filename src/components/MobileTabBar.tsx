@@ -4,18 +4,28 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   IconBalance,
-  IconAssets,
-  IconZakat,
+  IconLedger,
+  IconYear,
   IconGiving,
-  IconScreening,
+  IconTools,
 } from "./icons";
 
 const TABS = [
-  { href: "/dashboard", label: "Balance", Icon: IconBalance },
-  { href: "/assets", label: "Assets", Icon: IconAssets },
-  { href: "/zakat", label: "Zakat", Icon: IconZakat },
-  { href: "/giving", label: "Giving", Icon: IconGiving },
-  { href: "/screening", label: "Screen", Icon: IconScreening },
+  { href: "/dashboard", label: "Balance", Icon: IconBalance, match: ["/dashboard"] },
+  { href: "/assets", label: "Ledger", Icon: IconLedger, match: ["/assets"] },
+  {
+    href: "/year",
+    label: "Year",
+    Icon: IconYear,
+    match: ["/year", "/zakat", "/statement"],
+  },
+  { href: "/giving", label: "Give", Icon: IconGiving, match: ["/giving"] },
+  {
+    href: "/tools",
+    label: "Tools",
+    Icon: IconTools,
+    match: ["/tools", "/screening", "/mirath"],
+  },
 ];
 
 export default function MobileTabBar() {
@@ -27,8 +37,8 @@ export default function MobileTabBar() {
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <ul className="grid grid-cols-5">
-        {TABS.map(({ href, label, Icon }) => {
-          const active = pathname.startsWith(href);
+        {TABS.map(({ href, label, Icon, match }) => {
+          const active = match.some((m) => pathname.startsWith(m));
           return (
             <li key={href}>
               <Link

@@ -30,13 +30,18 @@ export async function POST(request: Request) {
   }
 
   const passwordHash = await hashPassword(password);
+  const now = new Date().toISOString();
   const [user] = await db
     .insert(users)
-    .values({ email, name, passwordHash })
+    .values({ email, name, passwordHash, lastLoginAt: now })
     .returning({ id: users.id });
 
   // Seed a settings row so the user lands on sensible defaults.
-  await db.insert(settings).values({ userId: user.id, ...DEFAULT_SETTINGS });
+  await db.insert(settings).values({
+    userId: user.id,
+    ...DEFAULT_SETTINGS,
+    setupComplete: false,
+  });
 
   await createSession(user.id);
   return NextResponse.json({ ok: true });

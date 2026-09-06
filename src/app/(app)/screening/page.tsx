@@ -1,19 +1,26 @@
 import ScreeningTool from "@/components/ScreeningTool";
+import EstimateBanner from "@/components/EstimateBanner";
+import { getCurrentUser, getUserSettings } from "@/lib/session";
 
-export default function ScreeningPage() {
+export default async function ScreeningPage() {
+  const user = (await getCurrentUser())!;
+  const settings = await getUserSettings(user.id);
+
   return (
     <div className="space-y-6">
       <header>
-        <p className="label text-brass">Halal investing</p>
+        <p className="label text-brass">Equity checks</p>
         <h1 className="mt-1 font-serif text-3xl text-ink">Shariah stock screening</h1>
         <p className="mt-2 text-sm text-sage">
-          Check whether a company passes a business-activity screen and the
-          AAOIFI financial ratios. Enter figures by hand, so nothing here depends
-          on a paid data feed.
+          Apply AAOIFI-style business and ratio checks to figures you enter by
+          hand. A pass means those checks cleared — not that the stock is
+          recommended or that every scholar agrees.
         </p>
       </header>
 
-      <ScreeningTool />
+      <EstimateBanner />
+
+      <ScreeningTool currency={settings.currency} />
     </div>
   );
 }

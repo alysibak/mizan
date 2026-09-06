@@ -3,7 +3,15 @@
 import { useRouter } from "next/navigation";
 import { IconSignOut } from "./icons";
 
-export default function SignOutButton() {
+export default function SignOutButton({
+  className,
+  label = "Sign out",
+  icon = true,
+}: {
+  className?: string;
+  label?: string;
+  icon?: boolean;
+}) {
   const router = useRouter();
 
   async function logout() {
@@ -14,11 +22,14 @@ export default function SignOutButton() {
 
   return (
     <button
+      type="button"
       onClick={logout}
-      className="btn-ghost w-full justify-center text-danger md:hidden"
+      className={
+        className ?? "btn-ghost w-full justify-center text-danger md:hidden"
+      }
     >
-      <IconSignOut className="h-5 w-5" />
-      Sign out
+      {icon ? <IconSignOut className="h-5 w-5" /> : null}
+      {label}
     </button>
   );
 }

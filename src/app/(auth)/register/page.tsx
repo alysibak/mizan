@@ -24,7 +24,7 @@ export default function RegisterPage() {
       }),
     });
     if (res.ok) {
-      router.push("/settings?welcome=1");
+      router.push("/begin");
       router.refresh();
     } else {
       const data = await res.json().catch(() => ({}));
@@ -40,7 +40,7 @@ export default function RegisterPage() {
       </Link>
       <h1 className="font-serif text-3xl text-ink">Create your account</h1>
       <p className="mt-2 text-sm text-sage">
-        Everything stays in a local database on your machine.
+        Create a private account. Your wealth data is yours alone.
       </p>
 
       <form onSubmit={onSubmit} className="mt-8 space-y-4">

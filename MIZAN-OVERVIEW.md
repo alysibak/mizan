@@ -14,7 +14,7 @@ Mizan is the spiritual successor to **PocketChange**, an app that died when a pa
 |---|---|
 | Database | SQLite via libSQL — local file or free Turso hosting |
 | Auth | Self-hosted bcrypt + DB-backed sessions |
-| Nisab metal prices | You enter them manually |
+| Nisab metal prices | You enter them manually (optional free suggest; freshness tracked) |
 | Stock screening | You enter figures by hand |
 
 You can clone it, run `npm install`, and it works. The README’s goal is that it still works in five years.
@@ -46,14 +46,14 @@ Browser
   → App Router pages + API routes
   → getCurrentUser() (DB session lookup)
   → SQLite / Turso
-  → Pure lib: zakat, nisab, hijri, screening
+  → Pure lib: zakat, nisab, hijri, screening, giving-window, madhhab
 ```
 
 The app splits cleanly into three layers:
 
 1. **UI** — Server Components + small client components for forms/lists
 2. **API** — REST-style route handlers, all scoped to the logged-in user
-3. **Pure logic** — `src/lib/zakat.ts`, `nisab.ts`, `hijri.ts`, `screening.ts` — no I/O, fully testable
+3. **Pure logic** — `src/lib/zakat.ts`, `nisab.ts`, `hijri.ts`, `screening.ts`, `giving-window.ts` — no I/O, fully testable
 
 ---
 
@@ -62,48 +62,49 @@ The app splits cleanly into three layers:
 ```
 src/
   db/
-    schema.ts       Tables (users, sessions, settings, assets, liabilities, giving)
+    schema.ts       users, sessions, settings, assets, liabilities, giving, year_snapshots
     index.ts        libSQL client (lazy init)
     seed.ts         Demo account
   lib/
-    zakat.ts        Calculation engine
-    nisab.ts        Gold/silver thresholds
-    hijri.ts        Lunar calendar + hawl tracking
-    screening.ts    AAOIFI-style stock screening
-    categories.ts   Asset types and default zakatable portions
-    auth.ts         Password hashing, session creation
-    session.ts      Resolve current user from cookie
-    validation.ts   Zod schemas for API input
-    money.ts        Currency/percent formatting
+    zakat.ts · nisab.ts · hijri.ts · screening.ts · madhhab.ts
+    giving-window.ts  payable/indicative, metal freshness
+    reckoning-path.ts yearly sitting spine
+    categories.ts · asnaf.ts · forgotten.ts · unique-calcs.ts
+    auth.ts · session.ts · validation.ts · money.ts
   app/
-    page.tsx        Landing page
+    page.tsx        Landing
+    begin/          Post-register wizard
+    trust/ · method/
     (auth)/         Login, register
-    (app)/          Dashboard, assets, zakat, giving, screening, settings
-    api/            All mutations and reads
-  components/       Nav, Scale (balance beam), client managers
-  middleware.ts     Lightweight route guard
+    (app)/          Balance, ledger, year, give, statement, tools, settings
+    api/            Mutations and reads
+  components/       Scale, CycleActions, CloseYearPath, managers, tools
+  middleware.ts
+drizzle/            Versioned SQL migrations
 ```
 
 ---
 
 ## 5. Database schema
 
-Six tables, all tied to a user with cascade deletes:
+Seven tables, all tied to a user with cascade deletes:
 
 | Table | Purpose |
 |---|---|
-| `users` | Email, bcrypt password hash, name |
+| `users` | Email, bcrypt password hash, name, last login |
 | `sessions` | Stores **SHA-256 hash** of session token (never the raw token) |
-| `settings` | Currency, nisab standard (gold/silver), calendar basis (lunar/solar), metal prices, hawl start date |
-| `assets` | Category, label, amount, zakatable portion (0–1) |
+| `settings` | Currency, nisab, calendar, metal prices + `metals_updated_at`, hawl start, madhhab, setup flags |
+| `assets` | Category, label, amount, zakatable portion, optional reminder hawl, note |
 | `liabilities` | Label, amount, whether deductible |
-| `giving_records` | Zakat or sadaqah, amount, recipient, date |
+| `giving_records` | Zakat / sadaqah / purification, optional asnaf, amount, recipient, date |
+| `year_snapshots` | Frozen reckoning payload + optional letter to next year |
 
 Key design choices in `schema.ts`:
 
-- **Nisab prices are user-entered** — no paid metals API
-- **Hawl start date** is optional until the user sets it
-- **Partial zakatable portions** support long-term stocks (~25% default) and pensions
+- **Nisab prices are user-entered** — no paid metals API on the critical path
+- **Ledger hawl start** drives payable status; per-asset dates are reminders only
+- **Partial zakatable portions** support long-term stocks (~25% default estimate) and pensions
+- **One user = one ledger** — “household” in udhiyah copy means family share math, not multi-user
 
 Locally the DB defaults to `./mizan.db`. In production it points at Turso via `DATABASE_URL` + `DATABASE_AUTH_TOKEN`.
 
@@ -244,20 +245,26 @@ All inputs are manual — no paid financial data API.
 
 ### Authenticated app (`(app)/` layout)
 
-Sidebar nav on desktop, tab bar on mobile:
+Primary nav: Balance · Ledger · Year · Give · Tools.
 
 | Page | What it does |
 |---|---|
-| **Dashboard** | Scale visualization, zakat due, paid this year, hawl progress |
-| **Assets** | CRUD assets + liabilities |
-| **Zakat** | Full breakdown: asset lines, both nisab thresholds, rate, amount due |
-| **Giving** | Log zakat and sadaqah; zakat entries reduce “outstanding” on dashboard |
-| **Screening** | Interactive stock screener |
-| **Settings** | Currency, nisab standard, calendar basis, metal prices, hawl start |
+| **Balance** | Scale, payable/indicative, close-year CTAs, notices |
+| **Ledger** | CRUD assets + liabilities; metals by weight; CSV import |
+| **Year** | Ledger hawl, freeze snapshots, roll hawl, YoY compare |
+| **Give** | Zakat / sadaqah / purification; asnaf; round-up |
+| **Statement** | Printable cycle statement |
+| **Tools** | Reckoning night spine + screening, mirath, udhiyah, etc. |
+| **Zakat** | Full breakdown |
+| **Settings** | Currency, nisab, metals freshness, hawl, school profile |
+| **Begin** | Post-register trust → preferences → prices → hawl → first holding |
+| **Trust / Method** | Honesty map and how numbers are made |
 
 ### Signature UI: the Scale
 
 `Scale.tsx` renders a balance beam that tilts based on the ratio of your net zakatable wealth to nisab — the visual metaphor for the whole app.
+
+Close path chrome: `CycleActions` + `CloseYearPath` — **pay → freeze → roll hawl → statement**.
 
 ---
 
@@ -348,12 +355,19 @@ Fly.io config exists but is **not recommended** — free trial expires and suspe
 
 ---
 
-## 16. What could come next (from README)
+## 16. What could come next
 
-- **Round-up sadaqah** — PocketChange’s original idea, halal version (schema already supports giving records)
-- Optional free metals price lookup (behind manual override)
-- Multiple hawl cycles per asset
-- Yearly zakat statement export
+Shipped since the early README wishlist: round-up sadaqah, optional metals suggest, yearly statement, year snapshots, Begin wizard, reckoning night, asnaf, unique tools.
+
+Still worth considering (see expansion audit):
+
+- Mid-hawl nisab breach rules (estimate-labeled)
+- Manual multi-currency FX on holdings
+- True offline / service worker (today: works without paid APIs, not airplane mode)
+- Shared encrypted ledger for 2–3 people (today: one user = one ledger)
+- Purification ↔ screening loop stored in DB
+
+Do not build: bank sync, auto-pay rails, fatwa AI, live paid screening APIs.
 
 ---
 

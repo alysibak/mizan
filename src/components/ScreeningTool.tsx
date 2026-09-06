@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   screenEquity,
   THRESHOLDS,
@@ -8,7 +9,8 @@ import {
   type DenominatorBasis,
   type ScreeningResult,
 } from "@/lib/screening";
-import { formatPercent } from "@/lib/money";
+import { purificationAmount } from "@/lib/zakat";
+import { formatMoney, formatPercent } from "@/lib/money";
 
 const ACTIVITIES: { key: keyof BusinessActivity; label: string }[] = [
   { key: "alcohol", label: "Alcohol" },
@@ -18,6 +20,15 @@ const ACTIVITIES: { key: keyof BusinessActivity; label: string }[] = [
   { key: "adultEntertainment", label: "Adult entertainment" },
   { key: "tobacco", label: "Tobacco" },
   { key: "weapons", label: "Weapons" },
+];
+
+const FIGURE_FIELDS: [string, string][] = [
+  ["marketCap", "Market capitalisation"],
+  ["totalAssets", "Total assets"],
+  ["interestBearingDebt", "Interest-bearing debt"],
+  ["cashAndInterestSecurities", "Cash + interest securities"],
+  ["totalRevenue", "Total revenue"],
+  ["impermissibleRevenue", "Impermissible revenue"],
 ];
 
 const EMPTY_ACTIVITY: BusinessActivity = {
@@ -30,15 +41,51 @@ const EMPTY_ACTIVITY: BusinessActivity = {
   weapons: false,
 };
 
-export default function ScreeningTool() {
+const STORAGE_KEY = "mizan-screening-draft";
+
+type Draft = {
+  name: string;
+  activity: BusinessActivity;
+  denominator: DenominatorBasis;
+  figures: Record<string, string>;
+};
+
+export default function ScreeningTool({ currency = "CAD" }: { currency?: string }) {
+  const [hydrated, setHydrated] = useState(false);
+  const [name, setName] = useState("");
   const [activity, setActivity] = useState<BusinessActivity>(EMPTY_ACTIVITY);
   const [denominator, setDenominator] = useState<DenominatorBasis>("marketCap");
+  const [figures, setFigures] = useState<Record<string, string>>({});
   const [result, setResult] = useState<ScreeningResult | null>(null);
+  const [dividend, setDividend] = useState("");
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const d = JSON.parse(raw) as Draft;
+        if (d.name) setName(d.name);
+        if (d.activity) setActivity({ ...EMPTY_ACTIVITY, ...d.activity });
+        if (d.denominator === "marketCap" || d.denominator === "totalAssets") {
+          setDenominator(d.denominator);
+        }
+        if (d.figures) setFigures(d.figures);
+      }
+    } catch {
+      /* ignore a broken draft */
+    }
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    const draft: Draft = { name, activity, denominator, figures };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
+  }, [hydrated, name, activity, denominator, figures]);
 
   function run(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const f = new FormData(e.currentTarget);
-    const num = (k: string) => parseFloat(String(f.get(k) || "0")) || 0;
+    const num = (k: string) => parseFloat(figures[k] || "0") || 0;
     setResult(
       screenEquity(
         activity,
@@ -55,13 +102,47 @@ export default function ScreeningTool() {
     );
   }
 
+  function clearDraft() {
+    setName("");
+    setActivity(EMPTY_ACTIVITY);
+    setDenominator("marketCap");
+    setFigures({});
+    setResult(null);
+    setDividend("");
+    localStorage.removeItem(STORAGE_KEY);
+  }
+
+  const purifyDue = result
+    ? purificationAmount(parseFloat(dividend) || 0, result.purificationRatio)
+    : 0;
+
   return (
     <div className="space-y-8">
       <form onSubmit={run} className="space-y-8">
         <section className="card p-5">
+          <h2 className="font-serif text-lg text-ink">Company</h2>
+          <p className="mt-1 text-sm text-sage">
+            Optional. Kept on this device so you can come back to the same
+            figures without a paid data feed.
+          </p>
+          <div className="mt-4">
+            <label className="label mb-1.5" htmlFor="company">
+              Name or ticker
+            </label>
+            <input
+              id="company"
+              className="field max-w-xs"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. SU"
+            />
+          </div>
+        </section>
+
+        <section className="card p-5">
           <h2 className="font-serif text-lg text-ink">Business activity</h2>
           <p className="mt-1 text-sm text-sage">
-            Tick any impermissible activity that forms part of the company's core
+            Tick any impermissible activity that forms part of the company&apos;s core
             business. Any single one fails the business screen.
           </p>
           <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -87,7 +168,7 @@ export default function ScreeningTool() {
         <section className="card p-5">
           <h2 className="font-serif text-lg text-ink">Financial figures</h2>
           <p className="mt-1 text-sm text-sage">
-            Enter values from the company's filings in any one consistent unit.
+            Enter values from the company&apos;s filings in any one consistent unit.
             Ratios are compared against the AAOIFI thresholds of{" "}
             {formatPercent(THRESHOLDS.debtRatio, 0)} and{" "}
             {formatPercent(THRESHOLDS.impermissibleRevenueRatio, 0)}.
@@ -109,35 +190,36 @@ export default function ScreeningTool() {
           </div>
 
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            {[
-              ["marketCap", "Market capitalisation"],
-              ["totalAssets", "Total assets"],
-              ["interestBearingDebt", "Interest-bearing debt"],
-              ["cashAndInterestSecurities", "Cash + interest securities"],
-              ["totalRevenue", "Total revenue"],
-              ["impermissibleRevenue", "Impermissible revenue"],
-            ].map(([name, label]) => (
-              <div key={name}>
-                <label className="label mb-1.5" htmlFor={name}>
+            {FIGURE_FIELDS.map(([fieldName, label]) => (
+              <div key={fieldName}>
+                <label className="label mb-1.5" htmlFor={fieldName}>
                   {label}
                 </label>
                 <input
-                  id={name}
-                  name={name}
+                  id={fieldName}
                   type="number"
                   step="any"
                   min="0"
                   className="field nums"
                   placeholder="0"
+                  value={figures[fieldName] ?? ""}
+                  onChange={(e) =>
+                    setFigures({ ...figures, [fieldName]: e.target.value })
+                  }
                 />
               </div>
             ))}
           </div>
         </section>
 
-        <button type="submit" className="btn-primary">
-          Screen this stock
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          <button type="submit" className="btn-primary">
+            Screen this stock
+          </button>
+          <button type="button" className="btn-ghost" onClick={clearDraft}>
+            Clear
+          </button>
+        </div>
       </form>
 
       {result && (
@@ -147,19 +229,20 @@ export default function ScreeningTool() {
             (result.compliant ? "border-gain/40" : "border-danger/40")
           }
         >
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-3">
             <h2 className="font-serif text-xl text-ink">
-              {result.compliant ? "Passes screening" : "Does not pass"}
+              {name ? `${name}: ` : ""}
+              {result.compliant ? "Meets these checks" : "Does not meet these checks"}
             </h2>
             <span
               className={
-                "rounded-full px-3 py-1 text-xs font-medium " +
+                "shrink-0 rounded-full px-3 py-1 text-xs font-medium " +
                 (result.compliant
                   ? "bg-gain/10 text-gain"
                   : "bg-danger/10 text-danger")
               }
             >
-              {result.compliant ? "Compliant" : "Non-compliant"}
+              {result.compliant ? "Checks cleared" : "Checks failed"}
             </span>
           </div>
 
@@ -199,20 +282,58 @@ export default function ScreeningTool() {
           </div>
 
           {result.compliant && result.purificationRatio > 0 && (
-            <p className="mt-4 rounded-lg bg-porcelain px-3 py-2 text-xs leading-relaxed text-sage">
-              If you hold this stock, purify{" "}
-              <span className="text-brass">
-                {formatPercent(result.purificationRatio)}
-              </span>{" "}
-              of any dividend income by giving it away, since that share of
-              revenue is impermissible.
-            </p>
+            <div className="mt-4 space-y-3 rounded-lg bg-porcelain px-3 py-3">
+              <p className="text-xs leading-relaxed text-sage">
+                If you hold this stock, purify{" "}
+                <span className="text-brass">
+                  {formatPercent(result.purificationRatio)}
+                </span>{" "}
+                of any dividend income by giving it away. That gift is not zakat.
+              </p>
+              <div className="max-w-xs">
+                <label className="label mb-1.5" htmlFor="dividend">
+                  Dividend received
+                </label>
+                <input
+                  id="dividend"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  className="field nums"
+                  placeholder="0.00"
+                  value={dividend}
+                  onChange={(e) => setDividend(e.target.value)}
+                />
+              </div>
+              {purifyDue > 0 && (
+                <p className="text-sm text-ink">
+                  Give away{" "}
+                  <span className="nums font-medium text-brass">
+                    {formatMoney(purifyDue, currency)}
+                  </span>
+                </p>
+              )}
+              <Link
+                href={
+                  purifyDue > 0
+                    ? `/giving?type=purification&amount=${purifyDue.toFixed(2)}`
+                    : "/giving?type=purification"
+                }
+                className="btn-primary"
+              >
+                Record purification
+              </Link>
+            </div>
           )}
 
           <p className="mt-4 text-xs leading-relaxed text-sage">
-            This applies common AAOIFI thresholds. Index providers differ in their
-            exact rules, and a passing screen is a starting point, not a
-            recommendation. Verify with a qualified source before investing.
+            These are commonly cited AAOIFI-style thresholds. Index providers
+            (Dow Jones Islamic, S&amp;P Shariah, MSCI Islamic) differ. Clearing
+            these checks is a starting point for your own research — not a
+            fatwa and not investment advice.{" "}
+            <a href="/trust" className="text-pine hover:underline">
+              What is verified
+            </a>
           </p>
         </section>
       )}

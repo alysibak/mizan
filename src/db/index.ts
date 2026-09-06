@@ -14,12 +14,15 @@ export type AppDatabase = LibSQLDatabase<typeof schema>;
  */
 function createDb(): AppDatabase {
   // Prefer app names; fall back to Vercel Turso marketplace vars.
+  // Treat empty strings as unset (e.g. vercel env pull placeholders).
   const url =
-    process.env.DATABASE_URL ??
-    process.env.TURSO_DATABASE_URL ??
+    process.env.DATABASE_URL?.trim() ||
+    process.env.TURSO_DATABASE_URL?.trim() ||
     "file:mizan.db";
   const authToken =
-    process.env.DATABASE_AUTH_TOKEN ?? process.env.TURSO_AUTH_TOKEN;
+    process.env.DATABASE_AUTH_TOKEN?.trim() ||
+    process.env.TURSO_AUTH_TOKEN?.trim() ||
+    undefined;
   const client: Client = createClient(
     authToken ? { url, authToken } : { url },
   );

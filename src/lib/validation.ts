@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { CATEGORIES } from "./categories";
+import { ASNAF_KEYS } from "./asnaf";
 
 const categoryKeys = Object.keys(CATEGORIES) as [string, ...string[]];
 
@@ -19,6 +20,8 @@ export const assetSchema = z.object({
   label: z.string().trim().min(1, "Give this asset a name").max(120),
   amount: z.coerce.number().min(0, "Amount cannot be negative"),
   zakatablePortion: z.coerce.number().min(0).max(1).default(1),
+  hawlStartDate: z.string().optional().nullable(),
+  note: z.string().trim().max(400).nullish(),
 });
 
 export const liabilitySchema = z.object({
@@ -29,9 +32,10 @@ export const liabilitySchema = z.object({
 
 export const givingSchema = z.object({
   amount: z.coerce.number().positive("Enter an amount greater than zero"),
-  type: z.enum(["zakat", "sadaqah"]).default("sadaqah"),
-  recipient: z.string().trim().max(120).optional(),
-  note: z.string().trim().max(400).optional(),
+  type: z.enum(["zakat", "sadaqah", "purification"]).default("sadaqah"),
+  asnaf: z.enum(ASNAF_KEYS).optional().nullable(),
+  recipient: z.string().trim().max(120).nullish(),
+  note: z.string().trim().max(400).nullish(),
   date: z.string().min(1, "Pick a date"),
 });
 
@@ -42,6 +46,14 @@ export const settingsSchema = z.object({
   goldPricePerGram: z.coerce.number().positive("Enter a gold price"),
   silverPricePerGram: z.coerce.number().positive("Enter a silver price"),
   hawlStartDate: z.string().optional().nullable(),
+  madhhab: z
+    .enum(["general", "hanafi", "maliki", "shafii", "hanbali"])
+    .default("general"),
+  setupComplete: z.boolean().optional(),
+  trustedAckAt: z.string().optional().nullable(),
+  metalsUpdatedAt: z.string().optional().nullable(),
+  /** Reconfirm metal prices without changing the numbers (clears aged stale). */
+  touchMetals: z.boolean().optional(),
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;

@@ -2,18 +2,32 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { IconSettings } from "./icons";
+import { IconSettings, IconUsers } from "./icons";
 
 const TITLES: [string, string][] = [
+  ["/tools/reckoning-night", "Reckoning night"],
+  ["/tools/forgotten", "Forgotten"],
+  ["/tools/what-if", "What if"],
+  ["/tools/envelopes", "Envelopes"],
+  ["/tools/reverse", "Reverse"],
+  ["/tools/forgive", "Forgive"],
+  ["/tools/udhiyah", "Udhiyah"],
+  ["/tools/asnaf", "Asnaf"],
+  ["/year/snapshots", "Snapshot"],
   ["/dashboard", "Balance"],
-  ["/assets", "Assets"],
+  ["/assets", "Ledger"],
+  ["/year", "The year"],
   ["/zakat", "Zakat"],
+  ["/statement", "Statement"],
   ["/giving", "Giving"],
+  ["/tools", "Tools"],
   ["/screening", "Screening"],
+  ["/mirath", "Mirath"],
   ["/settings", "Settings"],
+  ["/admin/users", "Visitors"],
 ];
 
-export default function MobileHeader() {
+export default function MobileHeader({ isAdmin = false }: { isAdmin?: boolean }) {
   const pathname = usePathname();
   const title = TITLES.find(([p]) => pathname.startsWith(p))?.[1] ?? "Mizan";
 
@@ -26,13 +40,24 @@ export default function MobileHeader() {
         <span className="font-serif text-lg text-ink">{title}</span>
         <span className="font-serif text-sm text-brass">Mizan</span>
       </div>
-      <Link
-        href="/settings"
-        aria-label="Settings"
-        className="-mr-1 rounded-lg p-2 text-sage transition active:bg-mist/60"
-      >
-        <IconSettings className="h-6 w-6" />
-      </Link>
+      <div className="flex items-center gap-1">
+        {isAdmin && (
+          <Link
+            href="/admin/users"
+            aria-label="Visitors"
+            className="-mr-1 rounded-card p-2 text-sage transition active:bg-mist/60"
+          >
+            <IconUsers className="h-6 w-6" />
+          </Link>
+        )}
+        <Link
+          href="/settings"
+          aria-label="Settings"
+          className="-mr-1 rounded-card p-2 text-sage transition active:bg-mist/60"
+        >
+          <IconSettings className="h-6 w-6" />
+        </Link>
+      </div>
     </header>
   );
 }

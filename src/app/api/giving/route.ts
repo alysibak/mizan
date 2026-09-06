@@ -27,9 +27,16 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
+  const data = {
+    ...parsed.data,
+    asnaf:
+      parsed.data.type === "zakat" ? parsed.data.asnaf || null : null,
+    recipient: parsed.data.recipient || null,
+    note: parsed.data.note || null,
+  };
   const [row] = await db
     .insert(givingRecords)
-    .values({ userId: user.id, ...parsed.data })
+    .values({ userId: user.id, ...data })
     .returning();
   return NextResponse.json(row, { status: 201 });
 }

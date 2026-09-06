@@ -22,12 +22,35 @@ export async function PUT(request: Request) {
       { status: 400 },
     );
   }
-  const values = {
-    ...parsed.data,
+
+  const current = await getUserSettings(user.id);
+  const gold = parsed.data.goldPricePerGram;
+  const silver = parsed.data.silverPricePerGram;
+  const pricesChanged =
+    gold !== current.goldPricePerGram || silver !== current.silverPricePerGram;
+  // Touch metals clock when prices change, or when the client reconfirms
+  // (same numbers, explicit touchMetals) so aged prices can be cleared.
+  const touchMetals = pricesChanged || parsed.data.touchMetals === true;
+
+  const values: Record<string, unknown> = {
     currency: parsed.data.currency.toUpperCase(),
+    nisabStandard: parsed.data.nisabStandard,
+    calendarBasis: parsed.data.calendarBasis,
+    goldPricePerGram: gold,
+    silverPricePerGram: silver,
     hawlStartDate: parsed.data.hawlStartDate || null,
+    madhhab: parsed.data.madhhab ?? "general",
     updatedAt: new Date().toISOString(),
   };
+  if (touchMetals) {
+    values.metalsUpdatedAt = new Date().toISOString();
+  }
+  if (typeof parsed.data.setupComplete === "boolean") {
+    values.setupComplete = parsed.data.setupComplete;
+  }
+  if (parsed.data.trustedAckAt !== undefined) {
+    values.trustedAckAt = parsed.data.trustedAckAt || null;
+  }
 
   await db
     .insert(settings)

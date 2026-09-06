@@ -1,76 +1,119 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/session";
+import { getCurrentUser, getUserSettings } from "@/lib/session";
 
 export default async function LandingPage() {
   const user = await getCurrentUser();
-  if (user) redirect("/dashboard");
+  if (user) {
+    const settings = await getUserSettings(user.id);
+    redirect(settings.setupComplete ? "/dashboard" : "/begin");
+  }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-3xl flex-col px-6">
-      <header className="flex items-center justify-between py-6">
-        <span className="font-serif text-xl tracking-tight text-ink">Mizan</span>
-        <nav className="flex items-center gap-3 text-sm">
+    <main className="relative min-h-screen overflow-hidden bg-porcelain bg-pine-wash">
+      <div
+        className="pointer-events-none absolute inset-0 bg-grain opacity-80"
+        aria-hidden
+      />
+
+      <header className="relative z-10 flex items-center justify-between px-6 py-6 md:px-10">
+        <span className="font-serif text-2xl tracking-tight text-ink">Mizan</span>
+        <nav className="flex items-center gap-4 text-sm">
           <Link href="/login" className="text-sage hover:text-ink">
             Sign in
           </Link>
           <Link href="/register" className="btn-primary">
-            Create account
+            Begin
           </Link>
         </nav>
       </header>
 
-      <section className="flex flex-1 flex-col justify-center py-16">
-        <p className="label mb-5 text-brass">الميزان · the balance</p>
-        <h1 className="font-serif text-5xl leading-[1.05] text-ink sm:text-6xl">
-          Your wealth is a trust.
-          <br />
-          Weigh it with care.
+      <section className="relative z-10 mx-auto flex min-h-[calc(100dvh-5.5rem)] max-w-5xl flex-col justify-center px-6 pb-16 pt-8 md:px-10">
+        <p className="animate-fade-up font-serif text-sm tracking-[0.2em] text-brass">
+          الميزان
+        </p>
+        <h1 className="animate-fade-up mt-4 font-serif text-6xl leading-[0.95] tracking-tight text-ink sm:text-7xl md:text-8xl">
+          Mizan
         </h1>
-        <p className="mt-6 max-w-xl text-lg leading-relaxed text-sage">
-          Mizan helps you reckon your zakat against nisab, keep your assets
-          accounted for, and record what you give. It runs on your own machine
-          with a local database, so nothing here can lapse or be switched off.
+        <p
+          className="animate-fade-up mt-6 max-w-md text-lg leading-relaxed text-sage"
+          style={{ animationDelay: "80ms" }}
+        >
+          Weigh what you hold against nisab. Close the lunar year with a clear
+          figure for what you owe.
         </p>
 
-        <div className="my-10 max-w-xl">
-          <div className="balance-rule" />
+        <div
+          className="animate-fade-up my-12 max-w-lg"
+          style={{ animationDelay: "140ms" }}
+          aria-hidden
+        >
+          <LandingScale />
         </div>
 
-        <dl className="grid max-w-xl grid-cols-1 gap-6 sm:grid-cols-3">
-          <div>
-            <dt className="font-serif text-2xl text-pine nums">2.5%</dt>
-            <dd className="mt-1 text-sm text-sage">
-              The rate on qualifying wealth, with a solar-year adjustment built in.
-            </dd>
-          </div>
-          <div>
-            <dt className="font-serif text-2xl text-pine nums">85g / 595g</dt>
-            <dd className="mt-1 text-sm text-sage">
-              Gold and silver nisab, shown side by side so the threshold is yours
-              to choose.
-            </dd>
-          </div>
-          <div>
-            <dt className="font-serif text-2xl text-pine">Hawl</dt>
-            <dd className="mt-1 text-sm text-sage">
-              The lunar holding year tracked on the Hijri calendar, to the day.
-            </dd>
-          </div>
-        </dl>
-
-        <div className="mt-12">
+        <div
+          className="animate-fade-up flex flex-wrap items-center gap-4"
+          style={{ animationDelay: "200ms" }}
+        >
           <Link href="/register" className="btn-primary px-6 py-3 text-base">
-            Begin
+            Open a ledger
+          </Link>
+          <Link href="/method" className="text-sm text-pine hover:underline">
+            How the numbers are made
           </Link>
         </div>
       </section>
 
-      <footer className="border-t border-mist py-6 text-xs leading-relaxed text-sage">
-        Mizan is a personal estimation aid, not a substitute for scholarly
-        guidance. Scholars differ on several rulings reflected here. For your
-        specific situation, consult a qualified person of knowledge.
-      </footer>
+      <section className="relative z-10 border-t border-mist bg-paper/60 px-6 py-16 md:px-10">
+        <div className="mx-auto grid max-w-5xl gap-10 sm:grid-cols-3">
+          <div>
+            <p className="font-serif text-3xl text-pine nums">2.5%</p>
+            <p className="mt-2 text-sm text-sage">
+              On qualifying wealth, with a solar-year adjustment when you reckon
+              on the Gregorian calendar.
+            </p>
+          </div>
+          <div>
+            <p className="font-serif text-3xl text-pine nums">85g / 595g</p>
+            <p className="mt-2 text-sm text-sage">
+              Gold and silver nisab — you choose the standard and set the metal
+              prices.
+            </p>
+          </div>
+          <div>
+            <p className="font-serif text-3xl text-pine">Hawl</p>
+            <p className="mt-2 text-sm text-sage">
+              One Hijri year from the day wealth crossed nisab. Tabular calendar
+              may differ from moon-sighting by a day or two.
+            </p>
+          </div>
+        </div>
+        <p className="mx-auto mt-12 max-w-5xl text-xs leading-relaxed text-sage">
+          Mizan is a personal estimation aid, not a substitute for scholarly
+          guidance.{" "}
+          <Link href="/trust" className="text-pine hover:underline">
+            What is verified
+          </Link>
+          . For your situation, consult a qualified person of knowledge.
+        </p>
+      </section>
     </main>
+  );
+}
+
+/** Decorative static scale for the landing — no live numbers. */
+function LandingScale() {
+  return (
+    <div className="relative h-24">
+      <div
+        className="absolute left-1/2 top-4 h-px w-64 -translate-x-1/2 bg-ink/50 transition-transform duration-1000"
+        style={{ transform: "translateX(-50%) rotate(-4deg)" }}
+      >
+        <span className="absolute -left-1.5 -top-1 h-3 w-3 rotate-45 border border-brass bg-paper" />
+        <span className="absolute -right-1.5 -top-1 h-3 w-3 rotate-45 border border-brass bg-paper" />
+      </div>
+      <div className="absolute left-1/2 top-4 h-10 w-px -translate-x-1/2 bg-mist" />
+      <div className="absolute bottom-0 left-1/2 h-0 w-0 -translate-x-1/2 border-x-[9px] border-b-[16px] border-x-transparent border-b-ink/70" />
+    </div>
   );
 }

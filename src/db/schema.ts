@@ -17,6 +17,8 @@ export const users = sqliteTable("users", {
   email: text("email").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
   name: text("name").notNull(),
+  // Updated on every successful login (and set at registration).
+  lastLoginAt: text("last_login_at"),
   createdAt: now(),
 });
 
@@ -41,9 +43,18 @@ export const settings = sqliteTable("settings", {
   calendarBasis: text("calendar_basis").notNull().default("lunar"), // 'lunar' | 'solar'
   goldPricePerGram: real("gold_price_per_gram").notNull().default(90),
   silverPricePerGram: real("silver_price_per_gram").notNull().default(1.05),
+  // When gold/silver prices were last saved by the user (not settings.updatedAt).
+  metalsUpdatedAt: text("metals_updated_at"),
   // Date the user's wealth last crossed nisab. Hawl (the lunar holding year)
-  // is measured from here. Null until the user sets it.
+  // is measured from here. Null until the user sets it. Per-asset dates may
+  // also be set on individual holdings.
   hawlStartDate: text("hawl_start_date"),
+  // School profile for default portions/notes. 'general' | 'hanafi' | ...
+  madhhab: text("madhhab").notNull().default("general"),
+  // False until the post-register Begin wizard is finished.
+  setupComplete: integer("setup_complete", { mode: "boolean" }).notNull().default(true),
+  // When the user acknowledged the estimate/trust notice during setup.
+  trustedAckAt: text("trusted_ack_at"),
   updatedAt: now(),
 });
 
@@ -58,6 +69,10 @@ export const assets = sqliteTable("assets", {
   // Fraction of the value that is zakatable (0..1). Defaults to 1. Long-term
   // equity holdings, for example, are often zakatable on a partial basis.
   zakatablePortion: real("zakatable_portion").notNull().default(1),
+  // Optional per-holding hawl start — reminder only today; payable math uses
+  // settings.hawlStartDate. Falls back to that date when blank.
+  hawlStartDate: text("hawl_start_date"),
+  note: text("note"),
   createdAt: now(),
 });
 
@@ -80,10 +95,25 @@ export const givingRecords = sqliteTable("giving_records", {
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   amount: real("amount").notNull(),
-  type: text("type").notNull().default("sadaqah"), // 'zakat' | 'sadaqah'
+  type: text("type").notNull().default("sadaqah"), // 'zakat' | 'sadaqah' | 'purification'
+  /** Optional classical recipient category for zakat entries (see lib/asnaf.ts). */
+  asnaf: text("asnaf"),
   recipient: text("recipient"),
   note: text("note"),
   date: text("date").notNull(), // ISO date string (YYYY-MM-DD)
+  createdAt: now(),
+});
+
+/** Frozen reckoning for a closed year — JSON payload, no live feeds. */
+export const yearSnapshots = sqliteTable("year_snapshots", {
+  id: id(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  label: text("label").notNull(),
+  takenAt: text("taken_at").notNull(),
+  currency: text("currency").notNull(),
+  payload: text("payload").notNull(),
   createdAt: now(),
 });
 
@@ -93,3 +123,4 @@ export type NewAsset = typeof assets.$inferInsert;
 export type Liability = typeof liabilities.$inferSelect;
 export type Settings = typeof settings.$inferSelect;
 export type GivingRecord = typeof givingRecords.$inferSelect;
+export type YearSnapshot = typeof yearSnapshots.$inferSelect;

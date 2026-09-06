@@ -1,15 +1,12 @@
+import Link from "next/link";
 import { getCurrentUser, getUserSettings } from "@/lib/session";
 import SettingsForm from "@/components/SettingsForm";
 import SignOutButton from "@/components/SignOutButton";
+import DataBackup from "@/components/DataBackup";
 
-export default async function SettingsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ welcome?: string }>;
-}) {
+export default async function SettingsPage() {
   const user = (await getCurrentUser())!;
   const settings = await getUserSettings(user.id);
-  const { welcome } = await searchParams;
 
   return (
     <div className="space-y-6">
@@ -18,17 +15,20 @@ export default async function SettingsPage({
         <h1 className="mt-1 font-serif text-3xl text-ink">Settings</h1>
       </header>
 
-      {welcome && (
-        <div className="card border-pine/30 bg-pine/5 p-5">
-          <p className="font-serif text-lg text-ink">Welcome to Mizan.</p>
-          <p className="mt-1 text-sm text-sage">
-            Before you calculate, set your currency, pick a nisab standard, and
-            enter current gold and silver prices. You can change these any time.
-          </p>
-        </div>
-      )}
-
       <SettingsForm settings={settings} />
+      <p className="text-sm text-sage">
+        <Link href="/trust" className="text-pine hover:underline">
+          How the numbers are made
+        </Link>
+        {settings.trustedAckAt ? (
+          <span className="text-mist">
+            {" "}
+            · Trust note acknowledged{" "}
+            {new Date(settings.trustedAckAt).toLocaleDateString()}
+          </span>
+        ) : null}
+      </p>
+      <DataBackup />
       <SignOutButton />
     </div>
   );

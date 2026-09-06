@@ -25,5 +25,14 @@
 .DS_Store
 *.log
 .vscode
+cookies.txt
+test-cookies.txt
+login-body.json
 
 .vercel
+.env*
+
+# Windows accidental device file
+NUL
+*.tsbuildinfo
+

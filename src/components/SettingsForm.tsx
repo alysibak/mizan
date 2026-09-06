@@ -7,7 +7,16 @@ import {
   NISAB_SILVER_GRAMS,
 } from "@/lib/nisab";
 import { formatMoney } from "@/lib/money";
+import {
+  MADHHABS,
+  MADHHAB_LABELS,
+  madhhabSummary,
+  parseMadhhab,
+  type Madhhab,
+} from "@/lib/madhhab";
 import type { Settings } from "@/db/schema";
+import { COMMON_CURRENCIES } from "@/lib/currencies";
+import { METALS_STALE_DAYS, metalsFreshness } from "@/lib/giving-window";
 
 export default function SettingsForm({ settings }: { settings: Settings }) {
   const router = useRouter();
@@ -18,27 +27,47 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
   const [gold, setGold] = useState(settings.goldPricePerGram);
   const [silver, setSilver] = useState(settings.silverPricePerGram);
   const [currency, setCurrency] = useState(settings.currency);
+  const [madhhab, setMadhhab] = useState<Madhhab>(parseMadhhab(settings.madhhab));
+  const [priceHint, setPriceHint] = useState<string | null>(null);
+  const [lookingUp, setLookingUp] = useState(false);
 
   const goldNisab = NISAB_GOLD_GRAMS * gold;
   const silverNisab = NISAB_SILVER_GRAMS * silver;
+  const freshness = metalsFreshness({
+    gold: settings.goldPricePerGram,
+    silver: settings.silverPricePerGram,
+    metalsUpdatedAt: settings.metalsUpdatedAt,
+  });
+  const pricesDirty =
+    gold !== settings.goldPricePerGram || silver !== settings.silverPricePerGram;
 
-  async function save(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  async function suggestPrices() {
+    setLookingUp(true);
+    setPriceHint(null);
+    const res = await fetch(`/api/metals?currency=${encodeURIComponent(currency)}`);
+    const data = await res.json().catch(() => ({}));
+    setLookingUp(false);
+    if (!res.ok) {
+      setPriceHint(data.error || "Could not suggest prices");
+      return;
+    }
+    setGold(data.goldPricePerGram);
+    setSilver(data.silverPricePerGram);
+    setPriceHint(
+      `Suggested from ${data.source}${
+        data.asOf ? ` (${new Date(data.asOf).toLocaleString()})` : ""
+      }. Review, then save. This does not change your ledger until you save.`,
+    );
+  }
+
+  async function saveSettings(payload: Record<string, unknown>) {
     setError(null);
     setSaved(false);
     setBusy(true);
-    const form = new FormData(e.currentTarget);
     const res = await fetch("/api/settings", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        currency: form.get("currency"),
-        nisabStandard: form.get("nisabStandard"),
-        calendarBasis: form.get("calendarBasis"),
-        goldPricePerGram: form.get("goldPricePerGram"),
-        silverPricePerGram: form.get("silverPricePerGram"),
-        hawlStartDate: form.get("hawlStartDate") || null,
-      }),
+      body: JSON.stringify(payload),
     });
     setBusy(false);
     if (res.ok) {
@@ -48,6 +77,37 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
       const data = await res.json().catch(() => ({}));
       setError(data.error || "Could not save settings");
     }
+  }
+
+  async function save(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget);
+    await saveSettings({
+      currency: form.get("currency"),
+      nisabStandard: form.get("nisabStandard"),
+      calendarBasis: form.get("calendarBasis"),
+      goldPricePerGram: form.get("goldPricePerGram"),
+      silverPricePerGram: form.get("silverPricePerGram"),
+      hawlStartDate: form.get("hawlStartDate") || null,
+      madhhab: form.get("madhhab"),
+      setupComplete: settings.setupComplete,
+      trustedAckAt: settings.trustedAckAt,
+    });
+  }
+
+  async function confirmMetals() {
+    await saveSettings({
+      currency: settings.currency,
+      nisabStandard: settings.nisabStandard,
+      calendarBasis: settings.calendarBasis,
+      goldPricePerGram: gold,
+      silverPricePerGram: silver,
+      hawlStartDate: settings.hawlStartDate,
+      madhhab: settings.madhhab,
+      setupComplete: settings.setupComplete,
+      trustedAckAt: settings.trustedAckAt,
+      touchMetals: true,
+    });
   }
 
   return (
@@ -68,6 +128,21 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
               value={currency}
               onChange={(e) => setCurrency(e.target.value.toUpperCase())}
             />
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {COMMON_CURRENCIES.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  className={
+                    "btn-ghost px-2.5 py-1 text-xs " +
+                    (currency === c ? "border-pine text-pine" : "")
+                  }
+                  onClick={() => setCurrency(c)}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
             <p className="mt-1.5 text-xs text-sage">
               A three-letter code such as CAD, USD, GBP, or AED.
             </p>
@@ -102,11 +177,39 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
             defaultValue={settings.calendarBasis}
           >
             <option value="lunar">Lunar year — 2.5%</option>
-            <option value="solar">Solar year — 2.577% (adjusted)</option>
+            <option value="solar">Solar year — ~2.577% (calendar adjustment)</option>
           </select>
           <p className="mt-1.5 text-xs text-sage">
-            If you reckon on the Gregorian calendar, the adjusted rate keeps the
-            assessment fair across the slightly longer solar year.
+            The solar option scales 2.5% by year length so Gregorian reckoning
+            does not under-assess. It is a modern adjustment, not a separate
+            prophetic rate.
+          </p>
+        </div>
+
+        <div className="mt-4">
+          <label className="label mb-1.5" htmlFor="madhhab">
+            School profile (jewellery defaults)
+          </label>
+          <select
+            id="madhhab"
+            name="madhhab"
+            className="field"
+            value={madhhab}
+            onChange={(e) => setMadhhab(parseMadhhab(e.target.value))}
+          >
+            {MADHHABS.map((m) => (
+              <option key={m} value={m}>
+                {MADHHAB_LABELS[m]}
+              </option>
+            ))}
+          </select>
+          <p className="mt-1.5 text-xs text-sage">{madhhabSummary(madhhab)}</p>
+          <p className="mt-1 text-xs text-sage">
+            Does not invent classical rulings for stocks or pensions. Existing
+            holdings keep their portions until you edit them.{" "}
+            <a href="/trust" className="text-pine hover:underline">
+              What is verified
+            </a>
           </p>
         </div>
       </section>
@@ -116,9 +219,30 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
         <h2 className="font-serif text-lg text-ink">Metal prices</h2>
         <p className="mt-1 text-sm text-sage">
           Nisab is a weight of gold or silver, so its cash value depends on the
-          current price. You set these yourself, which is why Mizan never needs a
-          paid price feed to work. Update them when you calculate.
+          current price. You set these yourself. A suggestion from a free public
+          source is optional — it never runs unless you ask, and it never saves
+          until you do.
         </p>
+        <p className="mt-2 text-xs text-sage">
+          {settings.metalsUpdatedAt
+            ? `Last saved ${new Date(settings.metalsUpdatedAt).toLocaleString()}. Reconfirm at least every ${METALS_STALE_DAYS} days.`
+            : "No save date yet — confirm or update prices before trusting nisab."}
+          {freshness.stale && freshness.reason === "aged"
+            ? ` These are ${freshness.ageDays} days old.`
+            : null}
+          {freshness.stale && freshness.reason === "defaults"
+            ? " Still matching seed defaults."
+            : null}
+        </p>
+        <button
+          type="button"
+          className="btn-ghost mt-3"
+          onClick={suggestPrices}
+          disabled={lookingUp || currency.length !== 3}
+        >
+          {lookingUp ? "Looking up…" : `Suggest prices in ${currency}`}
+        </button>
+        {priceHint && <p className="mt-2 text-xs text-sage">{priceHint}</p>}
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <div>
             <label className="label mb-1.5" htmlFor="goldPricePerGram">
@@ -149,7 +273,7 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
               id="silverPricePerGram"
               name="silverPricePerGram"
               type="number"
-              step="0.01"
+              step="0.0001"
               min="0"
               className="field nums"
               value={silver}
@@ -163,15 +287,27 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
             </p>
           </div>
         </div>
+        {!pricesDirty &&
+        freshness.stale &&
+        freshness.reason !== "defaults" ? (
+          <button
+            type="button"
+            className="btn-ghost mt-4"
+            disabled={busy}
+            onClick={() => void confirmMetals()}
+          >
+            Confirm prices still current
+          </button>
+        ) : null}
       </section>
 
       {/* Hawl */}
       <section className="card p-5">
         <h2 className="font-serif text-lg text-ink">Hawl start date</h2>
         <p className="mt-1 text-sm text-sage">
-          The date your wealth last crossed nisab. Zakat falls due one lunar year
-          after this date. If your wealth dips below nisab and later recovers,
-          reset this to the new crossing date.
+          The ledger date wealth last crossed nisab. Payable zakat uses this
+          date. Optional per-holding dates on the ledger are reminders only.
+          Zakat falls due one lunar year later.
         </p>
         <div className="mt-4 max-w-xs">
           <label className="label mb-1.5" htmlFor="hawlStartDate">

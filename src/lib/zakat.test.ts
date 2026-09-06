@@ -24,6 +24,10 @@ describe("nisab", () => {
 });
 
 describe("zakat rate", () => {
+  it("is exactly one fortieth", () => {
+    expect(ZAKAT_RATE_LUNAR).toBe(1 / 40);
+  });
+
   it("is 2.5% on the lunar year", () => {
     expect(zakatRate("lunar")).toBe(ZAKAT_RATE_LUNAR);
     expect(ZAKAT_RATE_LUNAR).toBe(0.025);
@@ -47,6 +51,19 @@ describe("calculateZakat", () => {
     standard: "silver" as const,
     basis: "lunar" as const,
   };
+
+  it("is due when wealth equals nisab exactly", () => {
+    const silverNisab = 595 * 1.05;
+    const r = calculateZakat({
+      assets: [{ category: "cash", label: "Cash", amount: silverNisab }],
+      liabilities: [],
+      prices,
+      standard: "silver",
+      basis: "lunar",
+    });
+    expect(r.isDue).toBe(true);
+    expect(r.zakatDue).toBeCloseTo(silverNisab * 0.025);
+  });
 
   it("nets assets against deductible liabilities", () => {
     const r = calculateZakat(base);

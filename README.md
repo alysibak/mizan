@@ -37,17 +37,22 @@ work.
 - **Zakat engine.** Pure, tested functions that net your assets against
   deductible liabilities, compare the result to nisab on the gold or silver
   standard, and apply the 2.5 percent rate (with a solar-year adjustment when you
-  reckon on the Gregorian calendar).
-- **Asset tracking.** Categorised holdings (cash, metals, equities, crypto,
-  business inventory, receivables, pensions) each with the correct zakatable
-  treatment and a short note on the reasoning.
-- **Hawl tracking.** The lunar holding year tracked on the Hijri calendar, with a
-  due date computed to the day using a self-contained tabular converter.
-- **Giving log.** Record zakat and sadaqah. Zakat entries count against what you
-  owe.
-- **Shariah stock screening.** A business-activity gate plus the AAOIFI financial
-  ratios (debt, cash and interest securities, impermissible revenue), with a
-  configurable denominator and a dividend purification figure.
+  reckon on the Gregorian calendar). Indicative vs payable when hawl is tracked.
+- **Ledger.** Categorised holdings (cash, metals by weight, equities, crypto,
+  business inventory, receivables, pensions) with editable zakatable portions
+  and school-profile jewellery defaults.
+- **Hawl tracking.** One ledger lunar year from your settings date; optional
+  per-holding start dates are reminders only. Tabular Hijri calendar.
+- **Yearly ritual.** Begin wizard, Reckoning night (forgotten wealth → what-if
+  nisab → envelopes → pay), freeze snapshots with a letter to next year, roll
+  hawl, printable statement.
+- **Giving log.** Zakat, sadaqah, and purification; optional asnaf tags; round-up
+  helper. Zakat entries clear outstanding for the cycle.
+- **Tools.** Screening (manual AAOIFI-style), mirath sketch, udhiyah shares,
+  reverse zakat, forgive debt, envelopes, and more — satellites around the
+  sitting, not a second product.
+- **Trust.** `/trust` map, estimate banners, optional free metals suggestion
+  (manual prices remain source of truth; freshness tracked).
 
 ## Tech stack
 
@@ -134,27 +139,24 @@ people reach it and more reaches those in need.
 ```
 src/
   db/
-    schema.ts          Drizzle tables (users, sessions, settings, assets,
-                       liabilities, giving)
-    index.ts           local SQLite client
-    seed.ts            demo data
+    schema.ts          users, sessions, settings, assets, liabilities,
+                       giving, year_snapshots
+    seed.ts            demo account
   lib/
-    zakat.ts           the calculation engine (pure functions)
-    nisab.ts           nisab thresholds and metal-price math
-    hijri.ts           Hijri calendar and hawl tracking
-    screening.ts       AAOIFI-style stock screening
-    categories.ts      asset categories and their zakat treatment
-    auth.ts            password hashing and session lifecycle
-    session.ts         resolve the current user from the session cookie
-    validation.ts      Zod schemas
-    money.ts           currency and percent formatting
-    zakat.test.ts      Vitest suite for the engine
+    zakat.ts           calculation engine
+    nisab.ts / hijri.ts / screening.ts / madhhab.ts
+    giving-window.ts   payable vs indicative, payment window, metal freshness
+    reckoning-path.ts  yearly sitting spine
+    categories.ts, asnaf.ts, forgotten.ts, unique-calcs.ts, …
   app/
-    (auth)/            login and register
-    (app)/             dashboard, assets, zakat, giving, screening, settings
-    api/               route handlers (every mutation is scoped to the owner)
-  components/          Nav, Scale (the signature balance), and the client managers
-  middleware.ts        route protection
+    (auth)/            login, register
+    (app)/             dashboard, assets, year, giving, statement, tools, …
+    begin/             post-register wizard
+    trust/ · method/   honesty pages
+    api/               scoped mutations
+  components/          Scale, CycleActions, CloseYearPath, managers, tools
+  middleware.ts
+drizzle/               SQL migrations (0000…)
 ```
 
 ## Authorization
