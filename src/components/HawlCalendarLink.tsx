@@ -1,6 +1,5 @@
 "use client";
 
-import { hawlDueDate } from "@/lib/hijri";
 
 function pad(n: number) {
   return String(n).padStart(2, "0");
@@ -16,12 +15,13 @@ function nextDay(d: Date) {
 }
 
 export default function HawlCalendarLink({
-  hawlStartDate,
+  dueDate,
 }: {
-  hawlStartDate: string;
+  /** The hawl due day (YYYY-MM-DD), computed on the server in the user's calendar. */
+  dueDate: string;
 }) {
   function download() {
-    const due = hawlDueDate(hawlStartDate);
+    const due = new Date(`${dueDate}T00:00:00Z`);
     const start = icsDay(due);
     const end = icsDay(nextDay(due));
     const stamp = new Date()

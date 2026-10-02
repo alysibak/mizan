@@ -34,6 +34,8 @@ export async function GET() {
       setupComplete: settings.setupComplete,
       trustedAckAt: settings.trustedAckAt,
       metalsUpdatedAt: settings.metalsUpdatedAt,
+      hijriCalendar: settings.hijriCalendar,
+      timezone: settings.timezone ?? undefined,
     },
     assets: assetRows.map((a) => ({
       category: a.category,

@@ -14,6 +14,7 @@ import {
 } from "@/lib/madhhab";
 import { NISAB_GOLD_GRAMS, NISAB_SILVER_GRAMS } from "@/lib/nisab";
 import { formatMoney } from "@/lib/money";
+import { metalsLookLikeDefaults } from "@/lib/giving-window";
 import { COMMON_CURRENCIES } from "@/lib/currencies";
 import { sendJson } from "@/lib/client-fetch";
 import { readStoredValue, setStoredValue, useHydrated } from "@/lib/client-store";
@@ -52,8 +53,10 @@ function Wizard({
   const [nisabStandard, setNisabStandard] = useState(settings.nisabStandard);
   const [calendarBasis, setCalendarBasis] = useState(settings.calendarBasis);
   const [madhhab, setMadhhab] = useState<Madhhab>(parseMadhhab(settings.madhhab));
-  const [gold, setGold] = useState(settings.goldPricePerGram);
-  const [silver, setSilver] = useState(settings.silverPricePerGram);
+  // Starter placeholders are not real prices, so the fields start empty.
+  const starter = metalsLookLikeDefaults(settings.goldPricePerGram, settings.silverPricePerGram);
+  const [gold, setGold] = useState(starter ? 0 : settings.goldPricePerGram);
+  const [silver, setSilver] = useState(starter ? 0 : settings.silverPricePerGram);
   const [hawlStartDate, setHawlStartDate] = useState(settings.hawlStartDate ?? "");
   const [trustedAckAt, setTrustedAckAt] = useState(settings.trustedAckAt);
   const [lookingUp, setLookingUp] = useState(false);
@@ -76,8 +79,9 @@ function Wizard({
       currency,
       nisabStandard,
       calendarBasis,
-      goldPricePerGram: gold,
-      silverPricePerGram: silver,
+      // Until prices are entered, resend the stored ones (the API needs both).
+      goldPricePerGram: gold || settings.goldPricePerGram,
+      silverPricePerGram: silver || settings.silverPricePerGram,
       hawlStartDate: hawlStartDate || null,
       madhhab,
       trustedAckAt,
@@ -134,6 +138,12 @@ function Wizard({
   async function nextFromPrices() {
     if (!(gold > 0) || !(silver > 0)) {
       setError("Enter gold and silver prices greater than zero");
+      return;
+    }
+    if (metalsLookLikeDefaults(gold, silver)) {
+      // The starter figures are placeholders, far from any real market price;
+      // nisab built on them would be wrong.
+      setError("Enter today’s prices per gram, or tap Suggest, before continuing.");
       return;
     }
     setBusy(true);
@@ -363,8 +373,9 @@ function Wizard({
         <section className="space-y-5">
           <h2 className="font-serif text-xl text-ink">Metal prices</h2>
           <p className="text-sm text-sage">
-            Nisab is a weight. You set the cash price per gram. Suggestion is
-            optional and never saves until you continue.
+            Nisab is a weight of gold or silver, so Mizan needs today&apos;s price
+            per gram in {currency}. Ask a jeweller or bank, or tap Suggest for a
+            free market figure you can check. Nothing saves until you continue.
           </p>
           <button
             type="button"
@@ -387,7 +398,9 @@ function Wizard({
                 step="0.01"
                 min="0"
                 className="field nums"
-                value={gold}
+                placeholder="e.g. 125.40"
+                required
+                value={gold || ""}
                 onChange={(e) => setGold(parseFloat(e.target.value) || 0)}
               />
               <p className="mt-1 text-xs text-sage">
@@ -408,7 +421,9 @@ function Wizard({
                 step="0.0001"
                 min="0"
                 className="field nums"
-                value={silver}
+                placeholder="e.g. 1.55"
+                required
+                value={silver || ""}
                 onChange={(e) => setSilver(parseFloat(e.target.value) || 0)}
               />
               <p className="mt-1 text-xs text-sage">

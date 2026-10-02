@@ -3,7 +3,8 @@ import { getCurrentUser } from "@/lib/session";
 import { loadReckoning, sumTypeInWindow } from "@/lib/reckoning";
 import { categoryMeta } from "@/lib/categories";
 import { formatHijri, gregorianToHijri } from "@/lib/hijri";
-import { amountParam, formatMoney, formatPercent } from "@/lib/money";
+import { isoDay } from "@/lib/dates";
+import { amountParam, formatMoney, formatPercent, sumCents } from "@/lib/money";
 import { MADHHAB_LABELS, parseMadhhab } from "@/lib/madhhab";
 import { duePhaseLabel, dateInWindow } from "@/lib/giving-window";
 import { givingTypeLabel } from "@/lib/giving";
@@ -26,15 +27,17 @@ export default async function StatementPage() {
     hawl,
     latestFreeze,
     frozenThisCycle,
+    today,
+    calendar,
   } = await loadReckoning(user.id);
-  const hijriYear = gregorianToHijri(new Date()).year;
+  const hijriYear = gregorianToHijri(today, calendar).year;
   const madhhab = parseMadhhab(settings.madhhab);
   const sadaqahPaid = sumTypeInWindow(givingRows, "sadaqah", window);
   const purificationPaid = sumTypeInWindow(givingRows, "purification", window);
   const fitrPaid = sumTypeInWindow(givingRows, "fitr", window);
   const yearGiving = givingRows.filter((g) => dateInWindow(g.date, window));
   const c = settings.currency;
-  const printed = new Date().toISOString().slice(0, 10);
+  const printed = isoDay(today);
   const title =
     window.kind === "hawl"
       ? `Hawl ${window.cycleStart} → ${window.end}`
@@ -43,9 +46,11 @@ export default async function StatementPage() {
   const asnafTotals = ASNAF.map((a) => ({
     key: a.key,
     label: a.label,
-    amount: yearGiving
-      .filter((g) => g.type === "zakat" && g.asnaf === a.key)
-      .reduce((t, g) => t + g.amount, 0),
+    amount: sumCents(
+      yearGiving
+        .filter((g) => g.type === "zakat" && g.asnaf === a.key)
+        .map((g) => g.amount),
+    ),
   })).filter((a) => a.amount > 0);
 
   return (
@@ -115,7 +120,7 @@ export default async function StatementPage() {
             <dt className="text-sage">Hawl</dt>
             <dd className="text-ink">
               {hawl
-                ? `${formatHijri(hawl.startDate)} → ${formatHijri(hawl.dueDate)}${
+                ? `${formatHijri(hawl.startDate, calendar)} → ${formatHijri(hawl.dueDate, calendar)}${
                     hawl.isComplete ? " · complete" : ` · ${hawl.remainingDays} days left`
                   }`
                 : "Not set"}

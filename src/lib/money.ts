@@ -22,6 +22,16 @@ export function toCents(amount: number): number {
 }
 
 /**
+ * Add money in whole cents, so a long list of entries like 0.1 + 0.2 sums to
+ * exactly 0.3 rather than drifting by fractions of a cent.
+ */
+export function sumCents(values: Iterable<number>): number {
+  let cents = 0;
+  for (const v of values) cents += Math.round((Number.isFinite(v) ? v : 0) * 100);
+  return cents / 100;
+}
+
+/**
  * An amount for a prefilled form field or query string. Always two decimals,
  * so it passes `step="0.01"` validation in the giving form.
  */

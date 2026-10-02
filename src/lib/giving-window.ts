@@ -1,6 +1,6 @@
-import { hawlDueDate, hawlStatus } from "./hijri";
+import { hawlDueDate, hawlStatus, type HijriCalendar } from "./hijri";
 import { addDays, isoDay } from "./dates";
-import { toCents } from "./money";
+import { sumCents, toCents } from "./money";
 
 export type PaymentWindowKind = "hawl" | "gregorian";
 
@@ -34,9 +34,10 @@ export function paymentWindow(
   hawlStartDate: string | null | undefined,
   today: Date = new Date(),
   closedThrough?: string | null,
+  calendar: HijriCalendar = "tabular",
 ): PaymentWindow {
   if (hawlStartDate) {
-    const status = hawlStatus(hawlStartDate, today);
+    const status = hawlStatus(hawlStartDate, today, calendar);
     const cycleStart = isoDay(status.startDate);
     // Keep the window open through today so payments after the tabular due day
     // still clear this cycle’s outstanding balance.
@@ -58,7 +59,7 @@ export function paymentWindow(
       start,
       end,
       label: "This hawl cycle",
-      detail: `Zakat payments from ${start} through ${end}. Tabular due day ${isoDay(status.dueDate)}; confirm the payment day with local moon-sighting.${carried}`,
+      detail: `Zakat payments from ${start} through ${end}. ${calendar === "umalqura" ? "Umm al-Qura" : "Tabular"} due day ${isoDay(status.dueDate)}; confirm the payment day with local moon-sighting.${carried}`,
     };
   }
 
@@ -139,30 +140,35 @@ export function sumZakatInWindow(
   records: { type: string; amount: number; date: string }[],
   window: Pick<PaymentWindow, "start" | "end">,
 ): number {
-  return records
-    .filter((g) => g.type === "zakat" && dateInWindow(g.date, window))
-    .reduce((t, g) => t + g.amount, 0);
+  return sumCents(
+    records.filter((g) => g.type === "zakat" && dateInWindow(g.date, window)).map((g) => g.amount),
+  );
 }
 
-export type DuePhase = "below_nisab" | "indicative" | "payable";
+export type DuePhase = "unverified" | "below_nisab" | "indicative" | "payable";
 
 /**
  * Nisab math (`isDue`) is not the same as “pay now.”
  * Payable only when wealth meets nisab AND the ledger hawl is complete
  * (or no hawl is tracked — then we stay indicative and say so).
+ * With starter metal prices nisab itself is unknown, so nothing is claimed.
  */
 export function duePhase(opts: {
   meetsNisab: boolean;
   hawlStartDate: string | null | undefined;
   today?: Date;
+  calendar?: HijriCalendar;
+  pricesUnverified?: boolean;
 }): DuePhase {
+  if (opts.pricesUnverified) return "unverified";
   if (!opts.meetsNisab) return "below_nisab";
   if (!opts.hawlStartDate) return "indicative";
-  const hawl = hawlStatus(opts.hawlStartDate, opts.today);
+  const hawl = hawlStatus(opts.hawlStartDate, opts.today, opts.calendar);
   return hawl.isComplete ? "payable" : "indicative";
 }
 
 export function duePhaseLabel(phase: DuePhase, hasHawlStart = true): string {
+  if (phase === "unverified") return "Unverified — set today’s metal prices";
   if (phase === "below_nisab") return "Below nisab";
   if (phase === "payable") return "Payable now";
   if (!hasHawlStart) return "Indicative — no hawl start set";

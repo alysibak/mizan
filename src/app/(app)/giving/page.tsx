@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/session";
 import { loadReckoning } from "@/lib/reckoning";
-import { formatMoney, toCents } from "@/lib/money";
+import { formatMoney, sumCents, toCents } from "@/lib/money";
 import { parseGivingType } from "@/lib/giving";
 import GivingManager from "@/components/GivingManager";
 import RoundUpTool from "@/components/RoundUpTool";
@@ -35,7 +35,7 @@ export default async function GivingPage({
   } = await loadReckoning(user.id);
 
   const totalOf = (type: string) =>
-    rows.filter((r) => r.type === type).reduce((t, r) => t + r.amount, 0);
+    sumCents(rows.filter((r) => r.type === type).map((r) => r.amount));
   const totalSadaqah = totalOf("sadaqah");
   const totalZakat = totalOf("zakat");
   const totalPurification = totalOf("purification");

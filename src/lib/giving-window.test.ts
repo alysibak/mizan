@@ -174,3 +174,14 @@ describe("outstandingZakat", () => {
     expect(outstandingZakat(400, 500)).toBe(0);
   });
 });
+
+describe("starter metal prices", () => {
+  it("claim nothing is due or payable", () => {
+    expect(
+      duePhase({ meetsNisab: true, hawlStartDate: "2020-01-01", pricesUnverified: true }),
+    ).toBe("unverified");
+    expect(duePhase({ meetsNisab: false, hawlStartDate: null, pricesUnverified: true })).toBe(
+      "unverified",
+    );
+  });
+});

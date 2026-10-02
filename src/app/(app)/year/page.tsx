@@ -43,6 +43,8 @@ export default async function YearPage() {
     latestFreeze,
     recentFreezes,
     frozenThisCycle,
+    today,
+    calendar,
   } = reckoning;
   const madhhab = parseMadhhab(settings.madhhab);
   const c = settings.currency;
@@ -59,7 +61,7 @@ export default async function YearPage() {
     .map((a) => ({
       id: a.id,
       label: a.label,
-      status: hawlStatus(a.hawlStartDate!),
+      status: hawlStatus(a.hawlStartDate!, today, calendar),
     }))
     .sort((a, b) => a.status.remainingDays - b.status.remainingDays);
 
@@ -132,7 +134,7 @@ export default async function YearPage() {
           <div className="mt-4">
             <div className="flex items-baseline justify-between text-sm">
               <span className="text-sage">
-                Started {formatHijri(hawl.startDate)}
+                Started {formatHijri(hawl.startDate, calendar)}
               </span>
               <span className="font-medium text-ink">
                 {hawl.isComplete
@@ -147,12 +149,12 @@ export default async function YearPage() {
               />
             </div>
             <p className="mt-3 text-xs text-sage">
-              Due on {formatHijri(hawl.dueDate)} (
+              Due on {formatHijri(hawl.dueDate, calendar)} (
               {hawl.dueDate.toISOString().slice(0, 10)}), if wealth stays at or
               above nisab. Follow local moon-sighting for the payment day.
             </p>
             <div className="mt-3">
-              <HawlCalendarLink hawlStartDate={settings.hawlStartDate!} />
+              <HawlCalendarLink dueDate={hawl.dueDate.toISOString().slice(0, 10)} />
             </div>
           </div>
         ) : (
@@ -176,7 +178,7 @@ export default async function YearPage() {
                 <div>
                   <p className="text-ink">{a.label}</p>
                   <p className="text-xs text-sage">
-                    Due {formatHijri(a.status.dueDate)}
+                    Due {formatHijri(a.status.dueDate, calendar)}
                   </p>
                 </div>
                 <p className="text-sm text-ink">

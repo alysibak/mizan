@@ -277,3 +277,17 @@ describe("hijri calendar", () => {
     }
   });
 });
+
+describe("cent-exact totals", () => {
+  it("adds many small entries without drift", () => {
+    const r = calculateZakat({
+      assets: Array.from({ length: 1000 }, (_, i) => ({ category: "cash", label: `c${i}`, amount: 0.1 })),
+      liabilities: [{ label: "x", amount: 0.3 }],
+      prices: { goldPricePerGram: 90, silverPricePerGram: 0.01 },
+      standard: "silver",
+      basis: "lunar",
+    });
+    expect(r.grossZakatable).toBe(100);
+    expect(r.netZakatable).toBe(99.7);
+  });
+});

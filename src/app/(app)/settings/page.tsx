@@ -5,8 +5,13 @@ import SignOutButton from "@/components/SignOutButton";
 import DataBackup from "@/components/DataBackup";
 import AccountPanel from "@/components/AccountPanel";
 
-export default async function SettingsPage() {
+export default async function SettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ recovered?: string }>;
+}) {
   const user = (await getCurrentUser())!;
+  const { recovered } = await searchParams;
   const settings = await getUserSettings(user.id);
 
   return (
@@ -29,7 +34,11 @@ export default async function SettingsPage() {
         ) : null}
       </p>
       <DataBackup />
-      <AccountPanel email={user.email} />
+      <AccountPanel
+        email={user.email}
+        hasRecoveryCode={Boolean(user.recoveryCodeHash)}
+        recovered={recovered === "1"}
+      />
       <SignOutButton />
     </div>
   );

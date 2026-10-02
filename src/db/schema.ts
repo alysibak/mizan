@@ -23,6 +23,8 @@ export const users = sqliteTable("users", {
   failedLoginCount: integer("failed_login_count").notNull().default(0),
   // Sign-in is refused until this time after too many failures.
   lockedUntil: text("locked_until"),
+  // SHA-256 of the one-time recovery code, if the user made one.
+  recoveryCodeHash: text("recovery_code_hash"),
   createdAt: now(),
 });
 
@@ -63,6 +65,12 @@ export const settings = sqliteTable("settings", {
   setupComplete: integer("setup_complete", { mode: "boolean" }).notNull().default(true),
   // When the user acknowledged the estimate/trust notice during setup.
   trustedAckAt: text("trusted_ack_at"),
+  // IANA time zone from the user's browser, so "today" is their today.
+  timezone: text("timezone"),
+  // 'tabular' (arithmetic) or 'umalqura' (Saudi Umm al-Qura tables).
+  hijriCalendar: text("hijri_calendar").notNull().default("tabular"),
+  // SHA-256 of the secret in the user's calendar-feed URL, if enabled.
+  calendarTokenHash: text("calendar_token_hash"),
   // The column is named created_at for historical reasons; it holds the time
   // of the last settings save.
   updatedAt: text("created_at")
@@ -92,6 +100,11 @@ export const assets = sqliteTable(
     grams: real("grams"),
     purity: real("purity"),
     metal: text("metal"), // "gold" | "silver"
+    // Holdings kept in another currency: the figure in that currency and the
+    // user's rate to the base currency. amount holds the converted value.
+    foreignCurrency: text("foreign_currency"),
+    foreignAmount: real("foreign_amount"),
+    fxRate: real("fx_rate"),
     createdAt: now(),
   },
   (t) => [index("assets_user_idx").on(t.userId)],
@@ -149,6 +162,13 @@ export const yearSnapshots = sqliteTable(
   },
   (t) => [index("year_snapshots_user_idx").on(t.userId)],
 );
+
+/** Fixed-window counters for per-IP limits on sign-up, sign-in, and recovery. */
+export const authAttempts = sqliteTable("auth_attempts", {
+  key: text("key").primaryKey(), // scope + hashed IP
+  windowStart: text("window_start").notNull(),
+  count: integer("count").notNull(),
+});
 
 export type User = typeof users.$inferSelect;
 export type Asset = typeof assets.$inferSelect;

@@ -89,6 +89,7 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
       silverPricePerGram: form.get("silverPricePerGram"),
       hawlStartDate: form.get("hawlStartDate") || null,
       madhhab: form.get("madhhab"),
+      hijriCalendar: form.get("hijriCalendar"),
       setupComplete: settings.setupComplete,
       trustedAckAt: settings.trustedAckAt,
     });
@@ -217,7 +218,7 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
       </section>
 
       {/* Metal prices */}
-      <section className="card p-5">
+      <section id="metal-prices" className="card scroll-mt-20 p-5">
         <h2 className="font-serif text-lg text-ink">Metal prices</h2>
         <p className="mt-1 text-sm text-sage">
           Nisab is a weight of gold or silver, so its cash value depends on the
@@ -324,6 +325,25 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
             className="field"
             defaultValue={settings.hawlStartDate ?? ""}
           />
+        </div>
+        <div className="mt-4 max-w-xs">
+          <label className="label mb-1.5" htmlFor="hijriCalendar">
+            Hijri calendar
+          </label>
+          <select
+            id="hijriCalendar"
+            name="hijriCalendar"
+            className="field"
+            defaultValue={settings.hijriCalendar}
+          >
+            <option value="tabular">Tabular (arithmetic)</option>
+            <option value="umalqura">Umm al-Qura</option>
+          </select>
+          <p className="mt-1.5 text-xs text-sage">
+            Umm al-Qura follows Saudi Arabia&apos;s published tables, which
+            match many printed calendars. Either can differ by a day from local
+            moon-sighting.
+          </p>
         </div>
       </section>
 

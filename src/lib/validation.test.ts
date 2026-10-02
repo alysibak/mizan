@@ -94,3 +94,14 @@ describe("registerSchema", () => {
     expect(registerSchema.safeParse({ ...ok, password: "short" }).success).toBe(false);
   });
 });
+
+describe("money is kept to the cent", () => {
+  it("rounds amounts as they are saved", () => {
+    expect(assetSchema.parse({ category: "cash", label: "x", amount: "10.005" }).amount).toBe(10.01);
+    expect(givingSchema.parse({ amount: 0.004 + 0.002, date: "2026-01-01" }).amount).toBe(0.01);
+  });
+
+  it("refuses a gift that rounds to nothing", () => {
+    expect(givingSchema.safeParse({ amount: 0.001, date: "2026-01-01" }).success).toBe(false);
+  });
+});

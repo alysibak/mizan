@@ -69,3 +69,25 @@ stocks_longterm,ETF,1000,0.4`);
     expect(rows[0]).toMatchObject({ category: "jewellery", zakatablePortion: 1 });
   });
 });
+
+describe("headerless thousands", () => {
+  it("rejoins unquoted thousands separators", () => {
+    const { rows, errors } = parseAssetCsv(`Chequing,1,234.56
+bank,Savings,12,500,0.5
+Brokerage,1,000,000
+Cash,80`);
+    expect(errors).toEqual([]);
+    expect(rows.map((r) => [r.label, r.amount])).toEqual([
+      ["Chequing", 1234.56],
+      ["Savings", 12500],
+      ["Brokerage", 1000000],
+      ["Cash", 80],
+    ]);
+    expect(rows[1]).toMatchObject({ category: "bank", zakatablePortion: 0.5 });
+  });
+
+  it("still reads category,label,amount rows", () => {
+    const { rows } = parseAssetCsv("gold,Coins,3200");
+    expect(rows[0]).toMatchObject({ category: "gold", label: "Coins", amount: 3200 });
+  });
+});

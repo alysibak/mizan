@@ -230,14 +230,119 @@ function DeleteAccount() {
   );
 }
 
-/** Password, sessions, and erasure — the account's own controls. */
-export default function AccountPanel({ email }: { email: string }) {
+function RecoveryCode({ hasCode }: { hasCode: boolean }) {
+  const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [code, setCode] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  async function submit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setBusy(true);
+    setError(null);
+    const form = new FormData(e.currentTarget);
+    const res = await sendJson<{ code: string }>(
+      "/api/account/recovery-code",
+      "POST",
+      { password: form.get("password") },
+      "Could not make a recovery code",
+    );
+    setBusy(false);
+    if (!res.ok) {
+      setError(res.error);
+      return;
+    }
+    setCode(res.data.code);
+    setOpen(false);
+  }
+
   return (
-    <section className="card space-y-8 p-5">
+    <div className="space-y-2">
+      <h3 className="font-serif text-base text-ink">Recovery code</h3>
+      <p className="text-sm text-sage">
+        Mizan sends no email. A recovery code is how you get back in if you
+        forget your password. Keep it somewhere safe, like a password manager.
+        {hasCode && !code ? " You have one; making a new one cancels it." : ""}
+      </p>
+      {code ? (
+        <div className="space-y-2 border border-pine/30 bg-pine/5 p-4">
+          <p className="text-sm text-ink">Save this now. It will not be shown again.</p>
+          <p className="select-all break-all font-mono text-lg tracking-wider text-ink">{code}</p>
+          <button
+            type="button"
+            className="btn-ghost"
+            onClick={async () => {
+              try {
+                await navigator.clipboard.writeText(code);
+                setCopied(true);
+              } catch {
+                /* select-all lets the user copy by hand */
+              }
+            }}
+          >
+            {copied ? "Copied" : "Copy"}
+          </button>
+        </div>
+      ) : open ? (
+        <form onSubmit={submit} className="flex flex-wrap items-end gap-3">
+          <div>
+            <label className="label mb-1.5" htmlFor="recoveryPassword">
+              Your password
+            </label>
+            <input
+              id="recoveryPassword"
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              className="field"
+              required
+            />
+          </div>
+          <button type="submit" className="btn-primary" disabled={busy}>
+            {busy ? "Making…" : "Make code"}
+          </button>
+          <button type="button" className="btn-ghost" onClick={() => setOpen(false)}>
+            Cancel
+          </button>
+        </form>
+      ) : (
+        <button type="button" className="btn-ghost" onClick={() => setOpen(true)}>
+          {hasCode ? "Make a new recovery code" : "Make a recovery code"}
+        </button>
+      )}
+      {error && (
+        <p className="text-sm text-danger" role="alert">
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/** Password, sessions, and erasure — the account's own controls. */
+export default function AccountPanel({
+  email,
+  hasRecoveryCode,
+  recovered = false,
+}: {
+  email: string;
+  hasRecoveryCode: boolean;
+  /** Just signed in with a recovery code, which is now used up. */
+  recovered?: boolean;
+}) {
+  return (
+    <section id="account" className="card scroll-mt-20 space-y-8 p-5">
       <div>
         <h2 className="font-serif text-lg text-ink">Account</h2>
         <p className="mt-1 text-sm text-sage">Signed in as {email}.</p>
       </div>
+      {recovered && (
+        <p className="border border-brass/40 bg-brass/5 px-4 py-3 text-sm text-ink" role="status">
+          Password reset. Your recovery code is used up — make a new one below.
+        </p>
+      )}
+      <RecoveryCode hasCode={hasRecoveryCode} />
       <ChangePassword />
       <SignOutOthers />
       <DeleteAccount />

@@ -94,6 +94,27 @@ function parsePortion(raw: string): number | null {
   return Math.min(1, Math.max(0, fraction));
 }
 
+/**
+ * Without a header, an unquoted "1,234.56" arrives as the cells "1" and
+ * "234.56". Rejoin a 1–3 digit cell with following exact three-digit groups.
+ */
+function takeAmount(cells: string[], from: number): { raw: string; next: number } {
+  let raw = cells[from] ?? "";
+  let next = from + 1;
+  if (/^[-(]?[$£€]?\d{1,3}$/.test(raw.trim())) {
+    while (next < cells.length && /^\d{3}(\.\d+)?\)?$/.test(cells[next].trim())) {
+      raw += cells[next];
+      next++;
+    }
+  }
+  return { raw, next };
+}
+
+function isCategoryKey(raw: string | undefined): boolean {
+  const key = (raw ?? "").trim().toLowerCase().replace(/[\s-]+/g, "_");
+  return (KEYS as string[]).includes(key);
+}
+
 export function guessCategory(text: string): CategoryKey {
   const t = text.toLowerCase();
   if (/\b(jewel|jewellery|jewelry|ring|necklace|bracelet)\b/.test(t)) return "jewellery";
@@ -145,27 +166,15 @@ export function parseAssetCsv(
   const hasHeader = mapped.some(Boolean);
   const start = hasHeader ? 1 : 0;
 
-  let categoryIdx = mapped.indexOf("category");
+  const categoryIdx = mapped.indexOf("category");
   let labelIdx = mapped.indexOf("label");
   let amountIdx = mapped.indexOf("amount");
-  let portionIdx = mapped.indexOf("portion");
+  const portionIdx = mapped.indexOf("portion");
 
-  if (!hasHeader) {
-    if (firstCells.length === 1) {
-      return { rows, errors: ["Each line needs a label and an amount."] };
-    }
-    if (firstCells.length === 2) {
-      labelIdx = 0;
-      amountIdx = 1;
-      categoryIdx = -1;
-      portionIdx = -1;
-    } else {
-      categoryIdx = 0;
-      labelIdx = 1;
-      amountIdx = 2;
-      portionIdx = firstCells.length > 3 ? 3 : -1;
-    }
-  } else {
+  if (!hasHeader && firstCells.length === 1) {
+    return { rows, errors: ["Each line needs a label and an amount."] };
+  }
+  if (hasHeader) {
     if (labelIdx < 0) labelIdx = 0;
     if (amountIdx < 0) {
       amountIdx = firstCells.length > 1 ? 1 : 0;
@@ -175,13 +184,30 @@ export function parseAssetCsv(
   lines.slice(start).forEach((line, i) => {
     const lineNo = i + start + 1;
     const cells = splitCsvLine(line);
-    const label = (cells[labelIdx] ?? "").trim();
-    const amountRaw =
-      amountIdx >= 0
-        ? cells
-            .slice(amountIdx, portionIdx >= 0 ? portionIdx : undefined)
-            .join("")
-        : "";
+    let label: string;
+    let amountRaw: string;
+    let categoryCell: string | undefined;
+    let portionCell: string | undefined;
+    if (hasHeader) {
+      label = (cells[labelIdx] ?? "").trim();
+      amountRaw =
+        amountIdx >= 0
+          ? cells.slice(amountIdx, portionIdx >= 0 ? portionIdx : undefined).join("")
+          : "";
+      categoryCell = categoryIdx >= 0 ? cells[categoryIdx] : undefined;
+      portionCell = portionIdx >= 0 ? cells[portionIdx] : undefined;
+    } else if (isCategoryKey(cells[0]) && cells.length >= 3) {
+      // category,label,amount[,portion]
+      categoryCell = cells[0];
+      label = (cells[1] ?? "").trim();
+      const taken = takeAmount(cells, 2);
+      amountRaw = taken.raw;
+      portionCell = cells[taken.next];
+    } else {
+      // label,amount
+      label = (cells[0] ?? "").trim();
+      amountRaw = takeAmount(cells, 1).raw;
+    }
     const amount = parseAmount(amountRaw);
     if (!label) {
       errors.push(`Line ${lineNo}: missing description.`);
@@ -197,13 +223,10 @@ export function parseAssetCsv(
       );
       return;
     }
-    const category = asCategory(
-      categoryIdx >= 0 ? cells[categoryIdx] : undefined,
-      label,
-    );
+    const category = asCategory(categoryCell, label);
     let portion = defaultPortion(category);
-    if (portionIdx >= 0 && cells[portionIdx]) {
-      portion = parsePortion(cells[portionIdx]) ?? portion;
+    if (portionCell) {
+      portion = parsePortion(portionCell) ?? portion;
     }
     rows.push({
       category,

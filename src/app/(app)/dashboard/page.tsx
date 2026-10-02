@@ -3,7 +3,7 @@ import { getCurrentUser } from "@/lib/session";
 import { loadReckoning } from "@/lib/reckoning";
 import { formatHijri } from "@/lib/hijri";
 import { formatMoney, formatPercent } from "@/lib/money";
-import { duePhaseLabel, metalsFreshness } from "@/lib/giving-window";
+import { duePhaseLabel } from "@/lib/giving-window";
 import Scale from "@/components/Scale";
 import EstimateBanner from "@/components/EstimateBanner";
 import DashboardNotices from "@/components/DashboardNotices";
@@ -29,6 +29,8 @@ export default async function DashboardPage({
     hawl,
     latestFreeze,
     frozenThisCycle,
+    calendar,
+    metals,
   } = await loadReckoning(user.id);
 
   const lastLetter = latestFreeze?.payload?.letterToNextYear
@@ -40,11 +42,6 @@ export default async function DashboardPage({
     : null;
 
   const dueNow = phase === "payable" && zakatOutstanding > 0;
-  const metals = metalsFreshness({
-    gold: settings.goldPricePerGram,
-    silver: settings.silverPricePerGram,
-    metalsUpdatedAt: settings.metalsUpdatedAt,
-  });
   const metalsStale = metals.stale;
   const latestSnapshotId = latestFreeze?.id ?? null;
 
@@ -66,6 +63,11 @@ export default async function DashboardPage({
           ? "Reconfirm metal prices"
           : "Replace starter metal prices",
       href: "/settings",
+    },
+    {
+      done: Boolean(user.recoveryCodeHash),
+      label: "Save a recovery code (Mizan sends no email)",
+      href: "/settings#account",
     },
     {
       done: settings.madhhab !== "general",
@@ -224,7 +226,7 @@ export default async function DashboardPage({
           <div className="mt-4">
             <div className="flex items-baseline justify-between text-sm">
               <span className="text-sage">
-                Started {formatHijri(hawl.startDate)}
+                Started {formatHijri(hawl.startDate, calendar)}
               </span>
               <span className="font-medium text-ink">
                 {hawl.isComplete
@@ -239,7 +241,7 @@ export default async function DashboardPage({
               />
             </div>
             <div className="mt-3">
-              <HawlCalendarLink hawlStartDate={settings.hawlStartDate!} />
+              <HawlCalendarLink dueDate={hawl.dueDate.toISOString().slice(0, 10)} />
             </div>
           </div>
         ) : (

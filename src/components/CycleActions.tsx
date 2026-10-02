@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { amountParam, formatMoney } from "@/lib/money";
+import type { DuePhase } from "@/lib/giving-window";
 
 /**
  * One finish story everywhere: pay → freeze → roll hawl → statement.
@@ -14,7 +15,7 @@ export default function CycleActions({
 }: {
   currency: string;
   outstanding: number;
-  phase: "below_nisab" | "indicative" | "payable";
+  phase: DuePhase;
   compact?: boolean;
   latestSnapshotId?: string | null;
   /** True when a snapshot already exists for this payment window. */
@@ -23,6 +24,16 @@ export default function CycleActions({
   if (phase === "below_nisab") return null;
 
   const wrap = compact ? "flex flex-wrap gap-3" : "mt-4 flex flex-wrap gap-3";
+
+  if (phase === "unverified") {
+    return (
+      <div className={wrap}>
+        <Link href="/settings#metal-prices" className="btn-primary">
+          Set today’s metal prices
+        </Link>
+      </div>
+    );
+  }
 
   if (phase === "indicative") {
     return (

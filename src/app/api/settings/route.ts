@@ -49,6 +49,8 @@ export async function PUT(request: Request) {
   if (parsed.data.trustedAckAt !== undefined) {
     values.trustedAckAt = parsed.data.trustedAckAt;
   }
+  if (parsed.data.hijriCalendar) values.hijriCalendar = parsed.data.hijriCalendar;
+  if (parsed.data.timezone) values.timezone = parsed.data.timezone;
 
   const statements: BatchItem<"sqlite">[] = [
     db

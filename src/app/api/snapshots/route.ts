@@ -50,6 +50,7 @@ export async function POST(request: Request) {
     giving: givingRows,
     result,
     window,
+    today,
   } = await loadReckoning(user.id);
 
   const payload: SnapshotPayload = {
@@ -102,7 +103,7 @@ export async function POST(request: Request) {
     letterToNextYear: parsed.data.letterToNextYear?.trim() || null,
   };
 
-  const takenAt = new Date().toISOString().slice(0, 10);
+  const takenAt = today.toISOString().slice(0, 10);
   const label =
     parsed.data.label?.trim() ||
     (window.kind === "hawl"

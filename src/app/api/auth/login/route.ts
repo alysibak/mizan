@@ -15,10 +15,12 @@ import {
   isLocked,
   lockoutUntil,
 } from "@/lib/login-throttle";
+import { LIMITS, overLimit, tooManyRequests } from "@/lib/rate-limit";
 
 const WRONG = "Email or password is incorrect";
 
 export async function POST(request: Request) {
+  if (await overLimit(request, LIMITS.login)) return tooManyRequests(LIMITS.login);
   const body = await request.json().catch(() => null);
   const parsed = loginSchema.safeParse(body);
   if (!parsed.success) {

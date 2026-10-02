@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { SESSION_COOKIE } from "@/lib/constants";
 import { getCurrentUser, getUserSettings } from "@/lib/session";
 import { isAdmin } from "@/lib/admin";
+import TimezoneSync from "@/components/TimezoneSync";
 import Nav from "@/components/Nav";
 import MobileHeader from "@/components/MobileHeader";
 import MobileTabBar from "@/components/MobileTabBar";
@@ -28,6 +29,7 @@ export default async function AppLayout({
 
   return (
     <div className="md:flex">
+      <TimezoneSync saved={settings.timezone} />
       <div className="print:hidden">
         <Nav name={user.name} isAdmin={admin} />
       </div>

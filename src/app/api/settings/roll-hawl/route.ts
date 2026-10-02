@@ -3,7 +3,8 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { settings } from "@/db/schema";
 import { getCurrentUser, getUserSettings } from "@/lib/session";
-import { hawlStatus } from "@/lib/hijri";
+import { hawlStatus, parseHijriCalendar } from "@/lib/hijri";
+import { userToday } from "@/lib/today";
 import { isIsoDay, isoDay } from "@/lib/dates";
 
 /**
@@ -23,7 +24,11 @@ export async function POST() {
     );
   }
 
-  const status = hawlStatus(current.hawlStartDate);
+  const status = hawlStatus(
+    current.hawlStartDate,
+    userToday(current.timezone),
+    parseHijriCalendar(current.hijriCalendar),
+  );
   const due = isoDay(status.dueDate);
   if (!status.isComplete) {
     return NextResponse.json(

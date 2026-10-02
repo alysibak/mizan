@@ -4,6 +4,8 @@ import { ASNAF_KEYS } from "./asnaf";
 import { GIVING_TYPES } from "./giving";
 import { MADHHABS } from "./madhhab";
 import { isIsoDay } from "./dates";
+import { isValidTimeZone } from "./today";
+import { toCents } from "./money";
 
 const categoryKeys = Object.keys(CATEGORIES) as [string, ...string[]];
 
@@ -22,6 +24,7 @@ function numeric(schema: z.ZodNumber) {
   }, schema);
 }
 
+// Money is stored to the cent, so 10.005 is saved as 10.01.
 const amount = (message: string) =>
   numeric(
     z
@@ -29,7 +32,7 @@ const amount = (message: string) =>
       .finite(message)
       .min(0, "Amount cannot be negative")
       .max(MAX_AMOUNT, "That amount is too large"),
-  );
+  ).transform(toCents);
 
 const positive = (message: string, max = MAX_AMOUNT) =>
   numeric(
@@ -39,6 +42,9 @@ const positive = (message: string, max = MAX_AMOUNT) =>
       .positive(message)
       .max(max, "That figure is too large"),
   );
+
+const positiveCents = (message: string) =>
+  positive(message).transform(toCents).refine((v) => v > 0, message);
 
 // z.coerce.boolean() turns the string "false" into true.
 const boolish = z.preprocess((v) => {
@@ -75,6 +81,12 @@ const optionalTimestamp = z
   .nullish()
   .transform((v) => (v === "" ? null : v));
 
+export const timeZoneSchema = z
+  .string()
+  .trim()
+  .max(64)
+  .refine(isValidTimeZone, "Unknown time zone");
+
 export const currencySchema = z
   .string()
   .trim()
@@ -103,6 +115,12 @@ export const loginSchema = z.object({
 
 export const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, "Enter your current password").max(1000),
+  newPassword,
+});
+
+export const recoverSchema = z.object({
+  email: z.string().trim().toLowerCase().max(254).email("Enter a valid email"),
+  code: z.string().trim().min(10, "Enter your recovery code").max(64),
   newPassword,
 });
 
@@ -141,7 +159,7 @@ export const liabilitySchema = z.object({
 });
 
 export const givingSchema = z.object({
-  amount: positive("Enter an amount greater than zero"),
+  amount: positiveCents("Enter an amount greater than zero"),
   type: z.enum(GIVING_TYPES).default("sadaqah"),
   asnaf: z.enum(ASNAF_KEYS).nullish(),
   recipient: optionalText(120),
@@ -162,6 +180,9 @@ export const settingsSchema = z.object({
   metalsUpdatedAt: optionalTimestamp,
   /** Reconfirm metal prices without changing the numbers (clears aged stale). */
   touchMetals: z.boolean().optional(),
+  /** Omitted means "leave as is", so older clients keep working. */
+  hijriCalendar: z.enum(["tabular", "umalqura"]).optional(),
+  timezone: timeZoneSchema.optional(),
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;

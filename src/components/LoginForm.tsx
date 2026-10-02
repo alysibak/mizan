@@ -82,7 +82,12 @@ export default function LoginForm() {
         </button>
       </form>
 
-      <p className="mt-6 text-sm text-sage">
+      <p className="mt-4 text-sm">
+        <Link href="/forgot" className="text-pine underline-offset-2 hover:underline">
+          Forgot your password?
+        </Link>
+      </p>
+      <p className="mt-2 text-sm text-sage">
         New here?{" "}
         <Link href="/register" className="text-pine underline-offset-2 hover:underline">
           Create an account

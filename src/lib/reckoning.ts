@@ -13,12 +13,21 @@ import {
 } from "@/db/schema";
 import { getUserSettings } from "./session";
 import { calculateZakat, type ZakatResult } from "./zakat";
-import { hawlStatus, type HawlStatus } from "./hijri";
+import {
+  hawlStatus,
+  parseHijriCalendar,
+  type HawlStatus,
+  type HijriCalendar,
+} from "./hijri";
+import { userToday } from "./today";
+import { sumCents } from "./money";
 import { parseSnapshotPayload, type SnapshotPayload } from "./snapshot";
 import {
   closedThroughFromFreezes,
   dateInWindow,
   duePhase,
+  metalsFreshness,
+  type MetalsFreshness,
   freezeCoversWindow,
   outstandingZakat,
   paymentWindow,
@@ -55,6 +64,10 @@ export interface Reckoning {
   latestFreeze: LatestFreeze | null;
   /** Most recent freezes, newest first, with parsed payloads. */
   recentFreezes: LatestFreeze[];
+  /** The user's own calendar day (UTC midnight of it). */
+  today: Date;
+  calendar: HijriCalendar;
+  metals: MetalsFreshness;
   /** True when the latest freeze closed the cycle shown now. */
   frozenThisCycle: boolean;
 }
@@ -102,7 +115,7 @@ function freezeWindow(takenAt: string, payload: SnapshotPayload | null): FreezeW
  */
 export async function loadReckoning(
   userId: string,
-  today: Date = new Date(),
+  now: Date = new Date(),
 ): Promise<Reckoning> {
   const [settings, assetRows, liabilityRows, givingRows, freezeRows] =
     await Promise.all([
@@ -135,6 +148,14 @@ export async function loadReckoning(
         .limit(RECENT_FREEZES),
     ]);
 
+  const today = userToday(settings.timezone, now);
+  const calendar = parseHijriCalendar(settings.hijriCalendar);
+  const metals = metalsFreshness({
+    gold: settings.goldPricePerGram,
+    silver: settings.silverPricePerGram,
+    metalsUpdatedAt: settings.metalsUpdatedAt,
+    today: now,
+  });
   const result = calculateZakat(zakatInputFrom(settings, assetRows, liabilityRows));
 
   const freezes = freezeRows.map((row) => ({
@@ -145,7 +166,7 @@ export async function loadReckoning(
     freezes.map((f) => freezeWindow(f.takenAt, f.payload)),
     settings.hawlStartDate,
   );
-  const window = paymentWindow(settings.hawlStartDate, today, closedThrough);
+  const window = paymentWindow(settings.hawlStartDate, today, closedThrough, calendar);
   const zakatPaid = sumZakatInWindow(givingRows, window);
 
   const latest = freezes[0] ?? null;
@@ -166,8 +187,16 @@ export async function loadReckoning(
       meetsNisab: result.isDue,
       hawlStartDate: settings.hawlStartDate,
       today,
+      calendar,
+      // Starter prices make nisab a guess, so nothing is called due or payable.
+      pricesUnverified: metals.reason === "defaults",
     }),
-    hawl: settings.hawlStartDate ? hawlStatus(settings.hawlStartDate, today) : null,
+    hawl: settings.hawlStartDate
+      ? hawlStatus(settings.hawlStartDate, today, calendar)
+      : null,
+    today,
+    calendar,
+    metals,
     latestFreeze: latest,
     recentFreezes: freezes,
     frozenThisCycle,
@@ -180,7 +209,7 @@ export function sumTypeInWindow(
   type: string,
   window: Pick<PaymentWindow, "start" | "end">,
 ): number {
-  return rows
-    .filter((g) => g.type === type && dateInWindow(g.date, window))
-    .reduce((t, g) => t + g.amount, 0);
+  return sumCents(
+    rows.filter((g) => g.type === type && dateInWindow(g.date, window)).map((g) => g.amount),
+  );
 }

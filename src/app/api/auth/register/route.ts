@@ -6,6 +6,7 @@ import { users, settings } from "@/db/schema";
 import { firstIssue, registerSchema } from "@/lib/validation";
 import { hashPassword, createSession } from "@/lib/auth";
 import { DEFAULT_SETTINGS } from "@/lib/session";
+import { LIMITS, overLimit, tooManyRequests } from "@/lib/rate-limit";
 
 const TAKEN = "An account with this email already exists";
 
@@ -15,6 +16,7 @@ function isUniqueViolation(err: unknown): boolean {
 }
 
 export async function POST(request: Request) {
+  if (await overLimit(request, LIMITS.register)) return tooManyRequests(LIMITS.register);
   const body = await request.json().catch(() => null);
   const parsed = registerSchema.safeParse(body);
   if (!parsed.success) {
