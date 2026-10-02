@@ -10,6 +10,7 @@ import {
   type ScreeningResult,
 } from "@/lib/screening";
 import { purificationAmount } from "@/lib/zakat";
+import { readStoredValue, setStoredValue, useHydrated } from "@/lib/client-store";
 import { amountParam, formatMoney, formatPercent } from "@/lib/money";
 
 const ACTIVITIES: { key: keyof BusinessActivity; label: string }[] = [
@@ -50,42 +51,40 @@ type Draft = {
   figures: Record<string, string>;
 };
 
+function readDraft(): Draft | null {
+  try {
+    const raw = readStoredValue(STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as Draft) : null;
+  } catch {
+    return null; // a broken draft is simply ignored
+  }
+}
+
 export default function ScreeningTool({ currency = "CAD" }: { currency?: string }) {
-  const [hydrated, setHydrated] = useState(false);
-  const [name, setName] = useState("");
-  const [activity, setActivity] = useState<BusinessActivity>(EMPTY_ACTIVITY);
-  const [denominator, setDenominator] = useState<DenominatorBasis>("marketCap");
-  const [figures, setFigures] = useState<Record<string, string>>({});
+  // The draft lives in this browser, so the form mounts once hydrated with it
+  // as initial state rather than patching state in after the first render.
+  const hydrated = useHydrated();
+  if (!hydrated) return null;
+  return <ScreeningForm currency={currency} draft={readDraft()} />;
+}
+
+function ScreeningForm({ currency, draft }: { currency: string; draft: Draft | null }) {
+  const [name, setName] = useState(draft?.name ?? "");
+  const [activity, setActivity] = useState<BusinessActivity>({
+    ...EMPTY_ACTIVITY,
+    ...(draft?.activity ?? {}),
+  });
+  const [denominator, setDenominator] = useState<DenominatorBasis>(
+    draft?.denominator === "totalAssets" ? "totalAssets" : "marketCap",
+  );
+  const [figures, setFigures] = useState<Record<string, string>>(draft?.figures ?? {});
   const [result, setResult] = useState<ScreeningResult | null>(null);
   const [dividend, setDividend] = useState("");
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const d = JSON.parse(raw) as Draft;
-        if (d.name) setName(d.name);
-        if (d.activity) setActivity({ ...EMPTY_ACTIVITY, ...d.activity });
-        if (d.denominator === "marketCap" || d.denominator === "totalAssets") {
-          setDenominator(d.denominator);
-        }
-        if (d.figures) setFigures(d.figures);
-      }
-    } catch {
-      /* ignore a broken draft */
-    }
-    setHydrated(true);
-  }, []);
-
-  useEffect(() => {
-    if (!hydrated) return;
-    const draft: Draft = { name, activity, denominator, figures };
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
-    } catch {
-      /* storage full or blocked: the draft just is not kept */
-    }
-  }, [hydrated, name, activity, denominator, figures]);
+    const next: Draft = { name, activity, denominator, figures };
+    setStoredValue(STORAGE_KEY, JSON.stringify(next));
+  }, [name, activity, denominator, figures]);
 
   function run(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -113,11 +112,7 @@ export default function ScreeningTool({ currency = "CAD" }: { currency?: string 
     setFigures({});
     setResult(null);
     setDividend("");
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch {
-      /* ignore */
-    }
+    setStoredValue(STORAGE_KEY, null);
   }
 
   const purifyDue = result

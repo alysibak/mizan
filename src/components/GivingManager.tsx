@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { formatMoney } from "@/lib/money";
@@ -8,6 +8,7 @@ import { ASNAF, asnafLabel } from "@/lib/asnaf";
 import { givingTypeLabel, type GivingType } from "@/lib/giving";
 import { localIsoDay } from "@/lib/dates";
 import { sendJson } from "@/lib/client-fetch";
+import { useHydrated } from "@/lib/client-store";
 import type { GivingRecord } from "@/db/schema";
 
 const TYPE_TONE: Record<string, string> = {
@@ -41,8 +42,9 @@ export default function GivingManager({
   const [type, setType] = useState<GivingType>(defaultType);
   // The viewer's own calendar day, set after mount so the server render (UTC)
   // never pre-fills tomorrow's date for someone west of Greenwich.
-  const [date, setDate] = useState("");
-  useEffect(() => setDate((d) => d || localIsoDay()), []);
+  const hydrated = useHydrated();
+  const [pickedDate, setDate] = useState<string | null>(null);
+  const date = pickedDate ?? (hydrated ? localIsoDay() : "");
 
   const recipients = [
     ...new Set(records.map((r) => r.recipient).filter((x): x is string => Boolean(x))),
@@ -86,7 +88,7 @@ export default function GivingManager({
     }
     formEl.reset();
     setType(defaultType);
-    setDate(localIsoDay());
+    setDate(null);
     const q = defaultType === "sadaqah" ? "/giving" : `/giving?type=${defaultType}`;
     router.replace(q);
     router.refresh();

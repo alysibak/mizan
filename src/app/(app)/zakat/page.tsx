@@ -7,6 +7,41 @@ import EstimateBanner from "@/components/EstimateBanner";
 import CycleActions from "@/components/CycleActions";
 import { duePhaseLabel } from "@/lib/giving-window";
 
+function Row({
+  label,
+  value,
+  sub,
+  accent,
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+  accent?: "brass" | "danger" | "pine";
+}) {
+  return (
+  <div className="flex items-baseline justify-between gap-4 py-2.5">
+    <div>
+      <p className="text-sm text-ink">{label}</p>
+      {sub && <p className="text-xs text-sage">{sub}</p>}
+    </div>
+    <p
+      className={
+        "font-medium nums " +
+        (accent === "brass"
+          ? "text-brass"
+          : accent === "danger"
+            ? "text-danger"
+            : accent === "pine"
+              ? "text-pine"
+              : "text-ink")
+      }
+    >
+      {value}
+    </p>
+  </div>
+);
+}
+
 export default async function ZakatPage() {
   const user = (await getCurrentUser())!;
   const {
@@ -20,39 +55,6 @@ export default async function ZakatPage() {
     frozenThisCycle,
   } = await loadReckoning(user.id);
   const c = settings.currency;
-
-  const Row = ({
-    label,
-    value,
-    sub,
-    accent,
-  }: {
-    label: string;
-    value: string;
-    sub?: string;
-    accent?: "brass" | "danger" | "pine";
-  }) => (
-    <div className="flex items-baseline justify-between gap-4 py-2.5">
-      <div>
-        <p className="text-sm text-ink">{label}</p>
-        {sub && <p className="text-xs text-sage">{sub}</p>}
-      </div>
-      <p
-        className={
-          "font-medium nums " +
-          (accent === "brass"
-            ? "text-brass"
-            : accent === "danger"
-              ? "text-danger"
-              : accent === "pine"
-                ? "text-pine"
-                : "text-ink")
-        }
-      >
-        {value}
-      </p>
-    </div>
-  );
 
   return (
     <div className="space-y-6">

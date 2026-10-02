@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { formatMoney, toCents } from "@/lib/money";
 import { localIsoDay } from "@/lib/dates";
 import { sendJson } from "@/lib/client-fetch";
+import { useHydrated } from "@/lib/client-store";
 
 type Receivable = { id: string; label: string; amount: number };
 
@@ -24,8 +25,9 @@ export default function ForgiveDebtTool({
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
   const [assetId, setAssetId] = useState("");
-  const [date, setDate] = useState("");
-  useEffect(() => setDate((d) => d || localIsoDay()), []);
+  const hydrated = useHydrated();
+  const [pickedDate, setDate] = useState<string | null>(null);
+  const date = pickedDate ?? (hydrated ? localIsoDay() : "");
 
   const selected = receivables.find((r) => r.id === assetId);
 

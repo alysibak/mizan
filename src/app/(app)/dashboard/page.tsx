@@ -11,7 +11,12 @@ import HawlCalendarLink from "@/components/HawlCalendarLink";
 import CycleActions from "@/components/CycleActions";
 import LastLetterCard from "@/components/LastLetterCard";
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ welcome?: string }>;
+}) {
+  const { welcome } = await searchParams;
   const user = (await getCurrentUser())!;
   const {
     settings,
@@ -83,6 +88,7 @@ export default async function DashboardPage() {
         metalsStale={metalsStale}
         metalsReason={metals.reason}
         metalsAgeDays={metals.ageDays}
+        welcome={welcome === "1"}
       />
 
       {lastLetter ? (

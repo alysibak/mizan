@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { sendJson } from "@/lib/client-fetch";
+import { setStoredValue } from "@/lib/client-store";
 
 export default function FreezeYearButton({
   defaultLabel,
@@ -37,11 +38,8 @@ export default function FreezeYearButton({
       return;
     }
     const data = res.data;
-    try {
-      localStorage.removeItem("mizan-forgotten-checked");
-    } catch {
-      /* ignore */
-    }
+    // A new year starts the forgotten-wealth checklist fresh.
+    setStoredValue("mizan-forgotten-checked", null);
     router.push(`/year/snapshots/${data.id}`);
     router.refresh();
   }

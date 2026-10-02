@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Settings } from "@/db/schema";
@@ -16,11 +16,27 @@ import { NISAB_GOLD_GRAMS, NISAB_SILVER_GRAMS } from "@/lib/nisab";
 import { formatMoney } from "@/lib/money";
 import { COMMON_CURRENCIES } from "@/lib/currencies";
 import { sendJson } from "@/lib/client-fetch";
+import { readStoredValue, setStoredValue, useHydrated } from "@/lib/client-store";
 
 const STEPS = ["Trust", "Preferences", "Prices", "Hawl", "Holding"] as const;
 const STEP_KEY = "mizan-begin-step";
 
-export default function BeginWizard({
+/** The step to resume at: the trust note first, then wherever setup was left. */
+function resumeStep(trusted: boolean): number {
+  if (!trusted) return 0;
+  const n = parseInt(readStoredValue(STEP_KEY) ?? "", 10);
+  return n >= 1 && n < STEPS.length ? n : 1;
+}
+
+export default function BeginWizard(props: { name: string; settings: Settings }) {
+  // The saved step lives in this browser, so mount once hydrated with it as
+  // the initial state.
+  const hydrated = useHydrated();
+  if (!hydrated) return null;
+  return <Wizard {...props} />;
+}
+
+function Wizard({
   name,
   settings,
 }: {
@@ -28,7 +44,7 @@ export default function BeginWizard({
   settings: Settings;
 }) {
   const router = useRouter();
-  const [step, setStep] = useState(settings.trustedAckAt ? 1 : 0);
+  const [step, setStep] = useState(() => resumeStep(Boolean(settings.trustedAckAt)));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,28 +59,9 @@ export default function BeginWizard({
   const [lookingUp, setLookingUp] = useState(false);
   const [priceHint, setPriceHint] = useState<string | null>(null);
 
-  useEffect(() => {
-    try {
-      if (!settings.trustedAckAt) {
-        setStep(0);
-        return;
-      }
-      const saved = localStorage.getItem(STEP_KEY);
-      if (saved == null) return;
-      const n = parseInt(saved, 10);
-      if (n >= 1 && n < STEPS.length) setStep(n);
-    } catch {
-      /* ignore */
-    }
-  }, [settings.trustedAckAt]);
-
   function go(n: number) {
     setStep(n);
-    try {
-      localStorage.setItem(STEP_KEY, String(n));
-    } catch {
-      /* ignore */
-    }
+    setStoredValue(STEP_KEY, String(n));
   }
 
   const [assetLabel, setAssetLabel] = useState("");
@@ -193,13 +190,8 @@ export default function BeginWizard({
         hawlStartDate: hawlStartDate || null,
         setupComplete: true,
       });
-      try {
-        localStorage.removeItem(STEP_KEY);
-        localStorage.setItem("mizan-just-begun", "1");
-      } catch {
-        /* ignore */
-      }
-      router.push("/dashboard");
+      setStoredValue(STEP_KEY, null);
+      router.push("/dashboard?welcome=1");
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not finish setup");

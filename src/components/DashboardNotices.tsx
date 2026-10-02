@@ -1,12 +1,21 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { setStoredValue, useHydrated, useStoredValue } from "@/lib/client-store";
 import {
   getInstallPrompt,
   promptInstall,
   subscribeInstallPrompt,
 } from "@/lib/install-prompt";
+
+function isStandalone(): boolean {
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    Boolean((navigator as Navigator & { standalone?: boolean }).standalone)
+  );
+}
 
 function isIos(): boolean {
   const ua = navigator.userAgent;
@@ -14,7 +23,6 @@ function isIos(): boolean {
   return /iphone|ipad|ipod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
 }
 
-const BEGUN_KEY = "mizan-just-begun";
 const INSTALL_KEY = "mizan-install-dismissed";
 const CHECKLIST_KEY = "mizan-checklist-dismissed";
 
@@ -25,50 +33,41 @@ export default function DashboardNotices({
   metalsStale = false,
   metalsReason = null,
   metalsAgeDays = null,
+  welcome = false,
 }: {
   items: Item[];
   metalsStale?: boolean;
   metalsReason?: "defaults" | "never" | "aged" | null;
   metalsAgeDays?: number | null;
+  /** Setup just finished (the wizard lands on /dashboard?welcome=1). */
+  welcome?: boolean;
 }) {
-  const [begun, setBegun] = useState(false);
-  const [install, setInstall] = useState(false);
-  const [checklistHidden, setChecklistHidden] = useState(true);
+  const router = useRouter();
+  const hydrated = useHydrated();
   const [metalsHidden, setMetalsHidden] = useState(false);
-  const [ios, setIos] = useState(false);
+  const installDismissed = useStoredValue(INSTALL_KEY) === "1";
+  const checklistDismissed = useStoredValue(CHECKLIST_KEY) === "1";
   const installEvent = useSyncExternalStore(
     subscribeInstallPrompt,
     getInstallPrompt,
     () => null,
   );
+  const [installedNow, setInstalledNow] = useState(false);
 
-  useEffect(() => {
-    try {
-      if (localStorage.getItem(BEGUN_KEY) === "1") {
-        setBegun(true);
-        localStorage.removeItem(BEGUN_KEY);
-      }
-      if (localStorage.getItem(INSTALL_KEY) !== "1") {
-        const standalone =
-          window.matchMedia("(display-mode: standalone)").matches ||
-          ("standalone" in navigator &&
-            Boolean(
-              (navigator as Navigator & { standalone?: boolean }).standalone,
-            ));
-        if (!standalone) setInstall(true);
-      }
-      setIos(isIos());
-      setChecklistHidden(localStorage.getItem(CHECKLIST_KEY) === "1");
-    } catch {
-      setChecklistHidden(false);
-    }
-  }, []);
+  // Browser-only facts: shown after hydration so server and client agree.
+  const ios = hydrated && isIos();
+  const install = hydrated && !installDismissed && !installedNow && !isStandalone();
+  const checklistHidden = !hydrated || checklistDismissed;
+
+  function dismissWelcome() {
+    router.replace("/dashboard", { scroll: false });
+  }
 
   const remaining = items.filter((i) => !i.done);
 
   return (
     <div className="space-y-6">
-      {begun ? (
+      {welcome ? (
         <section className="border border-pine/40 bg-pine/5 px-5 py-5">
           <p className="label text-pine">Ready</p>
           <p className="mt-1 font-serif text-xl text-ink">Your ledger is open.</p>
@@ -86,7 +85,7 @@ export default function DashboardNotices({
             <button
               type="button"
               className="text-xs text-sage hover:text-ink"
-              onClick={() => setBegun(false)}
+              onClick={dismissWelcome}
             >
               Dismiss
             </button>
@@ -139,14 +138,7 @@ export default function DashboardNotices({
             <button
               type="button"
               className="text-xs text-sage hover:text-ink"
-              onClick={() => {
-                try {
-                  localStorage.setItem(CHECKLIST_KEY, "1");
-                } catch {
-                  /* ignore */
-                }
-                setChecklistHidden(true);
-              }}
+              onClick={() => setStoredValue(CHECKLIST_KEY, "1")}
             >
               Dismiss
             </button>
@@ -185,7 +177,7 @@ export default function DashboardNotices({
                     type="button"
                     className="btn-primary mt-3"
                     onClick={async () => {
-                      if (await promptInstall()) setInstall(false);
+                      if (await promptInstall()) setInstalledNow(true);
                     }}
                   >
                     Install Mizan
@@ -209,14 +201,7 @@ export default function DashboardNotices({
             <button
               type="button"
               className="shrink-0 text-xs text-sage hover:text-ink"
-              onClick={() => {
-                try {
-                  localStorage.setItem(INSTALL_KEY, "1");
-                } catch {
-                  /* ignore */
-                }
-                setInstall(false);
-              }}
+              onClick={() => setStoredValue(INSTALL_KEY, "1")}
             >
               Dismiss
             </button>
