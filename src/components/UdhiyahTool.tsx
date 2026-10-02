@@ -66,6 +66,7 @@ export default function UdhiyahTool({ currency }: { currency: string }) {
             <input
               id="cost"
               type="number"
+              inputMode="decimal"
               min="0"
               step="0.01"
               className="field nums"
@@ -81,6 +82,7 @@ export default function UdhiyahTool({ currency }: { currency: string }) {
             <input
               id="shares"
               type="number"
+              inputMode="numeric"
               min="1"
               max={animal === "cow" || animal === "camel" ? 7 : 1}
               step="1"
@@ -96,6 +98,7 @@ export default function UdhiyahTool({ currency }: { currency: string }) {
             <input
               id="extras"
               type="number"
+              inputMode="decimal"
               min="0"
               step="0.01"
               className="field nums"

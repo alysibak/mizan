@@ -118,41 +118,43 @@ export default function MirathTool({ currency }: { currency: string }) {
               Sunni framework. Estimation only.
             </p>
           </div>
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-mist bg-mist/30 text-xs uppercase tracking-wide text-sage">
-              <tr>
-                <th className="px-5 py-3 font-medium">Heir</th>
-                <th className="px-5 py-3 font-medium">Basis</th>
-                <th className="px-5 py-3 font-medium">Share</th>
-                <th className="px-5 py-3 font-medium">Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              {result.shares.map((line) => (
-                <tr key={line.heir} className="border-b border-mist/70">
-                  <td className="px-5 py-3">
-                    <p className="font-medium text-ink">
-                      {HEIR_LABELS[line.heir]}
-                      {line.count > 1 ? ` × ${line.count}` : ""}
-                    </p>
-                    <p className="text-xs text-sage">{line.reason}</p>
-                  </td>
-                  <td className="px-5 py-3 text-sage">{BASIS[line.basis]}</td>
-                  <td className="px-5 py-3 nums text-ink">
-                    {line.fraction.toString()}
-                    {line.count > 1 && (
-                      <span className="block text-xs text-sage">
-                        {line.perHead.toString()} each
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-5 py-3 nums text-ink">
-                    {formatMoney(line.fraction.value * estate, currency)}
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[34rem] text-left text-sm">
+              <thead className="border-b border-mist bg-mist/30 text-xs uppercase tracking-wide text-sage">
+                <tr>
+                  <th className="px-5 py-3 font-medium">Heir</th>
+                  <th className="px-5 py-3 font-medium">Basis</th>
+                  <th className="px-5 py-3 font-medium">Share</th>
+                  <th className="px-5 py-3 font-medium">Amount</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {result.shares.map((line) => (
+                  <tr key={line.heir} className="border-b border-mist/70">
+                    <td className="px-5 py-3">
+                      <p className="font-medium text-ink">
+                        {HEIR_LABELS[line.heir]}
+                        {line.count > 1 ? ` × ${line.count}` : ""}
+                      </p>
+                      <p className="text-xs text-sage">{line.reason}</p>
+                    </td>
+                    <td className="px-5 py-3 text-sage">{BASIS[line.basis]}</td>
+                    <td className="px-5 py-3 nums text-ink">
+                      {line.fraction.toString()}
+                      {line.count > 1 && (
+                        <span className="block text-xs text-sage">
+                          {line.perHead.toString()} each
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-5 py-3 nums text-ink">
+                      {formatMoney(line.fraction.value * estate, currency)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           {!result.toTreasury.isZero() && (
             <p className="border-t border-mist px-5 py-3 text-sm text-sage">
               Remainder {result.toTreasury.toString()} (

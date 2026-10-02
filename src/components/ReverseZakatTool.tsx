@@ -40,6 +40,7 @@ export default function ReverseZakatTool({
           <input
             id="gift"
             type="number"
+            inputMode="decimal"
             min="0"
             step="0.01"
             className="field nums"

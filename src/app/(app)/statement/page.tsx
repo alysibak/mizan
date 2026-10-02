@@ -131,27 +131,29 @@ export default async function StatementPage() {
         {r.lines.length === 0 ? (
           <p className="px-5 py-6 text-sm text-sage">No assets recorded.</p>
         ) : (
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-mist text-xs uppercase tracking-wide text-sage">
-              <tr>
-                <th className="px-5 py-2 font-medium">Holding</th>
-                <th className="px-5 py-2 font-medium">Value</th>
-                <th className="px-5 py-2 font-medium">Counted</th>
-              </tr>
-            </thead>
-            <tbody>
-              {r.lines.map((line, i) => (
-                <tr key={i} className="border-b border-mist/70">
-                  <td className="px-5 py-2">
-                    <p className="text-ink">{line.label}</p>
-                    <p className="text-xs text-sage">{categoryMeta(line.category).label}</p>
-                  </td>
-                  <td className="px-5 py-2 nums">{formatMoney(line.amount, c)}</td>
-                  <td className="px-5 py-2 nums">{formatMoney(line.zakatableAmount, c)}</td>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[30rem] text-left text-sm">
+              <thead className="border-b border-mist text-xs uppercase tracking-wide text-sage">
+                <tr>
+                  <th className="px-5 py-2 font-medium">Holding</th>
+                  <th className="px-5 py-2 font-medium">Value</th>
+                  <th className="px-5 py-2 font-medium">Counted</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {r.lines.map((line, i) => (
+                  <tr key={i} className="border-b border-mist/70">
+                    <td className="px-5 py-2">
+                      <p className="text-ink">{line.label}</p>
+                      <p className="text-xs text-sage">{categoryMeta(line.category).label}</p>
+                    </td>
+                    <td className="px-5 py-2 nums">{formatMoney(line.amount, c)}</td>
+                    <td className="px-5 py-2 nums">{formatMoney(line.zakatableAmount, c)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
 
@@ -160,26 +162,28 @@ export default async function StatementPage() {
           <h2 className="border-b border-mist px-5 py-4 font-serif text-lg text-ink">
             Debts
           </h2>
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-mist text-xs uppercase tracking-wide text-sage">
-              <tr>
-                <th className="px-5 py-2 font-medium">Description</th>
-                <th className="px-5 py-2 font-medium">Amount</th>
-                <th className="px-5 py-2 font-medium">Counted</th>
-              </tr>
-            </thead>
-            <tbody>
-              {liabilityRows.map((l) => (
-                <tr key={l.id} className="border-b border-mist/70">
-                  <td className="px-5 py-2 text-ink">{l.label}</td>
-                  <td className="px-5 py-2 nums">{formatMoney(l.amount, c)}</td>
-                  <td className="px-5 py-2 text-sage">
-                    {l.deductible ? "Deducted from zakatable wealth" : "Not deducted"}
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[30rem] text-left text-sm">
+              <thead className="border-b border-mist text-xs uppercase tracking-wide text-sage">
+                <tr>
+                  <th className="px-5 py-2 font-medium">Description</th>
+                  <th className="px-5 py-2 font-medium">Amount</th>
+                  <th className="px-5 py-2 font-medium">Counted</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {liabilityRows.map((l) => (
+                  <tr key={l.id} className="border-b border-mist/70">
+                    <td className="px-5 py-2 text-ink">{l.label}</td>
+                    <td className="px-5 py-2 nums">{formatMoney(l.amount, c)}</td>
+                    <td className="px-5 py-2 text-sage">
+                      {l.deductible ? "Deducted from zakatable wealth" : "Not deducted"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </section>
       )}
 
@@ -273,30 +277,32 @@ export default async function StatementPage() {
           <h2 className="border-b border-mist px-5 py-4 font-serif text-lg text-ink">
             Giving · {window.label}
           </h2>
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-mist text-xs uppercase tracking-wide text-sage">
-              <tr>
-                <th className="px-5 py-2 font-medium">Date</th>
-                <th className="px-5 py-2 font-medium">Kind</th>
-                <th className="px-5 py-2 font-medium">To</th>
-                <th className="px-5 py-2 font-medium">Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              {yearGiving.map((g) => (
-                <tr key={g.id} className="border-b border-mist/70">
-                  <td className="px-5 py-2 nums text-sage">{g.date}</td>
-                  <td className="px-5 py-2 text-ink">
-                    {g.type === "zakat" && g.asnaf
-                      ? `Zakat · ${asnafLabel(g.asnaf)}`
-                      : givingTypeLabel(g.type)}
-                  </td>
-                  <td className="px-5 py-2 text-sage">{g.recipient || g.note || "—"}</td>
-                  <td className="px-5 py-2 nums">{formatMoney(g.amount, c)}</td>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[30rem] text-left text-sm">
+              <thead className="border-b border-mist text-xs uppercase tracking-wide text-sage">
+                <tr>
+                  <th className="px-5 py-2 font-medium">Date</th>
+                  <th className="px-5 py-2 font-medium">Kind</th>
+                  <th className="px-5 py-2 font-medium">To</th>
+                  <th className="px-5 py-2 font-medium">Amount</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {yearGiving.map((g) => (
+                  <tr key={g.id} className="border-b border-mist/70">
+                    <td className="px-5 py-2 nums text-sage">{g.date}</td>
+                    <td className="px-5 py-2 text-ink">
+                      {g.type === "zakat" && g.asnaf
+                        ? `Zakat · ${asnafLabel(g.asnaf)}`
+                        : givingTypeLabel(g.type)}
+                    </td>
+                    <td className="px-5 py-2 text-sage">{g.recipient || g.note || "—"}</td>
+                    <td className="px-5 py-2 nums">{formatMoney(g.amount, c)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </section>
       )}
 

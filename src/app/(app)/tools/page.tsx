@@ -81,6 +81,14 @@ export default function ToolsPage() {
             </Link>
           </li>
           <li>
+            <Link href="/tools/fitr" className="block py-5 hover:bg-mist/20">
+              <p className="font-serif text-lg text-ink">Zakat al-Fitr</p>
+              <p className="mt-1 text-sm text-sage">
+                Per-person amount for your household before Eid
+              </p>
+            </Link>
+          </li>
+          <li>
             <Link href="/tools/udhiyah" className="block py-5 hover:bg-mist/20">
               <p className="font-serif text-lg text-ink">Udhiyah / qurbani</p>
               <p className="mt-1 text-sm text-sage">Split an animal’s cost into shares</p>

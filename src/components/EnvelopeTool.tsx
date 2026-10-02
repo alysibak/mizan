@@ -52,6 +52,7 @@ export default function EnvelopeTool({
         <input
           id="total"
           type="number"
+          inputMode="decimal"
           min="0"
           step="0.01"
           className="field nums"
@@ -71,6 +72,7 @@ export default function EnvelopeTool({
                   Weight{" "}
                   <input
                     type="number"
+                    inputMode="numeric"
                     min="0"
                     step="1"
                     className="field ml-2 inline-block w-16 nums py-1"

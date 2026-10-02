@@ -12,6 +12,7 @@ const TITLES: [string, string][] = [
   ["/tools/reverse", "Reverse"],
   ["/tools/forgive", "Forgive"],
   ["/tools/udhiyah", "Udhiyah"],
+  ["/tools/fitr", "Zakat al-Fitr"],
   ["/tools/asnaf", "Asnaf"],
   ["/year/snapshots", "Snapshot"],
   ["/dashboard", "Balance"],

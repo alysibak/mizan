@@ -306,6 +306,7 @@ export default function ScreeningTool({ currency = "CAD" }: { currency?: string 
                 <input
                   id="dividend"
                   type="number"
+                  inputMode="decimal"
                   step="0.01"
                   min="0"
                   className="field nums"

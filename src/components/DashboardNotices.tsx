@@ -1,7 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
+import {
+  getInstallPrompt,
+  promptInstall,
+  subscribeInstallPrompt,
+} from "@/lib/install-prompt";
+
+function isIos(): boolean {
+  const ua = navigator.userAgent;
+  // iPadOS reports itself as a Mac with touch.
+  return /iphone|ipad|ipod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+}
 
 const BEGUN_KEY = "mizan-just-begun";
 const INSTALL_KEY = "mizan-install-dismissed";
@@ -24,6 +35,12 @@ export default function DashboardNotices({
   const [install, setInstall] = useState(false);
   const [checklistHidden, setChecklistHidden] = useState(true);
   const [metalsHidden, setMetalsHidden] = useState(false);
+  const [ios, setIos] = useState(false);
+  const installEvent = useSyncExternalStore(
+    subscribeInstallPrompt,
+    getInstallPrompt,
+    () => null,
+  );
 
   useEffect(() => {
     try {
@@ -40,6 +57,7 @@ export default function DashboardNotices({
             ));
         if (!standalone) setInstall(true);
       }
+      setIos(isIos());
       setChecklistHidden(localStorage.getItem(CHECKLIST_KEY) === "1");
     } catch {
       setChecklistHidden(false);
@@ -157,12 +175,36 @@ export default function DashboardNotices({
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="label text-brass">On your home screen</p>
-              <p className="mt-1 text-sm text-sage">
-                Mizan is a web app. In your browser menu, choose{" "}
-                <span className="text-ink">Add to Home Screen</span> or{" "}
-                <span className="text-ink">Install</span> for a ledger that opens
-                like a notebook — no app store.
-              </p>
+              {installEvent ? (
+                <>
+                  <p className="mt-1 text-sm text-sage">
+                    Install Mizan for a ledger that opens from your home screen
+                    like a notebook — no app store.
+                  </p>
+                  <button
+                    type="button"
+                    className="btn-primary mt-3"
+                    onClick={async () => {
+                      if (await promptInstall()) setInstall(false);
+                    }}
+                  >
+                    Install Mizan
+                  </button>
+                </>
+              ) : ios ? (
+                <p className="mt-1 text-sm text-sage">
+                  In Safari, tap <span className="text-ink">Share</span>, then{" "}
+                  <span className="text-ink">Add to Home Screen</span>. Mizan
+                  opens full-screen like an app — no app store.
+                </p>
+              ) : (
+                <p className="mt-1 text-sm text-sage">
+                  Mizan is a web app. In your browser menu, choose{" "}
+                  <span className="text-ink">Install</span> or{" "}
+                  <span className="text-ink">Add to Home Screen</span> for a
+                  ledger that opens like a notebook — no app store.
+                </p>
+              )}
             </div>
             <button
               type="button"
