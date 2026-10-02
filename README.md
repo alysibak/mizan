@@ -46,13 +46,22 @@ work.
 - **Yearly ritual.** Begin wizard, Reckoning night (forgotten wealth → what-if
   nisab → envelopes → pay), freeze snapshots with a letter to next year, roll
   hawl, printable statement.
-- **Giving log.** Zakat, sadaqah, and purification; optional asnaf tags; round-up
-  helper. Zakat entries clear outstanding for the cycle.
+- **Giving log.** Zakat, sadaqah, purification, and Zakat al-Fitr; optional
+  asnaf tags; round-up helper; CSV export for receipts season. Only zakat
+  entries clear outstanding for the cycle, and a payment made after the hawl
+  falls due counts toward that cycle only, not the next one after you roll.
+- **Metals by weight.** Gold, silver, and jewellery can be entered in grams and
+  fineness; they are revalued whenever you save new metal prices.
 - **Tools.** Screening (manual AAOIFI-style), mirath sketch, udhiyah shares,
   reverse zakat, forgive debt, envelopes, and more — satellites around the
   sitting, not a second product.
 - **Trust.** `/trust` map, estimate banners, optional free metals suggestion
   (manual prices remain source of truth; freshness tracked).
+- **Your account.** Change password (signs out other devices), sign out other
+  devices, download or restore a full backup, and delete the account with all
+  of its data.
+- **On your phone.** Installable as a web app (Add to Home Screen on iOS,
+  Install on Android). See [On your phone](#on-your-phone).
 
 ## Tech stack
 
@@ -66,14 +75,14 @@ work.
 
 ## Getting started
 
-You need Node 18.18 or newer.
+You need Node 20.9 or newer (22 recommended; see `.nvmrc`).
 
 ```bash
 # 1. Install dependencies
 npm install
 
 # 2. Create the database and its tables (defaults to ./mizan.db)
-npm run db:push
+npm run db:migrate
 
 # 3. (Optional) Seed a demo account so you can see it working
 npm run db:seed
@@ -85,8 +94,27 @@ npm run dev
 Open http://localhost:3000.
 
 You do not need to create an `.env.local` to start. The database defaults to
-`./mizan.db`. If you want to move it, copy `.env.example` to `.env.local`, set
-`DATABASE_PATH`, and pass the same value when you run the database scripts.
+`./mizan.db`. To move it, copy `.env.example` to `.env.local`, set
+`DATABASE_URL` (for example `file:/path/to/mizan.db`), and pass the same value
+when you run the database scripts.
+
+Use `npm run db:migrate` for real databases. `npm run db:push` is a quick way
+to prototype schema changes locally; if you used it on a database, `db:migrate`
+adopts that database on its next run instead of failing.
+
+### On your phone
+
+Mizan is a progressive web app, so the same code serves desktop and phone.
+
+- **iPhone / iPad:** open your Mizan URL in Safari, tap Share, then
+  *Add to Home Screen*.
+- **Android:** open it in Chrome and tap *Install* (the dashboard also offers a
+  button).
+
+It opens full-screen from the home screen. Pages are never cached on the
+device (they hold your finances); if you are offline, Mizan shows an offline
+notice instead. Regenerate the app icons after changing `src/app/icon.svg` with
+`node scripts/generate-icons.mjs`.
 
 ### Demo account
 
@@ -159,12 +187,20 @@ src/
 drizzle/               SQL migrations (0000…)
 ```
 
-## Authorization
+## Security
 
-Every API route resolves the signed-in user server-side and scopes its query to
-that user's rows. Update and delete operations match on both the record id and
-the owner id, so one account cannot read or change another account's data even by
-guessing ids.
+- Every API route resolves the signed-in user server-side and scopes its query
+  to that user's rows. Updates and deletes match on both the record id and the
+  owner id, so one account cannot read or change another's data by guessing ids.
+- Passwords are bcrypt-hashed (cost 12); sessions are random tokens stored only
+  as SHA-256 hashes, in HttpOnly SameSite=Lax cookies.
+- Ten wrong passwords lock an account's sign-in for 15 minutes; unknown emails
+  take the same time to reject as wrong passwords.
+- Writes from another site are refused (`Sec-Fetch-Site`), and pages ship a
+  Content-Security-Policy, HSTS, and frame denial.
+- All input is validated with Zod: real calendar dates, finite bounded amounts,
+  three-letter currency codes. Backup restores are validated and applied in a
+  single transaction, so a bad file never leaves you half-restored.
 
 ## Testing
 
@@ -172,9 +208,19 @@ guessing ids.
 npm test
 ```
 
-The suite covers nisab calculation, the lunar and solar rates, netting against
-liabilities, partial zakatable portions, the below-nisab case, purification, the
-Hijri conversion and hawl due date, and all three screening outcomes.
+The suite (111 tests) covers the zakat engine, nisab, Hijri conversion (every
+day for a century round-trips), hawl and payment windows across a roll, cent
+rounding of what is owed, inheritance shares (awl, radd, Umariyyatan,
+Mushtaraka), screening, CSV import, metal valuation by weight, input
+validation, and backup payload checks.
+
+```bash
+npm run lint
+npm run typecheck
+```
+
+CI (`.github/workflows/ci.yml`) runs lint, typecheck, tests, a fresh migration,
+a schema-drift check, and a production build on every push and pull request.
 
 ## Production
 
@@ -194,14 +240,14 @@ or wait for the next month — stay modest and you stay free.
 # After creating a Turso DB and copying URL + token into .env.local:
 npm run db:migrate
 npx vercel --prod
-# Set DATABASE_URL, DATABASE_AUTH_TOKEN, and APP_SECRET in the Vercel project.
+# Set DATABASE_URL and DATABASE_AUTH_TOKEN (and optionally ADMIN_EMAIL) in the
+# Vercel project.
 ```
 
 ### Docker (local / your own machine)
 
 ```bash
-cp .env.example .env
-# edit APP_SECRET in .env
+cp .env.example .env   # optional: ADMIN_EMAIL, PORT
 npm run docker:up
 # Open http://localhost:3080
 ```
@@ -232,13 +278,11 @@ NODE_ENV=production npm start
 Set `DATABASE_URL` to a durable location (`file:...` or a Turso URL).
 ## Where it could go next
 
-The original PocketChange idea was rounding up everyday spending and sending the
-difference to charity. That idea is worth reviving, the halal way: round up to
-**sadaqah**, logged in the giving table that already exists here. Because the
-schema and the giving flow are in place, it is an additive feature rather than a
-rebuild. Other natural extensions: an optional free metals-price lookup behind
-the manual override, multiple hawl cycles per asset, and an export of your
-yearly zakat statement.
+The original PocketChange idea, rounding everyday spending up and giving the
+difference, now lives here as round-up **sadaqah**. Natural next steps:
+holdings in other currencies with a manual exchange rate, per-asset hawl that
+affects payable zakat (today it is a reminder), and reminders on the hawl
+anniversary.
 
 ## A note on accuracy
 

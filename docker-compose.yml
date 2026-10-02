@@ -6,7 +6,7 @@ services:
     environment:
       NODE_ENV: production
       DATABASE_URL: file:/data/mizan.db
-      APP_SECRET: ${APP_SECRET:-change-me-in-production}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
     volumes:
       - mizan-data:/data
     restart: unless-stopped

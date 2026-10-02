@@ -274,12 +274,20 @@ REST-style routes under `src/app/api/`:
 
 ```
 /api/auth/login, register, logout, clear-stale
-/api/assets, /api/assets/[id]
+/api/account               DELETE (erase account), password, sessions
+/api/assets, /api/assets/[id], /api/assets/import
 /api/liabilities, /api/liabilities/[id]
 /api/giving, /api/giving/[id]
-/api/settings
+/api/settings, /api/settings/roll-hawl
+/api/snapshots, /api/snapshots/[id]
+/api/export (JSON backup), /api/export/giving (CSV), /api/import (restore)
+/api/metals          → optional free price suggestion
 /api/health          → { ok: true } if DB reachable
 ```
+
+Pages share one loader, `loadReckoning()` in `src/lib/reckoning.ts`, so the
+ledger, zakat result, payment window, and outstanding are computed one way
+everywhere.
 
 Every handler follows the same pattern (see `assets/route.ts`):
 
@@ -296,18 +304,13 @@ Every handler follows the same pattern (see `assets/route.ts`):
 npm test   # Vitest
 ```
 
-Tests cover the pure engine only:
+111 unit tests over the pure modules in `src/lib/`: the zakat engine, nisab,
+Hijri conversion (a century of round trips), payment windows across a hawl
+roll, cent rounding, mirath (awl, radd, Umariyyatan, Mushtaraka), screening,
+CSV import, metal valuation by weight, input validation, and snapshot payloads.
 
-- Nisab calculation (gold vs silver)
-- Lunar and solar rates
-- Liability netting
-- Partial zakatable portions
-- Below-nisab case
-- Purification math
-- Hijri conversion and hawl due date
-- All three screening outcomes (pass business, pass ratios, fail)
-
-No end-to-end browser tests — the calculation layer is what must be exact.
+CI runs lint, typecheck, tests, a fresh migration, a schema-drift check, and a
+production build.
 
 ---
 
@@ -336,7 +339,7 @@ SQLite file on a persistent volume; migrations run on container start.
 
 1. **Turso** — free hosted SQLite (`mizan-prod`)
 2. **Vercel** — serverless Next.js
-3. Env vars: `DATABASE_URL`, `DATABASE_AUTH_TOKEN`, `APP_SECRET`
+3. Env vars: `DATABASE_URL`, `DATABASE_AUTH_TOKEN`, optional `ADMIN_EMAIL`
 4. `vercel.json` runs `db:migrate` before each build
 
 Fly.io config exists but is **not recommended** — free trial expires and suspends the app.
@@ -357,13 +360,13 @@ Fly.io config exists but is **not recommended** — free trial expires and suspe
 
 ## 16. What could come next
 
-Shipped since the early README wishlist: round-up sadaqah, optional metals suggest, yearly statement, year snapshots, Begin wizard, reckoning night, asnaf, unique tools.
+Shipped since the early README wishlist: round-up sadaqah, optional metals suggest, yearly statement, year snapshots, Begin wizard, reckoning night, asnaf, unique tools, installable PWA with an offline notice, metals by weight, Zakat al-Fitr, giving CSV, and account controls (password change, sign out other devices, delete account).
 
-Still worth considering (see expansion audit):
+Still worth considering:
 
 - Mid-hawl nisab breach rules (estimate-labeled)
 - Manual multi-currency FX on holdings
-- True offline / service worker (today: works without paid APIs, not airplane mode)
+- Hawl-anniversary reminders (web push needs a small server-side sender)
 - Shared encrypted ledger for 2–3 people (today: one user = one ledger)
 - Purification ↔ screening loop stored in DB
 

@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - name: Migrations apply to a fresh database
+        run: npm run db:migrate
+        env:
+          DATABASE_URL: file:ci.db
+      - name: Schema and migrations agree
+        run: |
+          npx drizzle-kit generate --name drift-check
+          git status --porcelain drizzle
+          test -z "$(git status --porcelain drizzle)"
+      - run: npm run build
+        env:
+          DATABASE_URL: file:ci.db
+          NEXT_TELEMETRY_DISABLED: "1"
