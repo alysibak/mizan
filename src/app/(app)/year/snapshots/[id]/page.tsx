@@ -3,8 +3,10 @@ import { and, eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { db } from "@/db";
 import { yearSnapshots } from "@/db/schema";
-import { getCurrentUser, getUserSettings } from "@/lib/session";
+import { getCurrentUser } from "@/lib/session";
+import { loadReckoning } from "@/lib/reckoning";
 import { parseSnapshotPayload } from "@/lib/snapshot";
+import { isoDay } from "@/lib/dates";
 import { formatMoney, formatPercent } from "@/lib/money";
 import { categoryMeta } from "@/lib/categories";
 import DeleteSnapshotButton from "@/components/DeleteSnapshotButton";
@@ -15,13 +17,15 @@ type Ctx = { params: Promise<{ id: string }> };
 
 export default async function SnapshotPage({ params }: Ctx) {
   const user = (await getCurrentUser())!;
-  const settings = await getUserSettings(user.id);
   const { id } = await params;
-  const [row] = await db
-    .select()
-    .from(yearSnapshots)
-    .where(and(eq(yearSnapshots.id, id), eq(yearSnapshots.userId, user.id)))
-    .limit(1);
+  const [[row], reckoning] = await Promise.all([
+    db
+      .select()
+      .from(yearSnapshots)
+      .where(and(eq(yearSnapshots.id, id), eq(yearSnapshots.userId, user.id)))
+      .limit(1),
+    loadReckoning(user.id),
+  ]);
   if (!row) notFound();
 
   const payload = parseSnapshotPayload(row.payload);
@@ -29,6 +33,14 @@ export default async function SnapshotPage({ params }: Ctx) {
 
   const c = row.currency;
   const r = payload.result;
+  const { hawl, latestFreeze, frozenThisCycle } = reckoning;
+  // Rolling belongs to the freeze that closed the current cycle, once that
+  // hawl is complete. Older freezes are history only.
+  const closesCurrentCycle = latestFreeze?.id === row.id && frozenThisCycle;
+  const windowLabel =
+    payload.givingYtd.windowStart && payload.givingYtd.windowEnd
+      ? `${payload.givingYtd.windowStart} → ${payload.givingYtd.windowEnd}`
+      : String(payload.givingYtd.year);
 
   return (
     <div className="document-print space-y-8">
@@ -40,10 +52,10 @@ export default async function SnapshotPage({ params }: Ctx) {
           <p className="mt-2 text-sm text-sage">Taken {row.takenAt}</p>
         </div>
         <div className="flex gap-2 print:hidden">
-          <Link href="/statement" className="btn-primary">
-            Print statement
-          </Link>
           <PrintButton />
+          <Link href="/statement" className="btn-ghost">
+            Live statement
+          </Link>
           <Link href="/year" className="btn-ghost">
             Back to year
           </Link>
@@ -84,9 +96,15 @@ export default async function SnapshotPage({ params }: Ctx) {
             <dd className="nums text-sage">{r.basis}</dd>
           </div>
           <div className="ledger-row">
-            <dt className="text-sage">Zakat recorded ({payload.givingYtd.year})</dt>
+            <dt className="text-sage">Zakat recorded ({windowLabel})</dt>
             <dd className="nums">{formatMoney(payload.givingYtd.zakat, c)}</dd>
           </div>
+          {payload.givingYtd.fitr ? (
+            <div className="ledger-row">
+              <dt className="text-sage">Zakat al-Fitr recorded</dt>
+              <dd className="nums">{formatMoney(payload.givingYtd.fitr, c)}</dd>
+            </div>
+          ) : null}
         </dl>
       </section>
 
@@ -116,7 +134,27 @@ export default async function SnapshotPage({ params }: Ctx) {
           year begins counting. Then print a statement if you want paper.
         </p>
         <div className="mt-4">
-          <RollHawlButton settings={settings} />
+          {!hawl ? (
+            <p className="text-sm text-sage">
+              Set a hawl start in{" "}
+              <Link href="/settings" className="text-pine hover:underline">
+                settings
+              </Link>{" "}
+              before rolling the next cycle.
+            </p>
+          ) : !closesCurrentCycle ? (
+            <p className="text-sm text-sage">
+              This freeze belongs to an earlier cycle. The current hawl started{" "}
+              {isoDay(hawl.startDate)}.
+            </p>
+          ) : hawl.isComplete ? (
+            <RollHawlButton nextStart={isoDay(hawl.dueDate)} />
+          ) : (
+            <p className="text-sm text-sage">
+              This hawl runs until {isoDay(hawl.dueDate)}. Rolling to the next
+              cycle opens on that day.
+            </p>
+          )}
         </div>
       </section>
 

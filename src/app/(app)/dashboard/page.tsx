@@ -1,20 +1,9 @@
 import Link from "next/link";
-import { desc, eq } from "drizzle-orm";
-import { db } from "@/db";
-import { assets, liabilities, givingRecords, yearSnapshots } from "@/db/schema";
-import { getCurrentUser, getUserSettings } from "@/lib/session";
-import { calculateZakat } from "@/lib/zakat";
-import { hawlStatus, formatHijri } from "@/lib/hijri";
+import { getCurrentUser } from "@/lib/session";
+import { loadReckoning } from "@/lib/reckoning";
+import { formatHijri } from "@/lib/hijri";
 import { formatMoney, formatPercent } from "@/lib/money";
-import {
-  duePhase,
-  duePhaseLabel,
-  metalsFreshness,
-  paymentWindow,
-  sumZakatInWindow,
-  dateInWindow,
-} from "@/lib/giving-window";
-import { parseSnapshotPayload } from "@/lib/snapshot";
+import { duePhaseLabel, metalsFreshness } from "@/lib/giving-window";
 import Scale from "@/components/Scale";
 import EstimateBanner from "@/components/EstimateBanner";
 import DashboardNotices from "@/components/DashboardNotices";
@@ -24,64 +13,27 @@ import LastLetterCard from "@/components/LastLetterCard";
 
 export default async function DashboardPage() {
   const user = (await getCurrentUser())!;
-  const settings = await getUserSettings(user.id);
+  const {
+    settings,
+    assets: assetRows,
+    result,
+    window,
+    zakatPaid,
+    outstanding: zakatOutstanding,
+    phase,
+    hawl,
+    latestFreeze,
+    frozenThisCycle,
+  } = await loadReckoning(user.id);
 
-  const [assetRows, liabilityRows, givingRows, latestSnap] = await Promise.all([
-    db.select().from(assets).where(eq(assets.userId, user.id)),
-    db.select().from(liabilities).where(eq(liabilities.userId, user.id)),
-    db
-      .select()
-      .from(givingRecords)
-      .where(eq(givingRecords.userId, user.id))
-      .orderBy(desc(givingRecords.date)),
-    db
-      .select()
-      .from(yearSnapshots)
-      .where(eq(yearSnapshots.userId, user.id))
-      .orderBy(desc(yearSnapshots.takenAt))
-      .limit(1),
-  ]);
+  const lastLetter = latestFreeze?.payload?.letterToNextYear
+    ? {
+        id: latestFreeze.id,
+        takenAt: latestFreeze.takenAt,
+        letter: latestFreeze.payload.letterToNextYear,
+      }
+    : null;
 
-  const lastLetter = (() => {
-    const row = latestSnap[0];
-    if (!row) return null;
-    const payload = parseSnapshotPayload(row.payload);
-    if (!payload?.letterToNextYear) return null;
-    return {
-      id: row.id,
-      takenAt: row.takenAt,
-      letter: payload.letterToNextYear,
-    };
-  })();
-
-  const result = calculateZakat({
-    assets: assetRows.map((a) => ({
-      category: a.category,
-      label: a.label,
-      amount: a.amount,
-      zakatablePortion: a.zakatablePortion,
-    })),
-    liabilities: liabilityRows.map((l) => ({
-      label: l.label,
-      amount: l.amount,
-      deductible: l.deductible,
-    })),
-    prices: {
-      goldPricePerGram: settings.goldPricePerGram,
-      silverPricePerGram: settings.silverPricePerGram,
-    },
-    standard: settings.nisabStandard as "gold" | "silver",
-    basis: settings.calendarBasis as "lunar" | "solar",
-  });
-
-  const window = paymentWindow(settings.hawlStartDate);
-  const zakatPaid = sumZakatInWindow(givingRows, window);
-  const zakatOutstanding = Math.max(0, result.zakatDue - zakatPaid);
-  const hawl = settings.hawlStartDate ? hawlStatus(settings.hawlStartDate) : null;
-  const phase = duePhase({
-    meetsNisab: result.isDue,
-    hawlStartDate: settings.hawlStartDate,
-  });
   const dueNow = phase === "payable" && zakatOutstanding > 0;
   const metals = metalsFreshness({
     gold: settings.goldPricePerGram,
@@ -89,10 +41,7 @@ export default async function DashboardPage() {
     metalsUpdatedAt: settings.metalsUpdatedAt,
   });
   const metalsStale = metals.stale;
-  const latestSnapshotId = latestSnap[0]?.id ?? null;
-  const frozenThisCycle = Boolean(
-    latestSnap[0] && dateInWindow(latestSnap[0].takenAt, window),
-  );
+  const latestSnapshotId = latestFreeze?.id ?? null;
 
   const checklist = [
     {

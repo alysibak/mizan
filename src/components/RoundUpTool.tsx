@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { roundUpGap, roundUpTotal } from "@/lib/roundup";
 import { formatMoney } from "@/lib/money";
+import { localIsoDay } from "@/lib/dates";
+import { sendJson } from "@/lib/client-fetch";
 
 const INCREMENTS = [
   { value: 1, label: "Nearest 1" },
@@ -26,23 +28,24 @@ export default function RoundUpTool({ currency }: { currency: string }) {
     if (gap <= 0) return;
     setBusy(true);
     setMessage(null);
-    const res = await fetch("/api/giving", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+    const res = await sendJson(
+      "/api/giving",
+      "POST",
+      {
         amount: gap,
         type: "sadaqah",
         note: `Round-up from ${amount.toFixed(2)} → ${total.toFixed(2)}`,
-        date: new Date().toISOString().slice(0, 10),
-      }),
-    });
+        date: localIsoDay(),
+      },
+      "Could not record this round-up.",
+    );
     setBusy(false);
     if (res.ok) {
       setSpend("");
       setMessage(`Recorded ${formatMoney(gap, currency)} as sadaqah.`);
       router.refresh();
     } else {
-      setMessage("Could not record this round-up.");
+      setMessage(res.error);
     }
   }
 
@@ -61,6 +64,7 @@ export default function RoundUpTool({ currency }: { currency: string }) {
           <input
             id="spend"
             type="number"
+            inputMode="decimal"
             step="0.01"
             min="0"
             className="field nums"

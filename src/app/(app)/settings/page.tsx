@@ -3,6 +3,7 @@ import { getCurrentUser, getUserSettings } from "@/lib/session";
 import SettingsForm from "@/components/SettingsForm";
 import SignOutButton from "@/components/SignOutButton";
 import DataBackup from "@/components/DataBackup";
+import AccountPanel from "@/components/AccountPanel";
 
 export default async function SettingsPage() {
   const user = (await getCurrentUser())!;
@@ -23,12 +24,12 @@ export default async function SettingsPage() {
         {settings.trustedAckAt ? (
           <span className="text-mist">
             {" "}
-            · Trust note acknowledged{" "}
-            {new Date(settings.trustedAckAt).toLocaleDateString()}
+            · Trust note acknowledged {settings.trustedAckAt.slice(0, 10)}
           </span>
         ) : null}
       </p>
       <DataBackup />
+      <AccountPanel email={user.email} />
       <SignOutButton />
     </div>
   );

@@ -50,6 +50,13 @@
       "when": 1788200000000,
       "tag": "0006_metals_updated_at",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1790974643315,
+      "tag": "0007_auth_throttle_metal_weight_indexes",
+      "breakpoints": true
     }
   ]
 }

@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import {
   HEIR_LABELS,
+  HEIR_MAX,
   distributeEstate,
   type HeirKey,
   type Heirs,
@@ -46,7 +47,7 @@ export default function MirathTool({ currency }: { currency: string }) {
   const hasAnyone = Object.values(heirs).some((n) => (n ?? 0) > 0);
 
   function setCount(key: HeirKey, value: number) {
-    const n = Math.max(0, Math.min(20, Math.floor(value || 0)));
+    const n = Math.max(0, Math.min(HEIR_MAX[key], Math.floor(value || 0)));
     setHeirs((prev) => {
       const next = { ...prev };
       if (n === 0) delete next[key];
@@ -72,6 +73,7 @@ export default function MirathTool({ currency }: { currency: string }) {
           <input
             id="estate"
             type="number"
+            inputMode="decimal"
             min="0"
             step="1"
             className="field nums"
@@ -90,8 +92,9 @@ export default function MirathTool({ currency }: { currency: string }) {
                 <span className="text-sm text-ink">{HEIR_LABELS[key]}</span>
                 <input
                   type="number"
+                  inputMode="numeric"
                   min={0}
-                  max={key === "husband" ? 1 : 20}
+                  max={HEIR_MAX[key]}
                   className="field nums w-20"
                   value={heirs[key] ?? 0}
                   onChange={(e) => setCount(key, Number(e.target.value))}

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { formatMoney } from "@/lib/money";
+import { amountParam, formatMoney } from "@/lib/money";
 
 /**
  * One finish story everywhere: pay → freeze → roll hawl → statement.
@@ -41,7 +41,7 @@ export default function CycleActions({
     return (
       <div className={wrap}>
         <Link
-          href={`/giving?type=zakat&amount=${outstanding}`}
+          href={`/giving?type=zakat&amount=${amountParam(outstanding)}`}
           className="btn-primary"
         >
           Record {formatMoney(outstanding, currency)} zakat

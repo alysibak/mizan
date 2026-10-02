@@ -20,23 +20,46 @@ const PROTECTED = [
   "/begin",
 ];
 
+const UNSAFE_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+
+function under(pathname: string, prefix: string): boolean {
+  return pathname === prefix || pathname.startsWith(`${prefix}/`);
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (pathname.startsWith("/api/")) {
+    // Defense in depth on top of SameSite=Lax cookies: browsers label every
+    // request with Sec-Fetch-Site, so refuse writes that did not come from
+    // this origin. Clients that omit the header (curl, old browsers) carry no
+    // ambient cookie risk and pass through.
+    if (UNSAFE_METHODS.has(request.method)) {
+      const site = request.headers.get("sec-fetch-site");
+      if (site && site !== "same-origin") {
+        return NextResponse.json(
+          { error: "Cross-site request refused" },
+          { status: 403 },
+        );
+      }
+    }
+    return NextResponse.next();
+  }
+
   const hasSession = Boolean(request.cookies.get(SESSION_COOKIE)?.value);
 
-  if (PROTECTED.some((p) => pathname.startsWith(p)) && !hasSession) {
+  if (!hasSession && PROTECTED.some((p) => under(pathname, p))) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
-    url.searchParams.set("next", pathname);
+    url.search = "";
+    url.searchParams.set("next", `${pathname}${request.nextUrl.search}`);
     return NextResponse.redirect(url);
   }
 
-  if (
-    hasSession &&
-    (pathname === "/login" || pathname === "/register")
-  ) {
+  if (hasSession && (pathname === "/login" || pathname === "/register")) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
+    url.search = "";
     return NextResponse.redirect(url);
   }
 
@@ -44,5 +67,7 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|icon.svg|icons/|sw.js|manifest.webmanifest).*)",
+  ],
 };

@@ -50,8 +50,11 @@ export default function HawlCalendarLink({
     const a = document.createElement("a");
     a.href = url;
     a.download = "mizan-hawl.ics";
+    document.body.appendChild(a);
     a.click();
-    URL.revokeObjectURL(url);
+    a.remove();
+    // Revoking synchronously can cancel the download in Safari and Firefox.
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
   return (

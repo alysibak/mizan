@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { db } from "@/db";
 import { assets } from "@/db/schema";
-import { getCurrentUser } from "@/lib/session";
-import { assetSchema } from "@/lib/validation";
-import { z } from "zod";
+import { getCurrentUser, getUserSettings } from "@/lib/session";
+import { assetSchema, firstIssue } from "@/lib/validation";
+import { normalizeWeight } from "@/lib/asset-write";
 
 const bodySchema = z.object({
   rows: z.array(assetSchema).min(1, "Nothing to import").max(200),
@@ -17,14 +18,21 @@ export async function POST(request: Request) {
   const parsed = bodySchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: parsed.error.issues[0]?.message ?? "Invalid import" },
+      { error: firstIssue(parsed.error, "Invalid import") },
       { status: 400 },
     );
   }
 
+  const prices = await getUserSettings(user.id);
   const inserted = await db
     .insert(assets)
-    .values(parsed.data.rows.map((row) => ({ userId: user.id, ...row })))
+    .values(
+      parsed.data.rows.map((row) => ({
+        userId: user.id,
+        ...row,
+        ...normalizeWeight(row, prices),
+      })),
+    )
     .returning({ id: assets.id });
 
   return NextResponse.json({ ok: true, count: inserted.length }, { status: 201 });

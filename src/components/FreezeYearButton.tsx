@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { sendJson } from "@/lib/client-fetch";
 
 export default function FreezeYearButton({
   defaultLabel,
@@ -21,21 +22,21 @@ export default function FreezeYearButton({
     e.preventDefault();
     setBusy(true);
     setError(null);
-    const res = await fetch("/api/snapshots", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+    const res = await sendJson<{ id: string }>(
+      "/api/snapshots",
+      "POST",
+      {
         label: label.trim() || defaultLabel,
         letterToNextYear: letter.trim() || null,
-      }),
-    });
+      },
+      "Could not freeze this year",
+    );
     setBusy(false);
     if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      setError(data.error || "Could not freeze this year");
+      setError(res.error);
       return;
     }
-    const data = await res.json();
+    const data = res.data;
     try {
       localStorage.removeItem("mizan-forgotten-checked");
     } catch {

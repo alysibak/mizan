@@ -65,12 +65,33 @@ function splitCsvLine(line: string): string[] {
   return out;
 }
 
-function parseAmount(raw: string): number | null {
-  const cleaned = raw.replace(/[$£€CADUSDcadusd,\s]/g, "").replace(/[()]/g, "");
-  if (!cleaned) return null;
-  const n = Number(cleaned);
+type AmountRead = { value: number } | { negative: true } | null;
+
+/**
+ * Read a money cell. Currency symbols, codes, and thousands commas are
+ * ignored. A negative figure (-500, (500), or 500-) is reported rather than
+ * flipped: on a statement it is usually a debt, which belongs under
+ * liabilities, not in wealth.
+ */
+function parseAmount(raw: string): AmountRead {
+  const kept = raw.replace(/[^\d.,()\-]/g, "");
+  const digits = kept.replace(/[(),\-]/g, "");
+  if (!digits || !/\d/.test(digits)) return null;
+  const n = Number(digits);
   if (!Number.isFinite(n)) return null;
-  return Math.abs(n);
+  const negative =
+    kept.startsWith("-") || kept.endsWith("-") || /^\(.*\)$/.test(kept);
+  if (negative && n !== 0) return { negative: true };
+  return { value: n };
+}
+
+/** Read a portion cell: "0.3", "30", or "30%" all mean 30%. */
+function parsePortion(raw: string): number | null {
+  const percent = raw.includes("%");
+  const p = Number(raw.replace(/[%\s]/g, ""));
+  if (!Number.isFinite(p) || p < 0) return null;
+  const fraction = percent || p > 1 ? p / 100 : p;
+  return Math.min(1, Math.max(0, fraction));
 }
 
 export function guessCategory(text: string): CategoryKey {
@@ -99,8 +120,15 @@ function asCategory(raw: string | undefined, label: string): CategoryKey {
 /**
  * Parse a pasted bank/broker export. Header row optional.
  * Accepts category,label,amount[,portion] or label,amount.
+ *
+ * `defaultPortion` supplies the portion for rows without one (pass the
+ * school-aware default so jewellery follows the user's madhhab profile).
  */
-export function parseAssetCsv(text: string): ParseResult {
+export function parseAssetCsv(
+  text: string,
+  defaultPortion: (category: CategoryKey) => number = (c) =>
+    categoryMeta(c).defaultZakatablePortion,
+): ParseResult {
   const errors: string[] = [];
   const rows: ImportRow[] = [];
   const lines = text
@@ -163,19 +191,26 @@ export function parseAssetCsv(text: string): ParseResult {
       errors.push(`Line ${lineNo}: could not read an amount for “${label}”.`);
       return;
     }
+    if ("negative" in amount) {
+      errors.push(
+        `Line ${lineNo}: “${label}” is negative — add it under liabilities instead.`,
+      );
+      return;
+    }
     const category = asCategory(
       categoryIdx >= 0 ? cells[categoryIdx] : undefined,
       label,
     );
-    let portion = categoryMeta(category).defaultZakatablePortion;
+    let portion = defaultPortion(category);
     if (portionIdx >= 0 && cells[portionIdx]) {
-      const raw = cells[portionIdx].replace(/%/g, "");
-      const p = Number(raw);
-      if (Number.isFinite(p)) {
-        portion = p > 1 ? Math.min(1, p / 100) : Math.min(1, Math.max(0, p));
-      }
+      portion = parsePortion(cells[portionIdx]) ?? portion;
     }
-    rows.push({ category, label, amount, zakatablePortion: portion });
+    rows.push({
+      category,
+      label: label.slice(0, 120),
+      amount: amount.value,
+      zakatablePortion: portion,
+    });
   });
 
   return { rows, errors };

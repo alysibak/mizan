@@ -12,6 +12,7 @@ import {
   IconSignOut,
   IconUsers,
 } from "./icons";
+import { signOut } from "./SignOutButton";
 
 const LINKS = [
   { href: "/dashboard", label: "Balance", Icon: IconBalance, match: ["/dashboard"] },
@@ -40,12 +41,6 @@ export default function Nav({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-
-  async function logout() {
-    await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/");
-    router.refresh();
-  }
 
   return (
     <aside className="sticky top-0 hidden h-screen w-56 shrink-0 flex-col border-r border-mist bg-paper/80 px-3 py-6 md:flex">
@@ -117,7 +112,8 @@ export default function Nav({
           How numbers are made
         </Link>
         <button
-          onClick={logout}
+          type="button"
+          onClick={() => void signOut(router)}
           className="flex w-full items-center gap-3 border-l-2 border-transparent px-3 py-2.5 text-left text-sm text-sage transition hover:text-danger"
         >
           <IconSignOut className="h-5 w-5" />

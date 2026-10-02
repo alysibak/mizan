@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ASNAF } from "@/lib/asnaf";
 import { allocateEnvelopes } from "@/lib/unique-calcs";
-import { formatMoney } from "@/lib/money";
+import { amountParam, formatMoney } from "@/lib/money";
 import ReckoningStepNav from "@/components/ReckoningStepNav";
 
 export default function EnvelopeTool({
@@ -91,7 +91,7 @@ export default function EnvelopeTool({
                     {formatMoney(part.amount, currency)}
                   </p>
                   <Link
-                    href={`/giving?type=zakat&amount=${part.amount}&asnaf=${a.key}`}
+                    href={`/giving?type=zakat&amount=${amountParam(part.amount)}&asnaf=${a.key}`}
                     className="text-sm text-pine hover:underline"
                   >
                     Record this envelope
@@ -110,7 +110,7 @@ export default function EnvelopeTool({
       {totalNum > 0 ? (
         <div className="flex flex-wrap gap-3">
           <Link
-            href={`/giving?type=zakat&amount=${totalNum}`}
+            href={`/giving?type=zakat&amount=${amountParam(totalNum)}`}
             className="btn-primary"
           >
             Record full {formatMoney(totalNum, currency)} on Give

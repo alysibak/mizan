@@ -1,4 +1,5 @@
 import { zakatRate, type CalendarBasis } from "./zakat";
+import { NISAB_GOLD_GRAMS, NISAB_SILVER_GRAMS } from "./nisab";
 
 /**
  * Reverse the usual question: “If I want to give this much zakat,
@@ -36,7 +37,7 @@ export function allocateEnvelopes(
     key: r.key,
     amount: Math.floor(r.amount * 100) / 100,
   }));
-  let allocated = floored.reduce((s, r) => s + r.amount, 0);
+  const allocated = floored.reduce((s, r) => s + r.amount, 0);
   let leftover = Math.round((total - allocated) * 100) / 100;
   let i = 0;
   while (leftover >= 0.01 && i < floored.length * 2) {
@@ -66,10 +67,11 @@ export function whatIfNisab(opts: {
   standard: "gold" | "silver";
   basis: CalendarBasis;
 }): WhatIfNisab {
-  const goldNisab = 85 * opts.goldPricePerGram;
-  const silverNisab = 595 * opts.silverPricePerGram;
+  const goldNisab = NISAB_GOLD_GRAMS * opts.goldPricePerGram;
+  const silverNisab = NISAB_SILVER_GRAMS * opts.silverPricePerGram;
   const chosenNisab = opts.standard === "gold" ? goldNisab : silverNisab;
-  const meetsNisab = opts.netZakatable >= chosenNisab;
+  // Same rule as calculateZakat: a zero nisab (no price) never makes zakat due.
+  const meetsNisab = chosenNisab > 0 && opts.netZakatable >= chosenNisab;
   const rate = zakatRate(opts.basis);
   return {
     goldNisab,

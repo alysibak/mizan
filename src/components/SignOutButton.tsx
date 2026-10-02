@@ -1,7 +1,19 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { sendJson } from "@/lib/client-fetch";
 import { IconSignOut } from "./icons";
+
+/** End this session on the server, then leave the app. */
+export async function signOut(router: ReturnType<typeof useRouter>) {
+  const res = await sendJson("/api/auth/logout", "POST", undefined, "Could not sign out");
+  if (!res.ok) {
+    window.alert(`${res.error}. You are still signed in.`);
+    return;
+  }
+  router.push("/");
+  router.refresh();
+}
 
 export default function SignOutButton({
   className,
@@ -14,16 +26,10 @@ export default function SignOutButton({
 }) {
   const router = useRouter();
 
-  async function logout() {
-    await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/");
-    router.refresh();
-  }
-
   return (
     <button
       type="button"
-      onClick={logout}
+      onClick={() => void signOut(router)}
       className={
         className ?? "btn-ghost w-full justify-center text-danger md:hidden"
       }

@@ -1,17 +1,12 @@
 import Link from "next/link";
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { assets, liabilities, givingRecords, yearSnapshots } from "@/db/schema";
-import { getCurrentUser, getUserSettings } from "@/lib/session";
-import { calculateZakat } from "@/lib/zakat";
+import { yearSnapshots } from "@/db/schema";
+import { getCurrentUser } from "@/lib/session";
+import { loadReckoning } from "@/lib/reckoning";
 import { hawlStatus, formatHijri } from "@/lib/hijri";
+import { isIsoDay } from "@/lib/dates";
 import { formatMoney, formatPercent } from "@/lib/money";
-import {
-  duePhase,
-  paymentWindow,
-  sumZakatInWindow,
-  dateInWindow,
-} from "@/lib/giving-window";
 import FreezeYearButton from "@/components/FreezeYearButton";
 import SnapshotCompare from "@/components/SnapshotCompare";
 import { MADHHAB_LABELS, parseMadhhab } from "@/lib/madhhab";
@@ -23,59 +18,44 @@ import ReckoningStepNav from "@/components/ReckoningStepNav";
 
 export default async function YearPage() {
   const user = (await getCurrentUser())!;
-  const settings = await getUserSettings(user.id);
-  const madhhab = parseMadhhab(settings.madhhab);
-
-  const [assetRows, liabilityRows, givingRows, snaps] = await Promise.all([
-    db.select().from(assets).where(eq(assets.userId, user.id)),
-    db.select().from(liabilities).where(eq(liabilities.userId, user.id)),
-    db.select().from(givingRecords).where(eq(givingRecords.userId, user.id)),
+  const [reckoning, snaps] = await Promise.all([
+    loadReckoning(user.id),
     db
-      .select()
+      .select({
+        id: yearSnapshots.id,
+        label: yearSnapshots.label,
+        takenAt: yearSnapshots.takenAt,
+        currency: yearSnapshots.currency,
+      })
       .from(yearSnapshots)
       .where(eq(yearSnapshots.userId, user.id))
-      .orderBy(desc(yearSnapshots.takenAt)),
+      .orderBy(desc(yearSnapshots.takenAt), desc(yearSnapshots.createdAt)),
   ]);
-
-  const result = calculateZakat({
-    assets: assetRows.map((a) => ({
-      category: a.category,
-      label: a.label,
-      amount: a.amount,
-      zakatablePortion: a.zakatablePortion,
-    })),
-    liabilities: liabilityRows.map((l) => ({
-      label: l.label,
-      amount: l.amount,
-      deductible: l.deductible,
-    })),
-    prices: {
-      goldPricePerGram: settings.goldPricePerGram,
-      silverPricePerGram: settings.silverPricePerGram,
-    },
-    standard: settings.nisabStandard as "gold" | "silver",
-    basis: settings.calendarBasis as "lunar" | "solar",
-  });
-
-  const window = paymentWindow(settings.hawlStartDate);
-  const zakatPaid = sumZakatInWindow(givingRows, window);
-  const outstanding = Math.max(0, result.zakatDue - zakatPaid);
-  const hawl = settings.hawlStartDate ? hawlStatus(settings.hawlStartDate) : null;
+  const {
+    settings,
+    assets: assetRows,
+    result,
+    window,
+    zakatPaid,
+    outstanding,
+    phase,
+    hawl,
+    latestFreeze,
+    recentFreezes,
+    frozenThisCycle,
+  } = reckoning;
+  const madhhab = parseMadhhab(settings.madhhab);
   const c = settings.currency;
-  const phase = duePhase({
-    meetsNisab: result.isDue,
-    hawlStartDate: settings.hawlStartDate,
-  });
   const dueNow = phase === "payable" && outstanding > 0;
   const cycleMet =
     phase === "payable" && result.isDue && outstanding === 0 && zakatPaid > 0;
   const freezeLabel =
     window.kind === "hawl"
-      ? `Hawl ${window.start}`
-      : `Zakat ${window.start.slice(0, 4)}`;
+      ? `Hawl ${window.cycleStart}`
+      : `Zakat ${window.cycleStart.slice(0, 4)}`;
 
   const perAssetHawl = assetRows
-    .filter((a) => a.hawlStartDate)
+    .filter((a) => a.hawlStartDate && isIsoDay(a.hawlStartDate))
     .map((a) => ({
       id: a.id,
       label: a.label,
@@ -84,10 +64,7 @@ export default async function YearPage() {
     .sort((a, b) => a.status.remainingDays - b.status.remainingDays);
 
   const anyAssetDue = perAssetHawl.some((a) => a.status.isComplete);
-  const latestSnapshotId = snaps[0]?.id ?? null;
-  const frozenThisCycle = Boolean(
-    snaps[0] && dateInWindow(snaps[0].takenAt, window),
-  );
+  const latestSnapshotId = latestFreeze?.id ?? null;
   const closeStep =
     outstanding > 0 ? "pay" : frozenThisCycle ? "roll" : "freeze";
 
@@ -256,7 +233,7 @@ export default async function YearPage() {
         </div>
       </section>
 
-      <SnapshotCompare snaps={snaps.slice(0, 2)} />
+      <SnapshotCompare freezes={recentFreezes.slice(0, 2)} />
 
       <section id="freeze-year" className="panel space-y-6">
         <ReckoningStepNav current="freeze" />

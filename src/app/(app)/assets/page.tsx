@@ -15,7 +15,7 @@ export default async function AssetsPage({
   const settings = await getUserSettings(user.id);
   const params = await searchParams;
   const initialCategory =
-    params.category && params.category in CATEGORIES
+    params.category && Object.hasOwn(CATEGORIES, params.category)
       ? params.category
       : undefined;
   const initialLabel = params.label?.trim().slice(0, 120) || undefined;

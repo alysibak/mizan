@@ -93,7 +93,12 @@ export function screenEquity(
 
   const debt = ratio(figures.interestBearingDebt, denom);
   const cash = ratio(figures.cashAndInterestSecurities, denom);
-  const impermissible = ratio(figures.impermissibleRevenue, figures.totalRevenue);
+  // A company with no revenue yet has no impermissible share of it. Missing
+  // balance-sheet denominators still fail, since those ratios cannot be judged.
+  const impermissible =
+    figures.totalRevenue > 0 || figures.impermissibleRevenue > 0
+      ? ratio(figures.impermissibleRevenue, figures.totalRevenue)
+      : 0;
 
   const ratios: RatioCheck[] = [
     {

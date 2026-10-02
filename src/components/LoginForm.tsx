@@ -3,11 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { safeNextPath } from "@/lib/redirect";
 
 export default function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
-  const next = params.get("next") || "/dashboard";
+  const next = safeNextPath(params.get("next"));
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -23,7 +24,12 @@ export default function LoginForm() {
         email: form.get("email"),
         password: form.get("password"),
       }),
-    });
+    }).catch(() => null);
+    if (!res) {
+      setError("Could not reach Mizan. Check your connection and try again.");
+      setBusy(false);
+      return;
+    }
     if (res.ok) {
       router.push(next);
       router.refresh();
@@ -41,7 +47,15 @@ export default function LoginForm() {
           <label className="label mb-1.5" htmlFor="email">
             Email
           </label>
-          <input id="email" name="email" type="email" required className="field" />
+          <input
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            inputMode="email"
+            required
+            className="field"
+          />
         </div>
         <div>
           <label className="label mb-1.5" htmlFor="password">
@@ -51,6 +65,7 @@ export default function LoginForm() {
             id="password"
             name="password"
             type="password"
+            autoComplete="current-password"
             required
             className="field"
           />

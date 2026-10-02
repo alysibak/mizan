@@ -1,30 +1,15 @@
-import { desc, eq } from "drizzle-orm";
-import { db } from "@/db";
-import { assets, liabilities, givingRecords } from "@/db/schema";
-import { getCurrentUser, getUserSettings } from "@/lib/session";
-import { formatMoney } from "@/lib/money";
-import { calculateZakat } from "@/lib/zakat";
-import {
-  duePhase,
-  paymentWindow,
-  sumZakatInWindow,
-} from "@/lib/giving-window";
+import Link from "next/link";
+import { getCurrentUser } from "@/lib/session";
+import { loadReckoning } from "@/lib/reckoning";
+import { formatMoney, toCents } from "@/lib/money";
+import { parseGivingType } from "@/lib/giving";
 import GivingManager from "@/components/GivingManager";
 import RoundUpTool from "@/components/RoundUpTool";
 import { parseAsnaf } from "@/lib/asnaf";
 
-const GIVING_TYPES = ["zakat", "sadaqah", "purification"] as const;
-type GivingType = (typeof GIVING_TYPES)[number];
-
-function parseType(value?: string): GivingType {
-  return GIVING_TYPES.includes(value as GivingType)
-    ? (value as GivingType)
-    : "sadaqah";
-}
-
 function parseAmount(value?: string): number | undefined {
   if (!value) return undefined;
-  const n = Number(value);
+  const n = toCents(Number(value));
   return Number.isFinite(n) && n > 0 ? n : undefined;
 }
 
@@ -34,59 +19,27 @@ export default async function GivingPage({
   searchParams: Promise<{ type?: string; amount?: string; asnaf?: string }>;
 }) {
   const user = (await getCurrentUser())!;
-  const settings = await getUserSettings(user.id);
   const params = await searchParams;
-  const defaultType = parseType(params.type);
+  const defaultType = parseGivingType(params.type) ?? "sadaqah";
   const defaultAmount = parseAmount(params.amount);
   const defaultAsnaf = parseAsnaf(params.asnaf);
 
-  const [rows, assetRows, liabilityRows] = await Promise.all([
-    db
-      .select()
-      .from(givingRecords)
-      .where(eq(givingRecords.userId, user.id))
-      .orderBy(desc(givingRecords.date)),
-    db.select().from(assets).where(eq(assets.userId, user.id)),
-    db.select().from(liabilities).where(eq(liabilities.userId, user.id)),
-  ]);
+  const {
+    settings,
+    giving: rows,
+    result,
+    window,
+    zakatPaid: zakatCycle,
+    outstanding,
+    phase,
+  } = await loadReckoning(user.id);
 
-  const result = calculateZakat({
-    assets: assetRows.map((a) => ({
-      category: a.category,
-      label: a.label,
-      amount: a.amount,
-      zakatablePortion: a.zakatablePortion,
-    })),
-    liabilities: liabilityRows.map((l) => ({
-      label: l.label,
-      amount: l.amount,
-      deductible: l.deductible,
-    })),
-    prices: {
-      goldPricePerGram: settings.goldPricePerGram,
-      silverPricePerGram: settings.silverPricePerGram,
-    },
-    standard: settings.nisabStandard as "gold" | "silver",
-    basis: settings.calendarBasis as "lunar" | "solar",
-  });
-
-  const window = paymentWindow(settings.hawlStartDate);
-  const zakatCycle = sumZakatInWindow(rows, window);
-  const outstanding = Math.max(0, result.zakatDue - zakatCycle);
-  const phase = duePhase({
-    meetsNisab: result.isDue,
-    hawlStartDate: settings.hawlStartDate,
-  });
-
-  const totalSadaqah = rows
-    .filter((r) => r.type === "sadaqah")
-    .reduce((t, r) => t + r.amount, 0);
-  const totalZakat = rows
-    .filter((r) => r.type === "zakat")
-    .reduce((t, r) => t + r.amount, 0);
-  const totalPurification = rows
-    .filter((r) => r.type === "purification")
-    .reduce((t, r) => t + r.amount, 0);
+  const totalOf = (type: string) =>
+    rows.filter((r) => r.type === type).reduce((t, r) => t + r.amount, 0);
+  const totalSadaqah = totalOf("sadaqah");
+  const totalZakat = totalOf("zakat");
+  const totalPurification = totalOf("purification");
+  const totalFitr = totalOf("fitr");
 
   return (
     <div className="space-y-6">
@@ -96,7 +49,7 @@ export default async function GivingPage({
         <p className="mt-2 text-sm text-sage">
           Keep a record of what you give. Only zakat entries in{" "}
           {window.label.toLowerCase()} count toward outstanding. Purification of
-          interest is logged separately.
+          interest and Zakat al-Fitr are logged separately.
         </p>
       </header>
 
@@ -131,6 +84,25 @@ export default async function GivingPage({
           </p>
           <p className="mt-1 text-xs text-sage">Not counted as zakat</p>
         </div>
+        {totalFitr > 0 && (
+          <div className="card p-4">
+            <p className="label">Zakat al-Fitr</p>
+            <p className="mt-1 font-serif text-2xl text-ink nums">
+              {formatMoney(totalFitr, settings.currency)}
+            </p>
+            <p className="mt-1 text-xs text-sage">All time · separate from zakat on wealth</p>
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-wrap gap-3 text-sm">
+        <a href="/api/export/giving" className="text-pine hover:underline" download>
+          Download giving as CSV
+        </a>
+        <span className="text-mist">·</span>
+        <Link href="/tools/fitr" className="text-pine hover:underline">
+          Zakat al-Fitr calculator
+        </Link>
       </div>
 
       <RoundUpTool currency={settings.currency} />

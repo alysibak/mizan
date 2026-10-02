@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { formatMoney } from "@/lib/money";
+import { formatMoney, toCents } from "@/lib/money";
+import { localIsoDay } from "@/lib/dates";
+import { sendJson } from "@/lib/client-fetch";
 
 type Receivable = { id: string; label: string; amount: number };
 
@@ -22,7 +24,8 @@ export default function ForgiveDebtTool({
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
   const [assetId, setAssetId] = useState("");
-  const today = new Date().toISOString().slice(0, 10);
+  const [date, setDate] = useState("");
+  useEffect(() => setDate((d) => d || localIsoDay()), []);
 
   const selected = receivables.find((r) => r.id === assetId);
 
@@ -41,34 +44,38 @@ export default function ForgiveDebtTool({
       .filter(Boolean)
       .join(" · ");
 
-    const res = await fetch("/api/giving", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+    const res = await sendJson(
+      "/api/giving",
+      "POST",
+      {
         amount,
         type: "sadaqah",
-        recipient: who || selected?.label || "Debt forgiven",
-        note,
-        date: form.get("date") || today,
-      }),
-    });
+        recipient: (who || selected?.label || "Debt forgiven").slice(0, 120),
+        note: note.slice(0, 400),
+        date: form.get("date") || localIsoDay(),
+      },
+      "Could not record",
+    );
     if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      setError(data.error || "Could not record");
+      setError(res.error);
       setBusy(false);
       return;
     }
 
     if (selected && amount > 0) {
-      const nextAmount = Math.max(0, Math.round((selected.amount - amount) * 100) / 100);
-      if (nextAmount <= 0.009) {
-        await fetch(`/api/assets/${selected.id}`, { method: "DELETE" });
-      } else {
-        await fetch(`/api/assets/${selected.id}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ amount: nextAmount }),
-        });
+      const nextAmount = Math.max(0, toCents(selected.amount - amount));
+      const update =
+        nextAmount <= 0.009
+          ? await sendJson(`/api/assets/${selected.id}`, "DELETE")
+          : await sendJson(`/api/assets/${selected.id}`, "PATCH", { amount: nextAmount });
+      if (!update.ok) {
+        // The gift is recorded; say plainly that the ledger still needs a touch.
+        setError(
+          `Recorded as sadaqah, but the receivable could not be updated (${update.error}). Adjust it on the ledger.`,
+        );
+        setBusy(false);
+        router.refresh();
+        return;
       }
     }
 
@@ -142,6 +149,7 @@ export default function ForgiveDebtTool({
             id="amount"
             name="amount"
             type="number"
+            inputMode="decimal"
             min="0.01"
             step="0.01"
             className="field nums"
@@ -167,7 +175,15 @@ export default function ForgiveDebtTool({
           <label className="label mb-1.5" htmlFor="date">
             Date
           </label>
-          <input id="date" name="date" type="date" defaultValue={today} className="field" />
+          <input
+            id="date"
+            name="date"
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="field"
+            required
+          />
         </div>
         <div>
           <label className="label mb-1.5" htmlFor="note">

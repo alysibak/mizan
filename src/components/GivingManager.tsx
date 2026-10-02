@@ -1,17 +1,21 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { formatMoney } from "@/lib/money";
 import { ASNAF, asnafLabel } from "@/lib/asnaf";
+import { givingTypeLabel, type GivingType } from "@/lib/giving";
+import { localIsoDay } from "@/lib/dates";
+import { sendJson } from "@/lib/client-fetch";
 import type { GivingRecord } from "@/db/schema";
 
-function typeLabel(type: string) {
-  if (type === "zakat") return "Zakat";
-  if (type === "purification") return "Purification";
-  return "Sadaqah";
-}
+const TYPE_TONE: Record<string, string> = {
+  zakat: "text-pine",
+  purification: "text-sage",
+  fitr: "text-ink",
+  sadaqah: "text-brass",
+};
 
 export default function GivingManager({
   records,
@@ -24,7 +28,7 @@ export default function GivingManager({
 }: {
   records: GivingRecord[];
   currency: string;
-  defaultType?: "zakat" | "sadaqah" | "purification";
+  defaultType?: GivingType;
   defaultAmount?: number;
   defaultAsnaf?: string | null;
   cycleOutstanding?: number;
@@ -34,62 +38,68 @@ export default function GivingManager({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [justCleared, setJustCleared] = useState(false);
-  const [type, setType] = useState(defaultType);
-  const today = new Date().toISOString().slice(0, 10);
+  const [type, setType] = useState<GivingType>(defaultType);
+  // The viewer's own calendar day, set after mount so the server render (UTC)
+  // never pre-fills tomorrow's date for someone west of Greenwich.
+  const [date, setDate] = useState("");
+  useEffect(() => setDate((d) => d || localIsoDay()), []);
+
   const recipients = [
     ...new Set(records.map((r) => r.recipient).filter((x): x is string => Boolean(x))),
   ];
-
-  const asnafHint = useMemo(() => {
-    if (type !== "zakat") return null;
-    return ASNAF.find((a) => a.key === "faqir")?.note ?? null;
-  }, [type]);
 
   async function addRecord(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
     setBusy(true);
     setJustCleared(false);
-    const form = new FormData(e.currentTarget);
+    const formEl = e.currentTarget;
+    const form = new FormData(formEl);
     const amount = Number(form.get("amount"));
     const giftType = String(form.get("type"));
     const asnafRaw = String(form.get("asnaf") || "");
-    const res = await fetch("/api/giving", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+    const res = await sendJson(
+      "/api/giving",
+      "POST",
+      {
         amount: form.get("amount"),
         type: giftType,
         asnaf: giftType === "zakat" && asnafRaw ? asnafRaw : null,
         recipient: form.get("recipient"),
         note: form.get("note"),
         date: form.get("date"),
-      }),
-    });
+      },
+      "Could not record this gift",
+    );
     setBusy(false);
-    if (res.ok) {
-      if (
-        giftType === "zakat" &&
-        cyclePayable &&
-        cycleOutstanding > 0 &&
-        amount >= cycleOutstanding - 0.005
-      ) {
-        setJustCleared(true);
-      }
-      (e.target as HTMLFormElement).reset();
-      setType(defaultType);
-      const q = defaultType === "sadaqah" ? "/giving" : `/giving?type=${defaultType}`;
-      router.replace(q);
-      router.refresh();
-    } else {
-      const data = await res.json().catch(() => ({}));
-      setError(data.error || "Could not record this gift");
+    if (!res.ok) {
+      setError(res.error);
+      return;
     }
+    if (
+      giftType === "zakat" &&
+      cyclePayable &&
+      cycleOutstanding > 0 &&
+      amount >= cycleOutstanding - 0.005
+    ) {
+      setJustCleared(true);
+    }
+    formEl.reset();
+    setType(defaultType);
+    setDate(localIsoDay());
+    const q = defaultType === "sadaqah" ? "/giving" : `/giving?type=${defaultType}`;
+    router.replace(q);
+    router.refresh();
   }
 
   async function removeRecord(id: string, label: string) {
     if (!window.confirm(`Remove this gift (${label})?`)) return;
-    await fetch(`/api/giving/${id}`, { method: "DELETE" });
+    setError(null);
+    const res = await sendJson(`/api/giving/${id}`, "DELETE", undefined, "Could not remove this gift");
+    if (!res.ok) {
+      setError(res.error);
+      return;
+    }
     router.refresh();
   }
 
@@ -152,6 +162,7 @@ export default function GivingManager({
                 id="amount"
                 name="amount"
                 type="number"
+                inputMode="decimal"
                 step="0.01"
                 min="0.01"
                 className="field nums"
@@ -169,12 +180,11 @@ export default function GivingManager({
                 name="type"
                 className="field"
                 value={type}
-                onChange={(e) =>
-                  setType(e.target.value as typeof defaultType)
-                }
+                onChange={(e) => setType(e.target.value as GivingType)}
               >
                 <option value="sadaqah">Sadaqah (voluntary)</option>
-                <option value="zakat">Zakat (obligatory)</option>
+                <option value="zakat">Zakat (obligatory, on wealth)</option>
+                <option value="fitr">Zakat al-Fitr (end of Ramadan)</option>
                 <option value="purification">Purification / interest</option>
               </select>
             </div>
@@ -182,7 +192,15 @@ export default function GivingManager({
               <label className="label mb-1.5" htmlFor="date">
                 Date
               </label>
-              <input id="date" name="date" type="date" defaultValue={today} className="field" required />
+              <input
+                id="date"
+                name="date"
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="field"
+                required
+              />
             </div>
           </div>
 
@@ -210,9 +228,20 @@ export default function GivingManager({
                 <Link href="/tools/asnaf" className="text-pine hover:underline">
                   Read the list
                 </Link>
-                {asnafHint ? "." : "."}
+                .
               </p>
             </div>
+          )}
+
+          {type === "fitr" && (
+            <p className="text-xs text-sage">
+              Zakat al-Fitr is its own obligation. It does not count toward zakat
+              on wealth for this cycle.{" "}
+              <Link href="/tools/fitr" className="text-pine hover:underline">
+                Work out the amount
+              </Link>
+              .
+            </p>
           )}
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -226,6 +255,7 @@ export default function GivingManager({
                 className="field"
                 placeholder="e.g. local food bank"
                 list="past-recipients"
+                maxLength={120}
               />
               {recipients.length > 0 && (
                 <datalist id="past-recipients">
@@ -239,14 +269,24 @@ export default function GivingManager({
               <label className="label mb-1.5" htmlFor="note">
                 Note (optional)
               </label>
-              <input id="note" name="note" className="field" placeholder="e.g. Ramadan" />
+              <input
+                id="note"
+                name="note"
+                className="field"
+                placeholder="e.g. Ramadan"
+                maxLength={400}
+              />
             </div>
           </div>
 
-          {error && <p className="text-sm text-danger">{error}</p>}
+          {error && (
+            <p className="text-sm text-danger" role="alert">
+              {error}
+            </p>
+          )}
 
           <button type="submit" disabled={busy} className="btn-primary">
-            Record gift
+            {busy ? "Recording…" : "Record gift"}
           </button>
         </form>
       </section>
@@ -266,7 +306,7 @@ export default function GivingManager({
               <li key={r.id} className="flex items-center justify-between gap-4 p-4">
                 <div className="min-w-0">
                   <p className="truncate font-medium text-ink">
-                    {r.recipient || typeLabel(r.type)}
+                    {r.recipient || givingTypeLabel(r.type)}
                   </p>
                   <p className="text-xs text-sage">
                     {r.date}
@@ -279,25 +319,17 @@ export default function GivingManager({
                     <p className="font-medium text-ink nums">
                       {formatMoney(r.amount, currency)}
                     </p>
-                    <p
-                      className={
-                        "text-xs " +
-                        (r.type === "zakat"
-                          ? "text-pine"
-                          : r.type === "purification"
-                            ? "text-sage"
-                            : "text-brass")
-                      }
-                    >
-                      {typeLabel(r.type)}
+                    <p className={"text-xs " + (TYPE_TONE[r.type] ?? "text-brass")}>
+                      {givingTypeLabel(r.type)}
                     </p>
                   </div>
                   <button
+                    type="button"
                     onClick={() =>
                       removeRecord(r.id, formatMoney(r.amount, currency))
                     }
-                    className="text-sage transition hover:text-danger"
-                    aria-label="Remove record"
+                    className="-m-2 p-2 text-lg leading-none text-sage transition hover:text-danger"
+                    aria-label={`Remove ${givingTypeLabel(r.type)} of ${formatMoney(r.amount, currency)} on ${r.date}`}
                   >
                     &times;
                   </button>

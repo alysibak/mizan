@@ -15,6 +15,7 @@ import {
 import { NISAB_GOLD_GRAMS, NISAB_SILVER_GRAMS } from "@/lib/nisab";
 import { formatMoney } from "@/lib/money";
 import { COMMON_CURRENCIES } from "@/lib/currencies";
+import { sendJson } from "@/lib/client-fetch";
 
 const STEPS = ["Trust", "Preferences", "Prices", "Hawl", "Holding"] as const;
 const STEP_KEY = "mizan-begin-step";
@@ -69,6 +70,9 @@ export default function BeginWizard({
   const [assetLabel, setAssetLabel] = useState("");
   const [assetAmount, setAssetAmount] = useState("");
   const [assetCategory, setAssetCategory] = useState("bank");
+  // Set once the first holding is saved, so retrying a failed finish does
+  // not add it twice.
+  const [assetSaved, setAssetSaved] = useState(false);
 
   async function saveSettings(patch: Record<string, unknown>) {
     const body = {
@@ -83,24 +87,19 @@ export default function BeginWizard({
       setupComplete: false,
       ...patch,
     };
-    const res = await fetch("/api/settings", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      throw new Error(data.error || "Could not save");
-    }
+    const res = await sendJson("/api/settings", "PUT", body, "Could not save");
+    if (!res.ok) throw new Error(res.error);
   }
 
   async function suggestPrices() {
     setLookingUp(true);
     setPriceHint(null);
-    const res = await fetch(`/api/metals?currency=${encodeURIComponent(currency)}`);
-    const data = await res.json().catch(() => ({}));
+    const res = await fetch(`/api/metals?currency=${encodeURIComponent(currency)}`).catch(
+      () => null,
+    );
+    const data = (await res?.json().catch(() => ({}))) ?? {};
     setLookingUp(false);
-    if (!res.ok) {
+    if (!res?.ok) {
       setPriceHint(data.error || "Enter prices by hand");
       return;
     }
@@ -151,11 +150,12 @@ export default function BeginWizard({
     setBusy(false);
   }
 
-  async function nextFromHawl() {
+  /** `date` is passed explicitly: "Set later" clears it in the same click. */
+  async function nextFromHawl(date: string) {
     setBusy(true);
     setError(null);
     try {
-      await saveSettings({ hawlStartDate: hawlStartDate || null });
+      await saveSettings({ hawlStartDate: date || null });
       go(4);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not save");
@@ -167,7 +167,7 @@ export default function BeginWizard({
     setBusy(true);
     setError(null);
     try {
-      if (withAsset) {
+      if (withAsset && !assetSaved) {
         const amount = parseFloat(assetAmount);
         if (!assetLabel.trim() || !(amount >= 0)) {
           setError("Add a description and amount, or skip this step");
@@ -175,20 +175,19 @@ export default function BeginWizard({
           return;
         }
         const portion = categoryForMadhhab(assetCategory, madhhab).defaultZakatablePortion;
-        const res = await fetch("/api/assets", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
+        const res = await sendJson(
+          "/api/assets",
+          "POST",
+          {
             category: assetCategory,
             label: assetLabel.trim(),
             amount,
             zakatablePortion: portion,
-          }),
-        });
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          throw new Error(data.error || "Could not add holding");
-        }
+          },
+          "Could not add holding",
+        );
+        if (!res.ok) throw new Error(res.error);
+        setAssetSaved(true);
       }
       await saveSettings({
         hawlStartDate: hawlStartDate || null,
@@ -298,6 +297,8 @@ export default function BeginWizard({
             </div>
             <input
               id="currency"
+              autoCapitalize="characters"
+              autoComplete="off"
               className="field mt-2 max-w-[8rem] uppercase"
               maxLength={3}
               value={currency}
@@ -390,6 +391,7 @@ export default function BeginWizard({
               <input
                 id="gold"
                 type="number"
+                inputMode="decimal"
                 step="0.01"
                 min="0"
                 className="field nums"
@@ -410,6 +412,7 @@ export default function BeginWizard({
               <input
                 id="silver"
                 type="number"
+                inputMode="decimal"
                 step="0.0001"
                 min="0"
                 className="field nums"
@@ -469,7 +472,7 @@ export default function BeginWizard({
               disabled={busy}
               onClick={() => {
                 setHawlStartDate("");
-                void nextFromHawl();
+                void nextFromHawl("");
               }}
             >
               Set later
@@ -478,7 +481,7 @@ export default function BeginWizard({
               type="button"
               className="btn-primary"
               disabled={busy}
-              onClick={nextFromHawl}
+              onClick={() => void nextFromHawl(hawlStartDate)}
             >
               Continue
             </button>
@@ -512,6 +515,8 @@ export default function BeginWizard({
                 <option value="business_inventory">Business inventory</option>
                 <option value="stocks_longterm">Stocks (long-term)</option>
                 <option value="stocks_trading">Stocks (trading)</option>
+                <option value="crypto">Cryptocurrency</option>
+                <option value="pension">Pension / retirement</option>
                 <option value="other">Other</option>
               </select>
             </div>
@@ -534,6 +539,7 @@ export default function BeginWizard({
               <input
                 id="aamount"
                 type="number"
+                inputMode="decimal"
                 step="0.01"
                 min="0"
                 className="field nums"

@@ -1,24 +1,25 @@
 import Link from "next/link";
 import { formatMoney } from "@/lib/money";
-import { parseSnapshotPayload } from "@/lib/snapshot";
+import type { SnapshotPayload } from "@/lib/snapshot";
 
-type Snap = {
+type Freeze = {
   id: string;
   label: string;
   takenAt: string;
-  currency: string;
-  payload: string;
+  payload: SnapshotPayload | null;
 };
 
-export default function SnapshotCompare({ snaps }: { snaps: Snap[] }) {
-  if (snaps.length < 2) return null;
-  const newer = snaps[0];
-  const older = snaps[1];
-  const a = parseSnapshotPayload(newer.payload);
-  const b = parseSnapshotPayload(older.payload);
+export default function SnapshotCompare({ freezes }: { freezes: Freeze[] }) {
+  if (freezes.length < 2) return null;
+  const newer = freezes[0];
+  const older = freezes[1];
+  const a = newer.payload;
+  const b = older.payload;
   if (!a || !b) return null;
+  // Differences across currencies would be meaningless.
+  if (a.settings.currency !== b.settings.currency) return null;
 
-  const c = newer.currency;
+  const c = a.settings.currency;
   const rows = [
     {
       label: "Net zakatable",

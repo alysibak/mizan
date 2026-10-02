@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { formatMoney } from "@/lib/money";
+import { amountParam, formatMoney } from "@/lib/money";
 import {
   calculateUdhiyah,
   type UdhiyahAnimal,
@@ -135,7 +135,7 @@ export default function UdhiyahTool({ currency }: { currency: string }) {
 
         {result.valid && (
           <Link
-            href={`/giving?type=sadaqah&amount=${result.totalWithExtras}`}
+            href={`/giving?type=sadaqah&amount=${amountParam(result.totalWithExtras)}`}
             className="btn-primary"
           >
             Record as sadaqah on Give

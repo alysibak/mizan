@@ -10,7 +10,7 @@ import {
   type ScreeningResult,
 } from "@/lib/screening";
 import { purificationAmount } from "@/lib/zakat";
-import { formatMoney, formatPercent } from "@/lib/money";
+import { amountParam, formatMoney, formatPercent } from "@/lib/money";
 
 const ACTIVITIES: { key: keyof BusinessActivity; label: string }[] = [
   { key: "alcohol", label: "Alcohol" },
@@ -80,7 +80,11 @@ export default function ScreeningTool({ currency = "CAD" }: { currency?: string 
   useEffect(() => {
     if (!hydrated) return;
     const draft: Draft = { name, activity, denominator, figures };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
+    } catch {
+      /* storage full or blocked: the draft just is not kept */
+    }
   }, [hydrated, name, activity, denominator, figures]);
 
   function run(e: React.FormEvent<HTMLFormElement>) {
@@ -109,7 +113,11 @@ export default function ScreeningTool({ currency = "CAD" }: { currency?: string 
     setFigures({});
     setResult(null);
     setDividend("");
-    localStorage.removeItem(STORAGE_KEY);
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      /* ignore */
+    }
   }
 
   const purifyDue = result
@@ -198,6 +206,7 @@ export default function ScreeningTool({ currency = "CAD" }: { currency?: string 
                 <input
                   id={fieldName}
                   type="number"
+                  inputMode="decimal"
                   step="any"
                   min="0"
                   className="field nums"
@@ -316,7 +325,7 @@ export default function ScreeningTool({ currency = "CAD" }: { currency?: string 
               <Link
                 href={
                   purifyDue > 0
-                    ? `/giving?type=purification&amount=${purifyDue.toFixed(2)}`
+                    ? `/giving?type=purification&amount=${amountParam(purifyDue)}`
                     : "/giving?type=purification"
                 }
                 className="btn-primary"
@@ -331,9 +340,9 @@ export default function ScreeningTool({ currency = "CAD" }: { currency?: string 
             (Dow Jones Islamic, S&amp;P Shariah, MSCI Islamic) differ. Clearing
             these checks is a starting point for your own research — not a
             fatwa and not investment advice.{" "}
-            <a href="/trust" className="text-pine hover:underline">
+            <Link href="/trust" className="text-pine hover:underline">
               What is verified
-            </a>
+            </Link>
           </p>
         </section>
       )}

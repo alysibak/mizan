@@ -42,3 +42,30 @@ stocks_longterm,Index,10000,0.25`,
     expect(rows[0].zakatablePortion).toBe(0.25);
   });
 });
+
+describe("parseAssetCsv safety", () => {
+  it("refuses negative and bracketed amounts instead of counting debts as wealth", () => {
+    const { rows, errors } = parseAssetCsv(`label,amount
+Overdraft,-500
+Visa,(250.00)
+Chequing,$1,200.50`);
+    expect(rows).toEqual([
+      expect.objectContaining({ label: "Chequing", amount: 1200.5 }),
+    ]);
+    expect(errors).toHaveLength(2);
+    expect(errors[0]).toMatch(/negative/);
+  });
+
+  it("reads a percent sign as a percentage", () => {
+    const { rows } = parseAssetCsv(`category,label,amount,portion
+stocks_longterm,Index,1000,1%
+stocks_longterm,Fund,1000,30
+stocks_longterm,ETF,1000,0.4`);
+    expect(rows.map((r) => r.zakatablePortion)).toEqual([0.01, 0.3, 0.4]);
+  });
+
+  it("uses the supplied default portion for school-aware categories", () => {
+    const { rows } = parseAssetCsv("Gold necklace,800", () => 1);
+    expect(rows[0]).toMatchObject({ category: "jewellery", zakatablePortion: 1 });
+  });
+});
