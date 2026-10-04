@@ -8,7 +8,7 @@ export default async function BeginPage() {
   return (
     <BeginWizard
       name={user.name.split(" ")[0] || user.name}
-      settings={settings}
+      settings={{ ...settings, calendarTokenHash: null }}
     />
   );
 }

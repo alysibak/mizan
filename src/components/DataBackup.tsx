@@ -2,6 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { sendJson } from "@/lib/client-fetch";
+
+type RestoreCounts = {
+  assets: number;
+  liabilities: number;
+  giving: number;
+  snapshots?: number;
+};
 
 export default function DataBackup() {
   const router = useRouter();
@@ -20,28 +28,32 @@ export default function DataBackup() {
     setBusy(true);
     setError(null);
     setMessage(null);
+    let payload: unknown;
     try {
-      const payload = JSON.parse(await file.text());
-      const res = await fetch("/api/import", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        setError(data.error || "Could not restore this file");
-      } else {
-        setMessage(
-          `Restored ${data.assets} assets, ${data.liabilities} debts, ${data.giving} gifts${
-            data.snapshots != null ? `, ${data.snapshots} snapshots` : ""
-          }.`,
-        );
-        router.refresh();
-      }
+      payload = JSON.parse(await file.text());
     } catch {
       setError("That file is not valid JSON.");
+      setBusy(false);
+      return;
     }
+    const res = await sendJson<RestoreCounts>(
+      "/api/import",
+      "POST",
+      payload,
+      "Could not restore this file",
+    );
     setBusy(false);
+    if (!res.ok) {
+      setError(`${res.error} Your existing data was not changed.`);
+      return;
+    }
+    const d = res.data;
+    setMessage(
+      `Restored ${d.assets} assets, ${d.liabilities} debts, ${d.giving} gifts${
+        d.snapshots != null ? `, ${d.snapshots} snapshots` : ""
+      }.`,
+    );
+    router.refresh();
   }
 
   return (

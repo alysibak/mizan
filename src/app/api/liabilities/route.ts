@@ -3,7 +3,7 @@ import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { liabilities } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
-import { liabilitySchema } from "@/lib/validation";
+import { firstIssue, liabilitySchema } from "@/lib/validation";
 
 export async function GET() {
   const user = await getCurrentUser();
@@ -22,10 +22,7 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   const parsed = liabilitySchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json(
-      { error: parsed.error.issues[0]?.message ?? "Invalid input" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: firstIssue(parsed.error) }, { status: 400 });
   }
   const [row] = await db
     .insert(liabilities)

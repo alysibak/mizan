@@ -10,7 +10,8 @@ import {
   type ScreeningResult,
 } from "@/lib/screening";
 import { purificationAmount } from "@/lib/zakat";
-import { formatMoney, formatPercent } from "@/lib/money";
+import { readStoredValue, setStoredValue, useHydrated } from "@/lib/client-store";
+import { amountParam, formatMoney, formatPercent } from "@/lib/money";
 
 const ACTIVITIES: { key: keyof BusinessActivity; label: string }[] = [
   { key: "alcohol", label: "Alcohol" },
@@ -50,38 +51,40 @@ type Draft = {
   figures: Record<string, string>;
 };
 
+function readDraft(): Draft | null {
+  try {
+    const raw = readStoredValue(STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as Draft) : null;
+  } catch {
+    return null; // a broken draft is simply ignored
+  }
+}
+
 export default function ScreeningTool({ currency = "CAD" }: { currency?: string }) {
-  const [hydrated, setHydrated] = useState(false);
-  const [name, setName] = useState("");
-  const [activity, setActivity] = useState<BusinessActivity>(EMPTY_ACTIVITY);
-  const [denominator, setDenominator] = useState<DenominatorBasis>("marketCap");
-  const [figures, setFigures] = useState<Record<string, string>>({});
+  // The draft lives in this browser, so the form mounts once hydrated with it
+  // as initial state rather than patching state in after the first render.
+  const hydrated = useHydrated();
+  if (!hydrated) return null;
+  return <ScreeningForm currency={currency} draft={readDraft()} />;
+}
+
+function ScreeningForm({ currency, draft }: { currency: string; draft: Draft | null }) {
+  const [name, setName] = useState(draft?.name ?? "");
+  const [activity, setActivity] = useState<BusinessActivity>({
+    ...EMPTY_ACTIVITY,
+    ...(draft?.activity ?? {}),
+  });
+  const [denominator, setDenominator] = useState<DenominatorBasis>(
+    draft?.denominator === "totalAssets" ? "totalAssets" : "marketCap",
+  );
+  const [figures, setFigures] = useState<Record<string, string>>(draft?.figures ?? {});
   const [result, setResult] = useState<ScreeningResult | null>(null);
   const [dividend, setDividend] = useState("");
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const d = JSON.parse(raw) as Draft;
-        if (d.name) setName(d.name);
-        if (d.activity) setActivity({ ...EMPTY_ACTIVITY, ...d.activity });
-        if (d.denominator === "marketCap" || d.denominator === "totalAssets") {
-          setDenominator(d.denominator);
-        }
-        if (d.figures) setFigures(d.figures);
-      }
-    } catch {
-      /* ignore a broken draft */
-    }
-    setHydrated(true);
-  }, []);
-
-  useEffect(() => {
-    if (!hydrated) return;
-    const draft: Draft = { name, activity, denominator, figures };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
-  }, [hydrated, name, activity, denominator, figures]);
+    const next: Draft = { name, activity, denominator, figures };
+    setStoredValue(STORAGE_KEY, JSON.stringify(next));
+  }, [name, activity, denominator, figures]);
 
   function run(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -109,7 +112,7 @@ export default function ScreeningTool({ currency = "CAD" }: { currency?: string 
     setFigures({});
     setResult(null);
     setDividend("");
-    localStorage.removeItem(STORAGE_KEY);
+    setStoredValue(STORAGE_KEY, null);
   }
 
   const purifyDue = result
@@ -149,7 +152,7 @@ export default function ScreeningTool({ currency = "CAD" }: { currency?: string 
             {ACTIVITIES.map((a) => (
               <label
                 key={a.key}
-                className="flex items-center gap-2 rounded-lg border border-mist bg-white px-3 py-2 text-sm text-ink"
+                className="flex items-center gap-2 rounded-lg border border-mist bg-surface px-3 py-2 text-sm text-ink"
               >
                 <input
                   type="checkbox"
@@ -198,6 +201,7 @@ export default function ScreeningTool({ currency = "CAD" }: { currency?: string 
                 <input
                   id={fieldName}
                   type="number"
+                  inputMode="decimal"
                   step="any"
                   min="0"
                   className="field nums"
@@ -285,7 +289,7 @@ export default function ScreeningTool({ currency = "CAD" }: { currency?: string 
             <div className="mt-4 space-y-3 rounded-lg bg-porcelain px-3 py-3">
               <p className="text-xs leading-relaxed text-sage">
                 If you hold this stock, purify{" "}
-                <span className="text-brass">
+                <span className="text-brassDeep">
                   {formatPercent(result.purificationRatio)}
                 </span>{" "}
                 of any dividend income by giving it away. That gift is not zakat.
@@ -297,6 +301,7 @@ export default function ScreeningTool({ currency = "CAD" }: { currency?: string 
                 <input
                   id="dividend"
                   type="number"
+                  inputMode="decimal"
                   step="0.01"
                   min="0"
                   className="field nums"
@@ -308,7 +313,7 @@ export default function ScreeningTool({ currency = "CAD" }: { currency?: string 
               {purifyDue > 0 && (
                 <p className="text-sm text-ink">
                   Give away{" "}
-                  <span className="nums font-medium text-brass">
+                  <span className="nums font-medium text-brassDeep">
                     {formatMoney(purifyDue, currency)}
                   </span>
                 </p>
@@ -316,7 +321,7 @@ export default function ScreeningTool({ currency = "CAD" }: { currency?: string 
               <Link
                 href={
                   purifyDue > 0
-                    ? `/giving?type=purification&amount=${purifyDue.toFixed(2)}`
+                    ? `/giving?type=purification&amount=${amountParam(purifyDue)}`
                     : "/giving?type=purification"
                 }
                 className="btn-primary"
@@ -331,9 +336,9 @@ export default function ScreeningTool({ currency = "CAD" }: { currency?: string 
             (Dow Jones Islamic, S&amp;P Shariah, MSCI Islamic) differ. Clearing
             these checks is a starting point for your own research — not a
             fatwa and not investment advice.{" "}
-            <a href="/trust" className="text-pine hover:underline">
+            <Link href="/trust" className="text-pine hover:underline">
               What is verified
-            </a>
+            </Link>
           </p>
         </section>
       )}

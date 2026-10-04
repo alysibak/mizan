@@ -22,6 +22,23 @@ export const HIJRI_MONTHS = [
   "Dhul-Hijjah",
 ] as const;
 
+/**
+ * Which Hijri calendar to count in. "tabular" is pure arithmetic and works
+ * anywhere; "umalqura" follows Saudi Arabia's Umm al-Qura tables (via the
+ * browser/Node ICU data), which match many printed calendars more closely.
+ * Neither replaces local moon-sighting for the actual day.
+ */
+export type HijriCalendar = "tabular" | "umalqura";
+
+export function parseHijriCalendar(value: string | null | undefined): HijriCalendar {
+  return value === "umalqura" ? "umalqura" : "tabular";
+}
+
+export const HIJRI_CALENDAR_LABELS: Record<HijriCalendar, string> = {
+  tabular: "Tabular (arithmetic)",
+  umalqura: "Umm al-Qura",
+};
+
 export interface HijriDate {
   year: number;
   month: number; // 1..12
@@ -87,19 +104,80 @@ function ymdUTC(iso: string): { y: number; m: number; d: number } {
   };
 }
 
-export function gregorianToHijri(date: Date | string): HijriDate {
-  const iso = typeof date === "string" ? date : date.toISOString();
-  const { y, m, d } = ymdUTC(iso);
-  return jdnToIslamic(gregorianToJDN(y, m, d));
+let umalquraFormat: Intl.DateTimeFormat | null | undefined;
+
+/** Umm al-Qura date of a UTC day, or null where ICU lacks the calendar. */
+function umalqura(jdn: number): HijriDate | null {
+  if (umalquraFormat === undefined) {
+    try {
+      umalquraFormat = new Intl.DateTimeFormat("en-u-ca-islamic-umalqura", {
+        timeZone: "UTC",
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
+      });
+      if (umalquraFormat.resolvedOptions().calendar !== "islamic-umalqura") {
+        umalquraFormat = null;
+      }
+    } catch {
+      umalquraFormat = null;
+    }
+  }
+  if (!umalquraFormat) return null;
+  const g = jdnToGregorian(jdn);
+  const parts = umalquraFormat.formatToParts(new Date(Date.UTC(g.year, g.month - 1, g.day)));
+  const get = (t: string) => Number(parts.find((p) => p.type === t)?.value);
+  const h = { year: get("year"), month: get("month"), day: get("day") };
+  return Number.isFinite(h.year) && h.month >= 1 && h.day >= 1 ? h : null;
 }
 
-export function hijriToGregorian(h: HijriDate): Date {
-  const { year, month, day } = jdnToGregorian(islamicToJDN(h.year, h.month, h.day));
+function toHijri(jdn: number, calendar: HijriCalendar): HijriDate {
+  return (calendar === "umalqura" && umalqura(jdn)) || jdnToIslamic(jdn);
+}
+
+function sameDay(a: HijriDate, b: HijriDate): boolean {
+  return a.year === b.year && a.month === b.month && a.day === b.day;
+}
+
+/** JDN of a Hijri date. Umm al-Qura is found by searching near the tabular day. */
+function fromHijri(h: HijriDate, calendar: HijriCalendar): number {
+  const tabular = islamicToJDN(h.year, h.month, h.day);
+  if (calendar !== "umalqura") return tabular;
+  for (const offset of [0, -1, 1, -2, 2, -3, 3]) {
+    const found = umalqura(tabular + offset);
+    if (found && sameDay(found, h)) return tabular + offset;
+  }
+  // Day 30 of a 29-day month: the day after the 29th.
+  if (h.day === 30) {
+    const prev = fromHijri({ ...h, day: 29 }, calendar);
+    const next = umalqura(prev + 1);
+    if (next && next.day === 1) return prev + 1;
+  }
+  return tabular;
+}
+
+export function gregorianToHijri(
+  date: Date | string,
+  calendar: HijriCalendar = "tabular",
+): HijriDate {
+  const iso = typeof date === "string" ? date : date.toISOString();
+  const { y, m, d } = ymdUTC(iso);
+  return toHijri(gregorianToJDN(y, m, d), calendar);
+}
+
+export function hijriToGregorian(
+  h: HijriDate,
+  calendar: HijriCalendar = "tabular",
+): Date {
+  const { year, month, day } = jdnToGregorian(fromHijri(h, calendar));
   return new Date(Date.UTC(year, month - 1, day));
 }
 
-export function formatHijri(date: Date | string): string {
-  const h = gregorianToHijri(date);
+export function formatHijri(
+  date: Date | string,
+  calendar: HijriCalendar = "tabular",
+): string {
+  const h = gregorianToHijri(date, calendar);
   return `${h.day} ${HIJRI_MONTHS[h.month - 1]} ${h.year} AH`;
 }
 
@@ -112,9 +190,12 @@ export function daysBetween(from: Date, to: Date): number {
 }
 
 /** The Gregorian date one Hijri year after the given start date. */
-export function hawlDueDate(start: Date | string): Date {
-  const h = gregorianToHijri(start);
-  return hijriToGregorian({ year: h.year + 1, month: h.month, day: h.day });
+export function hawlDueDate(
+  start: Date | string,
+  calendar: HijriCalendar = "tabular",
+): Date {
+  const h = gregorianToHijri(start, calendar);
+  return hijriToGregorian({ year: h.year + 1, month: h.month, day: h.day }, calendar);
 }
 
 export interface HawlStatus {
@@ -128,9 +209,13 @@ export interface HawlStatus {
   isComplete: boolean;
 }
 
-export function hawlStatus(start: Date | string, today: Date = new Date()): HawlStatus {
+export function hawlStatus(
+  start: Date | string,
+  today: Date = new Date(),
+  calendar: HijriCalendar = "tabular",
+): HawlStatus {
   const startDate = typeof start === "string" ? new Date(start) : start;
-  const dueDate = hawlDueDate(startDate);
+  const dueDate = hawlDueDate(startDate, calendar);
   const totalDays = Math.max(1, daysBetween(startDate, dueDate));
   const elapsedDays = Math.max(0, daysBetween(startDate, today));
   const remainingDays = Math.max(0, daysBetween(today, dueDate));

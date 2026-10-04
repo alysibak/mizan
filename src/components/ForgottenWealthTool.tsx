@@ -1,48 +1,40 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { FORGOTTEN_PROMPTS } from "@/lib/forgotten";
+import { setStoredValue, useHydrated, useStoredValue } from "@/lib/client-store";
 import ReckoningStepNav from "@/components/ReckoningStepNav";
 
 const KEY = "mizan-forgotten-checked";
 
-export default function ForgottenWealthTool() {
-  const [checked, setChecked] = useState<Record<string, boolean>>({});
-  const [ready, setReady] = useState(false);
+function parseChecked(raw: string | null): Record<string, boolean> {
+  try {
+    const value = raw ? JSON.parse(raw) : {};
+    return value && typeof value === "object" ? value : {};
+  } catch {
+    return {};
+  }
+}
 
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(KEY);
-      if (raw) setChecked(JSON.parse(raw) as Record<string, boolean>);
-    } catch {
-      /* ignore */
-    }
-    setReady(true);
-  }, []);
+export default function ForgottenWealthTool() {
+  const hydrated = useHydrated();
+  const raw = useStoredValue(KEY);
+  const checked = parseChecked(raw);
 
   function toggle(id: string) {
-    setChecked((prev) => {
-      const next = { ...prev, [id]: !prev[id] };
-      try {
-        localStorage.setItem(KEY, JSON.stringify(next));
-      } catch {
-        /* ignore */
-      }
-      return next;
-    });
+    setStoredValue(KEY, JSON.stringify({ ...checked, [id]: !checked[id] }));
   }
 
   const done = FORGOTTEN_PROMPTS.filter((p) => checked[p.id]).length;
 
-  if (!ready) return null;
+  if (!hydrated) return null;
 
   return (
     <div className="space-y-8">
       <ReckoningStepNav current="forgotten" />
 
       <header>
-        <p className="label text-brass">Memory aid</p>
+        <p className="label text-brassDeep">Memory aid</p>
         <h1 className="mt-1 font-serif text-3xl text-ink">Forgotten wealth</h1>
         <p className="mt-2 max-w-xl text-sm text-sage">
           Check what you have reviewed. Add anything real on the ledger, then

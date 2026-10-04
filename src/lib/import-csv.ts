@@ -65,12 +65,54 @@ function splitCsvLine(line: string): string[] {
   return out;
 }
 
-function parseAmount(raw: string): number | null {
-  const cleaned = raw.replace(/[$£€CADUSDcadusd,\s]/g, "").replace(/[()]/g, "");
-  if (!cleaned) return null;
-  const n = Number(cleaned);
+type AmountRead = { value: number } | { negative: true } | null;
+
+/**
+ * Read a money cell. Currency symbols, codes, and thousands commas are
+ * ignored. A negative figure (-500, (500), or 500-) is reported rather than
+ * flipped: on a statement it is usually a debt, which belongs under
+ * liabilities, not in wealth.
+ */
+function parseAmount(raw: string): AmountRead {
+  const kept = raw.replace(/[^\d.,()\-]/g, "");
+  const digits = kept.replace(/[(),\-]/g, "");
+  if (!digits || !/\d/.test(digits)) return null;
+  const n = Number(digits);
   if (!Number.isFinite(n)) return null;
-  return Math.abs(n);
+  const negative =
+    kept.startsWith("-") || kept.endsWith("-") || /^\(.*\)$/.test(kept);
+  if (negative && n !== 0) return { negative: true };
+  return { value: n };
+}
+
+/** Read a portion cell: "0.3", "30", or "30%" all mean 30%. */
+function parsePortion(raw: string): number | null {
+  const percent = raw.includes("%");
+  const p = Number(raw.replace(/[%\s]/g, ""));
+  if (!Number.isFinite(p) || p < 0) return null;
+  const fraction = percent || p > 1 ? p / 100 : p;
+  return Math.min(1, Math.max(0, fraction));
+}
+
+/**
+ * Without a header, an unquoted "1,234.56" arrives as the cells "1" and
+ * "234.56". Rejoin a 1–3 digit cell with following exact three-digit groups.
+ */
+function takeAmount(cells: string[], from: number): { raw: string; next: number } {
+  let raw = cells[from] ?? "";
+  let next = from + 1;
+  if (/^[-(]?[$£€]?\d{1,3}$/.test(raw.trim())) {
+    while (next < cells.length && /^\d{3}(\.\d+)?\)?$/.test(cells[next].trim())) {
+      raw += cells[next];
+      next++;
+    }
+  }
+  return { raw, next };
+}
+
+function isCategoryKey(raw: string | undefined): boolean {
+  const key = (raw ?? "").trim().toLowerCase().replace(/[\s-]+/g, "_");
+  return (KEYS as string[]).includes(key);
 }
 
 export function guessCategory(text: string): CategoryKey {
@@ -99,8 +141,15 @@ function asCategory(raw: string | undefined, label: string): CategoryKey {
 /**
  * Parse a pasted bank/broker export. Header row optional.
  * Accepts category,label,amount[,portion] or label,amount.
+ *
+ * `defaultPortion` supplies the portion for rows without one (pass the
+ * school-aware default so jewellery follows the user's madhhab profile).
  */
-export function parseAssetCsv(text: string): ParseResult {
+export function parseAssetCsv(
+  text: string,
+  defaultPortion: (category: CategoryKey) => number = (c) =>
+    categoryMeta(c).defaultZakatablePortion,
+): ParseResult {
   const errors: string[] = [];
   const rows: ImportRow[] = [];
   const lines = text
@@ -117,27 +166,15 @@ export function parseAssetCsv(text: string): ParseResult {
   const hasHeader = mapped.some(Boolean);
   const start = hasHeader ? 1 : 0;
 
-  let categoryIdx = mapped.indexOf("category");
+  const categoryIdx = mapped.indexOf("category");
   let labelIdx = mapped.indexOf("label");
   let amountIdx = mapped.indexOf("amount");
-  let portionIdx = mapped.indexOf("portion");
+  const portionIdx = mapped.indexOf("portion");
 
-  if (!hasHeader) {
-    if (firstCells.length === 1) {
-      return { rows, errors: ["Each line needs a label and an amount."] };
-    }
-    if (firstCells.length === 2) {
-      labelIdx = 0;
-      amountIdx = 1;
-      categoryIdx = -1;
-      portionIdx = -1;
-    } else {
-      categoryIdx = 0;
-      labelIdx = 1;
-      amountIdx = 2;
-      portionIdx = firstCells.length > 3 ? 3 : -1;
-    }
-  } else {
+  if (!hasHeader && firstCells.length === 1) {
+    return { rows, errors: ["Each line needs a label and an amount."] };
+  }
+  if (hasHeader) {
     if (labelIdx < 0) labelIdx = 0;
     if (amountIdx < 0) {
       amountIdx = firstCells.length > 1 ? 1 : 0;
@@ -147,13 +184,30 @@ export function parseAssetCsv(text: string): ParseResult {
   lines.slice(start).forEach((line, i) => {
     const lineNo = i + start + 1;
     const cells = splitCsvLine(line);
-    const label = (cells[labelIdx] ?? "").trim();
-    const amountRaw =
-      amountIdx >= 0
-        ? cells
-            .slice(amountIdx, portionIdx >= 0 ? portionIdx : undefined)
-            .join("")
-        : "";
+    let label: string;
+    let amountRaw: string;
+    let categoryCell: string | undefined;
+    let portionCell: string | undefined;
+    if (hasHeader) {
+      label = (cells[labelIdx] ?? "").trim();
+      amountRaw =
+        amountIdx >= 0
+          ? cells.slice(amountIdx, portionIdx >= 0 ? portionIdx : undefined).join("")
+          : "";
+      categoryCell = categoryIdx >= 0 ? cells[categoryIdx] : undefined;
+      portionCell = portionIdx >= 0 ? cells[portionIdx] : undefined;
+    } else if (isCategoryKey(cells[0]) && cells.length >= 3) {
+      // category,label,amount[,portion]
+      categoryCell = cells[0];
+      label = (cells[1] ?? "").trim();
+      const taken = takeAmount(cells, 2);
+      amountRaw = taken.raw;
+      portionCell = cells[taken.next];
+    } else {
+      // label,amount
+      label = (cells[0] ?? "").trim();
+      amountRaw = takeAmount(cells, 1).raw;
+    }
     const amount = parseAmount(amountRaw);
     if (!label) {
       errors.push(`Line ${lineNo}: missing description.`);
@@ -163,19 +217,23 @@ export function parseAssetCsv(text: string): ParseResult {
       errors.push(`Line ${lineNo}: could not read an amount for “${label}”.`);
       return;
     }
-    const category = asCategory(
-      categoryIdx >= 0 ? cells[categoryIdx] : undefined,
-      label,
-    );
-    let portion = categoryMeta(category).defaultZakatablePortion;
-    if (portionIdx >= 0 && cells[portionIdx]) {
-      const raw = cells[portionIdx].replace(/%/g, "");
-      const p = Number(raw);
-      if (Number.isFinite(p)) {
-        portion = p > 1 ? Math.min(1, p / 100) : Math.min(1, Math.max(0, p));
-      }
+    if ("negative" in amount) {
+      errors.push(
+        `Line ${lineNo}: “${label}” is negative — add it under liabilities instead.`,
+      );
+      return;
     }
-    rows.push({ category, label, amount, zakatablePortion: portion });
+    const category = asCategory(categoryCell, label);
+    let portion = defaultPortion(category);
+    if (portionCell) {
+      portion = parsePortion(portionCell) ?? portion;
+    }
+    rows.push({
+      category,
+      label: label.slice(0, 120),
+      amount: amount.value,
+      zakatablePortion: portion,
+    });
   });
 
   return { rows, errors };

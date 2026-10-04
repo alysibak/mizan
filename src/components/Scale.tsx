@@ -52,7 +52,7 @@ export default function Scale({
           <p className="label">Nisab ({standardLabel})</p>
           <p
             className={
-              "mt-1 font-serif nums text-brass " + (large ? "text-3xl" : "text-2xl")
+              "mt-1 font-serif nums text-brassDeep " + (large ? "text-3xl" : "text-2xl")
             }
           >
             {formatMoney(nisab, currency)}

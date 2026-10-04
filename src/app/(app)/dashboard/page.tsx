@@ -1,20 +1,9 @@
 import Link from "next/link";
-import { desc, eq } from "drizzle-orm";
-import { db } from "@/db";
-import { assets, liabilities, givingRecords, yearSnapshots } from "@/db/schema";
-import { getCurrentUser, getUserSettings } from "@/lib/session";
-import { calculateZakat } from "@/lib/zakat";
-import { hawlStatus, formatHijri } from "@/lib/hijri";
+import { getCurrentUser } from "@/lib/session";
+import { loadReckoning } from "@/lib/reckoning";
+import { formatHijri } from "@/lib/hijri";
 import { formatMoney, formatPercent } from "@/lib/money";
-import {
-  duePhase,
-  duePhaseLabel,
-  metalsFreshness,
-  paymentWindow,
-  sumZakatInWindow,
-  dateInWindow,
-} from "@/lib/giving-window";
-import { parseSnapshotPayload } from "@/lib/snapshot";
+import { duePhaseLabel } from "@/lib/giving-window";
 import Scale from "@/components/Scale";
 import EstimateBanner from "@/components/EstimateBanner";
 import DashboardNotices from "@/components/DashboardNotices";
@@ -22,77 +11,39 @@ import HawlCalendarLink from "@/components/HawlCalendarLink";
 import CycleActions from "@/components/CycleActions";
 import LastLetterCard from "@/components/LastLetterCard";
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ welcome?: string }>;
+}) {
+  const { welcome } = await searchParams;
   const user = (await getCurrentUser())!;
-  const settings = await getUserSettings(user.id);
+  const {
+    settings,
+    assets: assetRows,
+    result,
+    window,
+    zakatPaid,
+    outstanding: zakatOutstanding,
+    phase,
+    hawl,
+    latestFreeze,
+    frozenThisCycle,
+    calendar,
+    metals,
+  } = await loadReckoning(user.id);
 
-  const [assetRows, liabilityRows, givingRows, latestSnap] = await Promise.all([
-    db.select().from(assets).where(eq(assets.userId, user.id)),
-    db.select().from(liabilities).where(eq(liabilities.userId, user.id)),
-    db
-      .select()
-      .from(givingRecords)
-      .where(eq(givingRecords.userId, user.id))
-      .orderBy(desc(givingRecords.date)),
-    db
-      .select()
-      .from(yearSnapshots)
-      .where(eq(yearSnapshots.userId, user.id))
-      .orderBy(desc(yearSnapshots.takenAt))
-      .limit(1),
-  ]);
+  const lastLetter = latestFreeze?.payload?.letterToNextYear
+    ? {
+        id: latestFreeze.id,
+        takenAt: latestFreeze.takenAt,
+        letter: latestFreeze.payload.letterToNextYear,
+      }
+    : null;
 
-  const lastLetter = (() => {
-    const row = latestSnap[0];
-    if (!row) return null;
-    const payload = parseSnapshotPayload(row.payload);
-    if (!payload?.letterToNextYear) return null;
-    return {
-      id: row.id,
-      takenAt: row.takenAt,
-      letter: payload.letterToNextYear,
-    };
-  })();
-
-  const result = calculateZakat({
-    assets: assetRows.map((a) => ({
-      category: a.category,
-      label: a.label,
-      amount: a.amount,
-      zakatablePortion: a.zakatablePortion,
-    })),
-    liabilities: liabilityRows.map((l) => ({
-      label: l.label,
-      amount: l.amount,
-      deductible: l.deductible,
-    })),
-    prices: {
-      goldPricePerGram: settings.goldPricePerGram,
-      silverPricePerGram: settings.silverPricePerGram,
-    },
-    standard: settings.nisabStandard as "gold" | "silver",
-    basis: settings.calendarBasis as "lunar" | "solar",
-  });
-
-  const window = paymentWindow(settings.hawlStartDate);
-  const zakatPaid = sumZakatInWindow(givingRows, window);
-  const zakatOutstanding = Math.max(0, result.zakatDue - zakatPaid);
-  const hawl = settings.hawlStartDate ? hawlStatus(settings.hawlStartDate) : null;
-  const phase = duePhase({
-    meetsNisab: result.isDue,
-    hawlStartDate: settings.hawlStartDate,
-  });
   const dueNow = phase === "payable" && zakatOutstanding > 0;
-  const metals = metalsFreshness({
-    gold: settings.goldPricePerGram,
-    silver: settings.silverPricePerGram,
-    metalsUpdatedAt: settings.metalsUpdatedAt,
-  });
   const metalsStale = metals.stale;
-  const latestSnapshotId = latestSnap[0]?.id ?? null;
-  const frozenThisCycle = Boolean(
-    latestSnap[0] && dateInWindow(latestSnap[0].takenAt, window),
-  );
+  const latestSnapshotId = latestFreeze?.id ?? null;
 
   const checklist = [
     {
@@ -114,6 +65,11 @@ export default async function DashboardPage() {
       href: "/settings",
     },
     {
+      done: Boolean(user.recoveryCodeHash),
+      label: "Save a recovery code (Mizan sends no email)",
+      href: "/settings#account",
+    },
+    {
       done: settings.madhhab !== "general",
       label: "Pick a school profile (optional)",
       href: "/settings",
@@ -123,7 +79,7 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-10">
       <header>
-        <p className="label text-brass">Balance</p>
+        <p className="label text-brassDeep">Balance</p>
         <h1 className="mt-1 font-serif text-3xl text-ink">
           {user.name.split(" ")[0]}
         </h1>
@@ -134,6 +90,7 @@ export default async function DashboardPage() {
         metalsStale={metalsStale}
         metalsReason={metals.reason}
         metalsAgeDays={metals.ageDays}
+        welcome={welcome === "1"}
       />
 
       {lastLetter ? (
@@ -148,7 +105,7 @@ export default async function DashboardPage() {
 
       {assetRows.length > 0 && (
         <section className="border border-mist px-5 py-5">
-          <p className="label text-brass">Close the year</p>
+          <p className="label text-brassDeep">Close the year</p>
           <p className="mt-1 font-serif text-xl text-ink">Reckoning night</p>
           <p className="mt-1 text-sm text-sage">
             Remember forgotten wealth, watch nisab, sketch envelopes, then pay →
@@ -269,7 +226,7 @@ export default async function DashboardPage() {
           <div className="mt-4">
             <div className="flex items-baseline justify-between text-sm">
               <span className="text-sage">
-                Started {formatHijri(hawl.startDate)}
+                Started {formatHijri(hawl.startDate, calendar)}
               </span>
               <span className="font-medium text-ink">
                 {hawl.isComplete
@@ -284,7 +241,7 @@ export default async function DashboardPage() {
               />
             </div>
             <div className="mt-3">
-              <HawlCalendarLink hawlStartDate={settings.hawlStartDate!} />
+              <HawlCalendarLink dueDate={hawl.dueDate.toISOString().slice(0, 10)} />
             </div>
           </div>
         ) : (

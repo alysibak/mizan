@@ -36,3 +36,8 @@ login-body.json
 NUL
 *.tsbuildinfo
 
+
+# playwright
+/test-results
+/playwright-report
+/blob-report

@@ -1,20 +1,13 @@
 import Link from "next/link";
-import { desc, eq } from "drizzle-orm";
-import { db } from "@/db";
-import { assets, liabilities, givingRecords } from "@/db/schema";
-import { getCurrentUser, getUserSettings } from "@/lib/session";
-import { calculateZakat } from "@/lib/zakat";
+import { getCurrentUser } from "@/lib/session";
+import { loadReckoning, sumTypeInWindow } from "@/lib/reckoning";
 import { categoryMeta } from "@/lib/categories";
-import { hawlStatus, formatHijri, gregorianToHijri } from "@/lib/hijri";
-import { formatMoney, formatPercent } from "@/lib/money";
+import { formatHijri, gregorianToHijri } from "@/lib/hijri";
+import { isoDay } from "@/lib/dates";
+import { amountParam, formatMoney, formatPercent, sumCents } from "@/lib/money";
 import { MADHHAB_LABELS, parseMadhhab } from "@/lib/madhhab";
-import {
-  duePhase,
-  duePhaseLabel,
-  paymentWindow,
-  sumZakatInWindow,
-  dateInWindow,
-} from "@/lib/giving-window";
+import { duePhaseLabel, dateInWindow } from "@/lib/giving-window";
+import { givingTypeLabel } from "@/lib/giving";
 import PrintButton from "@/components/PrintButton";
 import EstimateBanner from "@/components/EstimateBanner";
 import CycleActions from "@/components/CycleActions";
@@ -22,68 +15,42 @@ import { ASNAF, asnafLabel } from "@/lib/asnaf";
 
 export default async function StatementPage() {
   const user = (await getCurrentUser())!;
-  const settings = await getUserSettings(user.id);
-  const hijriYear = gregorianToHijri(new Date()).year;
+  const {
+    settings,
+    liabilities: liabilityRows,
+    giving: givingRows,
+    result: r,
+    window,
+    zakatPaid,
+    outstanding,
+    phase,
+    hawl,
+    latestFreeze,
+    frozenThisCycle,
+    today,
+    calendar,
+  } = await loadReckoning(user.id);
+  const hijriYear = gregorianToHijri(today, calendar).year;
   const madhhab = parseMadhhab(settings.madhhab);
-
-  const [assetRows, liabilityRows, givingRows] = await Promise.all([
-    db.select().from(assets).where(eq(assets.userId, user.id)),
-    db.select().from(liabilities).where(eq(liabilities.userId, user.id)),
-    db
-      .select()
-      .from(givingRecords)
-      .where(eq(givingRecords.userId, user.id))
-      .orderBy(desc(givingRecords.date)),
-  ]);
-
-  const r = calculateZakat({
-    assets: assetRows.map((a) => ({
-      category: a.category,
-      label: a.label,
-      amount: a.amount,
-      zakatablePortion: a.zakatablePortion,
-    })),
-    liabilities: liabilityRows.map((l) => ({
-      label: l.label,
-      amount: l.amount,
-      deductible: l.deductible,
-    })),
-    prices: {
-      goldPricePerGram: settings.goldPricePerGram,
-      silverPricePerGram: settings.silverPricePerGram,
-    },
-    standard: settings.nisabStandard as "gold" | "silver",
-    basis: settings.calendarBasis as "lunar" | "solar",
-  });
-
-  const window = paymentWindow(settings.hawlStartDate);
-  const zakatPaid = sumZakatInWindow(givingRows, window);
-  const sadaqahPaid = givingRows
-    .filter((g) => g.type === "sadaqah" && dateInWindow(g.date, window))
-    .reduce((t, g) => t + g.amount, 0);
-  const purificationPaid = givingRows
-    .filter((g) => g.type === "purification" && dateInWindow(g.date, window))
-    .reduce((t, g) => t + g.amount, 0);
+  const sadaqahPaid = sumTypeInWindow(givingRows, "sadaqah", window);
+  const purificationPaid = sumTypeInWindow(givingRows, "purification", window);
+  const fitrPaid = sumTypeInWindow(givingRows, "fitr", window);
   const yearGiving = givingRows.filter((g) => dateInWindow(g.date, window));
-  const outstanding = Math.max(0, r.zakatDue - zakatPaid);
-  const hawl = settings.hawlStartDate ? hawlStatus(settings.hawlStartDate) : null;
-  const phase = duePhase({
-    meetsNisab: r.isDue,
-    hawlStartDate: settings.hawlStartDate,
-  });
   const c = settings.currency;
-  const printed = new Date().toISOString().slice(0, 10);
+  const printed = isoDay(today);
   const title =
     window.kind === "hawl"
-      ? `Hawl ${window.start} → ${window.end}`
-      : `${window.start.slice(0, 4)} · ${hijriYear} AH`;
+      ? `Hawl ${window.cycleStart} → ${window.end}`
+      : `${window.cycleStart.slice(0, 4)} · ${hijriYear} AH`;
 
   const asnafTotals = ASNAF.map((a) => ({
     key: a.key,
     label: a.label,
-    amount: yearGiving
-      .filter((g) => g.type === "zakat" && g.asnaf === a.key)
-      .reduce((t, g) => t + g.amount, 0),
+    amount: sumCents(
+      yearGiving
+        .filter((g) => g.type === "zakat" && g.asnaf === a.key)
+        .map((g) => g.amount),
+    ),
   })).filter((a) => a.amount > 0);
 
   return (
@@ -91,7 +58,7 @@ export default async function StatementPage() {
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="font-serif text-2xl text-ink print:text-3xl">Mizan</p>
-          <p className="label mt-3 text-brass">Zakat statement</p>
+          <p className="label mt-3 text-brassDeep">Zakat statement</p>
           <h1 className="mt-1 font-serif text-3xl text-ink">{title}</h1>
           <p className="mt-2 text-sm text-sage">
             Prepared for {user.name} · {printed} · {MADHHAB_LABELS[madhhab]}
@@ -117,7 +84,7 @@ export default async function StatementPage() {
             have already recorded.
           </p>
           <Link
-            href={`/giving?type=zakat&amount=${outstanding}`}
+            href={`/giving?type=zakat&amount=${amountParam(outstanding)}`}
             className="btn-primary mt-4 print:hidden"
           >
             Record a zakat payment
@@ -153,7 +120,7 @@ export default async function StatementPage() {
             <dt className="text-sage">Hawl</dt>
             <dd className="text-ink">
               {hawl
-                ? `${formatHijri(hawl.startDate)} → ${formatHijri(hawl.dueDate)}${
+                ? `${formatHijri(hawl.startDate, calendar)} → ${formatHijri(hawl.dueDate, calendar)}${
                     hawl.isComplete ? " · complete" : ` · ${hawl.remainingDays} days left`
                   }`
                 : "Not set"}
@@ -169,27 +136,29 @@ export default async function StatementPage() {
         {r.lines.length === 0 ? (
           <p className="px-5 py-6 text-sm text-sage">No assets recorded.</p>
         ) : (
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-mist text-xs uppercase tracking-wide text-sage">
-              <tr>
-                <th className="px-5 py-2 font-medium">Holding</th>
-                <th className="px-5 py-2 font-medium">Value</th>
-                <th className="px-5 py-2 font-medium">Counted</th>
-              </tr>
-            </thead>
-            <tbody>
-              {r.lines.map((line, i) => (
-                <tr key={i} className="border-b border-mist/70">
-                  <td className="px-5 py-2">
-                    <p className="text-ink">{line.label}</p>
-                    <p className="text-xs text-sage">{categoryMeta(line.category).label}</p>
-                  </td>
-                  <td className="px-5 py-2 nums">{formatMoney(line.amount, c)}</td>
-                  <td className="px-5 py-2 nums">{formatMoney(line.zakatableAmount, c)}</td>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[30rem] text-left text-sm">
+              <thead className="border-b border-mist text-xs uppercase tracking-wide text-sage">
+                <tr>
+                  <th className="px-5 py-2 font-medium">Holding</th>
+                  <th className="px-5 py-2 font-medium">Value</th>
+                  <th className="px-5 py-2 font-medium">Counted</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {r.lines.map((line, i) => (
+                  <tr key={i} className="border-b border-mist/70">
+                    <td className="px-5 py-2">
+                      <p className="text-ink">{line.label}</p>
+                      <p className="text-xs text-sage">{categoryMeta(line.category).label}</p>
+                    </td>
+                    <td className="px-5 py-2 nums">{formatMoney(line.amount, c)}</td>
+                    <td className="px-5 py-2 nums">{formatMoney(line.zakatableAmount, c)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
 
@@ -198,26 +167,28 @@ export default async function StatementPage() {
           <h2 className="border-b border-mist px-5 py-4 font-serif text-lg text-ink">
             Debts
           </h2>
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-mist text-xs uppercase tracking-wide text-sage">
-              <tr>
-                <th className="px-5 py-2 font-medium">Description</th>
-                <th className="px-5 py-2 font-medium">Amount</th>
-                <th className="px-5 py-2 font-medium">Counted</th>
-              </tr>
-            </thead>
-            <tbody>
-              {liabilityRows.map((l) => (
-                <tr key={l.id} className="border-b border-mist/70">
-                  <td className="px-5 py-2 text-ink">{l.label}</td>
-                  <td className="px-5 py-2 nums">{formatMoney(l.amount, c)}</td>
-                  <td className="px-5 py-2 text-sage">
-                    {l.deductible ? "Deducted from zakatable wealth" : "Not deducted"}
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[30rem] text-left text-sm">
+              <thead className="border-b border-mist text-xs uppercase tracking-wide text-sage">
+                <tr>
+                  <th className="px-5 py-2 font-medium">Description</th>
+                  <th className="px-5 py-2 font-medium">Amount</th>
+                  <th className="px-5 py-2 font-medium">Counted</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {liabilityRows.map((l) => (
+                  <tr key={l.id} className="border-b border-mist/70">
+                    <td className="px-5 py-2 text-ink">{l.label}</td>
+                    <td className="px-5 py-2 nums">{formatMoney(l.amount, c)}</td>
+                    <td className="px-5 py-2 text-sage">
+                      {l.deductible ? "Deducted from zakatable wealth" : "Not deducted"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </section>
       )}
 
@@ -271,6 +242,12 @@ export default async function StatementPage() {
             <dt className="text-sage">Purification · {window.label}</dt>
             <dd className="nums">{formatMoney(purificationPaid, c)}</dd>
           </div>
+          {fitrPaid > 0 && (
+            <div className="flex justify-between gap-4">
+              <dt className="text-sage">Zakat al-Fitr · {window.label}</dt>
+              <dd className="nums">{formatMoney(fitrPaid, c)}</dd>
+            </div>
+          )}
         </dl>
         <p className="mt-3 text-xs text-sage">
           {window.detail} Purification of interest is not subtracted from zakat.
@@ -280,6 +257,8 @@ export default async function StatementPage() {
             currency={c}
             outstanding={outstanding}
             phase={phase}
+            latestSnapshotId={latestFreeze?.id ?? null}
+            frozenThisCycle={frozenThisCycle}
           />
         </div>
       </section>
@@ -303,34 +282,32 @@ export default async function StatementPage() {
           <h2 className="border-b border-mist px-5 py-4 font-serif text-lg text-ink">
             Giving · {window.label}
           </h2>
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-mist text-xs uppercase tracking-wide text-sage">
-              <tr>
-                <th className="px-5 py-2 font-medium">Date</th>
-                <th className="px-5 py-2 font-medium">Kind</th>
-                <th className="px-5 py-2 font-medium">To</th>
-                <th className="px-5 py-2 font-medium">Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              {yearGiving.map((g) => (
-                <tr key={g.id} className="border-b border-mist/70">
-                  <td className="px-5 py-2 nums text-sage">{g.date}</td>
-                  <td className="px-5 py-2 text-ink">
-                    {g.type === "zakat"
-                      ? g.asnaf
-                        ? `Zakat · ${asnafLabel(g.asnaf)}`
-                        : "Zakat"
-                      : g.type === "purification"
-                        ? "Purification"
-                        : "Sadaqah"}
-                  </td>
-                  <td className="px-5 py-2 text-sage">{g.recipient || g.note || "—"}</td>
-                  <td className="px-5 py-2 nums">{formatMoney(g.amount, c)}</td>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[30rem] text-left text-sm">
+              <thead className="border-b border-mist text-xs uppercase tracking-wide text-sage">
+                <tr>
+                  <th className="px-5 py-2 font-medium">Date</th>
+                  <th className="px-5 py-2 font-medium">Kind</th>
+                  <th className="px-5 py-2 font-medium">To</th>
+                  <th className="px-5 py-2 font-medium">Amount</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {yearGiving.map((g) => (
+                  <tr key={g.id} className="border-b border-mist/70">
+                    <td className="px-5 py-2 nums text-sage">{g.date}</td>
+                    <td className="px-5 py-2 text-ink">
+                      {g.type === "zakat" && g.asnaf
+                        ? `Zakat · ${asnafLabel(g.asnaf)}`
+                        : givingTypeLabel(g.type)}
+                    </td>
+                    <td className="px-5 py-2 text-sage">{g.recipient || g.note || "—"}</td>
+                    <td className="px-5 py-2 nums">{formatMoney(g.amount, c)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </section>
       )}
 

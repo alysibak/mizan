@@ -23,7 +23,7 @@ export default function ReverseZakatTool({
   return (
     <div className="space-y-8">
       <header>
-        <p className="label text-brass">Work backwards</p>
+        <p className="label text-brassDeep">Work backwards</p>
         <h1 className="mt-1 font-serif text-3xl text-ink">Reverse zakat</h1>
         <p className="mt-2 max-w-xl text-sm text-sage">
           Most tools ask “what do I owe?” This one asks the rarer question: if I
@@ -40,6 +40,7 @@ export default function ReverseZakatTool({
           <input
             id="gift"
             type="number"
+            inputMode="decimal"
             min="0"
             step="0.01"
             className="field nums"

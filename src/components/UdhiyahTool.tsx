@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { formatMoney } from "@/lib/money";
+import { amountParam, formatMoney } from "@/lib/money";
 import {
   calculateUdhiyah,
   type UdhiyahAnimal,
@@ -28,7 +28,7 @@ export default function UdhiyahTool({ currency }: { currency: string }) {
   return (
     <div className="space-y-8">
       <header>
-        <p className="label text-brass">Seasonal</p>
+        <p className="label text-brassDeep">Seasonal</p>
         <h1 className="mt-1 font-serif text-3xl text-ink">Udhiyah / qurbani</h1>
         <p className="mt-2 max-w-xl text-sm text-sage">
           Split the cost of an animal into shares. This does not decide whether
@@ -66,6 +66,7 @@ export default function UdhiyahTool({ currency }: { currency: string }) {
             <input
               id="cost"
               type="number"
+              inputMode="decimal"
               min="0"
               step="0.01"
               className="field nums"
@@ -81,6 +82,7 @@ export default function UdhiyahTool({ currency }: { currency: string }) {
             <input
               id="shares"
               type="number"
+              inputMode="numeric"
               min="1"
               max={animal === "cow" || animal === "camel" ? 7 : 1}
               step="1"
@@ -96,6 +98,7 @@ export default function UdhiyahTool({ currency }: { currency: string }) {
             <input
               id="extras"
               type="number"
+              inputMode="decimal"
               min="0"
               step="0.01"
               className="field nums"
@@ -135,7 +138,7 @@ export default function UdhiyahTool({ currency }: { currency: string }) {
 
         {result.valid && (
           <Link
-            href={`/giving?type=sadaqah&amount=${result.totalWithExtras}`}
+            href={`/giving?type=sadaqah&amount=${amountParam(result.totalWithExtras)}`}
             className="btn-primary"
           >
             Record as sadaqah on Give

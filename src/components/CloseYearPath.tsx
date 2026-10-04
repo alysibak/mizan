@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { formatMoney } from "@/lib/money";
+import { amountParam, formatMoney } from "@/lib/money";
 
 export type CloseYearStep = "pay" | "freeze" | "roll" | "statement";
 
@@ -36,7 +36,7 @@ export default function CloseYearPath({
           const done = i < idx;
           return (
             <li key={s.id} className="flex items-center gap-2">
-              {i > 0 ? <span className="text-mist" aria-hidden>→</span> : null}
+              {i > 0 ? <span className="text-sage" aria-hidden>→</span> : null}
               <span
                 className={
                   active
@@ -55,7 +55,7 @@ export default function CloseYearPath({
       <div className="mt-3 flex flex-wrap gap-3">
         {current === "pay" && outstanding > 0 ? (
           <Link
-            href={`/giving?type=zakat&amount=${outstanding}`}
+            href={`/giving?type=zakat&amount=${amountParam(outstanding)}`}
             className="btn-primary"
           >
             Record {formatMoney(outstanding, currency)} zakat
@@ -70,7 +70,7 @@ export default function CloseYearPath({
           <>
             {outstanding > 0 ? (
               <Link
-                href={`/giving?type=zakat&amount=${outstanding}`}
+                href={`/giving?type=zakat&amount=${amountParam(outstanding)}`}
                 className="btn-primary"
               >
                 Record {formatMoney(outstanding, currency)} zakat

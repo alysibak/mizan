@@ -9,7 +9,7 @@ export default async function ScreeningPage() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="label text-brass">Equity checks</p>
+        <p className="label text-brassDeep">Equity checks</p>
         <h1 className="mt-1 font-serif text-3xl text-ink">Shariah stock screening</h1>
         <p className="mt-2 text-sm text-sage">
           Apply AAOIFI-style business and ratio checks to figures you enter by

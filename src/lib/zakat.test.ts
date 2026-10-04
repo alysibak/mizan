@@ -7,7 +7,7 @@ import {
   purificationAmount,
 } from "./zakat";
 import { nisabValue, goldNisabValue, silverNisabValue } from "./nisab";
-import { hawlStatus, gregorianToHijri, hawlDueDate } from "./hijri";
+import { hawlStatus, gregorianToHijri, hijriToGregorian, hawlDueDate } from "./hijri";
 import { screenEquity } from "./screening";
 
 const prices = { goldPricePerGram: 90, silverPricePerGram: 1.05 };
@@ -226,5 +226,68 @@ describe("screening", () => {
     );
     expect(r.ratiosPass).toBe(false);
     expect(r.compliant).toBe(false);
+  });
+});
+
+describe("screening edge cases", () => {
+  const clean = {
+    alcohol: false,
+    gambling: false,
+    conventionalFinance: false,
+    porkAndNonHalalFood: false,
+    adultEntertainment: false,
+    tobacco: false,
+    weapons: false,
+  };
+
+  it("does not fail a pre-revenue company on the income screen", () => {
+    const r = screenEquity(clean, {
+      marketCap: 1000,
+      totalAssets: 1000,
+      interestBearingDebt: 0,
+      cashAndInterestSecurities: 0,
+      totalRevenue: 0,
+      impermissibleRevenue: 0,
+    });
+    expect(r.ratios[2].pass).toBe(true);
+    expect(r.compliant).toBe(true);
+  });
+
+  it("still fails when the balance-sheet denominator is missing", () => {
+    const r = screenEquity(clean, {
+      marketCap: 0,
+      totalAssets: 0,
+      interestBearingDebt: 0,
+      cashAndInterestSecurities: 0,
+      totalRevenue: 100,
+      impermissibleRevenue: 0,
+    });
+    expect(r.ratiosPass).toBe(false);
+  });
+});
+
+describe("hijri calendar", () => {
+  it("round-trips every day for a century", () => {
+    for (let t = Date.UTC(1980, 0, 1); t < Date.UTC(2080, 0, 1); t += 86_400_000) {
+      const h = gregorianToHijri(new Date(t));
+      expect(h.day >= 1 && h.day <= 30 && h.month >= 1 && h.month <= 12).toBe(true);
+      if (hijriToGregorian(h).getTime() !== t) {
+        throw new Error(`round trip failed for ${new Date(t).toISOString()}`);
+      }
+    }
+  });
+});
+
+describe("cent-exact totals", () => {
+  it("adds many small entries without drift", () => {
+    const r = calculateZakat({
+      assets: Array.from({ length: 1000 }, (_, i) => ({ category: "cash", label: `c${i}`, amount: 0.1 })),
+      liabilities: [{ label: "x", amount: 0.3 }],
+      prices: { goldPricePerGram: 90, silverPricePerGram: 0.01 },
+      standard: "silver",
+      basis: "lunar",
+    });
+    expect(r.grossZakatable).toBe(100);
+    expect(r.netZakatable).toBe(99.7);
   });
 });

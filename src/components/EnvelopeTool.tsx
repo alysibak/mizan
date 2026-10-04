@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ASNAF } from "@/lib/asnaf";
 import { allocateEnvelopes } from "@/lib/unique-calcs";
-import { formatMoney } from "@/lib/money";
+import { amountParam, formatMoney } from "@/lib/money";
 import ReckoningStepNav from "@/components/ReckoningStepNav";
 
 export default function EnvelopeTool({
@@ -37,7 +37,7 @@ export default function EnvelopeTool({
       <ReckoningStepNav current="envelopes" />
 
       <header>
-        <p className="label text-brass">Distribution sketch</p>
+        <p className="label text-brassDeep">Distribution sketch</p>
         <h1 className="mt-1 font-serif text-3xl text-ink">Zakat envelopes</h1>
         <p className="mt-2 max-w-xl text-sm text-sage">
           Split one figure across the eight asnaf. Then pay on Give and freeze
@@ -52,6 +52,7 @@ export default function EnvelopeTool({
         <input
           id="total"
           type="number"
+          inputMode="decimal"
           min="0"
           step="0.01"
           className="field nums"
@@ -71,6 +72,7 @@ export default function EnvelopeTool({
                   Weight{" "}
                   <input
                     type="number"
+                    inputMode="numeric"
                     min="0"
                     step="1"
                     className="field ml-2 inline-block w-16 nums py-1"
@@ -91,7 +93,7 @@ export default function EnvelopeTool({
                     {formatMoney(part.amount, currency)}
                   </p>
                   <Link
-                    href={`/giving?type=zakat&amount=${part.amount}&asnaf=${a.key}`}
+                    href={`/giving?type=zakat&amount=${amountParam(part.amount)}&asnaf=${a.key}`}
                     className="text-sm text-pine hover:underline"
                   >
                     Record this envelope
@@ -110,7 +112,7 @@ export default function EnvelopeTool({
       {totalNum > 0 ? (
         <div className="flex flex-wrap gap-3">
           <Link
-            href={`/giving?type=zakat&amount=${totalNum}`}
+            href={`/giving?type=zakat&amount=${amountParam(totalNum)}`}
             className="btn-primary"
           >
             Record full {formatMoney(totalNum, currency)} on Give

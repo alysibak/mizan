@@ -29,7 +29,7 @@ export default async function LandingPage() {
       </header>
 
       <section className="relative z-10 mx-auto flex min-h-[calc(100dvh-5.5rem)] max-w-5xl flex-col justify-center px-6 pb-16 pt-8 md:px-10">
-        <p className="animate-fade-up font-serif text-sm tracking-[0.2em] text-brass">
+        <p className="animate-fade-up font-serif text-sm tracking-[0.2em] text-brassDeep">
           الميزان
         </p>
         <h1 className="animate-fade-up mt-4 font-serif text-6xl leading-[0.95] tracking-tight text-ink sm:text-7xl md:text-8xl">
@@ -83,8 +83,9 @@ export default async function LandingPage() {
           <div>
             <p className="font-serif text-3xl text-pine">Hawl</p>
             <p className="mt-2 text-sm text-sage">
-              One Hijri year from the day wealth crossed nisab. Tabular calendar
-              may differ from moon-sighting by a day or two.
+              One Hijri year from the day wealth crossed nisab, on the tabular
+              or Umm al-Qura calendar. Either may differ from moon-sighting by a
+              day or two.
             </p>
           </div>
         </div>

@@ -20,7 +20,7 @@ export async function GET() {
 
   const payload = {
     app: "mizan",
-    version: 2,
+    version: 3,
     exportedAt: new Date().toISOString(),
     name: user.name,
     settings: {
@@ -34,6 +34,8 @@ export async function GET() {
       setupComplete: settings.setupComplete,
       trustedAckAt: settings.trustedAckAt,
       metalsUpdatedAt: settings.metalsUpdatedAt,
+      hijriCalendar: settings.hijriCalendar,
+      timezone: settings.timezone ?? undefined,
     },
     assets: assetRows.map((a) => ({
       category: a.category,
@@ -42,6 +44,12 @@ export async function GET() {
       zakatablePortion: a.zakatablePortion,
       hawlStartDate: a.hawlStartDate,
       note: a.note,
+      grams: a.grams,
+      purity: a.purity,
+      metal: a.metal,
+      foreignCurrency: a.foreignCurrency,
+      foreignAmount: a.foreignAmount,
+      fxRate: a.fxRate,
     })),
     liabilities: liabilityRows.map((l) => ({
       label: l.label,
@@ -64,10 +72,12 @@ export async function GET() {
     })),
   };
 
+  const day = new Date().toISOString().slice(0, 10);
   return new NextResponse(JSON.stringify(payload, null, 2), {
     headers: {
-      "Content-Type": "application/json",
-      "Content-Disposition": `attachment; filename="mizan-backup.json"`,
+      "Content-Type": "application/json; charset=utf-8",
+      "Content-Disposition": `attachment; filename="mizan-backup-${day}.json"`,
+      "Cache-Control": "no-store",
     },
   });
 }

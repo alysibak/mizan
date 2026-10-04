@@ -15,7 +15,7 @@ export default async function AssetsPage({
   const settings = await getUserSettings(user.id);
   const params = await searchParams;
   const initialCategory =
-    params.category && params.category in CATEGORIES
+    params.category && Object.hasOwn(CATEGORIES, params.category)
       ? params.category
       : undefined;
   const initialLabel = params.label?.trim().slice(0, 120) || undefined;
@@ -28,7 +28,7 @@ export default async function AssetsPage({
   return (
     <div className="space-y-6">
       <header>
-        <p className="label text-brass">Ledger</p>
+        <p className="label text-brassDeep">Ledger</p>
         <h1 className="mt-1 font-serif text-3xl text-ink">What you hold</h1>
         <p className="mt-2 text-sm text-sage">
           Assets and debts — including metals by weight, money owed to you, and

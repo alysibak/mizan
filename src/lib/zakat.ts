@@ -19,6 +19,7 @@ import {
   goldNisabValue,
   silverNisabValue,
 } from "./nisab";
+import { sumCents, toCents } from "./money";
 
 export const ZAKAT_RATE_LUNAR = 0.025;
 // 2.5% scaled by the ratio of the solar to the lunar year length.
@@ -105,16 +106,18 @@ export function computeAssetLines(assets: ZakatableAssetInput[]): AssetLine[] {
 }
 
 export function sumDeductibleLiabilities(liabilities: LiabilityInput[]): number {
-  return liabilities
-    .filter((l) => l.deductible !== false)
-    .reduce((total, l) => total + Math.max(0, l.amount || 0), 0);
+  return sumCents(
+    liabilities.filter((l) => l.deductible !== false).map((l) => Math.max(0, l.amount || 0)),
+  );
 }
 
 export function calculateZakat(input: ZakatInput): ZakatResult {
   const lines = computeAssetLines(input.assets);
-  const grossZakatable = lines.reduce((t, l) => t + l.zakatableAmount, 0);
+  // Totals are kept to the cent; only the zakat itself carries fractions
+  // until it is rounded as an amount owed.
+  const grossZakatable = sumCents(lines.map((l) => l.zakatableAmount));
   const deductibleLiabilities = sumDeductibleLiabilities(input.liabilities);
-  const netZakatable = Math.max(0, grossZakatable - deductibleLiabilities);
+  const netZakatable = Math.max(0, toCents(grossZakatable - deductibleLiabilities));
 
   const nisab = nisabValue(input.standard, input.prices);
   const goldNisab = goldNisabValue(input.prices);

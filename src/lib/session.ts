@@ -40,6 +40,9 @@ export const DEFAULT_SETTINGS: Omit<Settings, "userId" | "updatedAt"> = {
   madhhab: "general",
   setupComplete: false,
   trustedAckAt: null,
+  timezone: null,
+  hijriCalendar: "tabular",
+  calendarTokenHash: null,
 };
 
 export async function getUserSettings(userId: string): Promise<Settings> {
@@ -55,6 +58,7 @@ export async function getUserSettings(userId: string): Promise<Settings> {
       setupComplete: row[0].setupComplete !== false,
       trustedAckAt: row[0].trustedAckAt ?? null,
       metalsUpdatedAt: row[0].metalsUpdatedAt ?? null,
+      hijriCalendar: row[0].hijriCalendar === "umalqura" ? "umalqura" : "tabular",
     };
   }
   return {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   NISAB_GOLD_GRAMS,
@@ -17,6 +18,7 @@ import {
 import type { Settings } from "@/db/schema";
 import { COMMON_CURRENCIES } from "@/lib/currencies";
 import { METALS_STALE_DAYS, metalsFreshness } from "@/lib/giving-window";
+import { sendJson } from "@/lib/client-fetch";
 
 export default function SettingsForm({ settings }: { settings: Settings }) {
   const router = useRouter();
@@ -44,11 +46,13 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
   async function suggestPrices() {
     setLookingUp(true);
     setPriceHint(null);
-    const res = await fetch(`/api/metals?currency=${encodeURIComponent(currency)}`);
-    const data = await res.json().catch(() => ({}));
+    const res = await fetch(`/api/metals?currency=${encodeURIComponent(currency)}`).catch(
+      () => null,
+    );
+    const data = (await res?.json().catch(() => ({}))) ?? {};
     setLookingUp(false);
-    if (!res.ok) {
-      setPriceHint(data.error || "Could not suggest prices");
+    if (!res?.ok) {
+      setPriceHint(data.error || "Could not suggest prices. Enter them by hand.");
       return;
     }
     setGold(data.goldPricePerGram);
@@ -64,18 +68,13 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
     setError(null);
     setSaved(false);
     setBusy(true);
-    const res = await fetch("/api/settings", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    const res = await sendJson("/api/settings", "PUT", payload, "Could not save settings");
     setBusy(false);
     if (res.ok) {
       setSaved(true);
       router.refresh();
     } else {
-      const data = await res.json().catch(() => ({}));
-      setError(data.error || "Could not save settings");
+      setError(res.error);
     }
   }
 
@@ -90,6 +89,7 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
       silverPricePerGram: form.get("silverPricePerGram"),
       hawlStartDate: form.get("hawlStartDate") || null,
       madhhab: form.get("madhhab"),
+      hijriCalendar: form.get("hijriCalendar"),
       setupComplete: settings.setupComplete,
       trustedAckAt: settings.trustedAckAt,
     });
@@ -124,6 +124,8 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
               id="currency"
               name="currency"
               maxLength={3}
+              autoCapitalize="characters"
+              autoComplete="off"
               className="field uppercase"
               value={currency}
               onChange={(e) => setCurrency(e.target.value.toUpperCase())}
@@ -144,7 +146,9 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
               ))}
             </div>
             <p className="mt-1.5 text-xs text-sage">
-              A three-letter code such as CAD, USD, GBP, or AED.
+              A three-letter code such as CAD, USD, GBP, or AED. Changing it
+              relabels figures; it does not convert holdings or metal prices.
+              Holdings kept in another currency use rates to this one.
             </p>
           </div>
           <div>
@@ -207,25 +211,25 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
           <p className="mt-1 text-xs text-sage">
             Does not invent classical rulings for stocks or pensions. Existing
             holdings keep their portions until you edit them.{" "}
-            <a href="/trust" className="text-pine hover:underline">
+            <Link href="/trust" className="text-pine hover:underline">
               What is verified
-            </a>
+            </Link>
           </p>
         </div>
       </section>
 
       {/* Metal prices */}
-      <section className="card p-5">
+      <section id="metal-prices" className="card scroll-mt-20 p-5">
         <h2 className="font-serif text-lg text-ink">Metal prices</h2>
         <p className="mt-1 text-sm text-sage">
           Nisab is a weight of gold or silver, so its cash value depends on the
           current price. You set these yourself. A suggestion from a free public
           source is optional — it never runs unless you ask, and it never saves
-          until you do.
+          until you do. Holdings entered by weight are revalued when you save.
         </p>
         <p className="mt-2 text-xs text-sage">
           {settings.metalsUpdatedAt
-            ? `Last saved ${new Date(settings.metalsUpdatedAt).toLocaleString()}. Reconfirm at least every ${METALS_STALE_DAYS} days.`
+            ? `Last saved ${settings.metalsUpdatedAt.slice(0, 10)}. Reconfirm at least every ${METALS_STALE_DAYS} days.`
             : "No save date yet — confirm or update prices before trusting nisab."}
           {freshness.stale && freshness.reason === "aged"
             ? ` These are ${freshness.ageDays} days old.`
@@ -252,15 +256,16 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
               id="goldPricePerGram"
               name="goldPricePerGram"
               type="number"
+              inputMode="decimal"
               step="0.01"
-              min="0"
+              min="0.01"
               className="field nums"
               value={gold}
               onChange={(e) => setGold(parseFloat(e.target.value) || 0)}
             />
             <p className="mt-1.5 text-xs text-sage">
               Gold nisab ={" "}
-              <span className="text-brass nums">
+              <span className="text-brassDeep nums">
                 {formatMoney(goldNisab, currency)}
               </span>
             </p>
@@ -273,15 +278,16 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
               id="silverPricePerGram"
               name="silverPricePerGram"
               type="number"
+              inputMode="decimal"
               step="0.0001"
-              min="0"
+              min="0.0001"
               className="field nums"
               value={silver}
               onChange={(e) => setSilver(parseFloat(e.target.value) || 0)}
             />
             <p className="mt-1.5 text-xs text-sage">
               Silver nisab ={" "}
-              <span className="text-brass nums">
+              <span className="text-brassDeep nums">
                 {formatMoney(silverNisab, currency)}
               </span>
             </p>
@@ -320,6 +326,25 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
             className="field"
             defaultValue={settings.hawlStartDate ?? ""}
           />
+        </div>
+        <div className="mt-4 max-w-xs">
+          <label className="label mb-1.5" htmlFor="hijriCalendar">
+            Hijri calendar
+          </label>
+          <select
+            id="hijriCalendar"
+            name="hijriCalendar"
+            className="field"
+            defaultValue={settings.hijriCalendar}
+          >
+            <option value="tabular">Tabular (arithmetic)</option>
+            <option value="umalqura">Umm al-Qura</option>
+          </select>
+          <p className="mt-1.5 text-xs text-sage">
+            Umm al-Qura follows Saudi Arabia&apos;s published tables, which
+            match many printed calendars. Either can differ by a day from local
+            moon-sighting.
+          </p>
         </div>
       </section>
 

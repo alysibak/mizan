@@ -6,7 +6,7 @@ export default function MethodPage() {
       <Link href="/" className="font-serif text-xl text-ink">
         Mizan
       </Link>
-      <p className="label mt-10 text-brass">How the numbers are made</p>
+      <p className="label mt-10 text-brassDeep">How the numbers are made</p>
       <h1 className="mt-2 font-serif text-4xl text-ink">The method</h1>
       <p className="mt-4 leading-relaxed text-sage">
         Mizan is an estimation aid. The functions below are pure and tested.
@@ -49,11 +49,14 @@ export default function MethodPage() {
         <h2 className="font-serif text-2xl text-ink">Hawl</h2>
         <p className="text-sm leading-relaxed text-sage">
           The holding year is one Hijri year from the date wealth crossed nisab,
-          using a tabular Islamic calendar. Payable status uses one ledger hawl
-          start (your settings date). Optional per-holding start dates are
-          reminders only — they do not yet change the zakat due phase. Tabular
-          dates can differ from moon-sighting by a day or two; for payment day,
-          follow your local sighting.
+          counted on the tabular (arithmetic) Islamic calendar or, if you
+          choose it in settings, the Umm al-Qura tables. Payable status uses
+          one ledger hawl start (your settings date): new money joins the
+          year already running rather than starting its own, so per-holding
+          dates are reminders only. If wealth fell below nisab mid-year, The
+          year page lets you restart the hawl — the schools differ on whether
+          that is needed. Either calendar can differ from moon-sighting by a
+          day or two; for payment day, follow your local sighting.
         </p>
       </section>
 
@@ -92,7 +95,7 @@ export default function MethodPage() {
         <Link href="/trust" className="text-pine hover:underline">
           What is verified
         </Link>
-        <span className="mx-2 text-mist">·</span>
+        <span className="mx-2 text-sage">·</span>
         <Link href="/register" className="text-pine hover:underline">
           Create an account
         </Link>

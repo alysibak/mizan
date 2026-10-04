@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import {
   HEIR_LABELS,
+  HEIR_MAX,
   distributeEstate,
   type HeirKey,
   type Heirs,
@@ -46,7 +47,7 @@ export default function MirathTool({ currency }: { currency: string }) {
   const hasAnyone = Object.values(heirs).some((n) => (n ?? 0) > 0);
 
   function setCount(key: HeirKey, value: number) {
-    const n = Math.max(0, Math.min(20, Math.floor(value || 0)));
+    const n = Math.max(0, Math.min(HEIR_MAX[key], Math.floor(value || 0)));
     setHeirs((prev) => {
       const next = { ...prev };
       if (n === 0) delete next[key];
@@ -72,6 +73,7 @@ export default function MirathTool({ currency }: { currency: string }) {
           <input
             id="estate"
             type="number"
+            inputMode="decimal"
             min="0"
             step="1"
             className="field nums"
@@ -90,8 +92,9 @@ export default function MirathTool({ currency }: { currency: string }) {
                 <span className="text-sm text-ink">{HEIR_LABELS[key]}</span>
                 <input
                   type="number"
+                  inputMode="numeric"
                   min={0}
-                  max={key === "husband" ? 1 : 20}
+                  max={HEIR_MAX[key]}
                   className="field nums w-20"
                   value={heirs[key] ?? 0}
                   onChange={(e) => setCount(key, Number(e.target.value))}
@@ -115,41 +118,43 @@ export default function MirathTool({ currency }: { currency: string }) {
               Sunni framework. Estimation only.
             </p>
           </div>
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-mist bg-mist/30 text-xs uppercase tracking-wide text-sage">
-              <tr>
-                <th className="px-5 py-3 font-medium">Heir</th>
-                <th className="px-5 py-3 font-medium">Basis</th>
-                <th className="px-5 py-3 font-medium">Share</th>
-                <th className="px-5 py-3 font-medium">Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              {result.shares.map((line) => (
-                <tr key={line.heir} className="border-b border-mist/70">
-                  <td className="px-5 py-3">
-                    <p className="font-medium text-ink">
-                      {HEIR_LABELS[line.heir]}
-                      {line.count > 1 ? ` × ${line.count}` : ""}
-                    </p>
-                    <p className="text-xs text-sage">{line.reason}</p>
-                  </td>
-                  <td className="px-5 py-3 text-sage">{BASIS[line.basis]}</td>
-                  <td className="px-5 py-3 nums text-ink">
-                    {line.fraction.toString()}
-                    {line.count > 1 && (
-                      <span className="block text-xs text-sage">
-                        {line.perHead.toString()} each
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-5 py-3 nums text-ink">
-                    {formatMoney(line.fraction.value * estate, currency)}
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[34rem] text-left text-sm">
+              <thead className="border-b border-mist bg-mist/30 text-xs uppercase tracking-wide text-sage">
+                <tr>
+                  <th className="px-5 py-3 font-medium">Heir</th>
+                  <th className="px-5 py-3 font-medium">Basis</th>
+                  <th className="px-5 py-3 font-medium">Share</th>
+                  <th className="px-5 py-3 font-medium">Amount</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {result.shares.map((line) => (
+                  <tr key={line.heir} className="border-b border-mist/70">
+                    <td className="px-5 py-3">
+                      <p className="font-medium text-ink">
+                        {HEIR_LABELS[line.heir]}
+                        {line.count > 1 ? ` × ${line.count}` : ""}
+                      </p>
+                      <p className="text-xs text-sage">{line.reason}</p>
+                    </td>
+                    <td className="px-5 py-3 text-sage">{BASIS[line.basis]}</td>
+                    <td className="px-5 py-3 nums text-ink">
+                      {line.fraction.toString()}
+                      {line.count > 1 && (
+                        <span className="block text-xs text-sage">
+                          {line.perHead.toString()} each
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-5 py-3 nums text-ink">
+                      {formatMoney(line.fraction.value * estate, currency)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           {!result.toTreasury.isZero() && (
             <p className="border-t border-mist px-5 py-3 text-sm text-sage">
               Remainder {result.toTreasury.toString()} (

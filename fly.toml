@@ -10,7 +10,7 @@ primary_region = "iad"
   NODE_ENV = "production"
   PORT = "3000"
   HOSTNAME = "0.0.0.0"
-  DATABASE_PATH = "/data/mizan.db"
+  DATABASE_URL = "file:/data/mizan.db"
 
 [http_service]
   internal_port = 3000

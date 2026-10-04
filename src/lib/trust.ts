@@ -44,7 +44,7 @@ export const TRUST = {
   },
   tabularHawl: {
     level: "estimate" as const,
-    claim: "Hawl counted on a tabular Hijri calendar",
+    claim: "Hawl counted on a tabular (or optional Umm al-Qura) Hijri calendar",
     source: "May differ by a day or two from local moon-sighting",
   },
 } as const;

@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { assets } from "@/db/schema";
-import { getCurrentUser } from "@/lib/session";
-import { assetSchema } from "@/lib/validation";
+import { getCurrentUser, getUserSettings } from "@/lib/session";
+import { assetSchema, firstIssue } from "@/lib/validation";
+import { normalizeAsset } from "@/lib/asset-write";
 
 export async function GET() {
   const user = await getCurrentUser();
@@ -24,15 +25,17 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   const parsed = assetSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json(
-      { error: parsed.error.issues[0]?.message ?? "Invalid input" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: firstIssue(parsed.error) }, { status: 400 });
   }
 
+  const prices = await getUserSettings(user.id);
   const [row] = await db
     .insert(assets)
-    .values({ userId: user.id, ...parsed.data })
+    .values({
+      userId: user.id,
+      ...parsed.data,
+      ...normalizeAsset(parsed.data, prices, prices.currency),
+    })
     .returning();
   return NextResponse.json(row, { status: 201 });
 }

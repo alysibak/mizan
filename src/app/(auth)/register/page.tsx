@@ -22,7 +22,12 @@ export default function RegisterPage() {
         email: form.get("email"),
         password: form.get("password"),
       }),
-    });
+    }).catch(() => null);
+    if (!res) {
+      setError("Could not reach Mizan. Check your connection and try again.");
+      setBusy(false);
+      return;
+    }
     if (res.ok) {
       router.push("/begin");
       router.refresh();
@@ -48,13 +53,29 @@ export default function RegisterPage() {
           <label className="label mb-1.5" htmlFor="name">
             Name
           </label>
-          <input id="name" name="name" type="text" required className="field" />
+          <input
+            id="name"
+            name="name"
+            type="text"
+            autoComplete="name"
+            maxLength={80}
+            required
+            className="field"
+          />
         </div>
         <div>
           <label className="label mb-1.5" htmlFor="email">
             Email
           </label>
-          <input id="email" name="email" type="email" required className="field" />
+          <input
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            inputMode="email"
+            required
+            className="field"
+          />
         </div>
         <div>
           <label className="label mb-1.5" htmlFor="password">
@@ -64,11 +85,13 @@ export default function RegisterPage() {
             id="password"
             name="password"
             type="password"
+            autoComplete="new-password"
             required
             minLength={8}
+            maxLength={72}
             className="field"
           />
-          <p className="mt-1.5 text-xs text-sage">At least 8 characters.</p>
+          <p className="mt-1.5 text-xs text-sage">8 to 72 characters.</p>
         </div>
 
         {error && (

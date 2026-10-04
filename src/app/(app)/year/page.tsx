@@ -1,106 +1,105 @@
 import Link from "next/link";
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { assets, liabilities, givingRecords, yearSnapshots } from "@/db/schema";
-import { getCurrentUser, getUserSettings } from "@/lib/session";
-import { calculateZakat } from "@/lib/zakat";
+import { yearSnapshots } from "@/db/schema";
+import { getCurrentUser } from "@/lib/session";
+import { loadReckoning } from "@/lib/reckoning";
 import { hawlStatus, formatHijri } from "@/lib/hijri";
+import { isIsoDay, isoDay } from "@/lib/dates";
 import { formatMoney, formatPercent } from "@/lib/money";
-import {
-  duePhase,
-  paymentWindow,
-  sumZakatInWindow,
-  dateInWindow,
-} from "@/lib/giving-window";
 import FreezeYearButton from "@/components/FreezeYearButton";
 import SnapshotCompare from "@/components/SnapshotCompare";
 import { MADHHAB_LABELS, parseMadhhab } from "@/lib/madhhab";
 import EstimateBanner from "@/components/EstimateBanner";
 import HawlCalendarLink from "@/components/HawlCalendarLink";
+import HawlRestart from "@/components/HawlRestart";
 import CycleActions from "@/components/CycleActions";
 import CloseYearPath from "@/components/CloseYearPath";
 import ReckoningStepNav from "@/components/ReckoningStepNav";
 
-export default async function YearPage() {
+export default async function YearPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ rolled?: string }>;
+}) {
   const user = (await getCurrentUser())!;
-  const settings = await getUserSettings(user.id);
-  const madhhab = parseMadhhab(settings.madhhab);
-
-  const [assetRows, liabilityRows, givingRows, snaps] = await Promise.all([
-    db.select().from(assets).where(eq(assets.userId, user.id)),
-    db.select().from(liabilities).where(eq(liabilities.userId, user.id)),
-    db.select().from(givingRecords).where(eq(givingRecords.userId, user.id)),
+  const { rolled } = await searchParams;
+  const [reckoning, snaps] = await Promise.all([
+    loadReckoning(user.id),
     db
-      .select()
+      .select({
+        id: yearSnapshots.id,
+        label: yearSnapshots.label,
+        takenAt: yearSnapshots.takenAt,
+        currency: yearSnapshots.currency,
+      })
       .from(yearSnapshots)
       .where(eq(yearSnapshots.userId, user.id))
-      .orderBy(desc(yearSnapshots.takenAt)),
+      .orderBy(desc(yearSnapshots.takenAt), desc(yearSnapshots.createdAt)),
   ]);
-
-  const result = calculateZakat({
-    assets: assetRows.map((a) => ({
-      category: a.category,
-      label: a.label,
-      amount: a.amount,
-      zakatablePortion: a.zakatablePortion,
-    })),
-    liabilities: liabilityRows.map((l) => ({
-      label: l.label,
-      amount: l.amount,
-      deductible: l.deductible,
-    })),
-    prices: {
-      goldPricePerGram: settings.goldPricePerGram,
-      silverPricePerGram: settings.silverPricePerGram,
-    },
-    standard: settings.nisabStandard as "gold" | "silver",
-    basis: settings.calendarBasis as "lunar" | "solar",
-  });
-
-  const window = paymentWindow(settings.hawlStartDate);
-  const zakatPaid = sumZakatInWindow(givingRows, window);
-  const outstanding = Math.max(0, result.zakatDue - zakatPaid);
-  const hawl = settings.hawlStartDate ? hawlStatus(settings.hawlStartDate) : null;
+  const {
+    settings,
+    assets: assetRows,
+    result,
+    window,
+    zakatPaid,
+    outstanding,
+    phase,
+    hawl,
+    latestFreeze,
+    recentFreezes,
+    frozenThisCycle,
+    today,
+    calendar,
+  } = reckoning;
+  const madhhab = parseMadhhab(settings.madhhab);
   const c = settings.currency;
-  const phase = duePhase({
-    meetsNisab: result.isDue,
-    hawlStartDate: settings.hawlStartDate,
-  });
   const dueNow = phase === "payable" && outstanding > 0;
   const cycleMet =
     phase === "payable" && result.isDue && outstanding === 0 && zakatPaid > 0;
   const freezeLabel =
     window.kind === "hawl"
-      ? `Hawl ${window.start}`
-      : `Zakat ${window.start.slice(0, 4)}`;
+      ? `Hawl ${window.cycleStart}`
+      : `Zakat ${window.cycleStart.slice(0, 4)}`;
 
   const perAssetHawl = assetRows
-    .filter((a) => a.hawlStartDate)
+    .filter((a) => a.hawlStartDate && isIsoDay(a.hawlStartDate))
     .map((a) => ({
       id: a.id,
       label: a.label,
-      status: hawlStatus(a.hawlStartDate!),
+      status: hawlStatus(a.hawlStartDate!, today, calendar),
     }))
     .sort((a, b) => a.status.remainingDays - b.status.remainingDays);
 
   const anyAssetDue = perAssetHawl.some((a) => a.status.isComplete);
-  const latestSnapshotId = snaps[0]?.id ?? null;
-  const frozenThisCycle = Boolean(
-    snaps[0] && dateInWindow(snaps[0].takenAt, window),
-  );
+  const latestSnapshotId = latestFreeze?.id ?? null;
   const closeStep =
     outstanding > 0 ? "pay" : frozenThisCycle ? "roll" : "freeze";
 
   return (
     <div className="space-y-10">
       <header>
-        <p className="label text-brass">Hawl and reckoning</p>
+        <p className="label text-brassDeep">Hawl and reckoning</p>
         <h1 className="mt-1 font-serif text-3xl text-ink">The year</h1>
         <p className="mt-2 max-w-xl text-sm text-sage">
           Track the holding year, see what is payable, print a statement, and
           freeze a copy when you pay. School: {MADHHAB_LABELS[madhhab]}.
         </p>
       </header>
+
+      {rolled && isIsoDay(rolled) && hawl && isoDay(hawl.startDate) === rolled ? (
+        <section className="border border-pine/40 bg-pine/5 px-5 py-5" role="status">
+          <p className="label text-pine">Hawl rolled</p>
+          <p className="mt-1 font-serif text-xl text-ink">Next hawl starts {rolled}.</p>
+          <p className="mt-1 text-sm text-sage">
+            Confirm the real payment day with local moon-sighting. Print last
+            year&apos;s statement from the frozen copy if you want paper.
+          </p>
+          <Link href="/statement" className="btn-ghost mt-3">
+            Open statement
+          </Link>
+        </section>
+      ) : null}
 
       <EstimateBanner />
 
@@ -155,7 +154,7 @@ export default async function YearPage() {
           <div className="mt-4">
             <div className="flex items-baseline justify-between text-sm">
               <span className="text-sage">
-                Started {formatHijri(hawl.startDate)}
+                Started {formatHijri(hawl.startDate, calendar)}
               </span>
               <span className="font-medium text-ink">
                 {hawl.isComplete
@@ -170,13 +169,20 @@ export default async function YearPage() {
               />
             </div>
             <p className="mt-3 text-xs text-sage">
-              Due on {formatHijri(hawl.dueDate)} (
+              Due on {formatHijri(hawl.dueDate, calendar)} (
               {hawl.dueDate.toISOString().slice(0, 10)}), if wealth stays at or
               above nisab. Follow local moon-sighting for the payment day.
             </p>
             <div className="mt-3">
-              <HawlCalendarLink hawlStartDate={settings.hawlStartDate!} />
+              <HawlCalendarLink dueDate={hawl.dueDate.toISOString().slice(0, 10)} />
             </div>
+            {!hawl.isComplete && (
+              <HawlRestart
+                madhhab={madhhab}
+                hawlStart={isoDay(hawl.startDate)}
+                today={isoDay(today)}
+              />
+            )}
           </div>
         ) : (
           <p className="mt-3 text-sm text-sage">
@@ -199,7 +205,7 @@ export default async function YearPage() {
                 <div>
                   <p className="text-ink">{a.label}</p>
                   <p className="text-xs text-sage">
-                    Due {formatHijri(a.status.dueDate)}
+                    Due {formatHijri(a.status.dueDate, calendar)}
                   </p>
                 </div>
                 <p className="text-sm text-ink">
@@ -256,7 +262,7 @@ export default async function YearPage() {
         </div>
       </section>
 
-      <SnapshotCompare snaps={snaps.slice(0, 2)} />
+      <SnapshotCompare freezes={recentFreezes.slice(0, 2)} />
 
       <section id="freeze-year" className="panel space-y-6">
         <ReckoningStepNav current="freeze" />

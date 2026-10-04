@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Settings } from "@/db/schema";
@@ -14,12 +14,30 @@ import {
 } from "@/lib/madhhab";
 import { NISAB_GOLD_GRAMS, NISAB_SILVER_GRAMS } from "@/lib/nisab";
 import { formatMoney } from "@/lib/money";
+import { metalsLookLikeDefaults } from "@/lib/giving-window";
 import { COMMON_CURRENCIES } from "@/lib/currencies";
+import { sendJson } from "@/lib/client-fetch";
+import { readStoredValue, setStoredValue, useHydrated } from "@/lib/client-store";
 
 const STEPS = ["Trust", "Preferences", "Prices", "Hawl", "Holding"] as const;
 const STEP_KEY = "mizan-begin-step";
 
-export default function BeginWizard({
+/** The step to resume at: the trust note first, then wherever setup was left. */
+function resumeStep(trusted: boolean): number {
+  if (!trusted) return 0;
+  const n = parseInt(readStoredValue(STEP_KEY) ?? "", 10);
+  return n >= 1 && n < STEPS.length ? n : 1;
+}
+
+export default function BeginWizard(props: { name: string; settings: Settings }) {
+  // The saved step lives in this browser, so mount once hydrated with it as
+  // the initial state.
+  const hydrated = useHydrated();
+  if (!hydrated) return null;
+  return <Wizard {...props} />;
+}
+
+function Wizard({
   name,
   settings,
 }: {
@@ -27,7 +45,7 @@ export default function BeginWizard({
   settings: Settings;
 }) {
   const router = useRouter();
-  const [step, setStep] = useState(settings.trustedAckAt ? 1 : 0);
+  const [step, setStep] = useState(() => resumeStep(Boolean(settings.trustedAckAt)));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,72 +53,54 @@ export default function BeginWizard({
   const [nisabStandard, setNisabStandard] = useState(settings.nisabStandard);
   const [calendarBasis, setCalendarBasis] = useState(settings.calendarBasis);
   const [madhhab, setMadhhab] = useState<Madhhab>(parseMadhhab(settings.madhhab));
-  const [gold, setGold] = useState(settings.goldPricePerGram);
-  const [silver, setSilver] = useState(settings.silverPricePerGram);
+  // Starter placeholders are not real prices, so the fields start empty.
+  const starter = metalsLookLikeDefaults(settings.goldPricePerGram, settings.silverPricePerGram);
+  const [gold, setGold] = useState(starter ? 0 : settings.goldPricePerGram);
+  const [silver, setSilver] = useState(starter ? 0 : settings.silverPricePerGram);
   const [hawlStartDate, setHawlStartDate] = useState(settings.hawlStartDate ?? "");
   const [trustedAckAt, setTrustedAckAt] = useState(settings.trustedAckAt);
   const [lookingUp, setLookingUp] = useState(false);
   const [priceHint, setPriceHint] = useState<string | null>(null);
 
-  useEffect(() => {
-    try {
-      if (!settings.trustedAckAt) {
-        setStep(0);
-        return;
-      }
-      const saved = localStorage.getItem(STEP_KEY);
-      if (saved == null) return;
-      const n = parseInt(saved, 10);
-      if (n >= 1 && n < STEPS.length) setStep(n);
-    } catch {
-      /* ignore */
-    }
-  }, [settings.trustedAckAt]);
-
   function go(n: number) {
     setStep(n);
-    try {
-      localStorage.setItem(STEP_KEY, String(n));
-    } catch {
-      /* ignore */
-    }
+    setStoredValue(STEP_KEY, String(n));
   }
 
   const [assetLabel, setAssetLabel] = useState("");
   const [assetAmount, setAssetAmount] = useState("");
   const [assetCategory, setAssetCategory] = useState("bank");
+  // Set once the first holding is saved, so retrying a failed finish does
+  // not add it twice.
+  const [assetSaved, setAssetSaved] = useState(false);
 
   async function saveSettings(patch: Record<string, unknown>) {
     const body = {
       currency,
       nisabStandard,
       calendarBasis,
-      goldPricePerGram: gold,
-      silverPricePerGram: silver,
+      // Until prices are entered, resend the stored ones (the API needs both).
+      goldPricePerGram: gold || settings.goldPricePerGram,
+      silverPricePerGram: silver || settings.silverPricePerGram,
       hawlStartDate: hawlStartDate || null,
       madhhab,
       trustedAckAt,
       setupComplete: false,
       ...patch,
     };
-    const res = await fetch("/api/settings", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      throw new Error(data.error || "Could not save");
-    }
+    const res = await sendJson("/api/settings", "PUT", body, "Could not save");
+    if (!res.ok) throw new Error(res.error);
   }
 
   async function suggestPrices() {
     setLookingUp(true);
     setPriceHint(null);
-    const res = await fetch(`/api/metals?currency=${encodeURIComponent(currency)}`);
-    const data = await res.json().catch(() => ({}));
+    const res = await fetch(`/api/metals?currency=${encodeURIComponent(currency)}`).catch(
+      () => null,
+    );
+    const data = (await res?.json().catch(() => ({}))) ?? {};
     setLookingUp(false);
-    if (!res.ok) {
+    if (!res?.ok) {
       setPriceHint(data.error || "Enter prices by hand");
       return;
     }
@@ -140,6 +140,12 @@ export default function BeginWizard({
       setError("Enter gold and silver prices greater than zero");
       return;
     }
+    if (metalsLookLikeDefaults(gold, silver)) {
+      // The starter figures are placeholders, far from any real market price;
+      // nisab built on them would be wrong.
+      setError("Enter today’s prices per gram, or tap Suggest, before continuing.");
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
@@ -151,11 +157,12 @@ export default function BeginWizard({
     setBusy(false);
   }
 
-  async function nextFromHawl() {
+  /** `date` is passed explicitly: "Set later" clears it in the same click. */
+  async function nextFromHawl(date: string) {
     setBusy(true);
     setError(null);
     try {
-      await saveSettings({ hawlStartDate: hawlStartDate || null });
+      await saveSettings({ hawlStartDate: date || null });
       go(4);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not save");
@@ -167,7 +174,7 @@ export default function BeginWizard({
     setBusy(true);
     setError(null);
     try {
-      if (withAsset) {
+      if (withAsset && !assetSaved) {
         const amount = parseFloat(assetAmount);
         if (!assetLabel.trim() || !(amount >= 0)) {
           setError("Add a description and amount, or skip this step");
@@ -175,32 +182,26 @@ export default function BeginWizard({
           return;
         }
         const portion = categoryForMadhhab(assetCategory, madhhab).defaultZakatablePortion;
-        const res = await fetch("/api/assets", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
+        const res = await sendJson(
+          "/api/assets",
+          "POST",
+          {
             category: assetCategory,
             label: assetLabel.trim(),
             amount,
             zakatablePortion: portion,
-          }),
-        });
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          throw new Error(data.error || "Could not add holding");
-        }
+          },
+          "Could not add holding",
+        );
+        if (!res.ok) throw new Error(res.error);
+        setAssetSaved(true);
       }
       await saveSettings({
         hawlStartDate: hawlStartDate || null,
         setupComplete: true,
       });
-      try {
-        localStorage.removeItem(STEP_KEY);
-        localStorage.setItem("mizan-just-begun", "1");
-      } catch {
-        /* ignore */
-      }
-      router.push("/dashboard");
+      setStoredValue(STEP_KEY, null);
+      router.push("/dashboard?welcome=1");
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not finish setup");
@@ -211,7 +212,7 @@ export default function BeginWizard({
   return (
     <div className="space-y-8">
       <header>
-        <p className="label text-brass">Begin</p>
+        <p className="label text-brassDeep">Begin</p>
         <h1 className="mt-1 font-serif text-3xl text-ink">
           {name}, set your ledger
         </h1>
@@ -230,11 +231,11 @@ export default function BeginWizard({
                 ? "font-medium text-pine"
                 : i < step
                   ? "text-sage"
-                  : "text-mist")
+                  : "text-sage")
             }
           >
             {i + 1}. {label}
-            {i < STEPS.length - 1 ? <span className="mx-2 text-mist">/</span> : null}
+            {i < STEPS.length - 1 ? <span className="mx-2 text-sage">/</span> : null}
           </li>
         ))}
       </ol>
@@ -298,6 +299,8 @@ export default function BeginWizard({
             </div>
             <input
               id="currency"
+              autoCapitalize="characters"
+              autoComplete="off"
               className="field mt-2 max-w-[8rem] uppercase"
               maxLength={3}
               value={currency}
@@ -370,8 +373,9 @@ export default function BeginWizard({
         <section className="space-y-5">
           <h2 className="font-serif text-xl text-ink">Metal prices</h2>
           <p className="text-sm text-sage">
-            Nisab is a weight. You set the cash price per gram. Suggestion is
-            optional and never saves until you continue.
+            Nisab is a weight of gold or silver, so Mizan needs today&apos;s price
+            per gram in {currency}. Ask a jeweller or bank, or tap Suggest for a
+            free market figure you can check. Nothing saves until you continue.
           </p>
           <button
             type="button"
@@ -390,15 +394,18 @@ export default function BeginWizard({
               <input
                 id="gold"
                 type="number"
+                inputMode="decimal"
                 step="0.01"
                 min="0"
                 className="field nums"
-                value={gold}
+                placeholder="e.g. 125.40"
+                required
+                value={gold || ""}
                 onChange={(e) => setGold(parseFloat(e.target.value) || 0)}
               />
               <p className="mt-1 text-xs text-sage">
                 Gold nisab ≈{" "}
-                <span className="nums text-brass">
+                <span className="nums text-brassDeep">
                   {formatMoney(NISAB_GOLD_GRAMS * gold, currency)}
                 </span>
               </p>
@@ -410,15 +417,18 @@ export default function BeginWizard({
               <input
                 id="silver"
                 type="number"
+                inputMode="decimal"
                 step="0.0001"
                 min="0"
                 className="field nums"
-                value={silver}
+                placeholder="e.g. 1.55"
+                required
+                value={silver || ""}
                 onChange={(e) => setSilver(parseFloat(e.target.value) || 0)}
               />
               <p className="mt-1 text-xs text-sage">
                 Silver nisab ≈{" "}
-                <span className="nums text-brass">
+                <span className="nums text-brassDeep">
                   {formatMoney(NISAB_SILVER_GRAMS * silver, currency)}
                 </span>
               </p>
@@ -469,7 +479,7 @@ export default function BeginWizard({
               disabled={busy}
               onClick={() => {
                 setHawlStartDate("");
-                void nextFromHawl();
+                void nextFromHawl("");
               }}
             >
               Set later
@@ -478,7 +488,7 @@ export default function BeginWizard({
               type="button"
               className="btn-primary"
               disabled={busy}
-              onClick={nextFromHawl}
+              onClick={() => void nextFromHawl(hawlStartDate)}
             >
               Continue
             </button>
@@ -512,6 +522,8 @@ export default function BeginWizard({
                 <option value="business_inventory">Business inventory</option>
                 <option value="stocks_longterm">Stocks (long-term)</option>
                 <option value="stocks_trading">Stocks (trading)</option>
+                <option value="crypto">Cryptocurrency</option>
+                <option value="pension">Pension / retirement</option>
                 <option value="other">Other</option>
               </select>
             </div>
@@ -534,6 +546,7 @@ export default function BeginWizard({
               <input
                 id="aamount"
                 type="number"
+                inputMode="decimal"
                 step="0.01"
                 min="0"
                 className="field nums"

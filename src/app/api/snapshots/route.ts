@@ -2,11 +2,10 @@ import { NextResponse } from "next/server";
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/db";
-import { assets, liabilities, givingRecords, yearSnapshots } from "@/db/schema";
-import { getCurrentUser, getUserSettings } from "@/lib/session";
-import { calculateZakat } from "@/lib/zakat";
+import { yearSnapshots } from "@/db/schema";
+import { getCurrentUser } from "@/lib/session";
+import { loadReckoning, sumTypeInWindow } from "@/lib/reckoning";
 import type { SnapshotPayload } from "@/lib/snapshot";
-import { paymentWindow, sumZakatInWindow, dateInWindow } from "@/lib/giving-window";
 
 export const dynamic = "force-dynamic";
 
@@ -44,38 +43,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid label" }, { status: 400 });
   }
 
-  const settings = await getUserSettings(user.id);
-  const [assetRows, liabilityRows, givingRows] = await Promise.all([
-    db.select().from(assets).where(eq(assets.userId, user.id)),
-    db.select().from(liabilities).where(eq(liabilities.userId, user.id)),
-    db.select().from(givingRecords).where(eq(givingRecords.userId, user.id)),
-  ]);
-
-  const result = calculateZakat({
-    assets: assetRows.map((a) => ({
-      category: a.category,
-      label: a.label,
-      amount: a.amount,
-      zakatablePortion: a.zakatablePortion,
-    })),
-    liabilities: liabilityRows.map((l) => ({
-      label: l.label,
-      amount: l.amount,
-      deductible: l.deductible,
-    })),
-    prices: {
-      goldPricePerGram: settings.goldPricePerGram,
-      silverPricePerGram: settings.silverPricePerGram,
-    },
-    standard: settings.nisabStandard as "gold" | "silver",
-    basis: settings.calendarBasis as "lunar" | "solar",
-  });
-
-  const window = paymentWindow(settings.hawlStartDate);
-  const sumType = (type: string) =>
-    givingRows
-      .filter((g) => g.type === type && dateInWindow(g.date, window))
-      .reduce((t, g) => t + g.amount, 0);
+  const {
+    settings,
+    assets: assetRows,
+    liabilities: liabilityRows,
+    giving: givingRows,
+    result,
+    window,
+    today,
+  } = await loadReckoning(user.id);
 
   const payload: SnapshotPayload = {
     version: 1,
@@ -113,24 +89,26 @@ export async function POST(request: Request) {
       marginToNisab: result.marginToNisab,
     },
     givingYtd: {
-      year: Number(window.start.slice(0, 4)),
+      year: Number(window.cycleStart.slice(0, 4)),
       windowKind: window.kind,
+      cycleStart: window.cycleStart,
       windowStart: window.start,
       windowEnd: window.end,
       windowLabel: window.label,
-      zakat: sumType("zakat"),
-      sadaqah: sumType("sadaqah"),
-      purification: sumType("purification"),
+      zakat: sumTypeInWindow(givingRows, "zakat", window),
+      sadaqah: sumTypeInWindow(givingRows, "sadaqah", window),
+      purification: sumTypeInWindow(givingRows, "purification", window),
+      fitr: sumTypeInWindow(givingRows, "fitr", window),
     },
     letterToNextYear: parsed.data.letterToNextYear?.trim() || null,
   };
 
-  const takenAt = new Date().toISOString().slice(0, 10);
+  const takenAt = today.toISOString().slice(0, 10);
   const label =
     parsed.data.label?.trim() ||
     (window.kind === "hawl"
-      ? `Hawl ${window.start}`
-      : `Zakat ${window.start.slice(0, 4)}`);
+      ? `Hawl ${window.cycleStart}`
+      : `Zakat ${window.cycleStart.slice(0, 4)}`);
 
   const [row] = await db
     .insert(yearSnapshots)

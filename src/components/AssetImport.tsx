@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { parseAssetCsv, SAMPLE_CSV, type ImportRow } from "@/lib/import-csv";
 import { CATEGORY_LIST, type CategoryKey } from "@/lib/categories";
 import { categoryForMadhhab, type Madhhab } from "@/lib/madhhab";
-import { formatMoney } from "@/lib/money";
+import { formatMoney, formatPercent } from "@/lib/money";
+import { sendJson } from "@/lib/client-fetch";
 
 export default function AssetImport({
   currency,
@@ -23,7 +24,10 @@ export default function AssetImport({
 
   function runParse(raw: string) {
     setMessage(null);
-    const result = parseAssetCsv(raw);
+    const result = parseAssetCsv(
+      raw,
+      (category) => categoryForMadhhab(category, madhhab).defaultZakatablePortion,
+    );
     setErrors(result.errors);
     setPreview(result.rows.length ? result.rows : null);
   }
@@ -57,22 +61,21 @@ export default function AssetImport({
     if (!preview?.length) return;
     setBusy(true);
     setMessage(null);
-    const res = await fetch("/api/assets/import", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ rows: preview }),
-    });
+    const res = await sendJson<{ count?: number }>(
+      "/api/assets/import",
+      "POST",
+      { rows: preview },
+      "Could not import",
+    );
     setBusy(false);
-    if (res.ok) {
-      const data = await res.json().catch(() => ({ count: preview.length }));
-      setMessage(`Imported ${data.count ?? preview.length} holdings.`);
-      setPreview(null);
-      setText("");
-      router.refresh();
-    } else {
-      const data = await res.json().catch(() => ({}));
-      setErrors([data.error || "Could not import"]);
+    if (!res.ok) {
+      setErrors([res.error]);
+      return;
     }
+    setMessage(`Imported ${res.data.count ?? preview.length} holdings.`);
+    setPreview(null);
+    setText("");
+    router.refresh();
   }
 
   return (
@@ -106,6 +109,7 @@ export default function AssetImport({
       </div>
 
       <textarea
+        aria-label="CSV to import"
         className="field mt-4 min-h-[8rem] font-mono text-xs"
         placeholder={"chequing,9500\nTFSA brokerage,12000"}
         value={text}
@@ -142,12 +146,13 @@ export default function AssetImport({
 
       {preview && preview.length > 0 && (
         <div className="mt-4 overflow-x-auto">
-          <table className="w-full min-w-[28rem] text-left text-sm">
+          <table className="w-full min-w-[32rem] text-left text-sm">
             <thead className="text-xs uppercase tracking-wide text-sage">
               <tr>
                 <th className="py-2 font-medium">Description</th>
                 <th className="py-2 font-medium">Category</th>
                 <th className="py-2 font-medium">Amount</th>
+                <th className="py-2 font-medium">Counted</th>
               </tr>
             </thead>
             <tbody>
@@ -156,6 +161,7 @@ export default function AssetImport({
                   <td className="py-2 text-ink">{row.label}</td>
                   <td className="py-2">
                     <select
+                      aria-label={`Category for ${row.label}`}
                       className="field py-1 text-sm"
                       value={row.category}
                       onChange={(e) =>
@@ -170,6 +176,9 @@ export default function AssetImport({
                     </select>
                   </td>
                   <td className="py-2 nums">{formatMoney(row.amount, currency)}</td>
+                  <td className="py-2 nums text-sage">
+                    {formatPercent(row.zakatablePortion, 0)}
+                  </td>
                 </tr>
               ))}
             </tbody>

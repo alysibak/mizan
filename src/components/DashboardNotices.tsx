@@ -1,9 +1,28 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { setStoredValue, useHydrated, useStoredValue } from "@/lib/client-store";
+import {
+  getInstallPrompt,
+  promptInstall,
+  subscribeInstallPrompt,
+} from "@/lib/install-prompt";
 
-const BEGUN_KEY = "mizan-just-begun";
+function isStandalone(): boolean {
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    Boolean((navigator as Navigator & { standalone?: boolean }).standalone)
+  );
+}
+
+function isIos(): boolean {
+  const ua = navigator.userAgent;
+  // iPadOS reports itself as a Mac with touch.
+  return /iphone|ipad|ipod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+}
+
 const INSTALL_KEY = "mizan-install-dismissed";
 const CHECKLIST_KEY = "mizan-checklist-dismissed";
 
@@ -14,43 +33,41 @@ export default function DashboardNotices({
   metalsStale = false,
   metalsReason = null,
   metalsAgeDays = null,
+  welcome = false,
 }: {
   items: Item[];
   metalsStale?: boolean;
   metalsReason?: "defaults" | "never" | "aged" | null;
   metalsAgeDays?: number | null;
+  /** Setup just finished (the wizard lands on /dashboard?welcome=1). */
+  welcome?: boolean;
 }) {
-  const [begun, setBegun] = useState(false);
-  const [install, setInstall] = useState(false);
-  const [checklistHidden, setChecklistHidden] = useState(true);
+  const router = useRouter();
+  const hydrated = useHydrated();
   const [metalsHidden, setMetalsHidden] = useState(false);
+  const installDismissed = useStoredValue(INSTALL_KEY) === "1";
+  const checklistDismissed = useStoredValue(CHECKLIST_KEY) === "1";
+  const installEvent = useSyncExternalStore(
+    subscribeInstallPrompt,
+    getInstallPrompt,
+    () => null,
+  );
+  const [installedNow, setInstalledNow] = useState(false);
 
-  useEffect(() => {
-    try {
-      if (localStorage.getItem(BEGUN_KEY) === "1") {
-        setBegun(true);
-        localStorage.removeItem(BEGUN_KEY);
-      }
-      if (localStorage.getItem(INSTALL_KEY) !== "1") {
-        const standalone =
-          window.matchMedia("(display-mode: standalone)").matches ||
-          ("standalone" in navigator &&
-            Boolean(
-              (navigator as Navigator & { standalone?: boolean }).standalone,
-            ));
-        if (!standalone) setInstall(true);
-      }
-      setChecklistHidden(localStorage.getItem(CHECKLIST_KEY) === "1");
-    } catch {
-      setChecklistHidden(false);
-    }
-  }, []);
+  // Browser-only facts: shown after hydration so server and client agree.
+  const ios = hydrated && isIos();
+  const install = hydrated && !installDismissed && !installedNow && !isStandalone();
+  const checklistHidden = !hydrated || checklistDismissed;
+
+  function dismissWelcome() {
+    router.replace("/dashboard", { scroll: false });
+  }
 
   const remaining = items.filter((i) => !i.done);
 
   return (
     <div className="space-y-6">
-      {begun ? (
+      {welcome ? (
         <section className="border border-pine/40 bg-pine/5 px-5 py-5">
           <p className="label text-pine">Ready</p>
           <p className="mt-1 font-serif text-xl text-ink">Your ledger is open.</p>
@@ -68,7 +85,7 @@ export default function DashboardNotices({
             <button
               type="button"
               className="text-xs text-sage hover:text-ink"
-              onClick={() => setBegun(false)}
+              onClick={dismissWelcome}
             >
               Dismiss
             </button>
@@ -80,7 +97,7 @@ export default function DashboardNotices({
         <section className="border border-brass/40 bg-brass/5 px-5 py-4">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="label text-brass">
+              <p className="label text-brassDeep">
                 {metalsReason === "aged"
                   ? "Metal prices may be stale"
                   : metalsReason === "never"
@@ -113,7 +130,7 @@ export default function DashboardNotices({
         <section className="border border-mist bg-paper px-5 py-5">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="label text-brass">Getting started</p>
+              <p className="label text-brassDeep">Getting started</p>
               <p className="mt-1 font-serif text-lg text-ink">
                 {remaining.length} step{remaining.length === 1 ? "" : "s"} left
               </p>
@@ -121,14 +138,7 @@ export default function DashboardNotices({
             <button
               type="button"
               className="text-xs text-sage hover:text-ink"
-              onClick={() => {
-                try {
-                  localStorage.setItem(CHECKLIST_KEY, "1");
-                } catch {
-                  /* ignore */
-                }
-                setChecklistHidden(true);
-              }}
+              onClick={() => setStoredValue(CHECKLIST_KEY, "1")}
             >
               Dismiss
             </button>
@@ -136,7 +146,7 @@ export default function DashboardNotices({
           <ul className="mt-4 space-y-2">
             {items.map((item) => (
               <li key={item.label} className="flex items-center gap-3 text-sm">
-                <span className={item.done ? "text-gain" : "text-mist"}>
+                <span className={item.done ? "text-gain" : "text-sage"}>
                   {item.done ? "✓" : "○"}
                 </span>
                 {item.done ? (
@@ -156,25 +166,42 @@ export default function DashboardNotices({
         <section className="border border-dashed border-mist px-5 py-4">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="label text-brass">On your home screen</p>
-              <p className="mt-1 text-sm text-sage">
-                Mizan is a web app. In your browser menu, choose{" "}
-                <span className="text-ink">Add to Home Screen</span> or{" "}
-                <span className="text-ink">Install</span> for a ledger that opens
-                like a notebook — no app store.
-              </p>
+              <p className="label text-brassDeep">On your home screen</p>
+              {installEvent ? (
+                <>
+                  <p className="mt-1 text-sm text-sage">
+                    Install Mizan for a ledger that opens from your home screen
+                    like a notebook — no app store.
+                  </p>
+                  <button
+                    type="button"
+                    className="btn-primary mt-3"
+                    onClick={async () => {
+                      if (await promptInstall()) setInstalledNow(true);
+                    }}
+                  >
+                    Install Mizan
+                  </button>
+                </>
+              ) : ios ? (
+                <p className="mt-1 text-sm text-sage">
+                  In Safari, tap <span className="text-ink">Share</span>, then{" "}
+                  <span className="text-ink">Add to Home Screen</span>. Mizan
+                  opens full-screen like an app — no app store.
+                </p>
+              ) : (
+                <p className="mt-1 text-sm text-sage">
+                  Mizan is a web app. In your browser menu, choose{" "}
+                  <span className="text-ink">Install</span> or{" "}
+                  <span className="text-ink">Add to Home Screen</span> for a
+                  ledger that opens like a notebook — no app store.
+                </p>
+              )}
             </div>
             <button
               type="button"
               className="shrink-0 text-xs text-sage hover:text-ink"
-              onClick={() => {
-                try {
-                  localStorage.setItem(INSTALL_KEY, "1");
-                } catch {
-                  /* ignore */
-                }
-                setInstall(false);
-              }}
+              onClick={() => setStoredValue(INSTALL_KEY, "1")}
             >
               Dismiss
             </button>

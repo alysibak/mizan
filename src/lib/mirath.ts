@@ -114,6 +114,41 @@ export const HEIR_LABELS: Record<HeirKey, string> = {
   maternalSister: "Maternal half-sister",
 };
 
+/** Most of each heir that can exist: one husband, up to four wives, one of each parent. */
+export const HEIR_MAX: Record<HeirKey, number> = {
+  husband: 1,
+  wife: 4,
+  father: 1,
+  mother: 1,
+  paternalGrandfather: 1,
+  maternalGrandmother: 1,
+  paternalGrandmother: 1,
+  son: 30,
+  daughter: 30,
+  sonsSon: 30,
+  sonsDaughter: 30,
+  fullBrother: 30,
+  fullSister: 30,
+  paternalBrother: 30,
+  paternalSister: 30,
+  maternalBrother: 30,
+  maternalSister: 30,
+};
+
+/** Heirs who take only as residuaries (or alongside one) and can be left with nothing. */
+const RESIDUARY_ONLY: HeirKey[] = [
+  "son",
+  "sonsSon",
+  "sonsDaughter",
+  "fullBrother",
+  "fullSister",
+  "paternalBrother",
+  "paternalSister",
+];
+
+const DISTANT_RELATIVES_NOTE =
+  "This assumes no more distant male-line relatives survive (brother's sons, paternal uncles, or their sons). This engine does not model them; if any do, they take the remainder before radd or the treasury.";
+
 export interface ShareLine {
   heir: HeirKey;
   count: number;
@@ -143,11 +178,20 @@ export interface MirathResult {
 
 export function distributeEstate(input: Heirs): MirathResult {
   const h: Record<HeirKey, number> = Object.fromEntries(
-    (Object.keys(HEIR_LABELS) as HeirKey[]).map((k) => [k, Math.max(0, Math.floor(input[k] ?? 0))]),
+    (Object.keys(HEIR_LABELS) as HeirKey[]).map((k) => [
+      k,
+      Math.min(HEIR_MAX[k], Math.max(0, Math.floor(Number(input[k]) || 0))),
+    ]),
   ) as Record<HeirKey, number>;
 
   const notes: string[] = [];
   const blocked: { heir: HeirKey; by: string }[] = [];
+
+  // A deceased leaves a husband or wives, never both.
+  if (h.husband > 0 && h.wife > 0) {
+    h.wife = 0;
+    notes.push("A husband and a wife cannot both inherit from the same person; the wife entry was ignored.");
+  }
 
   // Presence flags ---------------------------------------------------------
   const maleDescendant = h.son > 0 || h.sonsSon > 0;
@@ -166,25 +210,30 @@ export function distributeEstate(input: Heirs): MirathResult {
     shares.set(k, { frac, basis, reason });
 
   // --- Gharrawayn (Umariyyatan): spouse + mother + father only ------------
+  // Grandparents are blocked by the parents and a single sibling by the
+  // father, so their presence does not change the case. Two or more siblings
+  // reduce the mother to 1/6 instead, which is the ordinary rule below.
   const onlyThree =
     h.mother > 0 &&
     father &&
     (h.husband > 0 || h.wife > 0) &&
-    siblingCount === 0 &&
     !anyDescendant &&
-    grandfather === false &&
-    h.maternalGrandmother === 0 &&
-    h.paternalGrandmother === 0;
-  if (onlyThree && h.husband > 0) {
-    setShare("husband", f(1, 2), "fard", "1/2, no descendant");
-    setShare("mother", f(1, 6), "fard", "1/3 of the remainder after the husband (Umariyyatan)");
-    setShare("father", f(1, 3), "asaba", "remainder as residuary");
-    return finalize(shares, h, notes, blocked, F0);
-  }
-  if (onlyThree && h.wife > 0) {
-    setShare("wife", f(1, 4), "fard", "1/4, no descendant");
-    setShare("mother", f(1, 4), "fard", "1/3 of the remainder after the wife (Umariyyatan)");
-    setShare("father", f(1, 2), "asaba", "remainder as residuary");
+    siblingCount < 2;
+  if (onlyThree) {
+    if (h.maternalGrandmother > 0) blocked.push({ heir: "maternalGrandmother", by: "mother" });
+    if (h.paternalGrandmother > 0) blocked.push({ heir: "paternalGrandmother", by: "mother" });
+    (["fullBrother", "fullSister", "paternalBrother", "paternalSister", "maternalBrother", "maternalSister"] as HeirKey[]).forEach((k) => {
+      if (h[k] > 0) blocked.push({ heir: k, by: "Father" });
+    });
+    if (h.husband > 0) {
+      setShare("husband", f(1, 2), "fard", "1/2, no descendant");
+      setShare("mother", f(1, 6), "fard", "1/3 of the remainder after the husband (Umariyyatan)");
+      setShare("father", f(1, 3), "asaba", "remainder as residuary");
+    } else {
+      setShare("wife", f(1, 4), "fard", "1/4, no descendant");
+      setShare("mother", f(1, 4), "fard", "1/3 of the remainder after the wife (Umariyyatan)");
+      setShare("father", f(1, 2), "asaba", "remainder as residuary");
+    }
     return finalize(shares, h, notes, blocked, F0);
   }
 
@@ -341,6 +390,7 @@ export function distributeEstate(input: Heirs): MirathResult {
     shares.forEach((s, k) => {
       if (s.basis === "fard" || s.basis === "fard+asaba") shares.set(k, { ...s, frac: s.frac.mul(scale), basis: "fard" });
     });
+    noteExhausted(shares, h, notes, blocked);
     return finalize(shares, h, notes, blocked, F0, true, false);
   }
 
@@ -352,6 +402,11 @@ export function distributeEstate(input: Heirs): MirathResult {
     return finalize(shares, h, notes, blocked, F0);
   }
 
+  if (residue.isZero()) {
+    noteExhausted(shares, h, notes, blocked);
+    return finalize(shares, h, notes, blocked, F0);
+  }
+
   // radd: leftover with no residuary returns to the sharers, never the spouse.
   if (residue.cmp(F0) > 0 && !asabaAssigned) {
     const spouseShare = (shares.get("husband")?.frac ?? F0).add(shares.get("wife")?.frac ?? F0);
@@ -360,11 +415,16 @@ export function distributeEstate(input: Heirs): MirathResult {
       if (k !== "husband" && k !== "wife") nonSpouseSum = nonSpouseSum.add(s.frac);
     });
     if (nonSpouseSum.isZero()) {
-      // Only a spouse: the remainder goes to the public treasury (classical view).
-      notes.push("Only a spouse inherits a fixed share. Classically the remainder passes to the public treasury (bayt al-mal); some modern rulings return it to the spouse.");
+      notes.push(
+        shares.size === 0
+          ? "No heir entered here inherits. Classically the estate passes to the public treasury (bayt al-mal)."
+          : "Only a spouse inherits a fixed share. Classically the remainder passes to the public treasury (bayt al-mal); some modern rulings return it to the spouse.",
+      );
+      notes.push(DISTANT_RELATIVES_NOTE);
       return finalize(shares, h, notes, blocked, residue);
     }
     notes.push("The fixed shares left a surplus with no residuary heir, so radd was applied: the surplus returns to the sharers in proportion, excluding the spouse.");
+    notes.push(DISTANT_RELATIVES_NOTE);
     const fill = F1.sub(spouseShare).div(nonSpouseSum);
     shares.forEach((s, k) => {
       if (k !== "husband" && k !== "wife") shares.set(k, { ...s, frac: s.frac.mul(fill), basis: "radd" });
@@ -373,6 +433,32 @@ export function distributeEstate(input: Heirs): MirathResult {
   }
 
   return finalize(shares, h, notes, blocked, residue);
+}
+
+// Residuary heirs who are present and unblocked but get nothing because the
+// fixed shares used up the estate. Reported, never silently dropped.
+function noteExhausted(
+  shares: Map<HeirKey, { frac: Fraction; basis: ShareLine["basis"]; reason: string }>,
+  h: Record<HeirKey, number>,
+  notes: string[],
+  blocked: { heir: HeirKey; by: string }[],
+) {
+  const left = RESIDUARY_ONLY.filter(
+    (k) => h[k] > 0 && !shares.has(k) && !blocked.some((b) => b.heir === k),
+  );
+  if (left.length === 0) return;
+  left.forEach((k) => blocked.push({ heir: k, by: "the fixed shares, which used up the estate" }));
+  const mushtaraka =
+    h.husband > 0 &&
+    (h.mother > 0 || h.maternalGrandmother > 0 || h.paternalGrandmother > 0) &&
+    h.maternalBrother + h.maternalSister >= 2 &&
+    (h.fullBrother > 0 || h.fullSister > 0) &&
+    left.includes(h.fullBrother > 0 ? "fullBrother" : "fullSister");
+  notes.push(
+    mushtaraka
+      ? "This is the Mushtaraka (Himariyya) case. Shown here as the Hanafi and Hanbali schools rule it: the full siblings get nothing. The Maliki and Shafi'i schools have them share the maternal siblings' third equally. Ask a scholar which applies."
+      : "The fixed shares used up the whole estate, so the residuary heirs listed below receive nothing.",
+  );
 }
 
 // Assign the residue to the nearest residuary heir. Returns true if assigned.

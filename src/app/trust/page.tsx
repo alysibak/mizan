@@ -14,7 +14,7 @@ export default function TrustPage() {
       <Link href="/" className="font-serif text-xl text-ink">
         Mizan
       </Link>
-      <p className="label mt-10 text-brass">Accountability</p>
+      <p className="label mt-10 text-brassDeep">Accountability</p>
       <h1 className="mt-2 font-serif text-4xl text-ink">What is verified</h1>
       <p className="mt-4 leading-relaxed text-sage">
         If you use this app for zakat, do not trust it blindly. Below is an
@@ -140,7 +140,7 @@ export default function TrustPage() {
         <Link href="/method" className="text-pine hover:underline">
           How the numbers are made
         </Link>
-        <span className="mx-2 text-mist">·</span>
+        <span className="mx-2 text-sage">·</span>
         <Link href="/register" className="text-pine hover:underline">
           Create an account
         </Link>

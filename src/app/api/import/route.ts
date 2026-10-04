@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
+import type { BatchItem } from "drizzle-orm/batch";
 import { z } from "zod";
 import { db } from "@/db";
 import {
@@ -12,27 +13,52 @@ import {
 import { getCurrentUser } from "@/lib/session";
 import {
   assetSchema,
+  currencySchema,
+  firstIssue,
+  isoDaySchema,
   liabilitySchema,
   givingSchema,
   settingsSchema,
 } from "@/lib/validation";
+import { snapshotPayloadSchema } from "@/lib/snapshot";
+import { normalizeAsset } from "@/lib/asset-write";
 
 const snapshotBackupSchema = z.object({
   label: z.string().trim().min(1).max(80),
-  takenAt: z.string().min(1),
-  currency: z.string().trim().min(3).max(3),
-  payload: z.string().min(2),
+  takenAt: isoDaySchema,
+  currency: currencySchema,
+  // Stored as a JSON string; validated as a real payload so a hand-edited
+  // backup cannot plant a snapshot that breaks the pages rendering it.
+  payload: z
+    .string()
+    .max(500_000)
+    .refine((raw) => {
+      try {
+        return snapshotPayloadSchema.safeParse(JSON.parse(raw)).success;
+      } catch {
+        return false;
+      }
+    }, "A frozen year in this backup is damaged."),
 });
 
 const backupSchema = z.object({
   app: z.literal("mizan").optional(),
   version: z.number().optional(),
   settings: settingsSchema,
-  assets: z.array(assetSchema).max(500),
-  liabilities: z.array(liabilitySchema).max(500),
-  giving: z.array(givingSchema).max(2000),
-  snapshots: z.array(snapshotBackupSchema).max(200).optional(),
+  assets: z.array(assetSchema).max(2000),
+  liabilities: z.array(liabilitySchema).max(2000),
+  giving: z.array(givingSchema).max(20_000),
+  snapshots: z.array(snapshotBackupSchema).max(500).optional(),
 });
+
+/** Rows per INSERT, well under SQLite's bound-parameter limit. */
+const CHUNK = 200;
+
+function chunks<T>(rows: T[]): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < rows.length; i += CHUNK) out.push(rows.slice(i, i + CHUNK));
+  return out;
+}
 
 export async function POST(request: Request) {
   const user = await getCurrentUser();
@@ -42,7 +68,7 @@ export async function POST(request: Request) {
   const parsed = backupSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: parsed.error.issues[0]?.message ?? "This file is not a Mizan backup." },
+      { error: firstIssue(parsed.error, "This file is not a Mizan backup.") },
       { status: 400 },
     );
   }
@@ -51,70 +77,54 @@ export async function POST(request: Request) {
   const { touchMetals: _touch, ...settingsFields } = data.settings;
   const settingValues = {
     ...settingsFields,
-    currency: data.settings.currency.toUpperCase(),
-    hawlStartDate: data.settings.hawlStartDate || null,
-    madhhab: data.settings.madhhab ?? "general",
     // Restoring a ledger means setup is done; older backups omit the flag.
     setupComplete: data.settings.setupComplete ?? true,
     trustedAckAt: data.settings.trustedAckAt ?? null,
     metalsUpdatedAt: data.settings.metalsUpdatedAt ?? null,
     updatedAt: new Date().toISOString(),
   };
+  const prices = {
+    goldPricePerGram: settingValues.goldPricePerGram,
+    silverPricePerGram: settingValues.silverPricePerGram,
+  };
 
-  await db.delete(assets).where(eq(assets.userId, user.id));
-  await db.delete(liabilities).where(eq(liabilities.userId, user.id));
-  await db.delete(givingRecords).where(eq(givingRecords.userId, user.id));
-  await db.delete(yearSnapshots).where(eq(yearSnapshots.userId, user.id));
-
-  await db
-    .insert(settings)
-    .values({ userId: user.id, ...settingValues })
-    .onConflictDoUpdate({ target: settings.userId, set: settingValues });
-
-  if (data.assets.length) {
-    await db.insert(assets).values(
-      data.assets.map((row) => ({
-        userId: user.id,
-        ...row,
-        hawlStartDate: row.hawlStartDate || null,
-        note: row.note || null,
-      })),
-    );
-  }
-  if (data.liabilities.length) {
-    await db
-      .insert(liabilities)
-      .values(data.liabilities.map((row) => ({ userId: user.id, ...row })));
-  }
-  if (data.giving.length) {
-    await db.insert(givingRecords).values(
-      data.giving.map((row) => ({
-        userId: user.id,
-        ...row,
-        asnaf: row.type === "zakat" ? row.asnaf || null : null,
-        recipient: row.recipient || null,
-        note: row.note || null,
-      })),
-    );
-  }
+  const assetRows = data.assets.map((row) => ({
+    userId: user.id,
+    ...row,
+    ...normalizeAsset(row, prices, settingValues.currency),
+  }));
+  const liabilityRows = data.liabilities.map((row) => ({ userId: user.id, ...row }));
+  const givingRows = data.giving.map((row) => ({
+    userId: user.id,
+    ...row,
+    asnaf: row.type === "zakat" ? row.asnaf ?? null : null,
+  }));
   const snaps = data.snapshots ?? [];
-  if (snaps.length) {
-    await db.insert(yearSnapshots).values(
-      snaps.map((s) => ({
-        userId: user.id,
-        label: s.label,
-        takenAt: s.takenAt,
-        currency: s.currency.toUpperCase(),
-        payload: s.payload,
-      })),
-    );
-  }
+  const snapshotRows = snaps.map((s) => ({ userId: user.id, ...s }));
+
+  // One batch is one transaction: the old ledger is only removed if every
+  // row of the backup lands. A failure part-way leaves the account untouched.
+  const statements: BatchItem<"sqlite">[] = [
+    db.delete(assets).where(eq(assets.userId, user.id)),
+    db.delete(liabilities).where(eq(liabilities.userId, user.id)),
+    db.delete(givingRecords).where(eq(givingRecords.userId, user.id)),
+    db.delete(yearSnapshots).where(eq(yearSnapshots.userId, user.id)),
+    db
+      .insert(settings)
+      .values({ userId: user.id, ...settingValues })
+      .onConflictDoUpdate({ target: settings.userId, set: settingValues }),
+    ...chunks(assetRows).map((rows) => db.insert(assets).values(rows)),
+    ...chunks(liabilityRows).map((rows) => db.insert(liabilities).values(rows)),
+    ...chunks(givingRows).map((rows) => db.insert(givingRecords).values(rows)),
+    ...chunks(snapshotRows).map((rows) => db.insert(yearSnapshots).values(rows)),
+  ];
+  await db.batch(statements as [BatchItem<"sqlite">, ...BatchItem<"sqlite">[]]);
 
   return NextResponse.json({
     ok: true,
-    assets: data.assets.length,
-    liabilities: data.liabilities.length,
-    giving: data.giving.length,
-    snapshots: snaps.length,
+    assets: assetRows.length,
+    liabilities: liabilityRows.length,
+    giving: givingRows.length,
+    snapshots: snapshotRows.length,
   });
 }
