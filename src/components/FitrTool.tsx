@@ -17,7 +17,7 @@ export default function FitrTool({ currency }: { currency: string }) {
   return (
     <div className="space-y-8">
       <header>
-        <p className="label text-brass">End of Ramadan</p>
+        <p className="label text-brassDeep">End of Ramadan</p>
         <h1 className="mt-1 font-serif text-3xl text-ink">Zakat al-Fitr</h1>
         <p className="mt-2 max-w-xl text-sm text-sage">
           A set amount for yourself and each person you provide for — children

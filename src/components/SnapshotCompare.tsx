@@ -70,7 +70,7 @@ export default function SnapshotCompare({ freezes }: { freezes: Freeze[] }) {
         <Link href={`/year/snapshots/${older.id}`} className="text-pine hover:underline">
           Open older
         </Link>
-        <span className="mx-2 text-mist">·</span>
+        <span className="mx-2 text-sage">·</span>
         <Link href={`/year/snapshots/${newer.id}`} className="text-pine hover:underline">
           Open newer
         </Link>

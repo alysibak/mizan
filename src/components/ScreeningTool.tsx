@@ -152,7 +152,7 @@ function ScreeningForm({ currency, draft }: { currency: string; draft: Draft | n
             {ACTIVITIES.map((a) => (
               <label
                 key={a.key}
-                className="flex items-center gap-2 rounded-lg border border-mist bg-white px-3 py-2 text-sm text-ink"
+                className="flex items-center gap-2 rounded-lg border border-mist bg-surface px-3 py-2 text-sm text-ink"
               >
                 <input
                   type="checkbox"
@@ -289,7 +289,7 @@ function ScreeningForm({ currency, draft }: { currency: string; draft: Draft | n
             <div className="mt-4 space-y-3 rounded-lg bg-porcelain px-3 py-3">
               <p className="text-xs leading-relaxed text-sage">
                 If you hold this stock, purify{" "}
-                <span className="text-brass">
+                <span className="text-brassDeep">
                   {formatPercent(result.purificationRatio)}
                 </span>{" "}
                 of any dividend income by giving it away. That gift is not zakat.
@@ -313,7 +313,7 @@ function ScreeningForm({ currency, draft }: { currency: string; draft: Draft | n
               {purifyDue > 0 && (
                 <p className="text-sm text-ink">
                   Give away{" "}
-                  <span className="nums font-medium text-brass">
+                  <span className="nums font-medium text-brassDeep">
                     {formatMoney(purifyDue, currency)}
                   </span>
                 </p>

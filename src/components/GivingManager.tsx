@@ -15,7 +15,7 @@ const TYPE_TONE: Record<string, string> = {
   zakat: "text-pine",
   purification: "text-sage",
   fitr: "text-ink",
-  sadaqah: "text-brass",
+  sadaqah: "text-brassDeep",
 };
 
 export default function GivingManager({
@@ -26,6 +26,7 @@ export default function GivingManager({
   defaultAsnaf,
   cycleOutstanding = 0,
   cyclePayable = false,
+  cleared = false,
 }: {
   records: GivingRecord[];
   currency: string;
@@ -34,11 +35,13 @@ export default function GivingManager({
   defaultAsnaf?: string | null;
   cycleOutstanding?: number;
   cyclePayable?: boolean;
+  /** The last gift just covered the cycle (carried in the URL as ?cleared=1). */
+  cleared?: boolean;
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [justCleared, setJustCleared] = useState(false);
+  const [justCleared, setJustCleared] = useState(cleared);
   const [type, setType] = useState<GivingType>(defaultType);
   // The viewer's own calendar day, set after mount so the server render (UTC)
   // never pre-fills tomorrow's date for someone west of Greenwich.
@@ -78,19 +81,22 @@ export default function GivingManager({
       setError(res.error);
       return;
     }
-    if (
+    const clearedCycle =
       giftType === "zakat" &&
       cyclePayable &&
       cycleOutstanding > 0 &&
-      amount >= cycleOutstanding - 0.005
-    ) {
-      setJustCleared(true);
-    }
+      amount >= cycleOutstanding - 0.005;
     formEl.reset();
     setType(defaultType);
     setDate(null);
-    const q = defaultType === "sadaqah" ? "/giving" : `/giving?type=${defaultType}`;
-    router.replace(q);
+    // The page remounts this form when the prefilled amount leaves the URL,
+    // so the "cycle cleared" note travels in the URL too.
+    const params = new URLSearchParams();
+    if (defaultType !== "sadaqah") params.set("type", defaultType);
+    if (clearedCycle) params.set("cleared", "1");
+    const q = params.size ? `/giving?${params}` : "/giving";
+    setJustCleared(clearedCycle);
+    router.replace(q, { scroll: !clearedCycle });
     router.refresh();
   }
 
@@ -321,7 +327,7 @@ export default function GivingManager({
                     <p className="font-medium text-ink nums">
                       {formatMoney(r.amount, currency)}
                     </p>
-                    <p className={"text-xs " + (TYPE_TONE[r.type] ?? "text-brass")}>
+                    <p className={"text-xs " + (TYPE_TONE[r.type] ?? "text-brassDeep")}>
                       {givingTypeLabel(r.type)}
                     </p>
                   </div>

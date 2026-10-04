@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 /** Advance ledger hawl start to the tabular due day of the closed cycle. */
@@ -14,7 +13,6 @@ export default function RollHawlButton({
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState(false);
 
   async function roll() {
     if (
@@ -35,22 +33,10 @@ export default function RollHawlButton({
       setError(data?.error || "Could not roll hawl");
       return;
     }
-    setDone(true);
+    // This snapshot stops being the current cycle's once rolled, so the
+    // confirmation lives on The year rather than in this button's state.
+    router.push(`/year?rolled=${encodeURIComponent(nextStart)}`);
     router.refresh();
-  }
-
-  if (done) {
-    return (
-      <div>
-        <p className="text-sm text-gain">
-          Next hawl starts {nextStart}. Confirm the real payment day with local
-          moon-sighting.
-        </p>
-        <Link href="/statement" className="btn-primary mt-4 inline-flex">
-          Print statement
-        </Link>
-      </div>
-    );
   }
 
   return (

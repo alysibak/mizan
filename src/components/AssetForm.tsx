@@ -11,7 +11,7 @@ import {
   valueByWeight,
   type Metal,
 } from "@/lib/metals";
-import { formatMoney } from "@/lib/money";
+import { formatMoney, toCents } from "@/lib/money";
 import { sendJson } from "@/lib/client-fetch";
 import type { Asset } from "@/db/schema";
 
@@ -66,6 +66,13 @@ export default function AssetForm({
   const [hawlStartDate, setHawlStartDate] = useState(asset?.hawlStartDate ?? "");
   const [note, setNote] = useState(asset?.note ?? "");
   const [byWeight, setByWeight] = useState(Boolean(asset?.grams));
+  const [inForeign, setInForeign] = useState(Boolean(asset?.foreignCurrency));
+  const [foreignCurrency, setForeignCurrency] = useState(asset?.foreignCurrency ?? "USD");
+  const [foreignAmount, setForeignAmount] = useState(
+    asset?.foreignAmount != null ? String(asset.foreignAmount) : "",
+  );
+  const [fxRate, setFxRate] = useState(asset?.fxRate != null ? String(asset.fxRate) : "");
+  const [rateHint, setRateHint] = useState<string | null>(null);
   const [grams, setGrams] = useState(asset?.grams ? String(asset.grams) : "");
   const [purity, setPurity] = useState(String(asset?.purity ?? 1));
   const [metal, setMetal] = useState<Metal>(
@@ -77,6 +84,26 @@ export default function AssetForm({
   const meta = useMemo(() => categoryForMadhhab(category, madhhab), [category, madhhab]);
   const weighable = isWeighable(category);
   const weighed = weighable && byWeight;
+  const foreign = !weighed && inForeign;
+  const foreignValue = foreign
+    ? toCents((parseFloat(foreignAmount) || 0) * (parseFloat(fxRate) || 0))
+    : 0;
+
+  async function suggestRate() {
+    setRateHint(null);
+    const res = await fetch(
+      `/api/fx?from=${encodeURIComponent(foreignCurrency)}&to=${encodeURIComponent(currency)}`,
+    ).catch(() => null);
+    const data = (await res?.json().catch(() => ({}))) ?? {};
+    if (!res?.ok) {
+      setRateHint(data.error || "Enter the rate by hand.");
+      return;
+    }
+    setFxRate(String(data.rate));
+    setRateHint(
+      `From ${data.source ?? "a free source"}${data.asOf ? `, ${data.asOf}` : ""}. Check it against your bank's rate.`,
+    );
+  }
   const activeMetal = metalFor(category, metal);
   const perGram = activeMetal ? pricePerGram(activeMetal, prices) : 0;
   const weightValue = weighed
@@ -101,11 +128,19 @@ export default function AssetForm({
     setGrams("");
     setPurity("1");
     setMetal("gold");
+    setInForeign(false);
+    setForeignAmount("");
+    setFxRate("");
+    setRateHint(null);
   }
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
+    if (foreign && !(parseFloat(fxRate) > 0)) {
+      setError(`Enter how many ${currency} one ${foreignCurrency} is worth.`);
+      return;
+    }
     if (weighed && !(weightValue > 0)) {
       setError(
         perGram > 0
@@ -118,7 +153,7 @@ export default function AssetForm({
     const body = {
       category,
       label,
-      amount: weighed ? weightValue : amount,
+      amount: weighed ? weightValue : foreign ? foreignValue : amount,
       // Fixed-portion categories always count in full.
       zakatablePortion: meta.portionEditable ? portion : meta.defaultZakatablePortion,
       hawlStartDate: hawlStartDate || null,
@@ -126,6 +161,9 @@ export default function AssetForm({
       grams: weighed ? grams : null,
       purity: weighed ? purity : null,
       metal: weighed && category === "jewellery" ? metal : null,
+      foreignCurrency: foreign ? foreignCurrency : null,
+      foreignAmount: foreign ? foreignAmount : null,
+      fxRate: foreign ? fxRate : null,
     };
     const res = asset
       ? await sendJson(`/api/assets/${asset.id}`, "PATCH", body, "Could not save this holding")
@@ -259,6 +297,87 @@ export default function AssetForm({
         </div>
       )}
 
+      {!weighed && (
+        <div className="border border-dashed border-mist px-4 py-3">
+          <label className="flex items-center gap-2 text-sm text-ink">
+            <input
+              type="checkbox"
+              className="h-4 w-4 accent-pine"
+              checked={inForeign}
+              onChange={(e) => setInForeign(e.target.checked)}
+            />
+            Held in another currency
+          </label>
+          {inForeign && (
+            <div className="mt-3 grid gap-3 sm:grid-cols-3">
+              <div>
+                <label className="label mb-1" htmlFor={`${idPrefix}-fcur`}>
+                  Currency
+                </label>
+                <input
+                  id={`${idPrefix}-fcur`}
+                  className="field uppercase"
+                  maxLength={3}
+                  autoCapitalize="characters"
+                  autoComplete="off"
+                  value={foreignCurrency}
+                  onChange={(e) => setForeignCurrency(e.target.value.toUpperCase())}
+                  required
+                />
+              </div>
+              <div>
+                <label className="label mb-1" htmlFor={`${idPrefix}-famount`}>
+                  Amount ({foreignCurrency || "…"})
+                </label>
+                <input
+                  id={`${idPrefix}-famount`}
+                  type="number"
+                  inputMode="decimal"
+                  step="0.01"
+                  min="0"
+                  className="field nums"
+                  value={foreignAmount}
+                  onChange={(e) => setForeignAmount(e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <label className="label mb-1" htmlFor={`${idPrefix}-rate`}>
+                  1 {foreignCurrency || "…"} = ? {currency}
+                </label>
+                <input
+                  id={`${idPrefix}-rate`}
+                  type="number"
+                  inputMode="decimal"
+                  step="any"
+                  min="0"
+                  className="field nums"
+                  value={fxRate}
+                  onChange={(e) => setFxRate(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="flex flex-wrap items-center gap-3 sm:col-span-3">
+                <button
+                  type="button"
+                  className="btn-ghost"
+                  onClick={() => void suggestRate()}
+                  disabled={foreignCurrency.length !== 3}
+                >
+                  Suggest rate
+                </button>
+                <p className="text-xs text-sage">
+                  {foreignValue > 0
+                    ? `Counts as ${formatMoney(foreignValue, currency)}. `
+                    : ""}
+                  {rateHint ?? "Use the rate you would actually get; update it at reckoning time."}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {(category === "receivables" || category === "business_inventory") && (
         <p className="text-xs text-sage">
           {category === "receivables"
@@ -268,7 +387,7 @@ export default function AssetForm({
       )}
 
       <div className="grid gap-4 sm:grid-cols-2">
-        {!weighed && (
+        {!weighed && !foreign && (
           <div>
             <label className="label mb-1.5" htmlFor={`${idPrefix}-amount`}>
               Value ({currency})

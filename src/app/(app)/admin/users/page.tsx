@@ -35,7 +35,7 @@ export default async function AdminUsersPage() {
   return (
     <div className="space-y-8">
       <header>
-        <p className="label text-brass">Admin</p>
+        <p className="label text-brassDeep">Admin</p>
         <h1 className="mt-1 font-serif text-3xl text-ink">Who has entered</h1>
         <p className="mt-2 max-w-xl text-sm text-sage">
           Accounts that registered on Mizan, with when they signed up and when

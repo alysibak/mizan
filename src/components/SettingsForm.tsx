@@ -148,6 +148,7 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
             <p className="mt-1.5 text-xs text-sage">
               A three-letter code such as CAD, USD, GBP, or AED. Changing it
               relabels figures; it does not convert holdings or metal prices.
+              Holdings kept in another currency use rates to this one.
             </p>
           </div>
           <div>
@@ -264,7 +265,7 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
             />
             <p className="mt-1.5 text-xs text-sage">
               Gold nisab ={" "}
-              <span className="text-brass nums">
+              <span className="text-brassDeep nums">
                 {formatMoney(goldNisab, currency)}
               </span>
             </p>
@@ -286,7 +287,7 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
             />
             <p className="mt-1.5 text-xs text-sage">
               Silver nisab ={" "}
-              <span className="text-brass nums">
+              <span className="text-brassDeep nums">
                 {formatMoney(silverNisab, currency)}
               </span>
             </p>

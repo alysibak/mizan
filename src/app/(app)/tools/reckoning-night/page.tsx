@@ -5,7 +5,7 @@ export default function ReckoningNightPage() {
   return (
     <div className="space-y-10">
       <header>
-        <p className="label text-brass">A sitting</p>
+        <p className="label text-brassDeep">A sitting</p>
         <h1 className="mt-1 font-serif text-4xl text-ink">Reckoning night</h1>
         <p className="mt-3 max-w-lg text-sm leading-relaxed text-sage">
           One path for the evening you close the year. Remember, watch nisab,
@@ -20,7 +20,7 @@ export default function ReckoningNightPage() {
               href={s.href}
               className="block py-8 transition hover:bg-mist/20"
             >
-              <p className="text-xs tracking-[0.2em] text-brass">
+              <p className="text-xs tracking-[0.2em] text-brassDeep">
                 {String(s.n).padStart(2, "0")}
               </p>
               <p className="mt-2 font-serif text-2xl text-ink">{s.title}</p>

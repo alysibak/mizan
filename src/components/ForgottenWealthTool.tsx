@@ -34,7 +34,7 @@ export default function ForgottenWealthTool() {
       <ReckoningStepNav current="forgotten" />
 
       <header>
-        <p className="label text-brass">Memory aid</p>
+        <p className="label text-brassDeep">Memory aid</p>
         <h1 className="mt-1 font-serif text-3xl text-ink">Forgotten wealth</h1>
         <p className="mt-2 max-w-xl text-sm text-sage">
           Check what you have reviewed. Add anything real on the ledger, then

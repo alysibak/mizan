@@ -150,6 +150,15 @@ export const assetSchema = z.object({
   purity: numeric(z.number().finite().positive().max(1)).nullish(),
   /** Which price a weighed jewellery holding follows. */
   metal: z.enum(["gold", "silver"]).nullish(),
+  /** A holding kept in another currency, converted at the user's own rate. */
+  foreignCurrency: z
+    .union([currencySchema, z.literal("")])
+    .nullish()
+    .transform((v) => v || null),
+  foreignAmount: z
+    .preprocess((v) => (v === "" ? null : v), amount("Enter the amount").nullish()),
+  /** Units of the base currency for one unit of the foreign currency. */
+  fxRate: numeric(z.number().finite().positive("Enter the exchange rate").max(1e7)).nullish(),
 });
 
 export const liabilitySchema = z.object({

@@ -36,7 +36,7 @@ export default function CloseYearPath({
           const done = i < idx;
           return (
             <li key={s.id} className="flex items-center gap-2">
-              {i > 0 ? <span className="text-mist" aria-hidden>→</span> : null}
+              {i > 0 ? <span className="text-sage" aria-hidden>→</span> : null}
               <span
                 className={
                   active

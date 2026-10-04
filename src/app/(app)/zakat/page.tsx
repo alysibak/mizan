@@ -28,7 +28,7 @@ function Row({
       className={
         "font-medium nums " +
         (accent === "brass"
-          ? "text-brass"
+          ? "text-brassDeep"
           : accent === "danger"
             ? "text-danger"
             : accent === "pine"
@@ -59,7 +59,7 @@ export default async function ZakatPage() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="label text-brass">The reckoning</p>
+        <p className="label text-brassDeep">The reckoning</p>
         <h1 className="mt-1 font-serif text-3xl text-ink">Your zakat breakdown</h1>
         <p className="mt-2 text-sm text-sage">
           Calculated on the {settings.nisabStandard} nisab and the{" "}

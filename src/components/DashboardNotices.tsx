@@ -97,7 +97,7 @@ export default function DashboardNotices({
         <section className="border border-brass/40 bg-brass/5 px-5 py-4">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="label text-brass">
+              <p className="label text-brassDeep">
                 {metalsReason === "aged"
                   ? "Metal prices may be stale"
                   : metalsReason === "never"
@@ -130,7 +130,7 @@ export default function DashboardNotices({
         <section className="border border-mist bg-paper px-5 py-5">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="label text-brass">Getting started</p>
+              <p className="label text-brassDeep">Getting started</p>
               <p className="mt-1 font-serif text-lg text-ink">
                 {remaining.length} step{remaining.length === 1 ? "" : "s"} left
               </p>
@@ -146,7 +146,7 @@ export default function DashboardNotices({
           <ul className="mt-4 space-y-2">
             {items.map((item) => (
               <li key={item.label} className="flex items-center gap-3 text-sm">
-                <span className={item.done ? "text-gain" : "text-mist"}>
+                <span className={item.done ? "text-gain" : "text-sage"}>
                   {item.done ? "✓" : "○"}
                 </span>
                 {item.done ? (
@@ -166,7 +166,7 @@ export default function DashboardNotices({
         <section className="border border-dashed border-mist px-5 py-4">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="label text-brass">On your home screen</p>
+              <p className="label text-brassDeep">On your home screen</p>
               {installEvent ? (
                 <>
                   <p className="mt-1 text-sm text-sage">

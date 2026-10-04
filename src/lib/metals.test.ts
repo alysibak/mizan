@@ -6,7 +6,7 @@ import {
   TROY_OUNCE_GRAMS,
   valueByWeight,
 } from "./metals";
-import { normalizeWeight } from "./asset-write";
+import { normalizeAsset } from "./asset-write";
 
 describe("perGramFromPerOunce", () => {
   it("divides a troy ounce into grams", () => {
@@ -37,14 +37,27 @@ describe("weighed holdings", () => {
 
   it("revalues on write and drops weight from other categories", () => {
     expect(
-      normalizeWeight({ category: "jewellery", amount: 1, grams: 100, purity: 0.925, metal: "silver" }, prices),
-    ).toEqual({ amount: 138.75, grams: 100, purity: 0.925, metal: "silver" });
-    expect(normalizeWeight({ category: "cash", amount: 50, grams: 10 }, prices)).toEqual({
+      normalizeAsset({ category: "jewellery", amount: 1, grams: 100, purity: 0.925, metal: "silver" }, prices, "CAD"),
+    ).toMatchObject({ amount: 138.75, grams: 100, purity: 0.925, metal: "silver", fxRate: null });
+    expect(normalizeAsset({ category: "cash", amount: 50, grams: 10 }, prices, "CAD")).toMatchObject({
       amount: 50,
       grams: null,
       purity: null,
       metal: null,
     });
-    expect(normalizeWeight({ category: "gold", amount: 50, grams: null }, prices).amount).toBe(50);
+    expect(normalizeAsset({ category: "gold", amount: 50, grams: null }, prices, "CAD").amount).toBe(50);
+  });
+
+  it("converts a holding in another currency at the user's rate", () => {
+    const usd = { category: "bank", amount: 0, foreignCurrency: "usd", foreignAmount: 1000, fxRate: 1.3725 };
+    expect(normalizeAsset(usd, prices, "CAD")).toMatchObject({
+      amount: 1372.5,
+      foreignCurrency: "USD",
+      foreignAmount: 1000,
+      fxRate: 1.3725,
+    });
+    // Same as the base currency, or no rate: just a plain amount.
+    expect(normalizeAsset({ ...usd, amount: 7 }, prices, "USD")).toMatchObject({ amount: 7, foreignCurrency: null });
+    expect(normalizeAsset({ ...usd, amount: 7, fxRate: null }, prices, "CAD").foreignCurrency).toBeNull();
   });
 });

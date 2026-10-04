@@ -212,7 +212,7 @@ function Wizard({
   return (
     <div className="space-y-8">
       <header>
-        <p className="label text-brass">Begin</p>
+        <p className="label text-brassDeep">Begin</p>
         <h1 className="mt-1 font-serif text-3xl text-ink">
           {name}, set your ledger
         </h1>
@@ -231,11 +231,11 @@ function Wizard({
                 ? "font-medium text-pine"
                 : i < step
                   ? "text-sage"
-                  : "text-mist")
+                  : "text-sage")
             }
           >
             {i + 1}. {label}
-            {i < STEPS.length - 1 ? <span className="mx-2 text-mist">/</span> : null}
+            {i < STEPS.length - 1 ? <span className="mx-2 text-sage">/</span> : null}
           </li>
         ))}
       </ol>
@@ -405,7 +405,7 @@ function Wizard({
               />
               <p className="mt-1 text-xs text-sage">
                 Gold nisab ≈{" "}
-                <span className="nums text-brass">
+                <span className="nums text-brassDeep">
                   {formatMoney(NISAB_GOLD_GRAMS * gold, currency)}
                 </span>
               </p>
@@ -428,7 +428,7 @@ function Wizard({
               />
               <p className="mt-1 text-xs text-sage">
                 Silver nisab ≈{" "}
-                <span className="nums text-brass">
+                <span className="nums text-brassDeep">
                   {formatMoney(NISAB_SILVER_GRAMS * silver, currency)}
                 </span>
               </p>

@@ -9,6 +9,11 @@ import type { Asset, Liability } from "@/db/schema";
 import AssetImport from "./AssetImport";
 import AssetForm from "./AssetForm";
 
+function foreignNote(a: Asset): string | null {
+  if (!a.foreignCurrency || a.foreignAmount == null || !a.fxRate) return null;
+  return `${formatMoney(a.foreignAmount, a.foreignCurrency)} @ ${a.fxRate}`;
+}
+
 function weightNote(a: Asset): string | null {
   if (!a.grams) return null;
   const purity = a.purity ?? 1;
@@ -224,6 +229,7 @@ export default function AssetManager({
                     <p className="text-xs text-sage">
                       {m.label}
                       {weight && <> · {weight}</>}
+                      {foreignNote(a) && <> · {foreignNote(a)}</>}
                       {a.zakatablePortion < 1 && (
                         <> · {formatPercent(a.zakatablePortion, 0)} zakatable</>
                       )}
@@ -237,7 +243,7 @@ export default function AssetManager({
                         {formatMoney(a.amount, currency)}
                       </p>
                       {a.zakatablePortion < 1 && (
-                        <p className="text-xs text-brass nums">
+                        <p className="text-xs text-brassDeep nums">
                           {formatMoney(zakatable, currency)} counted
                         </p>
                       )}

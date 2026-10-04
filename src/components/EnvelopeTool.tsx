@@ -37,7 +37,7 @@ export default function EnvelopeTool({
       <ReckoningStepNav current="envelopes" />
 
       <header>
-        <p className="label text-brass">Distribution sketch</p>
+        <p className="label text-brassDeep">Distribution sketch</p>
         <h1 className="mt-1 font-serif text-3xl text-ink">Zakat envelopes</h1>
         <p className="mt-2 max-w-xl text-sm text-sage">
           Split one figure across the eight asnaf. Then pay on Give and freeze

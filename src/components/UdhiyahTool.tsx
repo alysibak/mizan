@@ -28,7 +28,7 @@ export default function UdhiyahTool({ currency }: { currency: string }) {
   return (
     <div className="space-y-8">
       <header>
-        <p className="label text-brass">Seasonal</p>
+        <p className="label text-brassDeep">Seasonal</p>
         <h1 className="mt-1 font-serif text-3xl text-ink">Udhiyah / qurbani</h1>
         <p className="mt-2 max-w-xl text-sm text-sage">
           Split the cost of an animal into shares. This does not decide whether

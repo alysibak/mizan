@@ -58,7 +58,7 @@ export default async function StatementPage() {
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="font-serif text-2xl text-ink print:text-3xl">Mizan</p>
-          <p className="label mt-3 text-brass">Zakat statement</p>
+          <p className="label mt-3 text-brassDeep">Zakat statement</p>
           <h1 className="mt-1 font-serif text-3xl text-ink">{title}</h1>
           <p className="mt-2 text-sm text-sage">
             Prepared for {user.name} · {printed} · {MADHHAB_LABELS[madhhab]}

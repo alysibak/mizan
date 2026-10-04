@@ -35,6 +35,7 @@ RUN npm ci --omit=dev
 
 COPY --from=builder /app/drizzle ./drizzle
 COPY --from=builder /app/scripts/migrate.cjs ./scripts/migrate.cjs
+COPY --from=builder /app/scripts/reset-password.cjs ./scripts/reset-password.cjs
 COPY --from=builder /app/scripts/docker-entrypoint.sh ./scripts/docker-entrypoint.sh
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static

@@ -4,7 +4,7 @@ import { db } from "@/db";
 import { assets } from "@/db/schema";
 import { getCurrentUser, getUserSettings } from "@/lib/session";
 import { assetSchema, firstIssue } from "@/lib/validation";
-import { normalizeWeight } from "@/lib/asset-write";
+import { normalizeAsset } from "@/lib/asset-write";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -37,7 +37,7 @@ export async function PATCH(request: Request, { params }: Ctx) {
   // The where clause scopes the update to rows this user owns.
   const [row] = await db
     .update(assets)
-    .set({ ...parsed.data, ...normalizeWeight(merged, prices) })
+    .set({ ...parsed.data, ...normalizeAsset(merged, prices, prices.currency) })
     .where(and(eq(assets.id, id), eq(assets.userId, user.id)))
     .returning();
   if (!row) return NextResponse.json({ error: "Not found" }, { status: 404 });

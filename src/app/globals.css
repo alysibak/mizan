@@ -3,8 +3,39 @@
 @tailwind utilities;
 
 @layer base {
+  /* Theme tokens as "R G B" so Tailwind opacity modifiers (bg-pine/5) work. */
   :root {
     color-scheme: light;
+    --c-porcelain: 243 245 241; /* page */
+    --c-paper: 250 251 248; /* cards */
+    --c-surface: 255 255 255; /* inputs */
+    --c-ink: 14 42 34;
+    --c-pine: 18 70 58;
+    --c-sage: 76 106 94; /* secondary text, 5.4:1 */
+    --c-mist: 216 224 218; /* rules and tracks only, never text */
+    --c-brass: 169 135 79; /* ornament */
+    --c-brass-deep: 127 98 50; /* brass text, 5.2:1 */
+    --c-gain: 26 107 72;
+    --c-warn: 181 133 42;
+    --c-danger: 159 59 54;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --c-porcelain: 15 26 22;
+      --c-paper: 21 33 28;
+      --c-surface: 27 40 35;
+      --c-ink: 231 238 234;
+      --c-pine: 124 195 166;
+      --c-sage: 163 184 174;
+      --c-mist: 43 58 51;
+      --c-brass: 201 165 106;
+      --c-brass-deep: 210 174 114;
+      --c-gain: 108 201 154;
+      --c-warn: 224 176 79;
+      --c-danger: 242 148 138;
+    }
   }
 
   html {
@@ -18,7 +49,7 @@
   }
 
   ::selection {
-    background-color: rgba(169, 135, 79, 0.22);
+    background-color: rgb(var(--c-brass) / 0.28);
   }
 
   .nums {
@@ -42,9 +73,9 @@
   }
 
   .field {
-    @apply w-full rounded-card border border-mist bg-white px-3 py-2 text-ink
+    @apply w-full rounded-card border border-mist bg-surface px-3 py-2 text-ink
       outline-none transition focus:border-pine focus:ring-1 focus:ring-pine/20
-      placeholder:text-sage/60;
+      placeholder:text-sage/80;
   }
 
   .btn {
@@ -88,8 +119,8 @@
 
   .bg-pine-wash {
     background-image:
-      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(18, 70, 58, 0.14), transparent 55%),
-      radial-gradient(ellipse 50% 40% at 100% 100%, rgba(169, 135, 79, 0.08), transparent 45%);
+      radial-gradient(ellipse 80% 60% at 50% 0%, rgb(var(--c-pine) / 0.14), transparent 55%),
+      radial-gradient(ellipse 50% 40% at 100% 100%, rgb(var(--c-brass) / 0.08), transparent 45%);
   }
 }
 
@@ -125,6 +156,21 @@
 }
 
 @media print {
+  /* Paper is always light, whatever the screen theme. */
+  :root {
+    color-scheme: light;
+    --c-porcelain: 255 255 255;
+    --c-paper: 255 255 255;
+    --c-surface: 255 255 255;
+    --c-ink: 14 42 34;
+    --c-pine: 18 70 58;
+    --c-sage: 76 106 94;
+    --c-mist: 216 224 218;
+    --c-brass: 169 135 79;
+    --c-brass-deep: 127 98 50;
+    --c-gain: 26 107 72;
+    --c-danger: 159 59 54;
+  }
   body {
     background: white !important;
   }

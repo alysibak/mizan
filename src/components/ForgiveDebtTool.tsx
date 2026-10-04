@@ -113,7 +113,7 @@ export default function ForgiveDebtTool({
   return (
     <div className="space-y-8">
       <header>
-        <p className="label text-brass">Release</p>
+        <p className="label text-brassDeep">Release</p>
         <h1 className="mt-1 font-serif text-3xl text-ink">Forgive a debt</h1>
         <p className="mt-2 max-w-xl text-sm text-sage">
           When you let go of money someone owed you, record it as sadaqah — and

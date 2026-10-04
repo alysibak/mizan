@@ -4,7 +4,7 @@ import { db } from "@/db";
 import { assets } from "@/db/schema";
 import { getCurrentUser, getUserSettings } from "@/lib/session";
 import { assetSchema, firstIssue } from "@/lib/validation";
-import { normalizeWeight } from "@/lib/asset-write";
+import { normalizeAsset } from "@/lib/asset-write";
 
 const bodySchema = z.object({
   rows: z.array(assetSchema).min(1, "Nothing to import").max(200),
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
       parsed.data.rows.map((row) => ({
         userId: user.id,
         ...row,
-        ...normalizeWeight(row, prices),
+        ...normalizeAsset(row, prices, prices.currency),
       })),
     )
     .returning({ id: assets.id });

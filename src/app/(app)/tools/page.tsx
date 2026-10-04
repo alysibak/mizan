@@ -4,7 +4,7 @@ export default function ToolsPage() {
   return (
     <div className="space-y-10">
       <header>
-        <p className="label text-brass">Beside the ledger</p>
+        <p className="label text-brassDeep">Beside the ledger</p>
         <h1 className="mt-1 font-serif text-3xl text-ink">Tools</h1>
         <p className="mt-2 max-w-xl text-sm text-sage">
           The yearly sitting lives here. Everything else is a satellite — still
@@ -30,7 +30,7 @@ export default function ToolsPage() {
       </section>
 
       <div>
-        <p className="label text-brass">Sitting tools</p>
+        <p className="label text-brassDeep">Sitting tools</p>
         <ul className="mt-3 divide-y divide-mist border-y border-mist">
           <li>
             <Link href="/tools/forgotten" className="block py-5 hover:bg-mist/20">
@@ -62,7 +62,7 @@ export default function ToolsPage() {
       </div>
 
       <div>
-        <p className="label text-brass">More angles</p>
+        <p className="label text-brassDeep">More angles</p>
         <ul className="mt-3 divide-y divide-mist border-y border-mist">
           <li>
             <Link href="/tools/reverse" className="block py-5 hover:bg-mist/20">

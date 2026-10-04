@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { and, eq, isNotNull } from "drizzle-orm";
+import { and, eq, isNotNull, or } from "drizzle-orm";
 import type { BatchItem } from "drizzle-orm/batch";
 import { db } from "@/db";
 import { assets, settings } from "@/db/schema";
 import { getCurrentUser, getUserSettings } from "@/lib/session";
 import { firstIssue, settingsSchema } from "@/lib/validation";
-import { normalizeWeight } from "@/lib/asset-write";
+import { normalizeAsset } from "@/lib/asset-write";
 
 export async function GET() {
   const user = await getCurrentUser();
@@ -59,20 +59,31 @@ export async function PUT(request: Request) {
       .onConflictDoUpdate({ target: settings.userId, set: values }),
   ];
 
-  // Holdings entered by weight follow the metal price, in the same write.
-  if (pricesChanged) {
-    const weighed = await db
+  // Holdings entered by weight follow the metal price, and a foreign holding
+  // whose currency becomes the base is a plain amount again, in the same write.
+  const currencyChanged = parsed.data.currency !== current.currency;
+  if (pricesChanged || currencyChanged) {
+    const special = await db
       .select()
       .from(assets)
-      .where(and(eq(assets.userId, user.id), isNotNull(assets.grams)));
+      .where(
+        and(
+          eq(assets.userId, user.id),
+          or(isNotNull(assets.grams), isNotNull(assets.foreignCurrency)),
+        ),
+      );
     const prices = { goldPricePerGram: gold, silverPricePerGram: silver };
-    for (const asset of weighed) {
-      const { amount } = normalizeWeight(asset, prices);
-      if (amount !== asset.amount) {
+    for (const asset of special) {
+      const next = normalizeAsset(asset, prices, parsed.data.currency);
+      const amount =
+        asset.foreignCurrency && !next.foreignCurrency
+          ? asset.foreignAmount ?? asset.amount // now held in the base currency
+          : next.amount;
+      if (amount !== asset.amount || next.foreignCurrency !== asset.foreignCurrency) {
         statements.push(
           db
             .update(assets)
-            .set({ amount })
+            .set({ ...next, amount })
             .where(and(eq(assets.id, asset.id), eq(assets.userId, user.id))),
         );
       }

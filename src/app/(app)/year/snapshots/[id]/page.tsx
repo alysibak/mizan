@@ -47,7 +47,7 @@ export default async function SnapshotPage({ params }: Ctx) {
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="font-serif text-2xl text-ink print:text-3xl">Mizan</p>
-          <p className="label mt-3 text-brass">Frozen reckoning</p>
+          <p className="label mt-3 text-brassDeep">Frozen reckoning</p>
           <h1 className="mt-1 font-serif text-3xl text-ink">{row.label}</h1>
           <p className="mt-2 text-sm text-sage">Taken {row.takenAt}</p>
         </div>
@@ -65,7 +65,7 @@ export default async function SnapshotPage({ params }: Ctx) {
 
       {payload.letterToNextYear ? (
         <section className="border border-brass/40 bg-brass/5 px-5 py-6">
-          <p className="label text-brass">Letter from that night</p>
+          <p className="label text-brassDeep">Letter from that night</p>
           <p className="mt-3 whitespace-pre-wrap font-serif text-lg leading-relaxed text-ink">
             {payload.letterToNextYear}
           </p>

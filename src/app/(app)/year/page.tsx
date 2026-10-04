@@ -5,19 +5,25 @@ import { yearSnapshots } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
 import { loadReckoning } from "@/lib/reckoning";
 import { hawlStatus, formatHijri } from "@/lib/hijri";
-import { isIsoDay } from "@/lib/dates";
+import { isIsoDay, isoDay } from "@/lib/dates";
 import { formatMoney, formatPercent } from "@/lib/money";
 import FreezeYearButton from "@/components/FreezeYearButton";
 import SnapshotCompare from "@/components/SnapshotCompare";
 import { MADHHAB_LABELS, parseMadhhab } from "@/lib/madhhab";
 import EstimateBanner from "@/components/EstimateBanner";
 import HawlCalendarLink from "@/components/HawlCalendarLink";
+import HawlRestart from "@/components/HawlRestart";
 import CycleActions from "@/components/CycleActions";
 import CloseYearPath from "@/components/CloseYearPath";
 import ReckoningStepNav from "@/components/ReckoningStepNav";
 
-export default async function YearPage() {
+export default async function YearPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ rolled?: string }>;
+}) {
   const user = (await getCurrentUser())!;
+  const { rolled } = await searchParams;
   const [reckoning, snaps] = await Promise.all([
     loadReckoning(user.id),
     db
@@ -73,13 +79,27 @@ export default async function YearPage() {
   return (
     <div className="space-y-10">
       <header>
-        <p className="label text-brass">Hawl and reckoning</p>
+        <p className="label text-brassDeep">Hawl and reckoning</p>
         <h1 className="mt-1 font-serif text-3xl text-ink">The year</h1>
         <p className="mt-2 max-w-xl text-sm text-sage">
           Track the holding year, see what is payable, print a statement, and
           freeze a copy when you pay. School: {MADHHAB_LABELS[madhhab]}.
         </p>
       </header>
+
+      {rolled && isIsoDay(rolled) && hawl && isoDay(hawl.startDate) === rolled ? (
+        <section className="border border-pine/40 bg-pine/5 px-5 py-5" role="status">
+          <p className="label text-pine">Hawl rolled</p>
+          <p className="mt-1 font-serif text-xl text-ink">Next hawl starts {rolled}.</p>
+          <p className="mt-1 text-sm text-sage">
+            Confirm the real payment day with local moon-sighting. Print last
+            year&apos;s statement from the frozen copy if you want paper.
+          </p>
+          <Link href="/statement" className="btn-ghost mt-3">
+            Open statement
+          </Link>
+        </section>
+      ) : null}
 
       <EstimateBanner />
 
@@ -156,6 +176,13 @@ export default async function YearPage() {
             <div className="mt-3">
               <HawlCalendarLink dueDate={hawl.dueDate.toISOString().slice(0, 10)} />
             </div>
+            {!hawl.isComplete && (
+              <HawlRestart
+                madhhab={madhhab}
+                hawlStart={isoDay(hawl.startDate)}
+                today={isoDay(today)}
+              />
+            )}
           </div>
         ) : (
           <p className="mt-3 text-sm text-sage">

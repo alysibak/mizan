@@ -1,23 +1,27 @@
 import type { Config } from "tailwindcss";
 
-// Ruled ledger: cool porcelain, deep pine, brass for metal value.
-// Avoids cream/terracotta and purple SaaS defaults.
+// Ruled ledger: cool porcelain, deep pine, brass for metal value. Colours are
+// CSS variables (see globals.css) so one set of classes serves light and dark
+// themes; every text colour meets WCAG AA (4.5:1) on every surface.
+const token = (name: string) => `rgb(var(--c-${name}) / <alpha-value>)`;
+
 const config: Config = {
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
-        porcelain: "#F3F5F1",
-        paper: "#FAFBF8",
-        ink: "#0E2A22",
-        pine: "#12463A",
-        sage: "#5B7B6F",
-        mist: "#D8E0DA",
-        brass: "#A9874F",
-        brassDeep: "#8A6C3A",
-        gain: "#1E7A53",
-        warn: "#B5852A",
-        danger: "#9F3B36",
+        porcelain: token("porcelain"),
+        paper: token("paper"),
+        surface: token("surface"),
+        ink: token("ink"),
+        pine: token("pine"),
+        sage: token("sage"),
+        mist: token("mist"),
+        brass: token("brass"),
+        brassDeep: token("brass-deep"),
+        gain: token("gain"),
+        warn: token("warn"),
+        danger: token("danger"),
       },
       fontFamily: {
         serif: ["var(--font-literata)", "Georgia", "serif"],

@@ -79,7 +79,7 @@ export default async function DashboardPage({
   return (
     <div className="space-y-10">
       <header>
-        <p className="label text-brass">Balance</p>
+        <p className="label text-brassDeep">Balance</p>
         <h1 className="mt-1 font-serif text-3xl text-ink">
           {user.name.split(" ")[0]}
         </h1>
@@ -105,7 +105,7 @@ export default async function DashboardPage({
 
       {assetRows.length > 0 && (
         <section className="border border-mist px-5 py-5">
-          <p className="label text-brass">Close the year</p>
+          <p className="label text-brassDeep">Close the year</p>
           <p className="mt-1 font-serif text-xl text-ink">Reckoning night</p>
           <p className="mt-1 text-sm text-sage">
             Remember forgotten wealth, watch nisab, sketch envelopes, then pay →

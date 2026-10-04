@@ -16,7 +16,7 @@ function parseAmount(value?: string): number | undefined {
 export default async function GivingPage({
   searchParams,
 }: {
-  searchParams: Promise<{ type?: string; amount?: string; asnaf?: string }>;
+  searchParams: Promise<{ type?: string; amount?: string; asnaf?: string; cleared?: string }>;
 }) {
   const user = (await getCurrentUser())!;
   const params = await searchParams;
@@ -44,7 +44,7 @@ export default async function GivingPage({
   return (
     <div className="space-y-6">
       <header>
-        <p className="label text-brass">Sadaqah and zakat</p>
+        <p className="label text-brassDeep">Sadaqah and zakat</p>
         <h1 className="mt-1 font-serif text-3xl text-ink">Your giving</h1>
         <p className="mt-2 text-sm text-sage">
           Keep a record of what you give. Only zakat entries in{" "}
@@ -73,7 +73,7 @@ export default async function GivingPage({
         </div>
         <div className="card p-4">
           <p className="label">All-time sadaqah</p>
-          <p className="mt-1 font-serif text-2xl text-brass nums">
+          <p className="mt-1 font-serif text-2xl text-brassDeep nums">
             {formatMoney(totalSadaqah, settings.currency)}
           </p>
         </div>
@@ -99,7 +99,7 @@ export default async function GivingPage({
         <a href="/api/export/giving" className="text-pine hover:underline" download>
           Download giving as CSV
         </a>
-        <span className="text-mist">·</span>
+        <span className="text-sage">·</span>
         <Link href="/tools/fitr" className="text-pine hover:underline">
           Zakat al-Fitr calculator
         </Link>
@@ -116,6 +116,7 @@ export default async function GivingPage({
         defaultAsnaf={defaultAsnaf}
         cycleOutstanding={outstanding}
         cyclePayable={phase === "payable"}
+        cleared={params.cleared === "1"}
       />
     </div>
   );

@@ -17,7 +17,7 @@ export default function ReckoningStepNav({
       <div className="flex items-center justify-between gap-3">
         <Link
           href="/tools/reckoning-night"
-          className="label text-brass hover:text-pine"
+          className="label text-brassDeep hover:text-pine"
         >
           Reckoning night
         </Link>

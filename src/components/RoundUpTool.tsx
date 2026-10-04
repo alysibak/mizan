@@ -93,7 +93,7 @@ export default function RoundUpTool({ currency }: { currency: string }) {
         <div className="flex flex-col justify-end">
           <p className="text-sm text-ink">
             Give{" "}
-            <span className="font-medium nums text-brass">
+            <span className="font-medium nums text-brassDeep">
               {formatMoney(gap, currency)}
             </span>
           </p>

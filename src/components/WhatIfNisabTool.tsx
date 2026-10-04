@@ -42,7 +42,7 @@ export default function WhatIfNisabTool({
       <ReckoningStepNav current="what-if" />
 
       <header>
-        <p className="label text-brass">Sensitivity</p>
+        <p className="label text-brassDeep">Sensitivity</p>
         <h1 className="mt-1 font-serif text-3xl text-ink">What if prices move?</h1>
         <p className="mt-2 max-w-xl text-sm text-sage">
           Hold your current net zakatable wealth still. Nothing saves until you
@@ -112,7 +112,7 @@ export default function WhatIfNisabTool({
             : "border-mist bg-paper")
         }
       >
-        <p className="label text-brass">
+        <p className="label text-brassDeep">
           {result.meetsNisab
             ? "Above nisab at these prices"
             : "Below nisab at these prices"}

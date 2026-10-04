@@ -4,7 +4,7 @@ import { db } from "@/db";
 import { assets } from "@/db/schema";
 import { getCurrentUser, getUserSettings } from "@/lib/session";
 import { assetSchema, firstIssue } from "@/lib/validation";
-import { normalizeWeight } from "@/lib/asset-write";
+import { normalizeAsset } from "@/lib/asset-write";
 
 export async function GET() {
   const user = await getCurrentUser();
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     .values({
       userId: user.id,
       ...parsed.data,
-      ...normalizeWeight(parsed.data, prices),
+      ...normalizeAsset(parsed.data, prices, prices.currency),
     })
     .returning();
   return NextResponse.json(row, { status: 201 });

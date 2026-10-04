@@ -21,7 +21,7 @@ import {
   settingsSchema,
 } from "@/lib/validation";
 import { snapshotPayloadSchema } from "@/lib/snapshot";
-import { normalizeWeight } from "@/lib/asset-write";
+import { normalizeAsset } from "@/lib/asset-write";
 
 const snapshotBackupSchema = z.object({
   label: z.string().trim().min(1).max(80),
@@ -91,7 +91,7 @@ export async function POST(request: Request) {
   const assetRows = data.assets.map((row) => ({
     userId: user.id,
     ...row,
-    ...normalizeWeight(row, prices),
+    ...normalizeAsset(row, prices, settingValues.currency),
   }));
   const liabilityRows = data.liabilities.map((row) => ({ userId: user.id, ...row }));
   const givingRows = data.giving.map((row) => ({

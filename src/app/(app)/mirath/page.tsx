@@ -8,7 +8,7 @@ export default async function MirathPage() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="label text-brass">Faraid</p>
+        <p className="label text-brassDeep">Faraid</p>
         <h1 className="mt-1 font-serif text-3xl text-ink">Mirath</h1>
         <p className="mt-2 max-w-xl text-sm text-sage">
           Sunni shares of an estate, in exact fractions. This is an estimate —

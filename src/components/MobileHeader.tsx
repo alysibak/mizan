@@ -39,7 +39,7 @@ export default function MobileHeader({ isAdmin = false }: { isAdmin?: boolean })
     >
       <div className="flex items-baseline gap-2">
         <span className="font-serif text-lg text-ink">{title}</span>
-        <span className="font-serif text-sm text-brass">Mizan</span>
+        <span className="font-serif text-sm text-brassDeep">Mizan</span>
       </div>
       <div className="flex items-center gap-1">
         {isAdmin && (

@@ -24,7 +24,7 @@ export default function LastLetterCard({
     <section className="border border-brass/40 bg-brass/5 px-5 py-5">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="label text-brass">From last freeze</p>
+          <p className="label text-brassDeep">From last freeze</p>
           <p className="mt-1 text-xs text-sage">Sealed {takenAt}</p>
           <p className="mt-3 whitespace-pre-wrap font-serif text-lg leading-relaxed text-ink">
             {letter}

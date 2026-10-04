@@ -47,6 +47,9 @@ export async function GET() {
       grams: a.grams,
       purity: a.purity,
       metal: a.metal,
+      foreignCurrency: a.foreignCurrency,
+      foreignAmount: a.foreignAmount,
+      fxRate: a.fxRate,
     })),
     liabilities: liabilityRows.map((l) => ({
       label: l.label,
