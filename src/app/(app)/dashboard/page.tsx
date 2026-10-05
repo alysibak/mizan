@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/session";
+import { isDemoUser } from "@/lib/demo";
 import { loadReckoning } from "@/lib/reckoning";
 import { formatHijri } from "@/lib/hijri";
 import { formatMoney, formatPercent } from "@/lib/money";
@@ -231,11 +232,14 @@ export default async function DashboardPage({
         )}
       </section>
 
-      <DashboardNotices
-        items={checklist}
-        welcome={welcome === "1"}
-        part="bottom"
-      />
+      {/* The demo is read-only: a to-do list there could not be done. */}
+      {isDemoUser(user) ? null : (
+        <DashboardNotices
+          items={checklist}
+          welcome={welcome === "1"}
+          part="bottom"
+        />
+      )}
 
       {lastLetter ? (
         <LastLetterCard
