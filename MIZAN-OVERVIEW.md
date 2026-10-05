@@ -25,16 +25,16 @@ You can clone it, run `npm install`, and it works. The README’s goal is that i
 
 | Layer | Choice |
 |---|---|
-| Framework | Next.js 15 (App Router), React 19 |
+| Framework | Next.js 16 (App Router), React 19 |
 | Language | TypeScript |
 | Database | SQLite through Drizzle ORM + `@libsql/client` |
 | Styling | Tailwind CSS 3 |
 | Validation | Zod |
-| Tests | Vitest (pure calculation engine only) |
+| Tests | Vitest (pure modules), Playwright + axe (end to end, accessibility) |
 | Auth | bcryptjs + HTTP-only session cookies |
 
 **Production today:** Vercel (app) + Turso (hosted SQLite)  
-**Live URL:** https://mizan-sandy-eight.vercel.app
+**Live URL:** https://mizan-sandy-eight.vercel.app (set `APP_URL` when a custom domain is added)
 
 ---
 
@@ -42,7 +42,7 @@ You can clone it, run `npm install`, and it works. The README’s goal is that i
 
 ```
 Browser
-  → Middleware (cookie check, redirects)
+  → Proxy, src/proxy.ts (cookie check, redirects, cross-site and size limits)
   → App Router pages + API routes
   → getCurrentUser() (DB session lookup)
   → SQLite / Turso
@@ -79,7 +79,7 @@ src/
     (app)/          Balance, ledger, year, give, statement, tools, settings
     api/            Mutations and reads
   components/       Scale, CycleActions, CloseYearPath, managers, tools
-  middleware.ts
+  proxy.ts            redirects, cross-site and size limits (Next 16 "proxy")
 drizzle/            Versioned SQL migrations
 ```
 
@@ -121,7 +121,7 @@ Locally the DB defaults to `./mizan.db`. In production it points at Turso via `D
 
 ### Two layers of protection
 
-**Middleware** (`middleware.ts`) — UX guard only:
+**Proxy** (`src/proxy.ts`, Next 16’s name for middleware) — UX guard only:
 - Redirects unauthenticated users away from `/dashboard`, `/assets`, etc.
 - Does **not** trust the cookie alone for security
 
@@ -179,7 +179,7 @@ Gold nisab   (85g × $90/g)    =  7,650
 
 16,000 > both → zakat due
 Lunar: 16,000 × 2.5%   = $400.00
-Solar: 16,000 × 2.577% = $412.43
+Solar: 16,000 × 2.5768% = $412.28
 ```
 
 ---
@@ -240,8 +240,10 @@ All inputs are manual — no paid financial data API.
 
 ### Public
 
-- **`/`** — Landing page with value props (2.5%, nisab, hawl)
-- **`/login`**, **`/register`** — Auth forms
+- **`/`** — Landing page (static): calculator first, features, privacy, FAQ
+- **`/calculator`** — No-account zakat calculator with live prices; figures stay in the browser and carry into a new ledger
+- **`/method`**, **`/trust`**, **`/privacy`**, **`/terms`**
+- **`/login`** (with the optional one-click demo), **`/register`**, **`/forgot`**
 
 ### Authenticated app (`(app)/` layout)
 
@@ -273,7 +275,7 @@ Close path chrome: `CycleActions` + `CloseYearPath` — **pay → freeze → rol
 REST-style routes under `src/app/api/`:
 
 ```
-/api/auth/login, register, logout, clear-stale
+/api/auth/login, register, logout, recover, demo, clear-stale
 /api/account               DELETE (erase account), password, sessions
 /api/assets, /api/assets/[id], /api/assets/import
 /api/liabilities, /api/liabilities/[id]
@@ -281,7 +283,8 @@ REST-style routes under `src/app/api/`:
 /api/settings, /api/settings/roll-hawl
 /api/snapshots, /api/snapshots/[id]
 /api/export (JSON backup), /api/export/giving (CSV), /api/import (restore)
-/api/metals          → optional free price suggestion
+/api/metals          → public, cached price suggestion (no user data)
+/api/fx              → exchange-rate suggestion for a foreign holding
 /api/health          → { ok: true } if DB reachable
 ```
 
@@ -289,11 +292,11 @@ Pages share one loader, `loadReckoning()` in `src/lib/reckoning.ts`, so the
 ledger, zakat result, payment window, and outstanding are computed one way
 everywhere.
 
-Every handler follows the same pattern (see `assets/route.ts`):
+Every handler follows the same pattern (see `assets/route.ts` and `src/lib/api.ts`):
 
-1. `getCurrentUser()` → 401 if missing
-2. Zod-validate input
-3. Query scoped to `user.id`
+1. `signedInUser()` for reads, `writableUser()` for writes (401 signed out, 403 for the read-only demo)
+2. `readJson()` (size-capped), then Zod-validate
+3. Query scoped to `user.id`; `overRowLimit()` before inserts
 4. Return JSON
 
 ---
@@ -301,16 +304,22 @@ Every handler follows the same pattern (see `assets/route.ts`):
 ## 13. Testing
 
 ```bash
-npm test   # Vitest
+npm test          # Vitest, 205 unit tests
+npm run test:e2e  # Playwright on the production build
 ```
 
-111 unit tests over the pure modules in `src/lib/`: the zakat engine, nisab,
-Hijri conversion (a century of round trips), payment windows across a hawl
-roll, cent rounding, mirath (awl, radd, Umariyyatan, Mushtaraka), screening,
-CSV import, metal valuation by weight, input validation, and snapshot payloads.
+Unit tests cover the pure modules in `src/lib/`: the zakat engine, nisab, Hijri
+conversion (a century of round trips), payment windows across a hawl roll, cent
+rounding, mirath (awl, radd, Umariyyatan, Mushtaraka), screening, CSV import,
+metal by weight, the public calculator (including decimal-comma input), price
+feed parsing, input validation, and snapshot payloads.
 
-CI runs lint, typecheck, tests, a fresh migration, a schema-drift check, and a
-production build.
+End-to-end tests walk a full zakat year on a phone, carry the calculator into
+a new account, check the read-only demo, legal and search files, and audit 26
+pages against WCAG 2.1 AA in light and dark.
+
+CI runs lint, typecheck, tests, a fresh migration, a schema-drift check, a
+production build, the end-to-end suite, and a Docker build that must boot.
 
 ---
 
@@ -320,7 +329,7 @@ production build.
 
 ```bash
 npm install
-npm run db:push      # create tables
+npm run db:migrate   # create tables
 npm run db:seed      # optional demo account
 npm run dev          # http://localhost:3000
 ```
@@ -339,7 +348,7 @@ SQLite file on a persistent volume; migrations run on container start.
 
 1. **Turso** — free hosted SQLite (`mizan-prod`)
 2. **Vercel** — serverless Next.js
-3. Env vars: `DATABASE_URL`, `DATABASE_AUTH_TOKEN`, optional `ADMIN_EMAIL`
+3. Env vars: `DATABASE_URL`, `DATABASE_AUTH_TOKEN`, `APP_URL`, `OPERATOR_NAME`, `CONTACT_EMAIL`; optional `ADMIN_EMAIL`, `DEMO_EMAIL`, `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` (see the README)
 4. `vercel.json` runs `db:migrate` before each build
 
 Fly.io config exists but is **not recommended** — free trial expires and suspends the app.
@@ -360,14 +369,14 @@ Fly.io config exists but is **not recommended** — free trial expires and suspe
 
 ## 16. What could come next
 
-Shipped since the early README wishlist: round-up sadaqah, optional metals suggest, yearly statement, year snapshots, Begin wizard, reckoning night, asnaf, unique tools, installable PWA with an offline notice, metals by weight, Zakat al-Fitr, giving CSV, and account controls (password change, sign out other devices, delete account).
+Shipped since the early README wishlist: round-up sadaqah, metals suggest, yearly statement, year snapshots, Begin wizard, reckoning night, asnaf, unique tools, installable PWA, metals by weight, Zakat al-Fitr, giving CSV, account controls, recovery codes, foreign-currency holdings (manual FX), hawl restart after a nisab dip, calendar-feed reminders, Umm al-Qura, the public calculator, a read-only demo, and legal and SEO pages.
 
-Still worth considering:
+Still worth considering, roughly in order of reach:
 
-- Mid-hawl nisab breach rules (estimate-labeled)
-- Manual multi-currency FX on holdings
-- Hawl-anniversary reminders (web push needs a small server-side sender)
+- Translations and right-to-left layout (Arabic, Urdu, Bahasa, Turkish, French), public pages first
+- Optional email (password reset, hawl-day reminder), off unless a provider is configured
 - Shared encrypted ledger for 2–3 people (today: one user = one ledger)
+- Mid-hawl nisab breach rules (estimate-labeled)
 - Purification ↔ screening loop stored in DB
 
 Do not build: bank sync, auto-pay rails, fatwa AI, live paid screening APIs.

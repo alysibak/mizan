@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { givingRecords } from "@/db/schema";
-import { getCurrentUser, getUserSettings } from "@/lib/session";
+import { getUserSettings } from "@/lib/session";
+import { signedInUser } from "@/lib/api";
 import { asnafLabel } from "@/lib/asnaf";
 import { givingTypeLabel } from "@/lib/giving";
 import { csvRow } from "@/lib/csv";
@@ -11,8 +12,8 @@ export const dynamic = "force-dynamic";
 
 /** Giving history as CSV, for receipts season or a spreadsheet of your own. */
 export async function GET() {
-  const user = await getCurrentUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { user, response } = await signedInUser();
+  if (response) return response;
 
   const [settings, rows] = await Promise.all([
     getUserSettings(user.id),

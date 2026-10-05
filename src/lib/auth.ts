@@ -9,7 +9,7 @@ import { SESSION_COOKIE } from "./constants";
 
 export { SESSION_COOKIE };
 const SESSION_TTL_DAYS = 30;
-const SESSION_TTL_MS = SESSION_TTL_DAYS * 24 * 60 * 60 * 1000;
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 // A real cost-12 hash of a throwaway string. Comparing against it when the
 // email is unknown makes that path take as long as a wrong password, so
@@ -38,10 +38,13 @@ function hashToken(token: string): string {
   return createHash("sha256").update(token).digest("hex");
 }
 
-export async function createSession(userId: string): Promise<void> {
+export async function createSession(
+  userId: string,
+  ttlDays: number = SESSION_TTL_DAYS,
+): Promise<void> {
   const token = randomBytes(32).toString("hex");
   const tokenHash = hashToken(token);
-  const expiresAt = new Date(Date.now() + SESSION_TTL_MS).toISOString();
+  const expiresAt = new Date(Date.now() + ttlDays * DAY_MS).toISOString();
 
   await db.insert(sessions).values({ id: tokenHash, userId, expiresAt });
 
@@ -51,7 +54,7 @@ export async function createSession(userId: string): Promise<void> {
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
-    maxAge: SESSION_TTL_DAYS * 24 * 60 * 60,
+    maxAge: ttlDays * 24 * 60 * 60,
   });
 }
 

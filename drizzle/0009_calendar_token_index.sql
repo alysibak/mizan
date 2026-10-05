@@ -1,0 +1,1 @@
+CREATE INDEX `settings_calendar_token_idx` ON `settings` (`calendar_token_hash`);

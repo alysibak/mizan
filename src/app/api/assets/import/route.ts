@@ -2,26 +2,23 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/db";
 import { assets } from "@/db/schema";
-import { getCurrentUser, getUserSettings } from "@/lib/session";
+import { getUserSettings } from "@/lib/session";
 import { assetSchema, firstIssue } from "@/lib/validation";
 import { normalizeAsset } from "@/lib/asset-write";
+import { errorJson, overRowLimit, readJson, writableUser } from "@/lib/api";
 
 const bodySchema = z.object({
   rows: z.array(assetSchema).min(1, "Nothing to import").max(200),
 });
 
 export async function POST(request: Request) {
-  const user = await getCurrentUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { user, response } = await writableUser();
+  if (response) return response;
 
-  const body = await request.json().catch(() => null);
-  const parsed = bodySchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json(
-      { error: firstIssue(parsed.error, "Invalid import") },
-      { status: 400 },
-    );
-  }
+  const parsed = bodySchema.safeParse(await readJson(request, 512 * 1024));
+  if (!parsed.success) return errorJson(firstIssue(parsed.error, "Invalid import"), 400);
+  const full = await overRowLimit("assets", user.id, parsed.data.rows.length);
+  if (full) return full;
 
   const prices = await getUserSettings(user.id);
   const inserted = await db

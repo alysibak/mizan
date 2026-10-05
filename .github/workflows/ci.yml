@@ -2,12 +2,22 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A newer push to the same branch or pull request supersedes the old run.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -15,7 +25,14 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      - run: npm audit --audit-level=high
+      # What ships to users must be clean at any severity. Build and test
+      # tools only fail the run on critical advisories: a dev-only advisory
+      # with no patched release (such as braces under Tailwind 3) would
+      # otherwise block every pull request, Dependabot's included.
+      - name: Audit runtime dependencies
+        run: npm run audit:prod
+      - name: Audit all dependencies (critical only)
+        run: npm audit --audit-level=critical
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
@@ -33,7 +50,7 @@ jobs:
           NEXT_TELEMETRY_DISABLED: "1"
       - name: Install browser for end-to-end tests
         run: npx playwright install --with-deps chromium
-      - name: End-to-end (phone-size, production build)
+      - name: End-to-end (phone and desktop, production build)
         run: npm run test:e2e
       - uses: actions/upload-artifact@v4
         if: failure()
@@ -41,3 +58,20 @@ jobs:
           name: playwright-report
           path: playwright-report
           retention-days: 7
+
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the image
+        run: docker build -t mizan:ci .
+      - name: Boot it and answer the health check
+        run: |
+          docker run -d --name mizan -p 3000:3000 mizan:ci
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:3000/api/health; then exit 0; fi
+            sleep 2
+          done
+          docker logs mizan
+          exit 1

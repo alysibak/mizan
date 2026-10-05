@@ -2,13 +2,14 @@ import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { assets, liabilities, givingRecords, yearSnapshots } from "@/db/schema";
-import { getCurrentUser, getUserSettings } from "@/lib/session";
+import { getUserSettings } from "@/lib/session";
+import { signedInUser } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const user = await getCurrentUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { user, response } = await signedInUser();
+  if (response) return response;
 
   const [settings, assetRows, liabilityRows, givingRows, snapRows] = await Promise.all([
     getUserSettings(user.id),

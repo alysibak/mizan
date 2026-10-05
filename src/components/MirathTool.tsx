@@ -118,7 +118,7 @@ export default function MirathTool({ currency }: { currency: string }) {
               Sunni framework. Estimation only.
             </p>
           </div>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Division of the estate">
             <table className="w-full min-w-[34rem] text-left text-sm">
               <thead className="border-b border-mist bg-mist/30 text-xs uppercase tracking-wide text-sage">
                 <tr>

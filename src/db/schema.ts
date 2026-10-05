@@ -44,39 +44,45 @@ export const sessions = sqliteTable(
 
 // One settings row per user. Nisab prices are stored locally and edited by the
 // user, so the app never depends on a paid metals API to function.
-export const settings = sqliteTable("settings", {
-  userId: text("user_id")
-    .primaryKey()
-    .references(() => users.id, { onDelete: "cascade" }),
-  currency: text("currency").notNull().default("CAD"),
-  nisabStandard: text("nisab_standard").notNull().default("silver"), // 'gold' | 'silver'
-  calendarBasis: text("calendar_basis").notNull().default("lunar"), // 'lunar' | 'solar'
-  goldPricePerGram: real("gold_price_per_gram").notNull().default(90),
-  silverPricePerGram: real("silver_price_per_gram").notNull().default(1.05),
-  // When gold/silver prices were last saved by the user (not settings.updatedAt).
-  metalsUpdatedAt: text("metals_updated_at"),
-  // Date the user's wealth last crossed nisab. Hawl (the lunar holding year)
-  // is measured from here. Null until the user sets it. Per-asset dates may
-  // also be set on individual holdings.
-  hawlStartDate: text("hawl_start_date"),
-  // School profile for default portions/notes. 'general' | 'hanafi' | ...
-  madhhab: text("madhhab").notNull().default("general"),
-  // False until the post-register Begin wizard is finished.
-  setupComplete: integer("setup_complete", { mode: "boolean" }).notNull().default(true),
-  // When the user acknowledged the estimate/trust notice during setup.
-  trustedAckAt: text("trusted_ack_at"),
-  // IANA time zone from the user's browser, so "today" is their today.
-  timezone: text("timezone"),
-  // 'tabular' (arithmetic) or 'umalqura' (Saudi Umm al-Qura tables).
-  hijriCalendar: text("hijri_calendar").notNull().default("tabular"),
-  // SHA-256 of the secret in the user's calendar-feed URL, if enabled.
-  calendarTokenHash: text("calendar_token_hash"),
-  // The column is named created_at for historical reasons; it holds the time
-  // of the last settings save.
-  updatedAt: text("created_at")
-    .notNull()
-    .default(sql`(CURRENT_TIMESTAMP)`),
-});
+export const settings = sqliteTable(
+  "settings",
+  {
+    userId: text("user_id")
+      .primaryKey()
+      .references(() => users.id, { onDelete: "cascade" }),
+    currency: text("currency").notNull().default("CAD"),
+    nisabStandard: text("nisab_standard").notNull().default("silver"), // 'gold' | 'silver'
+    calendarBasis: text("calendar_basis").notNull().default("lunar"), // 'lunar' | 'solar'
+    goldPricePerGram: real("gold_price_per_gram").notNull().default(90),
+    silverPricePerGram: real("silver_price_per_gram").notNull().default(1.05),
+    // When gold/silver prices were last saved by the user (not settings.updatedAt).
+    metalsUpdatedAt: text("metals_updated_at"),
+    // Date the user's wealth last crossed nisab. Hawl (the lunar holding year)
+    // is measured from here. Null until the user sets it. Per-asset dates may
+    // also be set on individual holdings.
+    hawlStartDate: text("hawl_start_date"),
+    // School profile for default portions/notes. 'general' | 'hanafi' | ...
+    madhhab: text("madhhab").notNull().default("general"),
+    // False until the post-register Begin wizard is finished.
+    setupComplete: integer("setup_complete", { mode: "boolean" }).notNull().default(true),
+    // When the user acknowledged the estimate/trust notice during setup.
+    trustedAckAt: text("trusted_ack_at"),
+    // IANA time zone from the user's browser, so "today" is their today.
+    timezone: text("timezone"),
+    // 'tabular' (arithmetic) or 'umalqura' (Saudi Umm al-Qura tables).
+    hijriCalendar: text("hijri_calendar").notNull().default("tabular"),
+    // SHA-256 of the secret in the user's calendar-feed URL, if enabled.
+    calendarTokenHash: text("calendar_token_hash"),
+    // The column is named created_at for historical reasons; it holds the time
+    // of the last settings save.
+    updatedAt: text("created_at")
+      .notNull()
+      .default(sql`(CURRENT_TIMESTAMP)`),
+  },
+  // Calendar apps poll the feed by token hash; without an index each poll
+  // would scan every user's settings.
+  (t) => [index("settings_calendar_token_idx").on(t.calendarTokenHash)],
+);
 
 export const assets = sqliteTable(
   "assets",

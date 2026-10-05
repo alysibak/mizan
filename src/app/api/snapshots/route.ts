@@ -3,7 +3,7 @@ import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/db";
 import { yearSnapshots } from "@/db/schema";
-import { getCurrentUser } from "@/lib/session";
+import { errorJson, overRowLimit, readJson, signedInUser, writableUser } from "@/lib/api";
 import { loadReckoning, sumTypeInWindow } from "@/lib/reckoning";
 import type { SnapshotPayload } from "@/lib/snapshot";
 
@@ -15,8 +15,8 @@ const createSchema = z.object({
 });
 
 export async function GET() {
-  const user = await getCurrentUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { user, response } = await signedInUser();
+  if (response) return response;
 
   const rows = await db
     .select({
@@ -34,14 +34,14 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const user = await getCurrentUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { user, response } = await writableUser();
+  if (response) return response;
 
-  const body = await request.json().catch(() => ({}));
-  const parsed = createSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid label" }, { status: 400 });
-  }
+  // An empty body is fine: every field is optional.
+  const parsed = createSchema.safeParse((await readJson(request)) ?? {});
+  if (!parsed.success) return errorJson("Invalid label", 400);
+  const full = await overRowLimit("snapshots", user.id);
+  if (full) return full;
 
   const {
     settings,

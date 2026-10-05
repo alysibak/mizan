@@ -10,7 +10,7 @@ import {
   settings,
   yearSnapshots,
 } from "@/db/schema";
-import { getCurrentUser } from "@/lib/session";
+import { MAX_BACKUP_BYTES, ROW_LIMITS, errorJson, readJson, writableUser } from "@/lib/api";
 import {
   assetSchema,
   currencySchema,
@@ -45,10 +45,10 @@ const backupSchema = z.object({
   app: z.literal("mizan").optional(),
   version: z.number().optional(),
   settings: settingsSchema,
-  assets: z.array(assetSchema).max(2000),
-  liabilities: z.array(liabilitySchema).max(2000),
-  giving: z.array(givingSchema).max(20_000),
-  snapshots: z.array(snapshotBackupSchema).max(500).optional(),
+  assets: z.array(assetSchema).max(ROW_LIMITS.assets),
+  liabilities: z.array(liabilitySchema).max(ROW_LIMITS.liabilities),
+  giving: z.array(givingSchema).max(ROW_LIMITS.giving),
+  snapshots: z.array(snapshotBackupSchema).max(ROW_LIMITS.snapshots).optional(),
 });
 
 /** Rows per INSERT, well under SQLite's bound-parameter limit. */
@@ -61,16 +61,16 @@ function chunks<T>(rows: T[]): T[][] {
 }
 
 export async function POST(request: Request) {
-  const user = await getCurrentUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { user, response } = await writableUser();
+  if (response) return response;
 
-  const body = await request.json().catch(() => null);
+  const body = await readJson(request, MAX_BACKUP_BYTES);
+  if (body === null) {
+    return errorJson("This file is not a Mizan backup, or it is larger than 8 MB.", 400);
+  }
   const parsed = backupSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json(
-      { error: firstIssue(parsed.error, "This file is not a Mizan backup.") },
-      { status: 400 },
-    );
+    return errorJson(firstIssue(parsed.error, "This file is not a Mizan backup."), 400);
   }
 
   const data = parsed.data;

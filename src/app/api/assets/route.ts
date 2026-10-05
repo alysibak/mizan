@@ -2,13 +2,14 @@ import { NextResponse } from "next/server";
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { assets } from "@/db/schema";
-import { getCurrentUser, getUserSettings } from "@/lib/session";
+import { getUserSettings } from "@/lib/session";
 import { assetSchema, firstIssue } from "@/lib/validation";
 import { normalizeAsset } from "@/lib/asset-write";
+import { errorJson, overRowLimit, readJson, signedInUser, writableUser } from "@/lib/api";
 
 export async function GET() {
-  const user = await getCurrentUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { user, response } = await signedInUser();
+  if (response) return response;
 
   const rows = await db
     .select()
@@ -19,14 +20,13 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const user = await getCurrentUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { user, response } = await writableUser();
+  if (response) return response;
 
-  const body = await request.json().catch(() => null);
-  const parsed = assetSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: firstIssue(parsed.error) }, { status: 400 });
-  }
+  const parsed = assetSchema.safeParse(await readJson(request));
+  if (!parsed.success) return errorJson(firstIssue(parsed.error), 400);
+  const full = await overRowLimit("assets", user.id);
+  if (full) return full;
 
   const prices = await getUserSettings(user.id);
   const [row] = await db

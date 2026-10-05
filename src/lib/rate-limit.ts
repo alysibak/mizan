@@ -16,6 +16,8 @@ export const LIMITS = {
   register: { scope: "register", limit: 5, windowSeconds: 60 * 60 },
   login: { scope: "login", limit: 30, windowSeconds: 15 * 60 },
   recover: { scope: "recover", limit: 10, windowSeconds: 60 * 60 },
+  // Its own bucket: demo clicks must not use up anyone's sign-in attempts.
+  demo: { scope: "demo", limit: 30, windowSeconds: 15 * 60 },
 } satisfies Record<string, LimitRule>;
 
 /**

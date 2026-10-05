@@ -211,7 +211,7 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
           <p className="mt-1 text-xs text-sage">
             Does not invent classical rulings for stocks or pensions. Existing
             holdings keep their portions until you edit them.{" "}
-            <Link href="/trust" className="text-pine hover:underline">
+            <Link href="/trust" className="text-pine underline underline-offset-2">
               What is verified
             </Link>
           </p>

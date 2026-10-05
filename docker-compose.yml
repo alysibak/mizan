@@ -1,14 +1,24 @@
 services:
   mizan:
-    build: .
+    build:
+      context: .
+      # Baked into the static pages; set them in .env before `docker compose build`.
+      args:
+        APP_URL: ${APP_URL:-}
+        NEXT_PUBLIC_PLAUSIBLE_DOMAIN: ${NEXT_PUBLIC_PLAUSIBLE_DOMAIN:-}
     ports:
       - "${PORT:-3080}:3000"
     environment:
       NODE_ENV: production
       DATABASE_URL: file:/data/mizan.db
+      APP_URL: ${APP_URL:-}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      DEMO_EMAIL: ${DEMO_EMAIL:-}
+      OPERATOR_NAME: ${OPERATOR_NAME:-}
+      CONTACT_EMAIL: ${CONTACT_EMAIL:-}
     volumes:
       - mizan-data:/data
+    init: true
     restart: unless-stopped
 
 volumes:

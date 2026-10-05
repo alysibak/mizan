@@ -1,41 +1,18 @@
 import { NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/session";
-import { perGramFromPerOunce } from "@/lib/metals";
+import { PRICE_TTL_SECONDS, getMetalPrices } from "@/lib/price-fetch";
 
-export const dynamic = "force-dynamic";
+// Shared caches may serve this response for the same hour the upstream
+// answers are kept (see lib/price-fetch).
+const CACHE_HEADER = `public, max-age=600, s-maxage=${PRICE_TTL_SECONDS}, stale-while-revalidate=86400`;
 
-const OZ = { gold: "XAU", silver: "XAG" } as const;
+const UNAVAILABLE = "A free price source was unavailable. Enter prices by hand.";
 
-async function readPrice(symbol: string): Promise<number | null> {
-  const res = await fetch(`https://api.gold-api.com/price/${symbol}`, {
-    cache: "no-store",
-    signal: AbortSignal.timeout(5000),
-  });
-  if (!res.ok) return null;
-  const data = (await res.json()) as { price?: number };
-  return typeof data.price === "number" && data.price > 0 ? data.price : null;
-}
-
-async function usdTo(currency: string): Promise<number | null> {
-  if (currency === "USD") return 1;
-  const res = await fetch(
-    `https://api.frankfurter.app/latest?from=USD&to=${encodeURIComponent(currency)}`,
-    { cache: "no-store", signal: AbortSignal.timeout(5000) },
-  );
-  if (!res.ok) return null;
-  const data = (await res.json()) as { rates?: Record<string, number> };
-  const rate = data.rates?.[currency];
-  return typeof rate === "number" && rate > 0 ? rate : null;
-}
-
-/** Optional suggestion only. Manual prices remain the source of truth. */
+/**
+ * Optional suggestion only; manual prices remain the source of truth. Public,
+ * because the calculator works without an account. It carries no user data.
+ */
 export async function GET(request: Request) {
-  const user = await getCurrentUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const currency = (
-    new URL(request.url).searchParams.get("currency") ?? "CAD"
-  )
+  const currency = (new URL(request.url).searchParams.get("currency") ?? "CAD")
     .trim()
     .toUpperCase()
     .slice(0, 3);
@@ -43,29 +20,12 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Use a three-letter currency" }, { status: 400 });
   }
 
-  try {
-    const [goldOz, silverOz, fx] = await Promise.all([
-      readPrice(OZ.gold),
-      readPrice(OZ.silver),
-      usdTo(currency),
-    ]);
-    if (!goldOz || !silverOz || !fx) {
-      return NextResponse.json(
-        { error: "A free price source was unavailable. Enter prices by hand." },
-        { status: 503 },
-      );
-    }
-    return NextResponse.json({
-      currency,
-      goldPricePerGram: Number(perGramFromPerOunce(goldOz, fx).toFixed(2)),
-      silverPricePerGram: Number(perGramFromPerOunce(silverOz, fx).toFixed(4)),
-      asOf: new Date().toISOString(),
-      source: "gold-api.com + frankfurter.app",
-    });
-  } catch {
+  const prices = await getMetalPrices(currency);
+  if (!prices) {
     return NextResponse.json(
-      { error: "A free price source was unavailable. Enter prices by hand." },
-      { status: 503 },
+      { error: UNAVAILABLE },
+      { status: 503, headers: { "Cache-Control": "no-store" } },
     );
   }
+  return NextResponse.json(prices, { headers: { "Cache-Control": CACHE_HEADER } });
 }

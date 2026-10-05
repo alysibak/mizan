@@ -3,24 +3,22 @@ import { and, eq, isNotNull, or } from "drizzle-orm";
 import type { BatchItem } from "drizzle-orm/batch";
 import { db } from "@/db";
 import { assets, settings } from "@/db/schema";
-import { getCurrentUser, getUserSettings } from "@/lib/session";
+import { getUserSettings } from "@/lib/session";
 import { firstIssue, settingsSchema } from "@/lib/validation";
 import { normalizeAsset } from "@/lib/asset-write";
+import { errorJson, readJson, signedInUser, writableUser } from "@/lib/api";
 
 export async function GET() {
-  const user = await getCurrentUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { user, response } = await signedInUser();
+  if (response) return response;
   return NextResponse.json(await getUserSettings(user.id));
 }
 
 export async function PUT(request: Request) {
-  const user = await getCurrentUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const body = await request.json().catch(() => null);
-  const parsed = settingsSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: firstIssue(parsed.error) }, { status: 400 });
-  }
+  const { user, response } = await writableUser();
+  if (response) return response;
+  const parsed = settingsSchema.safeParse(await readJson(request));
+  if (!parsed.success) return errorJson(firstIssue(parsed.error), 400);
 
   const current = await getUserSettings(user.id);
   const gold = parsed.data.goldPricePerGram;

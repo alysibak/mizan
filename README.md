@@ -1,9 +1,9 @@
 # Mizan (الميزان)
 
-**Islamic wealth, in balance.** Calculate your zakat against nisab, keep your
-assets accounted for, track your sadaqah, and screen stocks for Shariah
-compliance. Mizan runs on your own machine with a local database, so nothing
-here can lapse, expire, or be switched off.
+**Islamic wealth, in balance.** A free, private zakat calculator and ledger.
+Weigh what you hold against nisab with live metal prices, keep your hawl on the
+Hijri calendar, record zakat and sadaqah, and close each year with a clear
+statement.
 
 > Mizan is a personal estimation aid, not a substitute for scholarly guidance.
 > Scholars differ on several of the rulings reflected here. For your specific
@@ -20,114 +20,119 @@ When the trial ran out, the app was finished.
 Mizan is built on the opposite principle: **nothing in the critical path
 expires.**
 
-- The database is a local SQLite file. No cloud project to provision, no managed
-  instance to keep alive.
+- The database is SQLite (a local file, or free hosted [Turso](https://turso.tech)).
+  No managed instance to keep alive.
 - Authentication is self-hosted (bcrypt password hashing plus revocable,
   database-backed sessions). No third-party auth service.
-- Nisab depends on gold and silver prices, which you enter yourself. There is no
-  paid metals feed in the way of a calculation.
-- Stock screening takes figures by hand, so it never depends on a paid financial
-  data API either.
+- Nisab depends on gold and silver prices. A free, keyless source can suggest
+  today's prices, but the figure you confirm is the source of truth, and
+  everything works with no outside service at all.
+- Stock screening takes figures by hand, so it never depends on a paid
+  financial data API either.
 
 You can clone this, run `npm install`, and it works. In five years it will still
 work.
 
 ## Features
 
+**For everyone, no account**
+
+- **Zakat calculator** (`/calculator`). Live gold and silver prices in some
+  sixty currencies (picked from the visitor's region), gold or silver nisab,
+  worn jewellery by school, metal by weight and karat, long-term shares and
+  pensions at a share you set, and debts due now. It runs in the browser;
+  figures stay in that browser's storage and come along into a new account at
+  setup.
+- **Read-only demo** (optional). One click on the sign-in page opens a sample
+  ledger nobody can change.
+
+**With a free account**
+
 - **Zakat engine.** Pure, tested functions that net your assets against
   deductible liabilities, compare the result to nisab on the gold or silver
-  standard, and apply the 2.5 percent rate (with a solar-year adjustment when you
-  reckon on the Gregorian calendar). Indicative vs payable when hawl is tracked.
-- **Ledger.** Categorised holdings (cash, metals by weight, equities, crypto,
-  business inventory, receivables, pensions) with editable zakatable portions
-  and school-profile jewellery defaults.
-- **Hawl tracking.** One ledger lunar year from your settings date; optional
-  per-holding start dates are reminders only. Tabular Hijri calendar.
-- **Yearly ritual.** Begin wizard, Reckoning night (forgotten wealth → what-if
-  nisab → envelopes → pay), freeze snapshots with a letter to next year, roll
-  hawl, printable statement.
-- **Giving log.** Zakat, sadaqah, purification, and Zakat al-Fitr; optional
-  asnaf tags; round-up helper; CSV export for receipts season. Only zakat
-  entries clear outstanding for the cycle, and a payment made after the hawl
-  falls due counts toward that cycle only, not the next one after you roll.
-- **Metals by weight.** Gold, silver, and jewellery can be entered in grams and
-  fineness; they are revalued whenever you save new metal prices.
-- **Tools.** Screening (manual AAOIFI-style), mirath sketch, udhiyah shares,
-  reverse zakat, forgive debt, envelopes, and more — satellites around the
-  sitting, not a second product.
-- **Trust.** `/trust` map, estimate banners, optional free metals suggestion
-  (manual prices remain source of truth; freshness tracked).
-- **Your account.** Change password (signs out other devices), sign out other
-  devices, download or restore a full backup, and delete the account with all
-  of its data.
-- **On your phone.** Installable as a web app (Add to Home Screen on iOS,
-  Install on Android). See [On your phone](#on-your-phone).
+  standard, and apply 2.5% (with a solar-year adjustment if you reckon on the
+  Gregorian calendar). Indicative versus payable once the hawl is tracked.
+- **Ledger.** Cash, bank, gold and silver (by value or by weight), jewellery,
+  shares held to trade or for the long term, crypto, business stock, money owed
+  to you, pensions, and holdings kept in other currencies at your own rate.
+  School-profile defaults for disputed items. CSV import.
+- **Hawl on the Hijri calendar.** Tabular or Umm al-Qura. Restart after a dip
+  below nisab, and a private calendar feed so your own calendar app reminds you
+  of the reckoning day.
+- **The yearly sitting.** Setup wizard, reckoning night (forgotten wealth,
+  what-if nisab, envelopes, pay), frozen snapshots with a letter to next year,
+  rolling the hawl, and a printable statement.
+- **Giving log.** Zakat, sadaqah, purification, and Zakat al-Fitr, with
+  optional asnaf tags and a round-up helper. Only zakat clears what is owed for
+  the cycle, and a payment after the hawl falls due counts toward that cycle
+  only. CSV export for receipts season.
+- **Tools.** Screening (manual, AAOIFI-style), mirath sketch, udhiyah shares,
+  reverse zakat, forgiving a debt, and more.
+- **Your account.** Change password (signs out other devices), one-time
+  recovery codes (Mizan sends no email), sign out everywhere, download or
+  restore a full backup, and delete the account with everything in it.
+- **On your phone.** An installable web app with dark mode and an offline
+  notice. The main pages are audited against WCAG 2.1 AA in light and dark on
+  every change.
+
+**Honesty pages:** `/method` (how the numbers are made), `/trust` (what is
+verified and what is not), `/privacy`, and `/terms`.
 
 ## Tech stack
 
-- [Next.js 15](https://nextjs.org) (App Router) and React 19
-- TypeScript throughout
+- [Next.js 16](https://nextjs.org) (App Router) and React 19, TypeScript
 - [Drizzle ORM](https://orm.drizzle.team) on SQLite via
-  [libSQL](https://docs.turso.tech/libsql) (`file:` locally, or free [Turso](https://turso.tech) hosted)
-- Tailwind CSS 3
-- [Zod](https://zod.dev) for validation
-- [Vitest](https://vitest.dev) for the engine tests
+  [libSQL](https://docs.turso.tech/libsql) (`file:` locally, or Turso hosted)
+- Tailwind CSS 3, [Zod](https://zod.dev) for validation
+- [Vitest](https://vitest.dev) for unit tests, [Playwright](https://playwright.dev)
+  and [axe](https://github.com/dequelabs/axe-core) for end-to-end and
+  accessibility tests
 
 ## Getting started
 
 You need Node 20.9 or newer (22 recommended; see `.nvmrc`).
 
 ```bash
-# 1. Install dependencies
 npm install
-
-# 2. Create the database and its tables (defaults to ./mizan.db)
-npm run db:migrate
-
-# 3. (Optional) Seed a demo account so you can see it working
-npm run db:seed
-
-# 4. Run it
-npm run dev
+npm run db:migrate     # create the database (defaults to ./mizan.db)
+npm run db:seed        # optional: the demo account
+npm run dev            # http://localhost:3000
 ```
 
-Open http://localhost:3000.
+No `.env.local` is needed to start. To change a setting, copy `.env.example` to
+`.env.local`; every setting is described under [Configuration](#configuration).
 
-You do not need to create an `.env.local` to start. The database defaults to
-`./mizan.db`. To move it, copy `.env.example` to `.env.local`, set
-`DATABASE_URL` (for example `file:/path/to/mizan.db`), and pass the same value
-when you run the database scripts.
+Use `npm run db:migrate` for real databases. `npm run db:push` is a quick way to
+prototype schema changes locally; if you used it on a database, `db:migrate`
+adopts that database on its next run instead of failing. New schema: edit
+`src/db/schema.ts`, then `npx drizzle-kit generate`.
 
-Use `npm run db:migrate` for real databases. `npm run db:push` is a quick way
-to prototype schema changes locally; if you used it on a database, `db:migrate`
-adopts that database on its next run instead of failing.
+### The demo account
 
-### On your phone
-
-Mizan is a progressive web app, so the same code serves desktop and phone.
-
-- **iPhone / iPad:** open your Mizan URL in Safari, tap Share, then
-  *Add to Home Screen*.
-- **Android:** open it in Chrome and tap *Install* (the dashboard also offers a
-  button).
-
-It opens full-screen from the home screen. Pages are never cached on the
-device (they hold your finances); if you are offline, Mizan shows an offline
-notice instead. Regenerate the app icons after changing `src/app/icon.svg` with
-`node scripts/generate-icons.mjs`.
-
-### Demo account
-
-If you ran `npm run db:seed`:
+`npm run db:seed` creates (or resets) a demo ledger with a year of holdings and
+giving:
 
 ```
 email:    demo@mizan.app
 password: mizan1234
 ```
 
-It comes preloaded with a spread of assets, a liability, a hawl in progress, and
-a couple of giving records, so the dashboard and the zakat breakdown have
-something to show.
+On a public server, set `DEMO_EMAIL=demo@mizan.app` too. The account then
+refuses every change (so one visitor cannot lock, empty, or delete it for the
+next), and the sign-in page offers **Explore a demo ledger**, which signs
+visitors in with one click for a day. Re-run the seed now and then to refresh
+its dates.
+
+### On your phone
+
+- **iPhone / iPad:** open your Mizan URL in Safari, tap Share, then *Add to Home
+  Screen*.
+- **Android:** open it in Chrome and tap *Install* (the dashboard also offers a
+  button).
+
+Pages are never cached on the device (they hold your finances); offline, Mizan
+shows a notice instead. Regenerate the icons after changing `src/app/icon.svg`
+with `node scripts/generate-icons.mjs`.
 
 ## How the zakat math works
 
@@ -151,7 +156,7 @@ Nisab (you set the metal prices: gold 90/g, silver 1.05/g)
 16,000 is above both thresholds, so zakat is due.
 
   Lunar year:  16,000 x 2.5%     =  400.00
-  Solar year:  16,000 x 2.5768%  =  412.43
+  Solar year:  16,000 x 2.5768%  =  412.28
 ```
 
 The solar rate is `2.5% x (365.25 / 354.367)`. The lunar year is about eleven
@@ -166,90 +171,138 @@ people reach it and more reaches those in need.
 
 ```
 src/
-  db/
-    schema.ts          users, sessions, settings, assets, liabilities,
-                       giving, year_snapshots
-    seed.ts            demo account
+  proxy.ts             redirects, cross-site write refusal, body-size limit
+  instrumentation.ts   one structured log line per server error
+  db/                  schema, client, demo seed
   lib/
-    zakat.ts           calculation engine
-    nisab.ts / hijri.ts / screening.ts / madhhab.ts
-    giving-window.ts   payable vs indicative, payment window, metal freshness
-    reckoning-path.ts  yearly sitting spine
-    categories.ts, asnaf.ts, forgotten.ts, unique-calcs.ts, …
+    zakat.ts           calculation engine (pure)
+    nisab.ts · hijri.ts · giving-window.ts · madhhab.ts · screening.ts
+    calculator.ts      the public calculator's model (pure)
+    price-sources.ts   parsing and sanity checks for free price feeds (pure)
+    reckoning.ts       one loader for every reckoning screen
+    api.ts             route guards: signed in, writable, password re-check,
+                       row limits, capped body reads
+    auth.ts · session.ts · rate-limit.ts · validation.ts · site.ts
   app/
-    (auth)/            login, register
-    (app)/             dashboard, assets, year, giving, statement, tools, …
-    begin/             post-register wizard
-    trust/ · method/   honesty pages
-    api/               scoped mutations
-  components/          Scale, CycleActions, CloseYearPath, managers, tools
-  middleware.ts
-drizzle/               SQL migrations (0000…)
+    page.tsx           landing (static)
+    calculator/        public calculator (static)
+    privacy/ terms/ method/ trust/
+    (auth)/            sign in, register, forgot
+    (setup)/begin/     setup wizard
+    (app)/             balance, ledger, year, give, statement, tools, settings
+    api/               JSON routes, each scoped to the signed-in user
+  components/
+drizzle/               SQL migrations (0000…0009)
+e2e/                   Playwright: yearly cycle, public pages, accessibility
 ```
+
+## Configuration
+
+All optional. Locally, put them in `.env.local`; on Vercel, in the project's
+environment variables; with Docker, in `.env` next to `docker-compose.yml`.
+
+| Variable | Purpose |
+|---|---|
+| `DATABASE_URL` | `file:mizan.db` (default) or `libsql://…` for Turso |
+| `DATABASE_AUTH_TOKEN` | Turso token (ignored for `file:` URLs) |
+| `APP_URL` | Public address, e.g. `https://mizan.example`. Used for canonical links, social cards, the sitemap, and calendar-feed links. Needed at **build** time for the static pages; Vercel falls back to its production domain. |
+| `OPERATOR_NAME`, `CONTACT_EMAIL` | Who runs this copy, shown in the privacy policy and terms. Set both before going public. |
+| `ADMIN_EMAIL` | Comma-separated emails that can open `/admin/users` (sign-up counts; never ledger contents). |
+| `DEMO_EMAIL` | Makes that account the read-only, one-click demo. |
+| `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` | Turns on cookieless [Plausible](https://plausible.io) analytics for public pages only, with `Signup`, `Demo`, and `Calculated` events. Build time. |
+| `NEXT_PUBLIC_PLAUSIBLE_SRC` | Script URL for a self-hosted Plausible (defaults to plausible.io, manual mode). |
+| `PORT` | Host port for Docker Compose (default 3080). |
 
 ## Security
 
-- Every API route resolves the signed-in user server-side and scopes its query
-  to that user's rows. Updates and deletes match on both the record id and the
-  owner id, so one account cannot read or change another's data by guessing ids.
+- Every API route resolves the signed-in user on the server and scopes its query
+  to that user's rows; updates and deletes match on both the record id and the
+  owner id. Every write passes one guard that also refuses the read-only demo.
 - Passwords are bcrypt-hashed (cost 12); sessions are random tokens stored only
   as SHA-256 hashes, in HttpOnly SameSite=Lax cookies.
-- Ten wrong passwords lock an account's sign-in for 15 minutes; unknown emails
-  take the same time to reject as wrong passwords.
-- Writes from another site are refused (`Sec-Fetch-Site`), and pages ship a
+- Ten wrong passwords lock an account for 15 minutes. Re-entering the password
+  to change it, make a recovery code, or delete the account counts toward the
+  same lock, so a stolen session cannot be used to guess it. Unknown emails take
+  as long to reject as wrong passwords. Sign-up, sign-in, recovery, and the demo
+  have per-network limits.
+- Writes from another site are refused (`Sec-Fetch-Site`); request bodies are
+  size-capped before they are read; each account has row limits. Pages ship a
   Content-Security-Policy, HSTS, and frame denial.
-- All input is validated with Zod: real calendar dates, finite bounded amounts,
-  three-letter currency codes. Backup restores are validated and applied in a
-  single transaction, so a bad file never leaves you half-restored.
+- All input is validated with Zod. Backup restores are validated and applied in
+  one transaction, so a bad file never leaves you half-restored.
+- Server errors are logged as one JSON line with the error digest the user sees,
+  never with request bodies.
+
+**Self-hosting behind a proxy.** Per-network limits read the client address
+from `X-Forwarded-For`. Vercel sets it. If you expose the Node server yourself,
+put it behind a reverse proxy that **overwrites** that header with the real
+client address, or a client can claim any address and spread its attempts (the
+per-account lock still holds). With Caddy:
+
+```
+mizan.example {
+  reverse_proxy localhost:3080 {
+    header_up X-Forwarded-For {remote_host}
+  }
+}
+```
 
 ## Testing
 
 ```bash
-npm test
+npm run lint && npm run typecheck && npm test   # 205 unit tests
+npm run build && npm run test:e2e               # Playwright, needs Chromium
 ```
 
-The suite (111 tests) covers the zakat engine, nisab, Hijri conversion (every
-day for a century round-trips), hawl and payment windows across a roll, cent
-rounding of what is owed, inheritance shares (awl, radd, Umariyyatan,
-Mushtaraka), screening, CSV import, metal valuation by weight, input
-validation, and backup payload checks.
+Unit tests cover the zakat engine, nisab, Hijri conversion (every day for a
+century round-trips), hawl and payment windows across a roll, cent rounding,
+inheritance shares (awl, radd, Umariyyatan, Mushtaraka), screening, CSV import,
+metal by weight, the calculator (including amounts typed with a decimal comma),
+price-feed parsing, and input validation.
 
-```bash
-npm run lint
-npm run typecheck
-```
+End-to-end tests run the production build on a phone and a desktop: a full
+zakat year, the calculator carried into a new account, the read-only demo,
+legal and search files, and an axe audit of 26 pages against WCAG 2.1 AA in
+light and dark.
 
-CI (`.github/workflows/ci.yml`) runs lint, typecheck, tests, a fresh migration,
-a schema-drift check, and a production build on every push and pull request.
+CI (`.github/workflows/ci.yml`) runs all of that on every push to `master` and
+every pull request, plus a runtime dependency audit, a fresh migration, a
+schema-drift check, and a Docker build that must boot and answer its health
+check.
 
 ## Production
 
-### Free public hosting (PC can be off)
+### Free public hosting (Vercel + Turso)
 
-Mizan needs somewhere for the database to live. A free always-on VM with a
-local SQLite file does not exist without a payment card. The $0 path is:
-
-1. **Turso** free plan (hosted SQLite, no credit card) — database
-2. **Vercel** Hobby (serverless Next.js, no credit card) — app
-
-These are ongoing free tiers with usage caps, not a 7-day trial that suspends
-the app. If you blow past the free quotas, the DB can block until you upgrade
-or wait for the next month — stay modest and you stay free.
+Mizan needs somewhere for the database to live. The $0 path is
+[Turso](https://turso.tech)'s free plan (hosted SQLite) for the database and
+Vercel's Hobby plan for the app. Both are ongoing free tiers with usage caps,
+not trials that suspend the app.
 
 ```bash
-# After creating a Turso DB and copying URL + token into .env.local:
+# With a Turso database URL and token in .env.local:
 npm run db:migrate
 npx vercel --prod
-# Set DATABASE_URL and DATABASE_AUTH_TOKEN (and optionally ADMIN_EMAIL) in the
-# Vercel project.
 ```
 
-### Docker (local / your own machine)
+In the Vercel project, set `DATABASE_URL`, `DATABASE_AUTH_TOKEN`, `APP_URL`,
+`OPERATOR_NAME`, and `CONTACT_EMAIL` (and optionally `ADMIN_EMAIL`,
+`DEMO_EMAIL`, `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`). `vercel.json` runs migrations
+before each build. To seed the demo there, run the seed locally against the
+same database:
 
 ```bash
-cp .env.example .env   # optional: ADMIN_EMAIL, PORT
-npm run docker:up
-# Open http://localhost:3080
+DATABASE_URL=libsql://… DATABASE_AUTH_TOKEN=… DEMO_EMAIL=demo@mizan.app npm run db:seed
+```
+
+Back the database up regularly (for example `turso db shell <db> .dump > backup.sql`)
+and point an uptime monitor at `/api/health`.
+
+### Docker (your own machine or server)
+
+```bash
+cp .env.example .env   # set APP_URL, OPERATOR_NAME, CONTACT_EMAIL, …
+npm run docker:up      # builds with your APP_URL, then serves http://localhost:3080
 ```
 
 ```bash
@@ -257,14 +310,8 @@ npm run docker:logs
 npm run docker:down
 ```
 
-### Fly.io
-
-> Not recommended. New accounts get a short free trial, then the app suspends
-> unless you pay — the expiry trap this project was built to avoid.
-
-```bash
-fly apps destroy mizan-app --yes
-```
+The SQLite file lives on the `mizan-data` volume; migrations run on every start.
+Put a reverse proxy in front for HTTPS (see the Caddy example above).
 
 ### Without Docker
 
@@ -272,22 +319,20 @@ fly apps destroy mizan-app --yes
 npm ci
 npm run build
 npm run db:migrate
-NODE_ENV=production npm start
+npm start              # serves the standalone build on $PORT (default 3000)
 ```
 
-Set `DATABASE_URL` to a durable location (`file:...` or a Turso URL).
-## Where it could go next
+Set `DATABASE_URL` to a durable location (`file:/path/mizan.db` or a Turso URL).
 
-The original PocketChange idea, rounding everyday spending up and giving the
-difference, now lives here as round-up **sadaqah**. Natural next steps:
-holdings in other currencies with a manual exchange rate, per-asset hawl that
-affects payable zakat (today it is a reminder), and reminders on the hawl
-anniversary.
+### Fly.io
+
+> Not recommended. New accounts get a short free trial, then the app suspends
+> unless you pay — the expiry trap this project was built to avoid.
 
 ## A note on accuracy
 
 The fiqh encoded here reflects mainstream positions, but it is deliberately
-explicit about where scholars differ (the gold versus silver standard, long-term
-equities, pensions, and the treatment of debt). Treat the numbers as a careful
-estimate to help you plan and act, not as a ruling. For anything consequential,
-ask someone qualified.
+explicit about where scholars differ (the gold versus silver standard, worn
+jewellery, long-term equities, pensions, and the treatment of debt). Treat the
+numbers as a careful estimate to help you plan and act, not as a ruling. For
+anything consequential, ask someone qualified.

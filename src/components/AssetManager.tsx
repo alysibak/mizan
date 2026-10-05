@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { categoryForMadhhab, type Madhhab } from "@/lib/madhhab";
-import { formatMoney, formatPercent } from "@/lib/money";
+import { formatMoney, formatPercent, sumCents } from "@/lib/money";
 import { sendJson } from "@/lib/client-fetch";
 import type { Asset, Liability } from "@/db/schema";
 import AssetImport from "./AssetImport";
@@ -168,22 +168,6 @@ export default function AssetManager({
 
   return (
     <div className="space-y-10">
-      <AssetImport currency={currency} madhhab={madhhab} />
-
-      <section className="card p-5">
-        <h2 className="font-serif text-lg text-ink">Add an asset</h2>
-        <div className="mt-4">
-          <AssetForm
-            currency={currency}
-            madhhab={madhhab}
-            prices={prices}
-            initialCategory={initialCategory}
-            initialLabel={initialLabel}
-            onSaved={() => router.refresh()}
-          />
-        </div>
-      </section>
-
       {error && (
         <p className="text-sm text-danger" role="alert">
           {error}
@@ -191,13 +175,24 @@ export default function AssetManager({
       )}
 
       <section>
-        <h2 className="mb-3 font-serif text-lg text-ink">
-          Your assets{" "}
-          <span className="text-sm font-normal text-sage">({assets.length})</span>
-        </h2>
+        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="font-serif text-lg text-ink">
+            Your assets{" "}
+            <span className="text-sm font-normal text-sage">({assets.length})</span>
+          </h2>
+          {assets.length > 0 ? (
+            <p className="text-sm text-sage nums">
+              {formatMoney(sumCents(assets.map((a) => a.amount)), currency)} held ·{" "}
+              <span className="text-ink">
+                {formatMoney(sumCents(assets.map((a) => a.amount * a.zakatablePortion)), currency)}
+              </span>{" "}
+              counted
+            </p>
+          ) : null}
+        </div>
         {assets.length === 0 ? (
           <p className="border border-dashed border-mist p-5 text-sm text-sage">
-            No assets yet. Add your first one above to begin your accounting.
+            No assets yet. Add your first one below to begin your accounting.
           </p>
         ) : (
           <ul className="divide-y divide-mist border-y border-mist">
@@ -272,6 +267,20 @@ export default function AssetManager({
         )}
       </section>
 
+      <section className="card p-5">
+        <h2 className="font-serif text-lg text-ink">Add an asset</h2>
+        <div className="mt-4">
+          <AssetForm
+            currency={currency}
+            madhhab={madhhab}
+            prices={prices}
+            initialCategory={initialCategory}
+            initialLabel={initialLabel}
+            onSaved={() => router.refresh()}
+          />
+        </div>
+      </section>
+
       <section>
         <h2 className="mb-1 font-serif text-lg text-ink">Deductible liabilities</h2>
         <p className="mb-4 text-sm text-sage">
@@ -338,6 +347,8 @@ export default function AssetManager({
           </ul>
         )}
       </section>
+
+      <AssetImport currency={currency} madhhab={madhhab} />
     </div>
   );
 }

@@ -34,6 +34,7 @@ export default function DashboardNotices({
   metalsReason = null,
   metalsAgeDays = null,
   welcome = false,
+  part = "all",
 }: {
   items: Item[];
   metalsStale?: boolean;
@@ -41,6 +42,11 @@ export default function DashboardNotices({
   metalsAgeDays?: number | null;
   /** Setup just finished (the wizard lands on /dashboard?welcome=1). */
   welcome?: boolean;
+  /**
+   * "top": what needs attention before reading the figures (the welcome and
+   * stale prices). "bottom": the getting-started list and install hint.
+   */
+  part?: "all" | "top" | "bottom";
 }) {
   const router = useRouter();
   const hydrated = useHydrated();
@@ -64,10 +70,17 @@ export default function DashboardNotices({
   }
 
   const remaining = items.filter((i) => !i.done);
+  const top = part !== "bottom";
+  const bottom = part !== "top";
+
+  const shown =
+    (top && (welcome || (metalsStale && !metalsHidden))) ||
+    (bottom && ((!checklistHidden && remaining.length > 0) || install));
+  if (!shown) return null;
 
   return (
     <div className="space-y-6">
-      {welcome ? (
+      {top && welcome ? (
         <section className="border border-pine/40 bg-pine/5 px-5 py-5">
           <p className="label text-pine">Ready</p>
           <p className="mt-1 font-serif text-xl text-ink">Your ledger is open.</p>
@@ -93,7 +106,7 @@ export default function DashboardNotices({
         </section>
       ) : null}
 
-      {metalsStale && !metalsHidden ? (
+      {top && metalsStale && !metalsHidden ? (
         <section className="border border-brass/40 bg-brass/5 px-5 py-4">
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -126,7 +139,7 @@ export default function DashboardNotices({
         </section>
       ) : null}
 
-      {!checklistHidden && remaining.length > 0 ? (
+      {bottom && !checklistHidden && remaining.length > 0 ? (
         <section className="border border-mist bg-paper px-5 py-5">
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -162,7 +175,7 @@ export default function DashboardNotices({
         </section>
       ) : null}
 
-      {install ? (
+      {bottom && install ? (
         <section className="border border-dashed border-mist px-5 py-4">
           <div className="flex items-start justify-between gap-4">
             <div>

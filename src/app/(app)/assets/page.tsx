@@ -32,8 +32,7 @@ export default async function AssetsPage({
         <h1 className="mt-1 font-serif text-3xl text-ink">What you hold</h1>
         <p className="mt-2 text-sm text-sage">
           Assets and debts — including metals by weight, money owed to you, and
-          trade inventory. Import a CSV, then correct categories before they
-          enter the reckoning.
+          trade inventory. Values are today’s; update them before you reckon.
         </p>
       </header>
 

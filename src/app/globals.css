@@ -191,3 +191,27 @@
     content: none !important;
   }
 }
+
+/* Arabic and Urdu pages. Letter-spacing breaks the joins of Arabic script,
+   and capitals do not exist in it, so the small-caps labels are reset. */
+@layer components {
+  .script-arabic {
+    font-family: var(--font-naskh), var(--font-source), ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.75;
+  }
+  .script-arabic .font-serif {
+    font-family: var(--font-naskh), var(--font-literata), Georgia, serif;
+  }
+  .script-arabic .label,
+  .script-arabic [class*="tracking-"] {
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .script-arabic .label {
+    font-size: 0.8rem;
+  }
+  .script-arabic h1,
+  .script-arabic h2 {
+    line-height: 1.35;
+  }
+}

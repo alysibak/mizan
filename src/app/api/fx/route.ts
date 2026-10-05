@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/session";
-
-export const dynamic = "force-dynamic";
+import { signedInUser } from "@/lib/api";
+import { ECB_CURRENCIES, crossRate, parseFrankfurter } from "@/lib/price-sources";
+import { currencyApiTable, getJson } from "@/lib/price-fetch";
 
 const CODE = /^[A-Z]{3}$/;
 
@@ -10,8 +10,8 @@ const CODE = /^[A-Z]{3}$/;
  * saves is the source of truth; this only pre-fills it and may be offline.
  */
 export async function GET(request: Request) {
-  const user = await getCurrentUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { response } = await signedInUser();
+  if (response) return response;
 
   const params = new URL(request.url).searchParams;
   const from = (params.get("from") ?? "").trim().toUpperCase();
@@ -25,17 +25,21 @@ export async function GET(request: Request) {
     { error: "No free rate source answered. Enter the rate by hand." },
     { status: 503 },
   );
-  try {
-    const res = await fetch(
-      `https://api.frankfurter.app/latest?from=${from}&to=${to}`,
-      { cache: "no-store", signal: AbortSignal.timeout(5000) },
-    );
-    if (!res.ok) return unavailable;
-    const data = (await res.json()) as { rates?: Record<string, number>; date?: string };
-    const rate = data.rates?.[to];
-    if (typeof rate !== "number" || !(rate > 0)) return unavailable;
-    return NextResponse.json({ from, to, rate, asOf: data.date ?? null, source: "frankfurter.app" });
-  } catch {
-    return unavailable;
+
+  if (ECB_CURRENCIES.has(from) && ECB_CURRENCIES.has(to)) {
+    const data = (await getJson(`https://api.frankfurter.app/latest?from=${from}&to=${to}`)) as {
+      date?: string;
+    } | null;
+    const rate = parseFrankfurter(data, to);
+    if (rate) {
+      return NextResponse.json({ from, to, rate, asOf: data?.date ?? null, source: "frankfurter.app" });
+    }
   }
+
+  const table = (await currencyApiTable()) as { date?: string } | null;
+  const rate = crossRate(table, from, to);
+  if (rate) {
+    return NextResponse.json({ from, to, rate, asOf: table?.date ?? null, source: "currency-api" });
+  }
+  return unavailable;
 }

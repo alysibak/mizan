@@ -64,6 +64,13 @@
       "when": 1790977346617,
       "tag": "0008_recovery_timezone_currency_ratelimit",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1791172605535,
+      "tag": "0009_calendar_token_index",
+      "breakpoints": true
     }
   ]
 }

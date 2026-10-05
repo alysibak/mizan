@@ -18,9 +18,26 @@ import { metalsLookLikeDefaults } from "@/lib/giving-window";
 import { COMMON_CURRENCIES } from "@/lib/currencies";
 import { sendJson } from "@/lib/client-fetch";
 import { readStoredValue, setStoredValue, useHydrated } from "@/lib/client-store";
+import {
+  CALC_STORAGE_KEY,
+  decimalMarkFor,
+  draftIsEmpty,
+  draftToLedger,
+  parseDraft,
+  type CalcDraft,
+  type LedgerCarryOver,
+} from "@/lib/calculator";
 
 const STEPS = ["Trust", "Preferences", "Prices", "Hawl", "Holding"] as const;
 const STEP_KEY = "mizan-begin-step";
+
+/** What this visitor entered in the public calculator, if anything. */
+function calculatorDraft(): { draft: CalcDraft; ledger: LedgerCarryOver } | null {
+  const stored = parseDraft(readStoredValue(CALC_STORAGE_KEY));
+  if (!stored) return null;
+  const draft = stored.decimal ? stored : { ...stored, decimal: decimalMarkFor(navigator.language) };
+  return draftIsEmpty(draft) ? null : { draft, ledger: draftToLedger(draft) };
+}
 
 /** The step to resume at: the trust note first, then wherever setup was left. */
 function resumeStep(trusted: boolean): number {
@@ -49,14 +66,21 @@ function Wizard({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [currency, setCurrency] = useState(settings.currency || "CAD");
-  const [nisabStandard, setNisabStandard] = useState(settings.nisabStandard);
-  const [calendarBasis, setCalendarBasis] = useState(settings.calendarBasis);
-  const [madhhab, setMadhhab] = useState<Madhhab>(parseMadhhab(settings.madhhab));
-  // Starter placeholders are not real prices, so the fields start empty.
+  // Starter placeholders are not real prices, so the fields start empty, or
+  // with what the visitor already used in the public calculator.
   const starter = metalsLookLikeDefaults(settings.goldPricePerGram, settings.silverPricePerGram);
-  const [gold, setGold] = useState(starter ? 0 : settings.goldPricePerGram);
-  const [silver, setSilver] = useState(starter ? 0 : settings.silverPricePerGram);
+  const [carry] = useState(calculatorDraft);
+  const fromCalc = starter ? carry?.draft : undefined;
+  const [currency, setCurrency] = useState(fromCalc?.currency || settings.currency || "CAD");
+  const [nisabStandard, setNisabStandard] = useState(fromCalc?.standard ?? settings.nisabStandard);
+  const [calendarBasis, setCalendarBasis] = useState(fromCalc?.basis ?? settings.calendarBasis);
+  const [madhhab, setMadhhab] = useState<Madhhab>(parseMadhhab(settings.madhhab));
+  const [gold, setGold] = useState(
+    starter ? (carry?.ledger.prices.goldPricePerGram ?? 0) : settings.goldPricePerGram,
+  );
+  const [silver, setSilver] = useState(
+    starter ? (carry?.ledger.prices.silverPricePerGram ?? 0) : settings.silverPricePerGram,
+  );
   const [hawlStartDate, setHawlStartDate] = useState(settings.hawlStartDate ?? "");
   const [trustedAckAt, setTrustedAckAt] = useState(settings.trustedAckAt);
   const [lookingUp, setLookingUp] = useState(false);
@@ -71,8 +95,11 @@ function Wizard({
   const [assetAmount, setAssetAmount] = useState("");
   const [assetCategory, setAssetCategory] = useState("bank");
   // Set once the first holding is saved, so retrying a failed finish does
-  // not add it twice.
+  // not add it twice. The calculator's holdings and debts are tracked apart
+  // for the same reason: a retry sends only what has not landed yet.
   const [assetSaved, setAssetSaved] = useState(false);
+  const [carriedAssets, setCarriedAssets] = useState(false);
+  const [carriedDebts, setCarriedDebts] = useState(0);
 
   async function saveSettings(patch: Record<string, unknown>) {
     const body = {
@@ -170,11 +197,32 @@ function Wizard({
     setBusy(false);
   }
 
-  async function finish(withAsset: boolean) {
+  async function finish(withAsset: boolean | "calculator") {
     setBusy(true);
     setError(null);
     try {
-      if (withAsset && !assetSaved) {
+      if (withAsset === "calculator" && carry && !assetSaved) {
+        // Prices are saved first, so weighed metal is valued at the same rate.
+        await saveSettings({});
+        if (carry.ledger.assets.length > 0 && !carriedAssets) {
+          const res = await sendJson(
+            "/api/assets/import",
+            "POST",
+            { rows: carry.ledger.assets },
+            "Could not bring in your holdings",
+          );
+          if (!res.ok) throw new Error(res.error);
+          setCarriedAssets(true);
+        }
+        for (const [i, debt] of carry.ledger.liabilities.entries()) {
+          if (i < carriedDebts) continue;
+          const res = await sendJson("/api/liabilities", "POST", debt, "Could not add your debts");
+          if (!res.ok) throw new Error(res.error);
+          setCarriedDebts(i + 1);
+        }
+        setAssetSaved(true);
+        setStoredValue(CALC_STORAGE_KEY, null);
+      } else if (withAsset === true && !assetSaved) {
         const amount = parseFloat(assetAmount);
         if (!assetLabel.trim() || !(amount >= 0)) {
           setError("Add a description and amount, or skip this step");
@@ -499,9 +547,46 @@ function Wizard({
       {step === 4 && (
         <section className="space-y-5">
           <h2 className="font-serif text-xl text-ink">First holding</h2>
+          {carry && !assetSaved ? (
+            <div className="border border-pine/40 bg-pine/5 px-4 py-4">
+              <p className="text-sm font-medium text-ink">From your calculator</p>
+              <ul className="mt-2 space-y-1 text-sm">
+                {carry.ledger.assets.map((a) => (
+                  <li key={a.label} className="flex justify-between gap-3">
+                    <span className="text-sage">{a.label}</span>
+                    <span className="text-ink nums">
+                      {formatMoney(a.amount, carry.ledger.currency)}
+                    </span>
+                  </li>
+                ))}
+                {carry.ledger.liabilities.map((l) => (
+                  <li key={l.label} className="flex justify-between gap-3">
+                    <span className="text-sage">{l.label}</span>
+                    <span className="text-danger nums">
+                      −{formatMoney(l.amount, carry.ledger.currency)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              {carry.ledger.currency !== currency ? (
+                <p className="mt-2 text-xs text-warn">
+                  These were entered in {carry.ledger.currency}; your ledger uses {currency}.
+                  Bring them in and correct the figures on the Ledger page.
+                </p>
+              ) : null}
+              <button
+                type="button"
+                className="btn-primary mt-4"
+                disabled={busy}
+                onClick={() => finish("calculator")}
+              >
+                {busy ? "Saving…" : "Bring these in and finish"}
+              </button>
+            </div>
+          ) : null}
           <p className="text-sm text-sage">
-            Optional. Add one balance now, or open an empty ledger and fill it
-            on the Ledger page.
+            {carry && !assetSaved ? "Or add" : "Optional. Add"} one balance now, or open an
+            empty ledger and fill it on the Ledger page.
           </p>
           <div className="grid gap-4">
             <div>

@@ -2,13 +2,13 @@ import { NextResponse } from "next/server";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { givingRecords } from "@/db/schema";
-import { getCurrentUser } from "@/lib/session";
+import { writableUser } from "@/lib/api";
 
 type Ctx = { params: Promise<{ id: string }> };
 
 export async function DELETE(_request: Request, { params }: Ctx) {
-  const user = await getCurrentUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { user, response } = await writableUser();
+  if (response) return response;
   const { id } = await params;
   const [row] = await db
     .delete(givingRecords)

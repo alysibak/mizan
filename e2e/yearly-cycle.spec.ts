@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import {
   PASSWORD,
+  asNewVisitor,
   daysAgo,
   expectNoHorizontalScroll,
   registerAndSetUp,
@@ -16,6 +17,7 @@ test("a full zakat year on a phone", async ({ page }) => {
   const email = uniqueEmail("year");
 
   await test.step("setup refuses the starter metal prices", async () => {
+    await asNewVisitor(page);
     await page.goto("/register");
     await page.fill("#name", "Gate Test");
     await page.fill("#email", uniqueEmail("gate"));

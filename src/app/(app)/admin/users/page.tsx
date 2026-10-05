@@ -1,36 +1,60 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
-import { desc } from "drizzle-orm";
+import { count, desc, gte } from "drizzle-orm";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
 import { isAdmin } from "@/lib/admin";
 
+const PAGE_SIZE = 100;
+
 function formatWhen(iso: string | null | undefined): string {
   if (!iso) return "—";
-  const d = new Date(iso);
+  // SQLite CURRENT_TIMESTAMP has no zone marker but is UTC.
+  const d = new Date(/[zZ]|[+-]\d\d:?\d\d$/.test(iso) ? iso : `${iso.replace(" ", "T")}Z`);
   if (Number.isNaN(d.getTime())) return iso;
   return d.toLocaleString("en-CA", {
     dateStyle: "medium",
     timeStyle: "short",
+    timeZone: "UTC",
   });
 }
 
-export default async function AdminUsersPage() {
+function daysAgoIso(days: number): string {
+  return new Date(Date.now() - days * 86_400_000).toISOString();
+}
+
+export default async function AdminUsersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
   const me = await getCurrentUser();
   if (!me || !isAdmin(me)) {
     redirect("/dashboard");
   }
 
-  const rows = await db
-    .select({
-      id: users.id,
-      name: users.name,
-      email: users.email,
-      createdAt: users.createdAt,
-      lastLoginAt: users.lastLoginAt,
-    })
-    .from(users)
-    .orderBy(desc(users.createdAt));
+  const requested = Number((await searchParams).page);
+  const page = Number.isInteger(requested) && requested > 0 ? requested : 1;
+
+  const [[total], [active7], [active30], rows] = await Promise.all([
+    db.select({ n: count() }).from(users),
+    db.select({ n: count() }).from(users).where(gte(users.lastLoginAt, daysAgoIso(7))),
+    db.select({ n: count() }).from(users).where(gte(users.lastLoginAt, daysAgoIso(30))),
+    db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        createdAt: users.createdAt,
+        lastLoginAt: users.lastLoginAt,
+      })
+      .from(users)
+      .orderBy(desc(users.createdAt))
+      .limit(PAGE_SIZE)
+      .offset((page - 1) * PAGE_SIZE),
+  ]);
+  const pages = Math.max(1, Math.ceil((total?.n ?? 0) / PAGE_SIZE));
 
   return (
     <div className="space-y-8">
@@ -39,15 +63,45 @@ export default async function AdminUsersPage() {
         <h1 className="mt-1 font-serif text-3xl text-ink">Who has entered</h1>
         <p className="mt-2 max-w-xl text-sm text-sage">
           Accounts that registered on Mizan, with when they signed up and when
-          they last signed in. Only visible to you.
+          they last signed in (UTC). Only visible to you. Ledgers stay private:
+          nothing here shows what anyone holds or gives.
         </p>
       </header>
 
+      <dl className="grid gap-6 sm:grid-cols-3">
+        {[
+          ["Accounts", total?.n ?? 0],
+          ["Signed in, last 7 days", active7?.n ?? 0],
+          ["Signed in, last 30 days", active30?.n ?? 0],
+        ].map(([label, value]) => (
+          <div key={label}>
+            <dt className="label">{label}</dt>
+            <dd className="mt-1 font-serif text-2xl text-ink nums">
+              {Number(value).toLocaleString("en")}
+            </dd>
+          </div>
+        ))}
+      </dl>
+
       <div className="card overflow-hidden p-0">
-        <div className="border-b border-mist px-4 py-3 text-sm text-sage">
-          {rows.length} account{rows.length === 1 ? "" : "s"}
+        <div className="flex items-center justify-between border-b border-mist px-4 py-3 text-sm text-sage">
+          <span>
+            Page {page} of {pages}
+          </span>
+          <span className="flex gap-4">
+            {page > 1 ? (
+              <Link href={`/admin/users?page=${page - 1}`} className="text-pine hover:underline">
+                Newer
+              </Link>
+            ) : null}
+            {page < pages ? (
+              <Link href={`/admin/users?page=${page + 1}`} className="text-pine hover:underline">
+                Older
+              </Link>
+            ) : null}
+          </span>
         </div>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Accounts">
           <table className="w-full min-w-[32rem] text-left text-sm">
             <thead className="border-b border-mist bg-mist/30 text-xs uppercase tracking-wide text-sage">
               <tr>
