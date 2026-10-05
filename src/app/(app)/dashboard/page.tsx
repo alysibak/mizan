@@ -156,18 +156,18 @@ export default async function DashboardPage({
               ? formatMoney(result.zakatDue, settings.currency)
               : "—"}
           </dd>
-          <p className="mt-1 text-xs text-sage">
+          <dd className="mt-1 text-xs text-sage">
             {result.isDue
               ? `${duePhaseLabel(phase, Boolean(settings.hawlStartDate))} · ${formatPercent(result.rate, result.basis === "solar" ? 3 : 1)} (${result.basis})`
               : "Below nisab"}
-          </p>
+          </dd>
         </div>
         <div>
           <dt className="label">Paid · {window.label}</dt>
           <dd className="mt-1 font-serif text-2xl text-ink nums">
             {formatMoney(zakatPaid, settings.currency)}
           </dd>
-          <p className="mt-1 text-xs text-sage" title={window.detail}>
+          <dd className="mt-1 text-xs text-sage" title={window.detail}>
             {zakatOutstanding > 0 && result.isDue
               ? `${formatMoney(zakatOutstanding, settings.currency)} outstanding`
               : result.isDue
@@ -175,7 +175,7 @@ export default async function DashboardPage({
                   ? "Obligation met for this cycle"
                   : "Paid toward this cycle (hawl still open)"
                 : "Nothing due"}
-          </p>
+          </dd>
         </div>
         <div>
           <dt className="label">Margin to nisab</dt>
@@ -188,9 +188,9 @@ export default async function DashboardPage({
             {result.marginToNisab >= 0 ? "+" : ""}
             {formatMoney(result.marginToNisab, settings.currency)}
           </dd>
-          <p className="mt-1 text-xs text-sage">
+          <dd className="mt-1 text-xs text-sage">
             {settings.nisabStandard} standard
-          </p>
+          </dd>
         </div>
       </dl>
 

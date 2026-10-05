@@ -101,7 +101,7 @@ export default async function AdminUsersPage({
             ) : null}
           </span>
         </div>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Accounts">
           <table className="w-full min-w-[32rem] text-left text-sm">
             <thead className="border-b border-mist bg-mist/30 text-xs uppercase tracking-wide text-sage">
               <tr>

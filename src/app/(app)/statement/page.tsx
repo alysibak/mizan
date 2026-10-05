@@ -136,7 +136,7 @@ export default async function StatementPage() {
         {r.lines.length === 0 ? (
           <p className="px-5 py-6 text-sm text-sage">No assets recorded.</p>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Zakatable assets">
             <table className="w-full min-w-[30rem] text-left text-sm">
               <thead className="border-b border-mist text-xs uppercase tracking-wide text-sage">
                 <tr>
@@ -167,7 +167,7 @@ export default async function StatementPage() {
           <h2 className="border-b border-mist px-5 py-4 font-serif text-lg text-ink">
             Debts
           </h2>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Debts">
             <table className="w-full min-w-[30rem] text-left text-sm">
               <thead className="border-b border-mist text-xs uppercase tracking-wide text-sage">
                 <tr>
@@ -223,9 +223,12 @@ export default async function StatementPage() {
               {r.isDue ? formatMoney(r.zakatDue, c) : "None — below nisab"}
             </dd>
           </div>
-          <p className="text-xs text-sage">
-            {duePhaseLabel(phase, Boolean(settings.hawlStartDate))}
-          </p>
+          <div className="text-xs">
+            <dt className="sr-only">Status</dt>
+            <dd className="text-sage">
+              {duePhaseLabel(phase, Boolean(settings.hawlStartDate))}
+            </dd>
+          </div>
           <div className="flex justify-between gap-4">
             <dt className="text-sage">Zakat · {window.label}</dt>
             <dd className="nums">{formatMoney(zakatPaid, c)}</dd>
@@ -282,7 +285,7 @@ export default async function StatementPage() {
           <h2 className="border-b border-mist px-5 py-4 font-serif text-lg text-ink">
             Giving · {window.label}
           </h2>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Giving this cycle">
             <table className="w-full min-w-[30rem] text-left text-sm">
               <thead className="border-b border-mist text-xs uppercase tracking-wide text-sage">
                 <tr>
