@@ -1,4 +1,38 @@
+import fs from "fs";
+import path from "path";
 import { expect, type Page } from "@playwright/test";
+
+// Email is on in the test server, written to this file instead of sent (see
+// src/lib/email.ts); reminders run when called with this secret.
+export const OUTBOX = path.join(__dirname, "..", "e2e-outbox.jsonl");
+export const CRON_SECRET = "e2e-cron-secret";
+
+export interface SentEmail {
+  to: string;
+  subject: string;
+  text: string;
+}
+
+/** Everything "sent" to this address so far, oldest first. */
+export function emailsTo(address: string): SentEmail[] {
+  let raw = "";
+  try {
+    raw = fs.readFileSync(OUTBOX, "utf8");
+  } catch {
+    return [];
+  }
+  return raw
+    .split("\n")
+    .filter(Boolean)
+    .map((line) => JSON.parse(line) as SentEmail)
+    .filter((m) => m.to === address);
+}
+
+/** The first link in the newest email to `address` with this subject. */
+export function linkInEmail(address: string, subject: string): string | null {
+  const mail = emailsTo(address).filter((m) => m.subject === subject).at(-1);
+  return mail?.text.match(/https?:\/\/\S+/)?.[0] ?? null;
+}
 
 export const PASSWORD = "correct-horse-battery";
 

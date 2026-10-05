@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import { sendJson } from "@/lib/client-fetch";
 import { track } from "@/lib/analytics";
 
-export default function RegisterForm() {
+/** `emailLinks`: this server can email reset links once the address is confirmed. */
+export default function RegisterForm({ emailLinks = false }: { emailLinks?: boolean }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -82,8 +83,10 @@ export default function RegisterForm() {
             className="field"
           />
           <p className="mt-1.5 text-xs text-sage">
-            8 to 72 characters. Mizan sends no email, so you will save a
-            recovery code once you are in.
+            8 to 72 characters.{" "}
+            {emailLinks
+              ? "Confirm your email in Settings to be able to reset it by email."
+              : "This server sends no email, so you will save a recovery code once you are in."}
           </p>
         </div>
 

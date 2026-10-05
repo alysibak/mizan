@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { sendJson } from "@/lib/client-fetch";
+import EmailPanel, { type EmailState } from "@/components/EmailPanel";
 
 function ChangePassword() {
   const [busy, setBusy] = useState(false);
@@ -230,7 +231,7 @@ function DeleteAccount() {
   );
 }
 
-function RecoveryCode({ hasCode }: { hasCode: boolean }) {
+function RecoveryCode({ hasCode, emailOn }: { hasCode: boolean; emailOn: boolean }) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [code, setCode] = useState<string | null>(null);
@@ -261,8 +262,10 @@ function RecoveryCode({ hasCode }: { hasCode: boolean }) {
     <div className="space-y-2">
       <h3 className="font-serif text-base text-ink">Recovery code</h3>
       <p className="text-sm text-sage">
-        Mizan sends no email. A recovery code is how you get back in if you
-        forget your password. Keep it somewhere safe, like a password manager.
+        {emailOn
+          ? "A recovery code gets you back in even without your email. "
+          : "This server sends no email. A recovery code is how you get back in if you forget your password. "}
+        Keep it somewhere safe, like a password manager.
         {hasCode && !code ? " You have one; making a new one cancels it." : ""}
       </p>
       {code ? (
@@ -325,11 +328,14 @@ export default function AccountPanel({
   email,
   hasRecoveryCode,
   recovered = false,
+  mail = null,
 }: {
   email: string;
   hasRecoveryCode: boolean;
   /** Just signed in with a recovery code, which is now used up. */
   recovered?: boolean;
+  /** Set when this server sends email. */
+  mail?: EmailState | null;
 }) {
   return (
     <section id="account" className="card scroll-mt-20 space-y-8 p-5">
@@ -342,7 +348,8 @@ export default function AccountPanel({
           Password reset. Your recovery code is used up — make a new one below.
         </p>
       )}
-      <RecoveryCode hasCode={hasRecoveryCode} />
+      {mail ? <EmailPanel email={email} state={mail} /> : null}
+      <RecoveryCode hasCode={hasRecoveryCode} emailOn={Boolean(mail)} />
       <ChangePassword />
       <SignOutOthers />
       <DeleteAccount />

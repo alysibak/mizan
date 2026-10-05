@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import RegisterForm from "@/components/RegisterForm";
+import { emailEnabled } from "@/lib/email";
 
 export const metadata: Metadata = {
   title: "Create your free account",
@@ -31,7 +32,7 @@ export default async function RegisterPage({
           in the last setup step.
         </p>
       ) : null}
-      <RegisterForm />
+      <RegisterForm emailLinks={emailEnabled()} />
     </main>
   );
 }

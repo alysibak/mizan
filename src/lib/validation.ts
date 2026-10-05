@@ -124,6 +124,19 @@ export const recoverSchema = z.object({
   newPassword,
 });
 
+export const resetRequestSchema = z.object({
+  email: z.string().trim().toLowerCase().max(254).email("Enter a valid email"),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().trim().min(20, "This link is incomplete").max(64),
+  newPassword,
+});
+
+export const emailRemindersSchema = z.object({
+  reminders: z.boolean(),
+});
+
 export const deleteAccountSchema = z.object({
   password: z.string().min(1, "Enter your password").max(1000),
 });
