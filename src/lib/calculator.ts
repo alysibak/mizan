@@ -194,12 +194,24 @@ export function decimalMarkFor(locale: string | null | undefined): DecimalMark {
  * groups thousands and a dot is a decimal point. Blank, negative, or
  * nonsense reads as 0.
  */
+/**
+ * Western digits for Arabic-Indic (٠–٩) and Persian/Urdu (۰–۹) ones, and the
+ * Arabic decimal and thousands marks for "." and ",".
+ */
+export function westernDigits(raw: string): string {
+  return raw
+    .replace(/[\u0660-\u0669]/g, (d) => String(d.charCodeAt(0) - 0x0660))
+    .replace(/[\u06f0-\u06f9]/g, (d) => String(d.charCodeAt(0) - 0x06f0))
+    .replace(/\u066b/g, ".")
+    .replace(/\u066c/g, ",");
+}
+
 export function parseAmount(
   raw: string | null | undefined,
   decimal: DecimalMark | null = null,
 ): number {
   if (!raw) return 0;
-  let s = raw.replace(/[\s\u00a0\u202f'’_]/g, "").replace(/[^\d.,-]/g, "");
+  let s = westernDigits(raw).replace(/[\s\u00a0\u202f'’_]/g, "").replace(/[^\d.,-]/g, "");
   if (s.startsWith("-")) return 0;
   s = s.replace(/-/g, "");
   const lastComma = s.lastIndexOf(",");
@@ -225,7 +237,7 @@ export function parseAmount(
 /** A portion typed as a percentage, as a fraction 0..1. */
 export function parsePercent(raw: string | null | undefined, fallback: number): number {
   if (raw === undefined || raw === null || raw.trim() === "") return fallback;
-  const n = Number(raw.replace(",", ".").replace("%", "").trim());
+  const n = Number(westernDigits(raw).replace(",", ".").replace(/[%٪]/g, "").trim());
   if (!Number.isFinite(n)) return fallback;
   return Math.min(1, Math.max(0, n / 100));
 }
@@ -233,7 +245,7 @@ export function parsePercent(raw: string | null | undefined, fallback: number): 
 /** Fineness as typed: "0.916", "91.6", "916", or "22k" all mean 22 karat. */
 export function parsePurity(raw: string | null | undefined): number {
   if (!raw || raw.trim() === "") return 1;
-  const t = raw.trim().toLowerCase();
+  const t = westernDigits(raw).trim().toLowerCase();
   const karat = /^(\d{1,2}(?:\.\d+)?)\s*(k|kt|ct|karat|carat)$/.exec(t);
   if (karat) return Math.min(1, Number(karat[1]) / 24);
   const n = Number(t.replace(",", "."));

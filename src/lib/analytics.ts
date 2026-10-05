@@ -1,3 +1,5 @@
+import { splitLocale } from "@/i18n/config";
+
 // Optional, cookieless page and conversion counts (Plausible or a
 // self-hosted Plausible-compatible server). Off unless
 // NEXT_PUBLIC_PLAUSIBLE_DOMAIN is set at build time.
@@ -8,6 +10,7 @@
 export const PUBLIC_PATHS = [
   "/",
   "/calculator",
+  "/nisab",
   "/method",
   "/trust",
   "/privacy",
@@ -17,8 +20,10 @@ export const PUBLIC_PATHS = [
   "/forgot",
 ];
 
+/** Public pages, in any language: "/ar/calculator" counts like "/calculator". */
 export function isPublicPath(pathname: string): boolean {
-  return PUBLIC_PATHS.includes(pathname);
+  const { path } = splitLocale(pathname);
+  return PUBLIC_PATHS.includes(path) || path.startsWith("/nisab/");
 }
 
 export function analyticsConfig(): { domain: string; src: string } | null {

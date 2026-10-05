@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   CALC_CURRENCIES,
   CALC_FIELDS,
@@ -22,24 +23,69 @@ import { KARAT_PURITY } from "@/lib/metals";
 import { formatMoney, formatPercent } from "@/lib/money";
 import { readStoredValue, useHydrated } from "@/lib/client-store";
 import { track } from "@/lib/analytics";
+import { LOCALE_INFO, fmt, type Locale } from "@/i18n/config";
+import type { Messages } from "@/i18n/messages/en";
+
+export type CalcMessages = Messages["calc"];
 
 /**
  * The public calculator. The server renders it empty; once in the browser it
  * remounts with whatever this visitor entered last time, kept only in their
  * own browser storage.
  */
-export default function ZakatCalculator() {
-  const hydrated = useHydrated();
-  if (!hydrated) return <Calculator key="server" initial={emptyDraft()} live={false} />;
-  return <Calculator key="client" initial={storedOrFresh()} live />;
+export default function ZakatCalculator({
+  m,
+  locale = "en",
+}: {
+  m: CalcMessages;
+  locale?: Locale;
+}) {
+  const empty = <Calculator key="server" initial={emptyDraft()} live={false} m={m} locale={locale} />;
+  // Reading the query string opts out of static rendering below this
+  // boundary, so the server still sends the empty calculator.
+  return (
+    <Suspense fallback={empty}>
+      <LiveCalculator m={m} locale={locale} empty={empty} />
+    </Suspense>
+  );
 }
 
-function storedOrFresh(): CalcDraft {
+function LiveCalculator({
+  m,
+  locale,
+  empty,
+}: {
+  m: CalcMessages;
+  locale: Locale;
+  empty: ReactNode;
+}) {
+  const hydrated = useHydrated();
+  // A link may name the currency (?currency=PKR), as the nisab pages do.
+  const asked = useSearchParams().get("currency")?.toUpperCase();
+  const wanted = asked && /^[A-Z]{3}$/.test(asked) ? asked : null;
+  if (!hydrated) return empty;
+  return (
+    <Calculator
+      key={`client-${wanted ?? ""}`}
+      initial={storedOrFresh(wanted)}
+      live
+      m={m}
+      locale={locale}
+    />
+  );
+}
+
+function storedOrFresh(wanted: string | null): CalcDraft {
   const locale = typeof navigator === "undefined" ? null : navigator.language;
   const stored = parseDraft(readStoredValue(CALC_STORAGE_KEY));
-  // A draft is read with the decimal mark of the browser it was typed in.
-  if (stored) return stored.decimal ? stored : { ...stored, decimal: decimalMarkFor(locale) };
-  return emptyDraft(currencyForLocale(locale), decimalMarkFor(locale));
+  if (stored) {
+    // A draft is read with the decimal mark of the browser it was typed in.
+    const draft = stored.decimal ? stored : { ...stored, decimal: decimalMarkFor(locale) };
+    if (!wanted || wanted === draft.currency) return draft;
+    // Prices were per gram in the old currency; they are fetched again.
+    return { ...draft, currency: wanted, goldPrice: "", silverPrice: "", pricesAsOf: null };
+  }
+  return emptyDraft(wanted ?? currencyForLocale(locale), decimalMarkFor(locale));
 }
 
 type PriceState =
@@ -48,15 +94,26 @@ type PriceState =
   | { status: "ok"; source: string }
   | { status: "error"; message: string };
 
-function currencyName(code: string): string {
+function currencyName(code: string, locale: Locale): string {
   try {
-    return new Intl.DisplayNames(["en"], { type: "currency" }).of(code) ?? code;
+    return new Intl.DisplayNames([locale], { type: "currency" }).of(code) ?? code;
   } catch {
     return code;
   }
 }
 
-function Calculator({ initial, live }: { initial: CalcDraft; live: boolean }) {
+function Calculator({
+  initial,
+  live,
+  m,
+  locale,
+}: {
+  initial: CalcDraft;
+  live: boolean;
+  m: CalcMessages;
+  locale: Locale;
+}) {
+  const intl = LOCALE_INFO[locale].intl;
   const [draft, setDraft] = useState<CalcDraft>(initial);
   // A first visit fetches today's prices straight away (see the effect below).
   const autoFetch = live && !initial.goldPrice && !initial.silverPrice;
@@ -67,6 +124,7 @@ function Calculator({ initial, live }: { initial: CalcDraft; live: boolean }) {
   const outcome = useMemo(() => computeDraft(draft), [draft]);
   const { result } = outcome;
   const c = draft.currency;
+  const money = (amount: number) => formatMoney(amount, c, intl);
 
   function update(patch: Partial<CalcDraft>) {
     setDraft((d) => ({ ...d, ...patch }));
@@ -114,7 +172,8 @@ function Calculator({ initial, live }: { initial: CalcDraft; live: boolean }) {
     if (!res?.ok || !data?.goldPricePerGram || !data.silverPricePerGram) {
       setPrice({
         status: "error",
-        message: data?.error ?? "Live prices are unavailable. Enter today’s prices per gram.",
+        // The server's message is English; the page's own words are clearer.
+        message: m.pricesUnavailable,
       });
       return;
     }
@@ -164,7 +223,7 @@ function Calculator({ initial, live }: { initial: CalcDraft; live: boolean }) {
   }
 
   function clearAll() {
-    if (!window.confirm("Clear everything you entered?")) return;
+    if (!window.confirm(m.clearConfirm)) return;
     setDraft({
       ...emptyDraft(draft.currency, draft.decimal),
       goldPrice: draft.goldPrice,
@@ -191,19 +250,16 @@ function Calculator({ initial, live }: { initial: CalcDraft; live: boolean }) {
       <div className="space-y-10 print:hidden">
         {/* 1. Prices */}
         <section aria-labelledby="calc-prices" className="card p-5 sm:p-6">
-          <p className="label text-brassDeep">Step 1</p>
+          <p className="label text-brassDeep">{fmt(m.step, { n: 1 })}</p>
           <h2 id="calc-prices" className="mt-1 font-serif text-xl text-ink">
-            Today’s prices
+            {m.pricesTitle}
           </h2>
-          <p className="mt-1 text-sm text-sage">
-            Nisab is set by the price of gold or silver. Filled in from a free
-            public source when it answers; check it against your local market.
-          </p>
+          <p className="mt-1 text-sm text-sage">{m.pricesLede}</p>
 
           <div className="mt-5 grid gap-4 sm:grid-cols-3">
             <div>
               <label className="label mb-1.5" htmlFor="calc-currency">
-                Currency
+                {m.currency}
               </label>
               <select
                 id="calc-currency"
@@ -216,21 +272,21 @@ function Calculator({ initial, live }: { initial: CalcDraft; live: boolean }) {
                 )}
                 {CALC_CURRENCIES.map((code) => (
                   <option key={code} value={code}>
-                    {code} · {currencyName(code)}
+                    {code} · {currencyName(code, locale)}
                   </option>
                 ))}
               </select>
             </div>
             <PriceInput
               id="calc-gold-price"
-              label="Gold, per gram"
+              label={m.goldPerGram}
               currency={c}
               value={draft.goldPrice}
               onChange={(v) => typePrice({ goldPrice: v })}
             />
             <PriceInput
               id="calc-silver-price"
-              label="Silver, per gram"
+              label={m.silverPerGram}
               currency={c}
               value={draft.silverPrice}
               onChange={(v) => typePrice({ silverPrice: v })}
@@ -239,13 +295,18 @@ function Calculator({ initial, live }: { initial: CalcDraft; live: boolean }) {
 
           <p className="mt-3 min-h-[1.25rem] text-xs text-sage" aria-live="polite">
             {price.status === "loading"
-              ? "Fetching today’s prices…"
+              ? m.fetching
               : price.status === "error"
                 ? price.message
                 : price.status === "ok" && draft.pricesAsOf
-                  ? `Live prices from ${price.source}, ${new Date(draft.pricesAsOf).toLocaleString()}.`
+                  ? fmt(m.livePricesFrom, {
+                      source: price.source,
+                      when: new Date(draft.pricesAsOf).toLocaleString(intl),
+                    })
                   : draft.pricesAsOf
-                    ? `Prices fetched ${new Date(draft.pricesAsOf).toLocaleDateString()}.`
+                    ? fmt(m.pricesFetched, {
+                        when: new Date(draft.pricesAsOf).toLocaleDateString(intl),
+                      })
                     : null}{" "}
             {price.status !== "loading" ? (
               <button
@@ -253,31 +314,31 @@ function Calculator({ initial, live }: { initial: CalcDraft; live: boolean }) {
                 className="text-pine underline-offset-2 hover:underline"
                 onClick={() => fetchPrices(c)}
               >
-                {draft.goldPrice || draft.silverPrice ? "Refresh prices" : "Fetch live prices"}
+                {draft.goldPrice || draft.silverPrice ? m.refreshPrices : m.fetchPrices}
               </button>
             ) : null}
           </p>
 
           <fieldset className="mt-5">
-            <legend className="label mb-2">Nisab standard</legend>
+            <legend className="label mb-2">{m.nisabStandard}</legend>
             <div className="grid gap-2 sm:grid-cols-2">
               <Choice
                 name="standard"
                 checked={draft.standard === "silver"}
                 onChange={() => update({ standard: "silver" })}
-                title="Silver · 595 g"
+                title={m.silverTitle}
                 detail={
                   silverNisab > 0
-                    ? `${formatMoney(silverNisab, c)} — the lower threshold, so more people give`
-                    : "The lower threshold, so more people give"
+                    ? fmt(m.silverDetailWithValue, { amount: money(silverNisab) })
+                    : m.silverDetail
                 }
               />
               <Choice
                 name="standard"
                 checked={draft.standard === "gold"}
                 onChange={() => update({ standard: "gold" })}
-                title="Gold · 85 g"
-                detail={goldNisab > 0 ? formatMoney(goldNisab, c) : "The higher threshold"}
+                title={m.goldTitle}
+                detail={goldNisab > 0 ? money(goldNisab) : m.goldDetail}
               />
             </div>
           </fieldset>
@@ -285,15 +346,11 @@ function Calculator({ initial, live }: { initial: CalcDraft; live: boolean }) {
 
         {/* 2. Holdings */}
         <section aria-labelledby="calc-own" className="card p-5 sm:p-6">
-          <p className="label text-brassDeep">Step 2</p>
+          <p className="label text-brassDeep">{fmt(m.step, { n: 2 })}</p>
           <h2 id="calc-own" className="mt-1 font-serif text-xl text-ink">
-            What you own
+            {m.ownTitle}
           </h2>
-          <p className="mt-1 text-sm text-sage">
-            Today’s value of what you have held for a lunar year. Leave blank
-            what does not apply. Your home, car, and things you use are not
-            counted.
-          </p>
+          <p className="mt-1 text-sm text-sage">{m.ownLede}</p>
           <div className="mt-5 divide-y divide-mist">
             {CALC_FIELDS.map((field) => (
               <HoldingField
@@ -301,6 +358,7 @@ function Calculator({ initial, live }: { initial: CalcDraft; live: boolean }) {
                 field={field}
                 draft={draft}
                 currency={c}
+                m={m}
                 onAmount={(v) => updateIn("amounts", field.key, v)}
                 onByWeight={(v) => setByWeight(field.key as WeighableKey, v)}
                 onGrams={(v) => updateIn("grams", field.key as WeighableKey, v)}
@@ -314,40 +372,36 @@ function Calculator({ initial, live }: { initial: CalcDraft; live: boolean }) {
 
         {/* 3. Debts */}
         <section aria-labelledby="calc-owe" className="card p-5 sm:p-6">
-          <p className="label text-brassDeep">Step 3</p>
+          <p className="label text-brassDeep">{fmt(m.step, { n: 3 })}</p>
           <h2 id="calc-owe" className="mt-1 font-serif text-xl text-ink">
-            What you owe now
+            {m.oweTitle}
           </h2>
-          <p className="mt-1 text-sm text-sage">
-            Bills, rent, credit cards, and loan instalments due now are taken
-            off. A long mortgage is not deducted in full; scholars differ on
-            the rest.
-          </p>
+          <p className="mt-1 text-sm text-sage">{m.oweLede}</p>
           <div className="mt-4 max-w-xs">
             <MoneyInput
               id="calc-debts"
-              label="Debts due now"
+              label={m.debtsDueNow}
               currency={c}
               value={draft.debts}
               onChange={(v) => update({ debts: v })}
             />
           </div>
           <fieldset className="mt-6">
-            <legend className="label mb-2">Year you count by</legend>
+            <legend className="label mb-2">{m.yearBasis}</legend>
             <div className="grid gap-2 sm:grid-cols-2">
               <Choice
                 name="basis"
                 checked={draft.basis === "lunar"}
                 onChange={() => update({ basis: "lunar" })}
-                title="Lunar (Hijri) year · 2.5%"
-                detail="The year zakat is reckoned by."
+                title={m.lunarTitle}
+                detail={m.lunarDetail}
               />
               <Choice
                 name="basis"
                 checked={draft.basis === "solar"}
                 onChange={() => update({ basis: "solar" })}
-                title="Solar year · 2.577%"
-                detail="If you pay on a Gregorian date, adjusted for the longer year."
+                title={m.solarTitle}
+                detail={m.solarDetail}
               />
             </div>
           </fieldset>
@@ -362,35 +416,34 @@ function Calculator({ initial, live }: { initial: CalcDraft; live: boolean }) {
       >
         <div className="card border-pine/40 p-5 sm:p-6">
           <p className="label text-pine" id="calc-result">
-            Your zakat
+            {m.resultLabel}
           </p>
           <div aria-live="polite" className="mt-1">
             {outcome.needsPrices ? (
               <p className="font-serif text-xl text-ink">
-                Enter today’s {draft.standard} price to compare against nisab.
+                {draft.standard === "gold" ? m.needsGoldPrice : m.needsSilverPrice}
               </p>
             ) : empty ? (
-              <p className="font-serif text-xl text-ink">
-                Enter what you own to see what is due.
-              </p>
+              <p className="font-serif text-xl text-ink">{m.enterHoldings}</p>
             ) : result.isDue ? (
               <>
-                <p className="font-serif text-4xl text-pine nums">
-                  {formatMoney(result.zakatDue, c)}
-                </p>
+                <p className="font-serif text-4xl text-pine nums">{money(result.zakatDue)}</p>
                 <p className="mt-2 text-sm text-sage">
-                  {formatPercent(result.rate, draft.basis === "solar" ? 3 : 1)} of{" "}
-                  {formatMoney(result.netZakatable, c)}, which is at or above the{" "}
-                  {draft.standard} nisab.
+                  {fmt(draft.standard === "gold" ? m.dueSummaryGold : m.dueSummarySilver, {
+                    rate: formatPercent(result.rate, draft.basis === "solar" ? 3 : 1, intl),
+                    net: money(result.netZakatable),
+                  })}
                 </p>
               </>
             ) : (
               <>
-                <p className="font-serif text-2xl text-ink">No zakat due</p>
+                <p className="font-serif text-2xl text-ink">{m.noneDue}</p>
                 <p className="mt-2 text-sm text-sage">
-                  {formatMoney(result.netZakatable, c)} is{" "}
-                  {formatMoney(Math.abs(result.marginToNisab), c)} below the{" "}
-                  {draft.standard} nisab of {formatMoney(result.nisab, c)}.
+                  {fmt(draft.standard === "gold" ? m.belowSummaryGold : m.belowSummarySilver, {
+                    net: money(result.netZakatable),
+                    gap: money(Math.abs(result.marginToNisab)),
+                    nisab: money(result.nisab),
+                  })}
                 </p>
               </>
             )}
@@ -401,69 +454,64 @@ function Calculator({ initial, live }: { initial: CalcDraft; live: boolean }) {
               {outcome.lines.map((line) => (
                 <div key={line.key} className="flex justify-between gap-3">
                   <dt className="text-sage">
-                    {line.label}
+                    {m.fields[line.key].label}
                     {line.zakatablePortion < 1 ? (
                       <span className="block text-xs">
-                        {formatPercent(line.zakatablePortion, 0)} of {formatMoney(line.amount, c)}
+                        {fmt(m.shareOf, {
+                          share: formatPercent(line.zakatablePortion, 0, intl),
+                          amount: money(line.amount),
+                        })}
                       </span>
                     ) : null}
                   </dt>
-                  <dd className="text-ink nums">
-                    {formatMoney(line.amount * line.zakatablePortion, c)}
-                  </dd>
+                  <dd className="text-ink nums">{money(line.amount * line.zakatablePortion)}</dd>
                 </div>
               ))}
               {outcome.debts > 0 ? (
                 <div className="flex justify-between gap-3">
-                  <dt className="text-sage">Debts due now</dt>
-                  <dd className="text-danger nums">−{formatMoney(outcome.debts, c)}</dd>
+                  <dt className="text-sage">{m.debtsDueNow}</dt>
+                  <dd className="text-danger nums">−{money(outcome.debts)}</dd>
                 </div>
               ) : null}
               <div className="flex justify-between gap-3 border-t border-mist pt-2 font-medium">
-                <dt className="text-ink">Net zakatable wealth</dt>
-                <dd className="text-ink nums">{formatMoney(result.netZakatable, c)}</dd>
+                <dt className="text-ink">{m.netWealth}</dt>
+                <dd className="text-ink nums">{money(result.netZakatable)}</dd>
               </div>
               {!outcome.needsPrices ? (
                 <div className="flex justify-between gap-3">
-                  <dt className="text-sage">Nisab ({draft.standard})</dt>
-                  <dd className="text-brassDeep nums">{formatMoney(result.nisab, c)}</dd>
+                  <dt className="text-sage">
+                    {draft.standard === "gold" ? m.nisabGold : m.nisabSilver}
+                  </dt>
+                  <dd className="text-brassDeep nums">{money(result.nisab)}</dd>
                 </div>
               ) : null}
             </dl>
           ) : null}
 
           {outcome.needsWeightPrice ? (
-            <p className="mt-4 text-xs text-warn">
-              Something is entered by weight, but its price per gram is missing.
-            </p>
+            <p className="mt-4 text-xs text-warn">{m.weightPriceMissing}</p>
           ) : null}
 
-          <p className="mt-5 text-xs leading-relaxed text-sage">
-            Zakat is due on wealth that stayed at or above nisab for a full lunar
-            year (the hawl). This is an estimate, not a ruling.
-          </p>
+          <p className="mt-5 text-xs leading-relaxed text-sage">{m.hawlNote}</p>
 
           <div className="mt-5 flex flex-wrap gap-2 print:hidden">
             <button type="button" className="btn-ghost" onClick={() => window.print()}>
-              Print or save PDF
+              {m.print}
             </button>
             {!empty ? (
               <button type="button" className="btn-ghost" onClick={clearAll}>
-                Clear
+                {m.clear}
               </button>
             ) : null}
           </div>
         </div>
 
         <div className="mt-6 border border-mist bg-paper/60 p-5 print:hidden">
-          <p className="font-serif text-lg text-ink">Keep this as a ledger</p>
-          <p className="mt-1 text-sm text-sage">
-            A free account counts your hawl on the Hijri calendar, tells you when
-            zakat falls due, records what you give, and closes each year with a
-            statement. These figures come with you.
-          </p>
+          <p className="font-serif text-lg text-ink">{m.keepTitle}</p>
+          <p className="mt-1 text-sm text-sage">{m.keepBody}</p>
+          {m.keepNote ? <p className="mt-2 text-xs text-sage">{m.keepNote}</p> : null}
           <Link href="/register?from=calculator" className="btn-primary mt-4 w-full">
-            Create a free ledger
+            {m.keepCta}
           </Link>
         </div>
       </aside>
@@ -475,9 +523,9 @@ function Calculator({ initial, live }: { initial: CalcDraft; live: boolean }) {
           className="fixed inset-x-0 bottom-0 z-30 flex items-center justify-between border-t border-mist bg-paper/95 px-5 py-3 backdrop-blur lg:hidden print:hidden"
           style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
         >
-          <span className="label">{result.isDue ? "Zakat due" : "Below nisab"}</span>
+          <span className="label">{result.isDue ? m.barDue : m.barBelow}</span>
           <span className="font-serif text-xl text-pine nums">
-            {result.isDue ? formatMoney(result.zakatDue, c) : formatMoney(0, c)}
+            {money(result.isDue ? result.zakatDue : 0)}
           </span>
         </a>
       ) : null}
@@ -485,13 +533,24 @@ function Calculator({ initial, live }: { initial: CalcDraft; live: boolean }) {
   );
 }
 
-function purityOptionsFor(key: WeighableKey | null): { label: string; purity: number }[] {
-  return key === "silver"
-    ? [
-        { label: "Fine (999)", purity: 0.999 },
-        { label: "Sterling (925)", purity: 0.925 },
-      ]
-    : KARAT_PURITY.filter((k) => !k.label.startsWith("Sterling"));
+function purityOptionsFor(
+  key: WeighableKey | null,
+  m?: CalcMessages,
+): { label: string; purity: number }[] {
+  if (key === "silver") {
+    return [
+      { label: m?.fineSilver ?? "Fine (999)", purity: 0.999 },
+      { label: m?.sterling ?? "Sterling (925)", purity: 0.925 },
+    ];
+  }
+  return KARAT_PURITY.filter((k) => !k.label.startsWith("Sterling")).map((k) => {
+    // "22k (916)" → the template's own word order and karat mark.
+    const [, karat, fineness] = /^(\d+)k \((\d+)\)$/.exec(k.label) ?? [];
+    return {
+      purity: k.purity,
+      label: m && karat ? fmt(m.karat, { k: karat, fineness }) : k.label,
+    };
+  });
 }
 
 function Choice({
@@ -548,7 +607,7 @@ function MoneyInput({
         {label}
       </label>
       <div className="relative">
-        <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-xs text-sage">
+        <span className="pointer-events-none absolute inset-y-0 start-3 flex items-center text-xs text-sage">
           {currency}
         </span>
         <input
@@ -557,7 +616,7 @@ function MoneyInput({
           inputMode="decimal"
           autoComplete="off"
           placeholder="0"
-          className="field pl-12 nums"
+          className="field ps-12 nums"
           value={value}
           onChange={(e) => onChange(e.target.value)}
         />
@@ -580,6 +639,7 @@ function HoldingField({
   field,
   draft,
   currency,
+  m,
   onAmount,
   onByWeight,
   onGrams,
@@ -590,6 +650,7 @@ function HoldingField({
   field: CalcField;
   draft: CalcDraft;
   currency: string;
+  m: CalcMessages;
   onAmount: (v: string) => void;
   onByWeight: (v: boolean) => void;
   onGrams: (v: string) => void;
@@ -600,27 +661,28 @@ function HoldingField({
   const id = `calc-${field.key}`;
   const weighKey = field.metal ? (field.key as WeighableKey) : null;
   const byWeight = weighKey ? Boolean(draft.byWeight[weighKey]) : false;
-  const purityOptions = purityOptionsFor(weighKey);
+  const purityOptions = purityOptionsFor(weighKey, m);
+  const text = m.fields[field.key];
 
   return (
     <div className="grid gap-3 py-4 sm:grid-cols-[minmax(0,1fr)_14rem] sm:items-start">
       <div>
         <label htmlFor={byWeight ? `${id}-grams` : id} className="text-sm font-medium text-ink">
-          {field.label}
+          {text.label}
         </label>
-        <p className="mt-0.5 text-xs leading-relaxed text-sage">{field.hint}</p>
+        <p className="mt-0.5 text-xs leading-relaxed text-sage">{text.hint}</p>
         {weighKey ? (
           <button
             type="button"
             className="mt-1 text-xs text-pine underline-offset-2 hover:underline"
             onClick={() => onByWeight(!byWeight)}
           >
-            {byWeight ? "Enter a value instead" : "Enter by weight instead"}
+            {byWeight ? m.byValue : m.byWeight}
           </button>
         ) : null}
         {field.key === "jewellery" ? (
           <fieldset className="mt-2">
-            <legend className="sr-only">Count jewellery you wear?</legend>
+            <legend className="sr-only">{m.jewelleryQuestion}</legend>
             <div className="flex flex-col gap-1 text-xs text-ink">
               <label className="flex items-center gap-2">
                 <input
@@ -629,7 +691,7 @@ function HoldingField({
                   checked={!draft.jewelleryCounted}
                   onChange={() => onJewellery(false)}
                 />
-                Not counted (Maliki, Shafi‘i, Hanbali)
+                {m.jewelleryNo}
               </label>
               <label className="flex items-center gap-2">
                 <input
@@ -638,7 +700,7 @@ function HoldingField({
                   checked={draft.jewelleryCounted}
                   onChange={() => onJewellery(true)}
                 />
-                Counted (Hanafi)
+                {m.jewelleryYes}
               </label>
             </div>
           </fieldset>
@@ -650,7 +712,7 @@ function HoldingField({
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="sr-only" htmlFor={`${id}-grams`}>
-                {field.label}, grams
+                {fmt(m.grams, { label: text.label })}
               </label>
               <div className="relative">
                 <input
@@ -659,18 +721,18 @@ function HoldingField({
                   inputMode="decimal"
                   autoComplete="off"
                   placeholder="0"
-                  className="field pr-8 nums"
+                  className="field pe-8 nums"
                   value={draft.grams[weighKey] ?? ""}
                   onChange={(e) => onGrams(e.target.value)}
                 />
-                <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs text-sage">
-                  g
+                <span className="pointer-events-none absolute inset-y-0 end-3 flex items-center text-xs text-sage">
+                  {m.gramUnit}
                 </span>
               </div>
             </div>
             <div>
               <label className="sr-only" htmlFor={`${id}-purity`}>
-                {field.label}, purity
+                {fmt(m.purity, { label: text.label })}
               </label>
               <select
                 id={`${id}-purity`}
@@ -688,7 +750,7 @@ function HoldingField({
           </div>
         ) : (
           <div className="relative">
-            <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-xs text-sage">
+            <span className="pointer-events-none absolute inset-y-0 start-3 flex items-center text-xs text-sage">
               {currency}
             </span>
             <input
@@ -697,7 +759,7 @@ function HoldingField({
               inputMode="decimal"
               autoComplete="off"
               placeholder="0"
-              className="field pl-12 nums"
+              className="field ps-12 nums"
               value={draft.amounts[field.key] ?? ""}
               onChange={(e) => onAmount(e.target.value)}
             />
@@ -705,18 +767,18 @@ function HoldingField({
         )}
         {field.portion ? (
           <div className="flex items-center gap-2 text-xs text-sage">
-            <label htmlFor={`${id}-portion`}>Counted share</label>
+            <label htmlFor={`${id}-portion`}>{m.countedShare}</label>
             <div className="relative w-20">
               <input
                 id={`${id}-portion`}
                 type="text"
                 inputMode="decimal"
-                className="field min-h-0 py-1 pr-6 text-sm nums"
+                className="field min-h-0 py-1 pe-6 text-sm nums"
                 placeholder={DEFAULT_PORTION_PERCENT[field.portion]}
                 value={draft.portions[field.portion] ?? ""}
                 onChange={(e) => onPortion(e.target.value)}
               />
-              <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center">
+              <span className="pointer-events-none absolute inset-y-0 end-2 flex items-center">
                 %
               </span>
             </div>

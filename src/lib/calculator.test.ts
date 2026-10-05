@@ -61,6 +61,23 @@ describe("parseAmount", () => {
   });
 });
 
+describe("Arabic-script digits", () => {
+  it.each([
+    ["١٢٥٠٠", 12500],
+    ["١٢٬٥٠٠٫٧٥", 12500.75],
+    ["۲۵۰۰۰", 25000], // Urdu and Persian digits
+    ["٠٫٨٨", 0.88],
+  ])("%s → %s", (raw, expected) => {
+    expect(parseAmount(raw)).toBe(expected);
+  });
+
+  it("reads percentages and fineness typed in Arabic digits", () => {
+    expect(parsePercent("٣٠", 0.25)).toBe(0.3);
+    expect(parsePercent("٣٠٪", 0.25)).toBe(0.3);
+    expect(parsePurity("٠٫٩١٦")).toBe(0.916);
+  });
+});
+
 describe("decimalMarkFor", () => {
   it.each([
     ["en-CA", "."],

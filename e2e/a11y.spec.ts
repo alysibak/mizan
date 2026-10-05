@@ -19,7 +19,8 @@ async function violations(page: Page, label: string): Promise<string[]> {
 
 for (const scheme of ["light", "dark"] as const) {
   test.describe(`${scheme} mode`, () => {
-    test.use({ colorScheme: scheme });
+    // Entrance animations fade text in; axe would measure it half-faded.
+    test.use({ colorScheme: scheme, contextOptions: { reducedMotion: "reduce" } });
     // Many pages per test; each is loaded and audited in turn.
     test.describe.configure({ timeout: 240_000 });
 
@@ -30,7 +31,21 @@ for (const scheme of ["light", "dark"] as const) {
         }),
       );
       const found: string[] = [];
-      for (const path of ["/", "/calculator", "/login", "/register", "/privacy", "/method", "/trust"]) {
+      for (const path of [
+        "/",
+        "/calculator",
+        "/nisab",
+        "/nisab/usd",
+        "/ar",
+        "/ar/calculator",
+        "/ur/calculator",
+        "/fr/nisab/eur",
+        "/login",
+        "/register",
+        "/privacy",
+        "/method",
+        "/trust",
+      ]) {
         await page.goto(path);
         await page.waitForLoadState("load");
         await page.waitForTimeout(250); // let hydration settle

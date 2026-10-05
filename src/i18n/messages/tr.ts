@@ -1,0 +1,303 @@
+import type { Messages } from "./en";
+
+const tr: Messages = {
+  common: {
+    nav: {
+      calculator: "Hesaplayıcı",
+      method: "Yöntem",
+      signIn: "Giriş yap",
+      openLedger: "Defter aç",
+    },
+    footer: {
+      disclaimer:
+        "Kişisel bir tahmin aracıdır; ilim ehlinin rehberliğinin yerini tutmaz. Kendi durumunuz için yetkin bir âlime danışın.",
+      calculator: "Zekât hesaplama",
+      nisab: "Bugünkü nisap",
+      method: "Rakamlar nasıl hesaplanır",
+      trust: "Neler doğrulandı",
+      privacy: "Gizlilik",
+      terms: "Koşullar",
+      languages: "Dil",
+    },
+    inEnglish: " (İngilizce)",
+  },
+
+  landing: {
+    metaTitle: "Mizan: ücretsiz zekât hesaplama ve defter",
+    metaDescription:
+      "Ücretsiz ve gizli bir zekât hesaplayıcı ve defter. Servetinizi nisapla karşılaştırın, havlinizi Hicri takvimle takip edin, zekât ve sadakalarınızı kaydedin, her yılı net bir dökümle kapatın.",
+    eyebrow: "الميزان · terazi",
+    title: "Zekât, özenle hesaplanır.",
+    lede: "Ücretsiz ve gizli bir zekât hesaplayıcı ve defter. Sahip olduklarınızı güncel maden fiyatlarıyla nisaba göre tartın, havlinizi Hicri takvimle izleyin ve her yılı güvenebileceğiniz bir rakamla kapatın.",
+    ctaCalculate: "Zekâtınızı hesaplayın",
+    ctaLedger: "Ücretsiz defter açın",
+    trustLine:
+      "Ücretsiz · Reklamsız · Banka bağlantısı yok · Verilerinizi istediğiniz zaman dışa aktarın veya silin",
+    sample: {
+      aria: "Örnek bir zekât sonucu",
+      due: "Ödenecek zekât",
+      summary: "{net} tutarının %2,5'i, gümüş nisabının üzerinde",
+      cash: "Nakit ve banka",
+      gold: "Altın, 40 g 22 ayar",
+      funds: "Uzun vadeli fonlar, {amount} tutarının %25'i",
+      debts: "Vadesi gelmiş borçlar",
+      caption: "Örnek rakamlar.",
+    },
+    featuresEyebrow: "Zekâtın bütün yılı",
+    featuresTitle: "Tek seferlik bir hesaptan fazlası",
+    featuresLede:
+      "Çoğu hesaplayıcı sekmeyi kapattığınız anda sizi unutur. Mizan yılınızı tutar: havliniz ne zaman başladı, nelere sahipsiniz, neler verdiniz ve neler hâlâ borcunuz.",
+    features: [
+      {
+        title: "Güncel nisap",
+        body: "Para biriminizde bugünkü altın ve gümüş fiyatları, iki ölçü yan yana. Hangisinin geçerli olacağını siz seçersiniz.",
+      },
+      {
+        title: "Hicri takvimle havliniz",
+        body: "Malınızın nisaba ulaştığı günden itibaren kameri yılı, hesaplamalı veya Ümmü'l-Kurâ takvimiyle sayın; kendi takvim uygulamanızda hatırlatmayla.",
+      },
+      {
+        title: "Zekâttan anlayan bir defter",
+        body: "Nakit, gram ve ayarıyla altın ve gümüş, hisse senetleri, kripto, ticari mallar, alacaklarınız ve başka para birimlerindeki varlıklar.",
+      },
+      {
+        title: "Her bağış tek yerde",
+        body: "Zekât, sadaka, fitre ve arındırma, zekâtın sekiz sınıfıyla birlikte. Bu dönemde neyin ödendiğini ve neyin kaldığını görün.",
+      },
+      {
+        title: "Yılı özenle kapatın",
+        body: "Yılın rakamlarını dondurun, bir döküm yazdırın, sonraki havli başlatın ve gelecek yılki kendinize bir mektup bırakın.",
+      },
+      {
+        title: "Telefonunuzda",
+        body: "Tarayıcıdan bir uygulama gibi yükleyin. Açık ve koyu tema, herkes için okunaklı, uygulama mağazası gerekmez.",
+      },
+    ],
+    honestEyebrow: "Görüş ayrılıklarında dürüst",
+    honestTitle: "Mezhebiniz, tercihiniz",
+    honestBody:
+      "Âlimlerin ihtilaf ettiği yerlerde (altın veya gümüş nisabı, takılan ziynet eşyası, uzun vadeli hisseler, emeklilik birikimleri, borçlar) Mizan farkı gösterir ve sizin yerinize karar vermek yerine seçimi size bırakır. Bir tahmin aracıdır, fetva değildir ve bunu açıkça söyler.",
+    privateEyebrow: "Tasarımdan gizlilik",
+    privateTitle: "Servetiniz size ait kalır",
+    privateItems: [
+      "Reklam yok, veri satışı yok, banka girişi yok.",
+      "Hesaplayıcı tarayıcınızda çalışır ve sunucuya hiçbir şey kaydetmez.",
+      "Parolalar tek yönlü şifrelenerek saklanır; oturumunuzu tek bir çerez açık tutar.",
+      "Her şeyi indirin ya da hesabınızı silin, ne zaman isterseniz.",
+    ],
+    privacyLink: "Gizlilik politikası",
+    questionsTitle: "Sık sorulan sorular",
+    moreQuestions: "Diğer sorular",
+    finalTitle: "Ramazan bitmeden zekâtınızı bilin.",
+  },
+
+  calculatorPage: {
+    metaTitle: "Zekât hesaplama — ücretsiz, gizli, kayıt gerektirmez",
+    metaDescription:
+      "Güncel altın ve gümüş fiyatlarıyla zekâtınızı dakikalar içinde hesaplayın. Altın veya gümüş nisabı, mezhebe göre ziynet eşyası, hisseler, kripto ve borçlar. Ücretsiz, gizli ve yazdığınız hiçbir şey sunucuda saklanmaz.",
+    eyebrow: "Zekât hesaplama",
+    title: "Bu yıl zekâtınız ne kadar?",
+    lede: "Bugün sahip olduklarınızı ve borçlarınızı girin. Mizan bunları güncel maden fiyatlarıyla nisaba göre tartar ve size dakikalar içinde bir rakam verir. Ücretsiz, hesap gerektirmez ve yazdıklarınız tarayıcınızdan çıkmaz.",
+    howTitle: "Hesaplama nasıl yapılır",
+    how: [
+      {
+        title: "1. Toplayın",
+        body: "Her varlık bugünkü değeriyle sayılır. Uzun vadeli hisseler ve emeklilik birikimleri yalnızca belirlediğiniz oranda sayılır; takılan ziynet eşyası seçtiğiniz mezhebe göre değerlendirilir.",
+      },
+      {
+        title: "2. Düşün",
+        body: "Vadesi gelmiş borçlar düşülür. Kalan, zekâta tabi net servetinizdir.",
+      },
+      {
+        title: "3. Tartın",
+        body: "Nisaba ulaşıyorsa zekât bir kameri yıl için %2,5'tir. Nisabın altındaysa bir şey gerekmez.",
+      },
+    ],
+    faqTitle: "Sık sorulanlar",
+    faqFooter: "Hesap açıktır: {method} ve {trust}. Kendi durumunuz için yetkin bir âlime danışın.",
+    appName: "Mizan zekât hesaplayıcı",
+  },
+
+  calc: {
+    step: "Adım {n}",
+    pricesTitle: "Bugünkü fiyatlar",
+    pricesLede:
+      "Nisap, altın veya gümüş fiyatına göre belirlenir. Erişilebildiğinde ücretsiz bir kamu kaynağından doldurulur; yerel piyasayla karşılaştırın.",
+    currency: "Para birimi",
+    goldPerGram: "Altın, gram başına",
+    silverPerGram: "Gümüş, gram başına",
+    fetching: "Bugünkü fiyatlar getiriliyor…",
+    pricesUnavailable: "Güncel fiyatlar alınamadı. Bugünkü gram fiyatlarını girin.",
+    livePricesFrom: "{source} kaynaklı güncel fiyatlar, {when}.",
+    pricesFetched: "Fiyatlar {when} tarihinde alındı.",
+    refreshPrices: "Fiyatları yenile",
+    fetchPrices: "Güncel fiyatları getir",
+    nisabStandard: "Nisap ölçüsü",
+    silverTitle: "Gümüş · 595 g",
+    silverDetailWithValue: "{amount} — daha düşük eşik, böylece daha çok kişi zekât verir",
+    silverDetail: "Daha düşük eşik, böylece daha çok kişi zekât verir",
+    goldTitle: "Altın · 85 g",
+    goldDetail: "Daha yüksek eşik",
+    ownTitle: "Sahip olduklarınız",
+    ownLede:
+      "Bir kameri yıl boyunca elinizde tuttuklarınızın bugünkü değeri. Size uymayanları boş bırakın. Eviniz, arabanız ve kullandığınız eşyalar sayılmaz.",
+    oweTitle: "Şu anki borçlarınız",
+    oweLede:
+      "Vadesi gelmiş faturalar, kira, kredi kartları ve kredi taksitleri düşülür. Uzun vadeli konut kredisi tamamen düşülmez; gerisinde âlimler farklı görüştedir.",
+    debtsDueNow: "Vadesi gelmiş borçlar",
+    yearBasis: "Hesap yaptığınız yıl",
+    lunarTitle: "Kameri (Hicri) yıl · %2,5",
+    lunarDetail: "Zekâtın hesaplandığı yıl.",
+    solarTitle: "Şemsi yıl · %2,577",
+    solarDetail: "Miladi bir tarihte ödüyorsanız, daha uzun yıla göre ayarlanır.",
+    resultLabel: "Zekâtınız",
+    needsSilverPrice: "Nisapla karşılaştırmak için bugünkü gümüş fiyatını girin.",
+    needsGoldPrice: "Nisapla karşılaştırmak için bugünkü altın fiyatını girin.",
+    enterHoldings: "Ne kadar zekât düştüğünü görmek için sahip olduklarınızı girin.",
+    dueSummarySilver: "{net} tutarının {rate} kadarı; bu tutar gümüş nisabına eşit veya üzerinde.",
+    dueSummaryGold: "{net} tutarının {rate} kadarı; bu tutar altın nisabına eşit veya üzerinde.",
+    noneDue: "Zekât gerekmiyor",
+    belowSummarySilver: "{net}, {nisab} tutarındaki gümüş nisabının {gap} altında.",
+    belowSummaryGold: "{net}, {nisab} tutarındaki altın nisabının {gap} altında.",
+    shareOf: "{amount} tutarının {share} kadarı",
+    netWealth: "Zekâta tabi net servet",
+    nisabSilver: "Nisap (gümüş)",
+    nisabGold: "Nisap (altın)",
+    weightPriceMissing: "Bir varlık gramla girilmiş ama gram fiyatı eksik.",
+    hawlNote:
+      "Zekât, tam bir kameri yıl (havl) boyunca nisap seviyesinde veya üzerinde kalan servete düşer. Bu bir tahmindir, fetva değildir.",
+    print: "Yazdır veya PDF kaydet",
+    clear: "Temizle",
+    clearConfirm: "Girdiğiniz her şey temizlensin mi?",
+    keepTitle: "Bunu bir deftere kaydedin",
+    keepBody:
+      "Ücretsiz bir hesap, havlinizi Hicri takvimle sayar, zekâtın ne zaman düştüğünü söyler, verdiklerinizi kaydeder ve her yılı bir dökümle kapatır. Bu rakamlar sizinle gelir.",
+    keepNote: "Defter şimdilik İngilizcedir.",
+    keepCta: "Ücretsiz defter oluşturun",
+    barDue: "Ödenecek zekât",
+    barBelow: "Nisabın altında",
+    byValue: "Bunun yerine tutar girin",
+    byWeight: "Bunun yerine gram girin",
+    jewelleryQuestion: "Takılan ziynet eşyası sayılsın mı?",
+    jewelleryNo: "Sayılmaz (Mâlikî, Şâfiî, Hanbelî)",
+    jewelleryYes: "Sayılır (Hanefî)",
+    grams: "{label}, gram",
+    gramUnit: "g",
+    purity: "{label}, ayar",
+    countedShare: "Sayılan oran",
+    karat: "{k} ayar ({fineness})",
+    fineSilver: "Saf (999)",
+    sterling: "Sterlin (925)",
+    fields: {
+      cash: { label: "Eldeki nakit", hint: "Evde veya cüzdanınızdaki kâğıt para ve madeni paralar." },
+      bank: {
+        label: "Banka bakiyeleri",
+        hint: "Vadesiz, birikim ve vadeli hesaplar. Kazanılan faizi dahil etmeyin: ayrıca elden çıkarın.",
+      },
+      gold: {
+        label: "Birikim olarak tuttuğunuz altın",
+        hint: "Yatırım için alınmış altın, külçe ve sikkeler.",
+      },
+      silver: {
+        label: "Birikim olarak tuttuğunuz gümüş",
+        hint: "Yatırım için alınmış gümüş, külçe ve sikkeler.",
+      },
+      jewellery: {
+        label: "Taktığınız altın ziynet eşyası",
+        hint: "Aşağıdaki seçime göre sayılır veya sayılmaz.",
+      },
+      trading: {
+        label: "Alım satım için hisse ve fonlar",
+        hint: "Satmak için alındı: bugünkü piyasa değeriyle sayılır.",
+      },
+      crypto: { label: "Kripto paralar", hint: "Bugünkü piyasa değeriyle." },
+      longterm: {
+        label: "Uzun vadeli hisse ve fonlar",
+        hint: "Büyüme ve temettü için tutulur. Değerin yalnızca bir kısmı sayılır; uyduğunuz oranı belirleyin.",
+      },
+      business: {
+        label: "Satılık ticari mallar",
+        hint: "Bugün satılacağı fiyatla, maliyetiyle değil.",
+      },
+      receivables: {
+        label: "Alacaklarınız",
+        hint: "Geri ödenmesini beklediğiniz borçlar. Tahsilinden şüphe ettiğiniz alacakları dahil etmeyin.",
+      },
+      pension: {
+        label: "Çekebileceğiniz emeklilik birikimi",
+        hint: "Hükmü çok farklılık gösterir. Uyduğunuz oranı belirleyin ya da erişemiyorsanız dahil etmeyin.",
+      },
+      other: {
+        label: "Zekâta tabi diğer varlıklar",
+        hint: "Biriktirilmiş kira geliri, geri alacağınız depozito ve benzerleri.",
+      },
+    },
+  },
+
+  nisabPage: {
+    indexMetaTitle: "Bugünkü nisap: para biriminizde altın ve gümüş nisabı",
+    indexMetaDescription:
+      "Güncel maden fiyatlarıyla, altmış para biriminde gümüş ölçüsüne (595 g) ve altın ölçüsüne (85 g) göre bugünkü zekât nisabı. Her saat güncellenir.",
+    indexTitle: "Bugünkü nisap",
+    indexLede:
+      "Bugünkü altın ve gümüş fiyatlarıyla, zekâtın farz olduğu en az servet miktarı. Her saat güncellenir.",
+    currencyMetaTitle: "{currency} cinsinden bugünkü nisap ({code})",
+    currencyMetaDescription:
+      "{currency} cinsinden bugünkü zekât nisabı: gümüş ölçüsüne (595 g) göre {silver}, altın ölçüsüne (85 g) göre {gold}. Her saat güncellenir.",
+    currencyTitle: "{currency} cinsinden bugünkü nisap",
+    silverLabel: "Gümüş nisabı · 595 g",
+    goldLabel: "Altın nisabı · 85 g",
+    asOf: "Fiyatlar {source} kaynağından, {when}. Her saat güncellenir; yerel piyasayla karşılaştırın.",
+    unavailable:
+      "Güncel fiyatlar şu anda alınamıyor. Biraz sonra tekrar deneyin ya da bugünkü fiyatları hesaplayıcıya girin.",
+    explainer:
+      "Vadesi gelmiş borçlar düşüldükten sonra sahip olduklarınız, uyduğunuz nisaba ulaşıyor ve üzerinden bir kameri yıl geçmişse, tamamı üzerinden %2,5 zekât farz olur. Pek çok âlim, daha düşük olduğu için gümüş ölçüsünü önerir; böylece daha çok kişi zekât verir.",
+    cta: "Zekâtınızı {code} cinsinden hesaplayın",
+    tableCurrency: "Para birimi",
+    tableSilver: "Gümüş nisabı",
+    tableGold: "Altın nisabı",
+    allCurrencies: "Tüm para birimleri",
+    otherCurrencies: "Diğer para birimlerinde nisap",
+  },
+
+  faq: [
+    {
+      q: "Nisap nedir?",
+      a: "Nisap, zekâtın farz olduğu en az servet miktarıdır. Kıymetli madenin ağırlığıyla belirlenir: 85 gram altın veya 595 gram gümüş. Parasal değeri maden fiyatına göre değiştiği için hesap yaptığınız gün belirlenir.",
+    },
+    {
+      q: "Altın nisabını mı, gümüş nisabını mı kullanmalıyım?",
+      a: "İkisi de sünnetle sabittir, ancak bugün değerleri arasında büyük fark vardır. Pek çok çağdaş âlim ve zekât kurumu, nakit ve karma servet için gümüş nisabını önerir; çünkü daha düşüktür, böylece daha çok kişi zekât verir ve ihtiyaç sahiplerine daha çok ulaşır. Diğerleri altını esas alır. Mizan ikisini de gösterir ve seçimi size bırakır.",
+    },
+    {
+      q: "Havl nedir?",
+      a: "Havl, bir kameri (Hicri) yıldır; yaklaşık 354 gün. Zekât, tam bir havl boyunca nisap seviyesinde veya üzerinde kalan servete düşer. Pek çok kişi Ramazan'da bir tarih gibi sabit bir gün seçer ve her yıl o gün sahip olduğu her şeyi hesaplar.",
+    },
+    {
+      q: "Neyin zekâtını veririm?",
+      a: "Nakit, banka bakiyeleri, altın ve gümüş, hisse ve fonlar, kripto paralar, satılık ticari mallar ve geri almayı beklediğiniz alacaklar. Eviniz, arabanız, kıyafetleriniz, eşyalarınız ve kişisel kullanımdaki diğer şeyler sayılmaz.",
+    },
+    {
+      q: "Ziynet eşyasına zekât düşer mi?",
+      a: "Mezhepler farklı görüştedir. Hanefî mezhebi, takılanlar da dahil altın ve gümüş ziynet eşyasını zekâta tabi sayar. Mâlikî, Şâfiî ve Hanbelî mezhepleri ise genellikle kişisel süs için kullanılan ziynet eşyasını muaf tutar. Yatırım için tutulan ziynet eşyası herkese göre sayılır.",
+    },
+    {
+      q: "Hisseler ve emeklilik birikimleri nasıl değerlendirilir?",
+      a: "Satmak için alınan hisseler tam piyasa değeriyle sayılır. Uzun vadeli hisselerde yaygın bir çağdaş yöntem, yalnızca şirketin hisse başına düşen zekâta tabi varlıklarını sayar; bu çoğu zaman hisse fiyatının yaklaşık dörtte biri olarak tahmin edilir. Emeklilik birikimleri, paraya erişip erişemediğinize bağlıdır; güvendiğiniz birine danışın.",
+    },
+    {
+      q: "Borçlarımı düşebilir miyim?",
+      a: "Faturalar, kredi kartı borçları ve vadesi gelmiş taksitler gibi hemen ödenecek borçlar genellikle düşülür. Konut kredisi gibi uzun vadeli borçlarda pek çok çağdaş âlim, bakiyenin tamamını değil, yalnızca önümüzdeki yıl ödenecek kısmı düşer.",
+    },
+    {
+      q: "Şemsi yılda oran neden %2,577?",
+      a: "Zekât her kameri yıl için %2,5'tir. Şemsi yıl yaklaşık on bir gün daha uzundur; bu yüzden miladi bir tarihte hesap yaparsanız oran 365,25 / 354,367 ile çarpılır, yani yaklaşık %2,577 olur ve zaman içinde adil kalır.",
+    },
+    {
+      q: "Yazdıklarım bir yere kaydediliyor ya da gönderiliyor mu?",
+      a: "Hesaplayıcı tarayıcınızda çalışır. Rakamlarınız, sayfa yenilendiğinde kaybolmasın diye bu tarayıcının deposunda kalır ve istediğiniz zaman silebilirsiniz. Mizan'a gönderilen tek şey, bugünkü maden fiyatlarını almak için para biriminizin kodudur.",
+    },
+  ],
+};
+
+export default tr;

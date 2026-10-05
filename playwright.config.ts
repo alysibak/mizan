@@ -20,7 +20,7 @@ export default defineConfig({
     { name: "phone", use: { ...devices["iPhone 13"], browserName: "chromium" } },
     {
       name: "desktop",
-      testMatch: /public\.spec\.ts/,
+      testMatch: /(public|languages)\.spec\.ts/,
       use: { ...devices["Desktop Chrome"], viewport: { width: 1360, height: 900 } },
     },
   ],

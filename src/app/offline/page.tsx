@@ -17,6 +17,7 @@ export default function OfflinePage() {
         again.
       </p>
       {/* A plain link on purpose: a full page load is the retry. */}
+      {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
       <a href="/dashboard" className="btn-primary mt-8 self-start">
         Try again
       </a>

@@ -1,6 +1,7 @@
-export function formatMoney(amount: number, currency = "CAD"): string {
+/** A sum in a currency. `locale` is a BCP 47 tag; the app itself uses en-CA. */
+export function formatMoney(amount: number, currency = "CAD", locale = "en-CA"): string {
   try {
-    return new Intl.NumberFormat("en-CA", {
+    return new Intl.NumberFormat(locale, {
       style: "currency",
       currency,
       maximumFractionDigits: 2,
@@ -10,9 +11,14 @@ export function formatMoney(amount: number, currency = "CAD"): string {
   }
 }
 
-export function formatPercent(fraction: number, digits = 1): string {
+export function formatPercent(fraction: number, digits = 1, locale?: string): string {
   if (!Number.isFinite(fraction)) return "n/a";
-  return `${(fraction * 100).toFixed(digits)}%`;
+  if (!locale) return `${(fraction * 100).toFixed(digits)}%`;
+  return new Intl.NumberFormat(locale, {
+    style: "percent",
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  }).format(fraction);
 }
 
 /** Round to the nearest cent. Money that is paid or recorded is always in cents. */
