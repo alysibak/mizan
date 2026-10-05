@@ -5,14 +5,15 @@ import SignOutButton from "@/components/SignOutButton";
 import DataBackup from "@/components/DataBackup";
 import CalendarFeed from "@/components/CalendarFeed";
 import AccountPanel from "@/components/AccountPanel";
+import { emailEnabled } from "@/lib/email";
 
 export default async function SettingsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ recovered?: string }>;
+  searchParams: Promise<{ recovered?: string; email?: string }>;
 }) {
   const user = (await getCurrentUser())!;
-  const { recovered } = await searchParams;
+  const { recovered, email } = await searchParams;
   const settings = await getUserSettings(user.id);
 
   return (
@@ -40,6 +41,15 @@ export default async function SettingsPage({
         email={user.email}
         hasRecoveryCode={Boolean(user.recoveryCodeHash)}
         recovered={recovered === "1"}
+        mail={
+          emailEnabled()
+            ? {
+                verified: Boolean(user.emailVerifiedAt),
+                reminders: settings.emailReminders,
+                status: email === "confirmed" || email === "expired" ? email : null,
+              }
+            : null
+        }
       />
       <SignOutButton />
     </div>

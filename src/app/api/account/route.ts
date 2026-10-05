@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { db } from "@/db";
 import {
   assets,
+  emailTokens,
   givingRecords,
   liabilities,
   sessions,
@@ -34,6 +35,7 @@ export async function DELETE(request: Request) {
     db.delete(liabilities).where(eq(liabilities.userId, user.id)),
     db.delete(givingRecords).where(eq(givingRecords.userId, user.id)),
     db.delete(yearSnapshots).where(eq(yearSnapshots.userId, user.id)),
+    db.delete(emailTokens).where(eq(emailTokens.userId, user.id)),
     db.delete(settings).where(eq(settings.userId, user.id)),
     db.delete(sessions).where(eq(sessions.userId, user.id)),
     db.delete(users).where(eq(users.id, user.id)),

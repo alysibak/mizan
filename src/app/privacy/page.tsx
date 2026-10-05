@@ -3,6 +3,7 @@ import Link from "next/link";
 import LegalPage, { LegalSection } from "@/components/LegalPage";
 import { LEGAL_UPDATED, contactEmail, operatorName } from "@/lib/legal";
 import { analyticsConfig } from "@/lib/analytics";
+import { emailEnabled } from "@/lib/email";
 
 export const metadata: Metadata = {
   title: "Privacy policy",
@@ -18,6 +19,7 @@ export const dynamic = "force-dynamic";
 export default function PrivacyPage() {
   const email = contactEmail();
   const analytics = analyticsConfig();
+  const mail = emailEnabled();
   return (
     <LegalPage eyebrow="Privacy" title="Privacy policy" updated={LEGAL_UPDATED}>
       <p className="text-base text-ink">
@@ -71,6 +73,13 @@ export default function PrivacyPage() {
             A hash of your recovery code and of your calendar-feed link, if you
             make them, so they can be checked but not read.
           </li>
+          {mail ? (
+            <li>
+              If you confirm your email address: when you did, whether you
+              asked for hawl reminders, and which reminder was sent last.
+              One-time links are stored only as hashes and deleted when used.
+            </li>
+          ) : null}
           <li>
             To slow down password guessing, a count of recent sign-in attempts
             per network address. The address is stored only as a one-way hash
@@ -117,6 +126,16 @@ export default function PrivacyPage() {
           public currency-rate feed) for today’s rates; those requests carry a
           currency code and nothing about you.
         </p>
+        {mail ? (
+          <p>
+            Emails (a confirmation link, a password-reset link you ask for, and
+            hawl reminders you turn on) are delivered by the operator’s email
+            provider, which sees your address and the message. They carry a
+            date and a link, never amounts or anything else from your ledger.
+          </p>
+        ) : (
+          <p>This server sends no email.</p>
+        )}
       </LegalSection>
 
       <LegalSection title="Your choices">

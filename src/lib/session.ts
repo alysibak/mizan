@@ -43,6 +43,8 @@ export const DEFAULT_SETTINGS: Omit<Settings, "userId" | "updatedAt"> = {
   timezone: null,
   hijriCalendar: "tabular",
   calendarTokenHash: null,
+  emailReminders: false,
+  reminderSentFor: null,
 };
 
 export async function getUserSettings(userId: string): Promise<Settings> {

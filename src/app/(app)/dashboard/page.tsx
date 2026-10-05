@@ -11,6 +11,7 @@ import DashboardNotices from "@/components/DashboardNotices";
 import HawlCalendarLink from "@/components/HawlCalendarLink";
 import CycleActions from "@/components/CycleActions";
 import LastLetterCard from "@/components/LastLetterCard";
+import { emailEnabled } from "@/lib/email";
 
 export default async function DashboardPage({
   searchParams,
@@ -66,8 +67,11 @@ export default async function DashboardPage({
       href: "/settings",
     },
     {
-      done: Boolean(user.recoveryCodeHash),
-      label: "Save a recovery code (Mizan sends no email)",
+      // Either is a way back in after a forgotten password.
+      done: Boolean(user.recoveryCodeHash) || (emailEnabled() && Boolean(user.emailVerifiedAt)),
+      label: emailEnabled()
+        ? "Confirm your email or save a recovery code"
+        : "Save a recovery code (this server sends no email)",
       href: "/settings#account",
     },
     {

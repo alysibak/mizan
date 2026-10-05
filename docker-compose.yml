@@ -16,6 +16,9 @@ services:
       DEMO_EMAIL: ${DEMO_EMAIL:-}
       OPERATOR_NAME: ${OPERATOR_NAME:-}
       CONTACT_EMAIL: ${CONTACT_EMAIL:-}
+      EMAIL_FROM: ${EMAIL_FROM:-}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      CRON_SECRET: ${CRON_SECRET:-}
     volumes:
       - mizan-data:/data
     init: true

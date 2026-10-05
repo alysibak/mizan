@@ -52,7 +52,10 @@ export default function TermsPage() {
       <LegalSection title="Your account">
         <ul className="list-disc space-y-1 pl-5">
           <li>Give a real email address, keep your password private, and save your recovery code.</li>
-          <li>Mizan sends no email, so a lost password without a recovery code may mean a lost account.</li>
+          <li>
+            Without a recovery code or a confirmed email address, a lost password may mean a lost
+            account.
+          </li>
           <li>One person per account. You may close your account at any time from Settings.</li>
         </ul>
       </LegalSection>

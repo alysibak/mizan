@@ -41,3 +41,6 @@ NUL
 /test-results
 /playwright-report
 /blob-report
+
+# End-to-end test outbox
+e2e-outbox.jsonl

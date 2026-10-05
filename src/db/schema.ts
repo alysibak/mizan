@@ -25,8 +25,27 @@ export const users = sqliteTable("users", {
   lockedUntil: text("locked_until"),
   // SHA-256 of the one-time recovery code, if the user made one.
   recoveryCodeHash: text("recovery_code_hash"),
+  // When the user followed a confirmation link sent to their address. Reset
+  // links and reminders only ever go to a confirmed address.
+  emailVerifiedAt: text("email_verified_at"),
   createdAt: now(),
 });
+
+// One-time links sent by email: confirm the address, or reset the password.
+// Only the SHA-256 of the token is stored; each is deleted when used.
+export const emailTokens = sqliteTable(
+  "email_tokens",
+  {
+    tokenHash: text("token_hash").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    purpose: text("purpose").notNull(), // 'verify' | 'reset'
+    expiresAt: text("expires_at").notNull(),
+    createdAt: now(),
+  },
+  (t) => [index("email_tokens_user_idx").on(t.userId)],
+);
 
 export const sessions = sqliteTable(
   "sessions",
@@ -73,6 +92,11 @@ export const settings = sqliteTable(
     hijriCalendar: text("hijri_calendar").notNull().default("tabular"),
     // SHA-256 of the secret in the user's calendar-feed URL, if enabled.
     calendarTokenHash: text("calendar_token_hash"),
+    // Opted in to an email a week before the hawl day and on the day.
+    emailReminders: integer("email_reminders", { mode: "boolean" }).notNull().default(false),
+    // The last reminder sent, as "<due day>:week" or "<due day>:day", so a
+    // daily run sends each one once.
+    reminderSentFor: text("reminder_sent_for"),
     // The column is named created_at for historical reasons; it holds the time
     // of the last settings save.
     updatedAt: text("created_at")
