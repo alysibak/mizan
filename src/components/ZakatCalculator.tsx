@@ -23,6 +23,7 @@ import { KARAT_PURITY } from "@/lib/metals";
 import { formatMoney, formatPercent } from "@/lib/money";
 import { readStoredValue, useHydrated } from "@/lib/client-store";
 import { track } from "@/lib/analytics";
+import { currencyName } from "@/lib/currencies";
 import { LOCALE_INFO, fmt, type Locale } from "@/i18n/config";
 import type { Messages } from "@/i18n/messages/en";
 
@@ -94,13 +95,6 @@ type PriceState =
   | { status: "ok"; source: string }
   | { status: "error"; message: string };
 
-function currencyName(code: string, locale: Locale): string {
-  try {
-    return new Intl.DisplayNames([locale], { type: "currency" }).of(code) ?? code;
-  } catch {
-    return code;
-  }
-}
 
 function Calculator({
   initial,

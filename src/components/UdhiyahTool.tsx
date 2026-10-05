@@ -3,12 +3,22 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { amountParam, formatMoney } from "@/lib/money";
+import { calculateUdhiyah, type UdhiyahAnimal } from "@/lib/udhiyah";
 import {
-  calculateUdhiyah,
-  type UdhiyahAnimal,
-} from "@/lib/udhiyah";
+  CurrencySelect,
+  KeepRecordNudge,
+  useVisitorCurrency,
+} from "@/components/public/VisitorCurrency";
 
-export default function UdhiyahTool({ currency }: { currency: string }) {
+/** With `currency`, the signed-in tool; without, a visitor picks one. */
+export default function UdhiyahTool({
+  currency: fixed,
+}: {
+  currency?: string;
+}) {
+  const [visitorCurrency, setVisitorCurrency] = useVisitorCurrency();
+  const guest = fixed === undefined;
+  const currency = fixed ?? visitorCurrency;
   const [animal, setAnimal] = useState<UdhiyahAnimal>("sheep");
   const [cost, setCost] = useState("");
   const [shares, setShares] = useState("1");
@@ -27,18 +37,13 @@ export default function UdhiyahTool({ currency }: { currency: string }) {
 
   return (
     <div className="space-y-8">
-      <header>
-        <p className="label text-brassDeep">Seasonal</p>
-        <h1 className="mt-1 font-serif text-3xl text-ink">Udhiyah / qurbani</h1>
-        <p className="mt-2 max-w-xl text-sm text-sage">
-          Split the cost of an animal into shares. This does not decide whether
-          you are obligated, which animal qualifies, or local slaughter rules —
-          only the arithmetic of a shared purchase.
-        </p>
-      </header>
-
       <section className="card space-y-4 p-5">
         <div className="grid gap-4 sm:grid-cols-2">
+          {guest ? (
+            <div className="sm:col-span-2 sm:max-w-xs">
+              <CurrencySelect value={currency} onChange={setVisitorCurrency} />
+            </div>
+          ) : null}
           <div>
             <label className="label mb-1.5" htmlFor="animal">
               Animal
@@ -50,7 +55,7 @@ export default function UdhiyahTool({ currency }: { currency: string }) {
               onChange={(e) => {
                 const next = e.target.value as UdhiyahAnimal;
                 setAnimal(next);
-                setShares(next === "cow" || next === "camel" ? "1" : "1");
+                setShares("1");
               }}
             >
               <option value="sheep">Sheep (1 share)</option>
@@ -120,11 +125,15 @@ export default function UdhiyahTool({ currency }: { currency: string }) {
             <dl className="mt-3 space-y-2 text-sm">
               <div className="flex justify-between gap-4">
                 <dt className="text-sage">Per share</dt>
-                <dd className="nums">{formatMoney(result.shareCost, currency)}</dd>
+                <dd className="nums">
+                  {formatMoney(result.shareCost, currency)}
+                </dd>
               </div>
               <div className="flex justify-between gap-4">
                 <dt className="text-sage">Your shares</dt>
-                <dd className="nums">{formatMoney(result.yourCost, currency)}</dd>
+                <dd className="nums">
+                  {formatMoney(result.yourCost, currency)}
+                </dd>
               </div>
               <div className="flex justify-between gap-4 border-t border-mist pt-2">
                 <dt className="text-ink">Total with extras</dt>
@@ -136,7 +145,8 @@ export default function UdhiyahTool({ currency }: { currency: string }) {
           )}
         </div>
 
-        {result.valid && (
+        {result.valid && guest ? <KeepRecordNudge what="it" /> : null}
+        {result.valid && !guest && (
           <Link
             href={`/giving?type=sadaqah&amount=${amountParam(result.totalWithExtras)}`}
             className="btn-primary"
