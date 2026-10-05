@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { perGramFromPerOunce } from "@/lib/metals";
+import { PRICE_TTL_SECONDS, currencyApiTable, getJson } from "@/lib/price-fetch";
 import {
   ECB_CURRENCIES,
   parseCurrencyApi,
@@ -9,38 +10,9 @@ import {
   type UsdOunces,
 } from "@/lib/price-sources";
 
-// Spot prices barely move within an hour for nisab purposes. Upstream answers
-// are kept that long, and shared caches may serve this response for the same
-// hour, so a busy public calculator costs the free sources a few calls an hour.
-const UPSTREAM_TTL_SECONDS = 3600;
-const CACHE_HEADER = `public, max-age=600, s-maxage=${UPSTREAM_TTL_SECONDS}, stale-while-revalidate=86400`;
-
-// Daily rates for ~200 currencies (PKR, SAR, BDT, NGN, …) and gold and silver,
-// served from two CDNs. Used where the ECB rates behind frankfurter stop.
-const CURRENCY_API = [
-  "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json",
-  "https://latest.currency-api.pages.dev/v1/currencies/usd.json",
-];
-
-async function getJson(url: string): Promise<unknown> {
-  try {
-    const res = await fetch(url, {
-      next: { revalidate: UPSTREAM_TTL_SECONDS },
-      signal: AbortSignal.timeout(5000),
-    });
-    return res.ok ? await res.json() : null;
-  } catch {
-    return null;
-  }
-}
-
-async function currencyApi(): Promise<unknown> {
-  for (const url of CURRENCY_API) {
-    const data = await getJson(url);
-    if (data) return data;
-  }
-  return null;
-}
+// Shared caches may serve this response for the same hour the upstream
+// answers are kept (see lib/price-fetch).
+const CACHE_HEADER = `public, max-age=600, s-maxage=${PRICE_TTL_SECONDS}, stale-while-revalidate=86400`;
 
 async function goldApiOunces(): Promise<UsdOunces | null> {
   const [gold, silver] = await Promise.all([
@@ -75,13 +47,16 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Use a three-letter currency" }, { status: 400 });
   }
 
+  // The fallback is asked at the same time, so a slow or missing primary
+  // source costs one timeout, not three in a row. It is cached like the rest.
+  const fallbackTable = currencyApiTable();
   let [ounces, fx] = await Promise.all([goldApiOunces(), frankfurterRate(currency)]);
   const sources = new Set<string>();
   if (ounces) sources.add("gold-api.com");
   if (fx && currency !== "USD") sources.add("frankfurter.app");
 
   if (!ounces || !fx) {
-    const fallback = parseCurrencyApi(await currencyApi(), currency);
+    const fallback = parseCurrencyApi(await fallbackTable, currency);
     if (!ounces && fallback.metals) {
       ounces = fallback.metals;
       sources.add("currency-api");

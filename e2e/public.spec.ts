@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import {
   PASSWORD,
+  asNewVisitor,
   expectNoHorizontalScroll,
   expectUniqueIds,
   uniqueEmail,
@@ -56,6 +57,7 @@ test("the calculator answers without an account, and the answer comes along", as
   await expect(page.locator("#calc-bank")).toHaveValue("18000");
   await expect(result).toContainText("$568.75");
 
+  await asNewVisitor(page);
   await page.getByRole("link", { name: "Create a free ledger" }).click();
   await page.waitForURL("**/register?from=calculator");
   await expect(page.getByText("Your calculator figures")).toBeVisible();

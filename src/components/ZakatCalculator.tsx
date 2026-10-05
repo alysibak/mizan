@@ -9,8 +9,9 @@ import {
   DEFAULT_PORTION_PERCENT,
   computeDraft,
   currencyForLocale,
-  draftIsEmpty,
+  decimalMarkFor,
   emptyDraft,
+  parseAmount,
   parseDraft,
   type CalcDraft,
   type CalcField,
@@ -34,10 +35,11 @@ export default function ZakatCalculator() {
 }
 
 function storedOrFresh(): CalcDraft {
-  return (
-    parseDraft(readStoredValue(CALC_STORAGE_KEY)) ??
-    emptyDraft(currencyForLocale(typeof navigator === "undefined" ? null : navigator.language))
-  );
+  const locale = typeof navigator === "undefined" ? null : navigator.language;
+  const stored = parseDraft(readStoredValue(CALC_STORAGE_KEY));
+  // A draft is read with the decimal mark of the browser it was typed in.
+  if (stored) return stored.decimal ? stored : { ...stored, decimal: decimalMarkFor(locale) };
+  return emptyDraft(currencyForLocale(locale), decimalMarkFor(locale));
 }
 
 type PriceState =
@@ -69,6 +71,18 @@ function Calculator({ initial, live }: { initial: CalcDraft; live: boolean }) {
   function update(patch: Partial<CalcDraft>) {
     setDraft((d) => ({ ...d, ...patch }));
   }
+  /** Switching to grams starts from the fineness the picker shows first. */
+  function setByWeight(key: WeighableKey, on: boolean) {
+    setDraft((d) => ({
+      ...d,
+      byWeight: { ...d.byWeight, [key]: on },
+      purity:
+        on && !d.purity[key]
+          ? { ...d.purity, [key]: String(purityOptionsFor(key)[0].purity) }
+          : d.purity,
+    }));
+  }
+
   function updateIn<K extends "amounts" | "byWeight" | "grams" | "purity" | "portions">(
     key: K,
     field: keyof CalcDraft[K],
@@ -95,7 +109,7 @@ function Calculator({ initial, live }: { initial: CalcDraft; live: boolean }) {
       source?: string;
       error?: string;
     } | null;
-    // A newer currency choice has already asked again.
+    // A newer currency choice has asked again, or the user typed prices.
     if (requested.current !== currency) return;
     if (!res?.ok || !data?.goldPricePerGram || !data.silverPricePerGram) {
       setPrice({
@@ -134,6 +148,15 @@ function Calculator({ initial, live }: { initial: CalcDraft; live: boolean }) {
     }
   }, [draft, live]);
 
+  /** Typed prices win over a suggestion still on its way. */
+  function typePrice(patch: Partial<CalcDraft>) {
+    if (requested.current) {
+      requested.current = null;
+      setPrice({ status: "idle" });
+    }
+    update({ ...patch, pricesAsOf: null });
+  }
+
   function changeCurrency(currency: string) {
     // Prices are per gram in the old currency; they no longer apply.
     update({ currency, goldPrice: "", silverPrice: "", pricesAsOf: null });
@@ -143,7 +166,7 @@ function Calculator({ initial, live }: { initial: CalcDraft; live: boolean }) {
   function clearAll() {
     if (!window.confirm("Clear everything you entered?")) return;
     setDraft({
-      ...emptyDraft(draft.currency),
+      ...emptyDraft(draft.currency, draft.decimal),
       goldPrice: draft.goldPrice,
       silverPrice: draft.silverPrice,
       pricesAsOf: draft.pricesAsOf,
@@ -152,16 +175,16 @@ function Calculator({ initial, live }: { initial: CalcDraft; live: boolean }) {
 
   // Count a visit that reached an answer, once per page view (no figures sent).
   const counted = useRef(false);
-  const answered = live && !draftIsEmpty(draft) && !outcome.needsPrices;
+  const empty = outcome.lines.length === 0 && outcome.debts === 0;
+  const answered = live && !empty && !outcome.needsPrices;
   useEffect(() => {
     if (!answered || counted.current) return;
     counted.current = true;
     track("Calculated");
   }, [answered]);
 
-  const goldNisab = NISAB_GOLD_GRAMS * (Number(draft.goldPrice) || 0);
-  const silverNisab = NISAB_SILVER_GRAMS * (Number(draft.silverPrice) || 0);
-  const empty = draftIsEmpty(draft);
+  const goldNisab = NISAB_GOLD_GRAMS * parseAmount(draft.goldPrice, draft.decimal);
+  const silverNisab = NISAB_SILVER_GRAMS * parseAmount(draft.silverPrice, draft.decimal);
 
   return (
     <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
@@ -203,14 +226,14 @@ function Calculator({ initial, live }: { initial: CalcDraft; live: boolean }) {
               label="Gold, per gram"
               currency={c}
               value={draft.goldPrice}
-              onChange={(v) => update({ goldPrice: v, pricesAsOf: null })}
+              onChange={(v) => typePrice({ goldPrice: v })}
             />
             <PriceInput
               id="calc-silver-price"
               label="Silver, per gram"
               currency={c}
               value={draft.silverPrice}
-              onChange={(v) => update({ silverPrice: v, pricesAsOf: null })}
+              onChange={(v) => typePrice({ silverPrice: v })}
             />
           </div>
 
@@ -279,7 +302,7 @@ function Calculator({ initial, live }: { initial: CalcDraft; live: boolean }) {
                 draft={draft}
                 currency={c}
                 onAmount={(v) => updateIn("amounts", field.key, v)}
-                onByWeight={(v) => updateIn("byWeight", field.key as WeighableKey, v)}
+                onByWeight={(v) => setByWeight(field.key as WeighableKey, v)}
                 onGrams={(v) => updateIn("grams", field.key as WeighableKey, v)}
                 onPurity={(v) => updateIn("purity", field.key as WeighableKey, v)}
                 onPortion={(v) => field.portion && updateIn("portions", field.portion, v)}
@@ -462,6 +485,15 @@ function Calculator({ initial, live }: { initial: CalcDraft; live: boolean }) {
   );
 }
 
+function purityOptionsFor(key: WeighableKey | null): { label: string; purity: number }[] {
+  return key === "silver"
+    ? [
+        { label: "Fine (999)", purity: 0.999 },
+        { label: "Sterling (925)", purity: 0.925 },
+      ]
+    : KARAT_PURITY.filter((k) => !k.label.startsWith("Sterling"));
+}
+
 function Choice({
   name,
   checked,
@@ -568,13 +600,7 @@ function HoldingField({
   const id = `calc-${field.key}`;
   const weighKey = field.metal ? (field.key as WeighableKey) : null;
   const byWeight = weighKey ? Boolean(draft.byWeight[weighKey]) : false;
-  const purityOptions =
-    field.metal === "silver"
-      ? [
-          { label: "Fine (999)", purity: 0.999 },
-          { label: "Sterling (925)", purity: 0.925 },
-        ]
-      : KARAT_PURITY.filter((k) => !k.label.startsWith("Sterling"));
+  const purityOptions = purityOptionsFor(weighKey);
 
   return (
     <div className="grid gap-3 py-4 sm:grid-cols-[minmax(0,1fr)_14rem] sm:items-start">

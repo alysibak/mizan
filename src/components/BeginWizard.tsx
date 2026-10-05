@@ -20,6 +20,7 @@ import { sendJson } from "@/lib/client-fetch";
 import { readStoredValue, setStoredValue, useHydrated } from "@/lib/client-store";
 import {
   CALC_STORAGE_KEY,
+  decimalMarkFor,
   draftIsEmpty,
   draftToLedger,
   parseDraft,
@@ -32,8 +33,10 @@ const STEP_KEY = "mizan-begin-step";
 
 /** What this visitor entered in the public calculator, if anything. */
 function calculatorDraft(): { draft: CalcDraft; ledger: LedgerCarryOver } | null {
-  const draft = parseDraft(readStoredValue(CALC_STORAGE_KEY));
-  return draft && !draftIsEmpty(draft) ? { draft, ledger: draftToLedger(draft) } : null;
+  const stored = parseDraft(readStoredValue(CALC_STORAGE_KEY));
+  if (!stored) return null;
+  const draft = stored.decimal ? stored : { ...stored, decimal: decimalMarkFor(navigator.language) };
+  return draftIsEmpty(draft) ? null : { draft, ledger: draftToLedger(draft) };
 }
 
 /** The step to resume at: the trust note first, then wherever setup was left. */
@@ -92,8 +95,11 @@ function Wizard({
   const [assetAmount, setAssetAmount] = useState("");
   const [assetCategory, setAssetCategory] = useState("bank");
   // Set once the first holding is saved, so retrying a failed finish does
-  // not add it twice.
+  // not add it twice. The calculator's holdings and debts are tracked apart
+  // for the same reason: a retry sends only what has not landed yet.
   const [assetSaved, setAssetSaved] = useState(false);
+  const [carriedAssets, setCarriedAssets] = useState(false);
+  const [carriedDebts, setCarriedDebts] = useState(0);
 
   async function saveSettings(patch: Record<string, unknown>) {
     const body = {
@@ -198,7 +204,7 @@ function Wizard({
       if (withAsset === "calculator" && carry && !assetSaved) {
         // Prices are saved first, so weighed metal is valued at the same rate.
         await saveSettings({});
-        if (carry.ledger.assets.length > 0) {
+        if (carry.ledger.assets.length > 0 && !carriedAssets) {
           const res = await sendJson(
             "/api/assets/import",
             "POST",
@@ -206,10 +212,13 @@ function Wizard({
             "Could not bring in your holdings",
           );
           if (!res.ok) throw new Error(res.error);
+          setCarriedAssets(true);
         }
-        for (const debt of carry.ledger.liabilities) {
+        for (const [i, debt] of carry.ledger.liabilities.entries()) {
+          if (i < carriedDebts) continue;
           const res = await sendJson("/api/liabilities", "POST", debt, "Could not add your debts");
           if (!res.ok) throw new Error(res.error);
+          setCarriedDebts(i + 1);
         }
         setAssetSaved(true);
         setStoredValue(CALC_STORAGE_KEY, null);

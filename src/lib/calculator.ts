@@ -120,9 +120,16 @@ export const DEFAULT_PORTION_PERCENT: Record<PortionKey, string> = {
   pension: "25",
 };
 
+export type DecimalMark = "." | ",";
+
 export interface CalcDraft {
   v: 1;
   currency: string;
+  /**
+   * The decimal mark of the locale the figures were typed in, so "1.500" is
+   * fifteen hundred in Germany and one and a half in Canada. Null: unknown.
+   */
+  decimal: DecimalMark | null;
   /** Price per gram, as typed. */
   goldPrice: string;
   silverPrice: string;
@@ -143,10 +150,11 @@ export interface CalcDraft {
 
 export const CALC_STORAGE_KEY = "mizan-calculator-v1";
 
-export function emptyDraft(currency = "USD"): CalcDraft {
+export function emptyDraft(currency = "USD", decimal: DecimalMark | null = null): CalcDraft {
   return {
     v: 1,
     currency,
+    decimal,
     goldPrice: "",
     silverPrice: "",
     pricesAsOf: null,
@@ -163,15 +171,35 @@ export function emptyDraft(currency = "USD"): CalcDraft {
 }
 
 const MAX = 1e12;
+/** Heaviest weight the ledger accepts, in grams. */
+const MAX_GRAMS = 1e7;
+
+/** The decimal mark a locale writes, e.g. "," for de-DE and fr-FR. */
+export function decimalMarkFor(locale: string | null | undefined): DecimalMark {
+  try {
+    const part = new Intl.NumberFormat(locale ?? undefined)
+      .formatToParts(1.5)
+      .find((p) => p.type === "decimal");
+    return part?.value === "," ? "," : ".";
+  } catch {
+    return ".";
+  }
+}
 
 /**
  * A typed amount as a number. Forgiving: "12,500", "12 500", "$12,500.50",
- * and "1.234,56" all read as people mean them. Blank, negative, or nonsense
- * reads as 0.
+ * "0,88", and "1.234,56" all read as people mean them. A lone separator
+ * followed by exactly three digits ("1,500", "1.500") is the one ambiguous
+ * case; `decimal`, the writer's locale mark, settles it. Without it a comma
+ * groups thousands and a dot is a decimal point. Blank, negative, or
+ * nonsense reads as 0.
  */
-export function parseAmount(raw: string | null | undefined): number {
+export function parseAmount(
+  raw: string | null | undefined,
+  decimal: DecimalMark | null = null,
+): number {
   if (!raw) return 0;
-  let s = raw.replace(/[\s  '’_]/g, "").replace(/[^\d.,-]/g, "");
+  let s = raw.replace(/[\s\u00a0\u202f'’_]/g, "").replace(/[^\d.,-]/g, "");
   if (s.startsWith("-")) return 0;
   s = s.replace(/-/g, "");
   const lastComma = s.lastIndexOf(",");
@@ -179,14 +207,16 @@ export function parseAmount(raw: string | null | undefined): number {
   if (lastComma >= 0 && lastDot >= 0) {
     // Both marks: the later one is the decimal point.
     s = lastComma > lastDot ? s.replace(/\./g, "").replace(",", ".") : s.replace(/,/g, "");
-  } else if (lastComma >= 0) {
-    const commas = s.split(",").length - 1;
-    const decimals = s.length - lastComma - 1;
-    // One comma followed by one or two digits is a decimal comma ("12,5").
-    s = commas === 1 && decimals >= 1 && decimals <= 2 ? s.replace(",", ".") : s.replace(/,/g, "");
-  } else if (s.split(".").length > 2) {
-    // "1.234.567" groups thousands with dots.
-    s = s.replace(/\./g, "");
+  } else if (lastComma >= 0 || lastDot >= 0) {
+    const mark = lastComma >= 0 ? "," : ".";
+    const pieces = s.split(mark);
+    const whole = pieces[0];
+    const after = pieces[pieces.length - 1].length;
+    let isDecimal: boolean;
+    if (pieces.length > 2) isDecimal = false; // "1,234,567" or "1.234.567"
+    else if (whole === "" || /^0+$/.test(whole) || after !== 3) isDecimal = true;
+    else isDecimal = decimal ? decimal === mark : mark === ".";
+    s = isDecimal ? s.replace(mark, ".") : s.split(mark).join("");
   }
   const n = Number(s);
   return Number.isFinite(n) && n > 0 ? Math.min(n, MAX) : 0;
@@ -232,8 +262,8 @@ export interface CalcPrices {
 
 export function draftPrices(draft: CalcDraft): CalcPrices {
   return {
-    goldPricePerGram: parseAmount(draft.goldPrice),
-    silverPricePerGram: parseAmount(draft.silverPrice),
+    goldPricePerGram: parseAmount(draft.goldPrice, draft.decimal),
+    silverPricePerGram: parseAmount(draft.silverPrice, draft.decimal),
   };
 }
 
@@ -247,14 +277,14 @@ export function draftLines(draft: CalcDraft): CalcLine[] {
     let grams: number | null = null;
     let purity: number | null = null;
     if (weighable && draft.byWeight[weighable]) {
-      grams = parseAmount(draft.grams[weighable]);
+      grams = Math.min(parseAmount(draft.grams[weighable], draft.decimal), MAX_GRAMS);
       purity = parsePurity(draft.purity[weighable]);
       const perGram =
         field.metal === "silver" ? prices.silverPricePerGram : prices.goldPricePerGram;
       amount = valueByWeight(grams, purity, perGram);
       if (!(grams > 0)) continue;
     } else {
-      amount = toCents(parseAmount(draft.amounts[field.key]));
+      amount = toCents(parseAmount(draft.amounts[field.key], draft.decimal));
       if (!(amount > 0)) continue;
     }
 
@@ -295,7 +325,7 @@ export interface CalcOutcome {
 export function computeDraft(draft: CalcDraft): CalcOutcome {
   const lines = draftLines(draft);
   const prices = draftPrices(draft);
-  const debts = toCents(parseAmount(draft.debts));
+  const debts = toCents(parseAmount(draft.debts, draft.decimal));
   const result = calculateZakat({
     assets: lines,
     liabilities: debts > 0 ? [{ label: "Debts due now", amount: debts, deductible: true }] : [],
@@ -307,7 +337,9 @@ export function computeDraft(draft: CalcDraft): CalcOutcome {
     draft.standard === "gold" ? !(prices.goldPricePerGram > 0) : !(prices.silverPricePerGram > 0);
   const needsWeightPrice = CALC_FIELDS.some((f) => {
     const k = f.key as WeighableKey;
-    if (!f.metal || !draft.byWeight[k] || !(parseAmount(draft.grams[k]) > 0)) return false;
+    if (!f.metal || !draft.byWeight[k] || !(parseAmount(draft.grams[k], draft.decimal) > 0)) {
+      return false;
+    }
     return f.metal === "silver" ? !(prices.silverPricePerGram > 0) : !(prices.goldPricePerGram > 0);
   });
   return { lines, debts, result, needsPrices, needsWeightPrice };
@@ -315,7 +347,7 @@ export function computeDraft(draft: CalcDraft): CalcOutcome {
 
 /** True when nothing has been entered yet. */
 export function draftIsEmpty(draft: CalcDraft): boolean {
-  return draftLines(draft).length === 0 && !(parseAmount(draft.debts) > 0);
+  return draftLines(draft).length === 0 && !(parseAmount(draft.debts, draft.decimal) > 0);
 }
 
 function str(v: unknown, max = 40): string {
@@ -353,6 +385,7 @@ export function parseDraft(raw: string | null | undefined): CalcDraft | null {
   return {
     v: 1,
     currency: /^[A-Z]{3}$/.test(currency) ? currency : "USD",
+    decimal: data.decimal === "," || data.decimal === "." ? data.decimal : null,
     goldPrice: str(data.goldPrice),
     silverPrice: str(data.silverPrice),
     pricesAsOf: str(data.pricesAsOf, 40) || null,
@@ -398,8 +431,14 @@ export function draftToLedger(draft: CalcDraft): LedgerCarryOver {
         : {}),
     })),
     liabilities:
-      parseAmount(draft.debts) > 0
-        ? [{ label: "Debts due now", amount: toCents(parseAmount(draft.debts)), deductible: true }]
+      parseAmount(draft.debts, draft.decimal) > 0
+        ? [
+            {
+              label: "Debts due now",
+              amount: toCents(parseAmount(draft.debts, draft.decimal)),
+              deductible: true,
+            },
+          ]
         : [],
   };
 }

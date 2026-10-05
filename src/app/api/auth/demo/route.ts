@@ -15,7 +15,7 @@ import { LIMITS, overLimit, tooManyRequests } from "@/lib/rate-limit";
 export async function POST(request: Request) {
   const email = demoEmail();
   if (!email) return errorJson("There is no demo on this server.", 404);
-  if (await overLimit(request, LIMITS.login)) return tooManyRequests(LIMITS.login);
+  if (await overLimit(request, LIMITS.demo)) return tooManyRequests(LIMITS.demo);
 
   const [user] = await db
     .select({ id: users.id })

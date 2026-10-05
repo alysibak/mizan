@@ -10,11 +10,24 @@ export function uniqueEmail(tag: string): string {
   return `${tag}-${Date.now()}-${Math.floor(Math.random() * 1e6)}@example.com`;
 }
 
+/**
+ * Give this browser its own client address. Sign-ups are limited per network
+ * (five an hour), and the suite opens more accounts than that; behind a real
+ * proxy each visitor arrives with their own address in the same way.
+ */
+export async function asNewVisitor(page: Page) {
+  const octet = () => Math.floor(Math.random() * 250) + 1;
+  await page
+    .context()
+    .setExtraHTTPHeaders({ "x-forwarded-for": `10.${octet()}.${octet()}.${octet()}` });
+}
+
 /** Register and finish setup with real prices, a hawl, and one holding. */
 export async function registerAndSetUp(
   page: Page,
   opts: { email: string; hawlStart: string; amount: string; gold?: string; silver?: string },
 ) {
+  await asNewVisitor(page);
   await page.goto("/register");
   await page.fill("#name", "Amina Test");
   await page.fill("#email", opts.email);

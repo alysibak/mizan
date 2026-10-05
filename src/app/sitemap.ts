@@ -11,6 +11,10 @@ const PAGES: { path: string; priority: number; changeFrequency: "weekly" | "mont
   { path: "/terms", priority: 0.3, changeFrequency: "yearly" },
 ];
 
+// Read at request time, so a self-hosted image picks up its own APP_URL,
+// OPERATOR_NAME, and CONTACT_EMAIL without a rebuild.
+export const dynamic = "force-dynamic";
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = siteUrl();
   return PAGES.map((p) => ({

@@ -3,6 +3,7 @@ import {
   CALC_FIELDS,
   computeDraft,
   currencyForLocale,
+  decimalMarkFor,
   draftIsEmpty,
   draftToLedger,
   emptyDraft,
@@ -15,7 +16,7 @@ import {
 import { CATEGORIES } from "./categories";
 
 function draft(patch: Partial<CalcDraft>): CalcDraft {
-  return { ...emptyDraft("CAD"), goldPrice: "90", silverPrice: "1.05", ...patch };
+  return { ...emptyDraft("CAD", "."), goldPrice: "90", silverPrice: "1.05", ...patch };
 }
 
 describe("parseAmount", () => {
@@ -38,6 +39,39 @@ describe("parseAmount", () => {
 
   it("caps absurd figures", () => {
     expect(parseAmount("99999999999999999")).toBe(1e12);
+  });
+
+  it.each([
+    // A small decimal-comma price must never become thousands.
+    ["0,8812", null, 0.8812],
+    ["0,881", null, 0.881],
+    [",88", null, 0.88],
+    ["12,3456", null, 12.3456],
+    ["1,23,456", null, 123456], // lakh grouping
+    ["12,", null, 12], // mid-typing
+    // The one ambiguous shape follows the writer's locale.
+    ["1,500", ".", 1500],
+    ["1,500", ",", 1.5],
+    ["1.500", ",", 1500],
+    ["1.500", ".", 1.5],
+    ["1.055", ".", 1.055], // a silver price per gram
+    ["1,055", ",", 1.055],
+  ] as const)("%s with decimal mark %s → %s", (raw, mark, expected) => {
+    expect(parseAmount(raw, mark)).toBe(expected);
+  });
+});
+
+describe("decimalMarkFor", () => {
+  it.each([
+    ["en-CA", "."],
+    ["en-PK", "."],
+    ["de-DE", ","],
+    ["fr-FR", ","],
+    ["tr-TR", ","],
+    ["id-ID", ","],
+    [null, "."],
+  ])("%s → %s", (locale, mark) => {
+    expect(decimalMarkFor(locale)).toBe(mark);
   });
 });
 
@@ -120,6 +154,25 @@ describe("computeDraft", () => {
     expect(out.needsPrices).toBe(true);
     expect(out.needsWeightPrice).toBe(true);
     expect(out.result.isDue).toBe(false);
+  });
+
+  it("reads a German draft the German way", () => {
+    const out = computeDraft({
+      ...emptyDraft("EUR", ","),
+      goldPrice: "85,40",
+      silverPrice: "0,88",
+      amounts: { bank: "12.500" },
+    });
+    expect(out.result.nisab).toBeCloseTo(595 * 0.88, 6);
+    expect(out.result.netZakatable).toBe(12500);
+    expect(out.result.zakatDue).toBe(312.5);
+  });
+
+  it("caps an impossible weight at what the ledger accepts", () => {
+    const out = computeDraft(
+      draft({ byWeight: { gold: true }, grams: { gold: "20000000000" }, purity: { gold: "1" } }),
+    );
+    expect(out.lines[0].grams).toBe(1e7);
   });
 
   it("is below nisab when debts outweigh holdings", () => {

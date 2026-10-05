@@ -10,6 +10,15 @@ FROM node:22-bookworm-slim AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+# The public address is written into the static landing and calculator pages
+# (canonical links, social cards), so it is needed at build time:
+#   docker build --build-arg APP_URL=https://mizan.example .
+ARG APP_URL=""
+ARG NEXT_PUBLIC_PLAUSIBLE_DOMAIN=""
+ARG NEXT_PUBLIC_PLAUSIBLE_SRC=""
+ENV APP_URL=$APP_URL \
+    NEXT_PUBLIC_PLAUSIBLE_DOMAIN=$NEXT_PUBLIC_PLAUSIBLE_DOMAIN \
+    NEXT_PUBLIC_PLAUSIBLE_SRC=$NEXT_PUBLIC_PLAUSIBLE_SRC
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV DATABASE_URL=file:/tmp/mizan-build.db
 RUN npm run build

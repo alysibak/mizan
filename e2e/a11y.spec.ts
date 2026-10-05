@@ -20,6 +20,8 @@ async function violations(page: Page, label: string): Promise<string[]> {
 for (const scheme of ["light", "dark"] as const) {
   test.describe(`${scheme} mode`, () => {
     test.use({ colorScheme: scheme });
+    // Many pages per test; each is loaded and audited in turn.
+    test.describe.configure({ timeout: 240_000 });
 
     test("public pages meet WCAG AA", async ({ page }) => {
       await page.route("**/api/metals?*", (route) =>
@@ -30,7 +32,8 @@ for (const scheme of ["light", "dark"] as const) {
       const found: string[] = [];
       for (const path of ["/", "/calculator", "/login", "/register", "/privacy", "/method", "/trust"]) {
         await page.goto(path);
-        await page.waitForLoadState("networkidle");
+        await page.waitForLoadState("load");
+        await page.waitForTimeout(250); // let hydration settle
         found.push(...(await violations(page, path)));
       }
       expect(found).toEqual([]);
@@ -65,7 +68,8 @@ for (const scheme of ["light", "dark"] as const) {
         "/mirath",
       ]) {
         await page.goto(path);
-        await page.waitForLoadState("networkidle");
+        await page.waitForLoadState("load");
+        await page.waitForTimeout(250); // let hydration settle
         found.push(...(await violations(page, path)));
       }
       expect(found).toEqual([]);
