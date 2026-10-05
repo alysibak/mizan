@@ -1,41 +1,73 @@
 import { NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/session";
 import { perGramFromPerOunce } from "@/lib/metals";
+import {
+  ECB_CURRENCIES,
+  parseCurrencyApi,
+  parseFrankfurter,
+  parseGoldApi,
+  plausibleMetals,
+  type UsdOunces,
+} from "@/lib/price-sources";
 
-export const dynamic = "force-dynamic";
+// Spot prices barely move within an hour for nisab purposes. Upstream answers
+// are kept that long, and shared caches may serve this response for the same
+// hour, so a busy public calculator costs the free sources a few calls an hour.
+const UPSTREAM_TTL_SECONDS = 3600;
+const CACHE_HEADER = `public, max-age=600, s-maxage=${UPSTREAM_TTL_SECONDS}, stale-while-revalidate=86400`;
 
-const OZ = { gold: "XAU", silver: "XAG" } as const;
+// Daily rates for ~200 currencies (PKR, SAR, BDT, NGN, …) and gold and silver,
+// served from two CDNs. Used where the ECB rates behind frankfurter stop.
+const CURRENCY_API = [
+  "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json",
+  "https://latest.currency-api.pages.dev/v1/currencies/usd.json",
+];
 
-async function readPrice(symbol: string): Promise<number | null> {
-  const res = await fetch(`https://api.gold-api.com/price/${symbol}`, {
-    cache: "no-store",
-    signal: AbortSignal.timeout(5000),
-  });
-  if (!res.ok) return null;
-  const data = (await res.json()) as { price?: number };
-  return typeof data.price === "number" && data.price > 0 ? data.price : null;
+async function getJson(url: string): Promise<unknown> {
+  try {
+    const res = await fetch(url, {
+      next: { revalidate: UPSTREAM_TTL_SECONDS },
+      signal: AbortSignal.timeout(5000),
+    });
+    return res.ok ? await res.json() : null;
+  } catch {
+    return null;
+  }
 }
 
-async function usdTo(currency: string): Promise<number | null> {
+async function currencyApi(): Promise<unknown> {
+  for (const url of CURRENCY_API) {
+    const data = await getJson(url);
+    if (data) return data;
+  }
+  return null;
+}
+
+async function goldApiOunces(): Promise<UsdOunces | null> {
+  const [gold, silver] = await Promise.all([
+    getJson("https://api.gold-api.com/price/XAU").then(parseGoldApi),
+    getJson("https://api.gold-api.com/price/XAG").then(parseGoldApi),
+  ]);
+  const metals = gold && silver ? { gold, silver } : null;
+  return metals && plausibleMetals(metals) ? metals : null;
+}
+
+async function frankfurterRate(currency: string): Promise<number | null> {
   if (currency === "USD") return 1;
-  const res = await fetch(
+  if (!ECB_CURRENCIES.has(currency)) return null;
+  const data = await getJson(
     `https://api.frankfurter.app/latest?from=USD&to=${encodeURIComponent(currency)}`,
-    { cache: "no-store", signal: AbortSignal.timeout(5000) },
   );
-  if (!res.ok) return null;
-  const data = (await res.json()) as { rates?: Record<string, number> };
-  const rate = data.rates?.[currency];
-  return typeof rate === "number" && rate > 0 ? rate : null;
+  return parseFrankfurter(data, currency);
 }
 
-/** Optional suggestion only. Manual prices remain the source of truth. */
-export async function GET(request: Request) {
-  const user = await getCurrentUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+const UNAVAILABLE = "A free price source was unavailable. Enter prices by hand.";
 
-  const currency = (
-    new URL(request.url).searchParams.get("currency") ?? "CAD"
-  )
+/**
+ * Optional suggestion only; manual prices remain the source of truth. Public,
+ * because the calculator works without an account. It carries no user data.
+ */
+export async function GET(request: Request) {
+  const currency = (new URL(request.url).searchParams.get("currency") ?? "CAD")
     .trim()
     .toUpperCase()
     .slice(0, 3);
@@ -43,29 +75,37 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Use a three-letter currency" }, { status: 400 });
   }
 
-  try {
-    const [goldOz, silverOz, fx] = await Promise.all([
-      readPrice(OZ.gold),
-      readPrice(OZ.silver),
-      usdTo(currency),
-    ]);
-    if (!goldOz || !silverOz || !fx) {
-      return NextResponse.json(
-        { error: "A free price source was unavailable. Enter prices by hand." },
-        { status: 503 },
-      );
+  let [ounces, fx] = await Promise.all([goldApiOunces(), frankfurterRate(currency)]);
+  const sources = new Set<string>();
+  if (ounces) sources.add("gold-api.com");
+  if (fx && currency !== "USD") sources.add("frankfurter.app");
+
+  if (!ounces || !fx) {
+    const fallback = parseCurrencyApi(await currencyApi(), currency);
+    if (!ounces && fallback.metals) {
+      ounces = fallback.metals;
+      sources.add("currency-api");
     }
-    return NextResponse.json({
-      currency,
-      goldPricePerGram: Number(perGramFromPerOunce(goldOz, fx).toFixed(2)),
-      silverPricePerGram: Number(perGramFromPerOunce(silverOz, fx).toFixed(4)),
-      asOf: new Date().toISOString(),
-      source: "gold-api.com + frankfurter.app",
-    });
-  } catch {
+    if (!fx && fallback.fx) {
+      fx = fallback.fx;
+      sources.add("currency-api");
+    }
+  }
+
+  if (!ounces || !fx) {
     return NextResponse.json(
-      { error: "A free price source was unavailable. Enter prices by hand." },
-      { status: 503 },
+      { error: UNAVAILABLE },
+      { status: 503, headers: { "Cache-Control": "no-store" } },
     );
   }
+  return NextResponse.json(
+    {
+      currency,
+      goldPricePerGram: Number(perGramFromPerOunce(ounces.gold, fx).toFixed(2)),
+      silverPricePerGram: Number(perGramFromPerOunce(ounces.silver, fx).toFixed(4)),
+      asOf: new Date().toISOString(),
+      source: [...sources].join(" + "),
+    },
+    { headers: { "Cache-Control": CACHE_HEADER } },
+  );
 }

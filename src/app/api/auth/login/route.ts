@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { loginSchema } from "@/lib/validation";
@@ -9,23 +9,16 @@ import {
   equalizeTiming,
   purgeExpiredSessions,
 } from "@/lib/auth";
-import {
-  MAX_FAILED_LOGINS,
-  LOCKOUT_MINUTES,
-  isLocked,
-  lockoutUntil,
-} from "@/lib/login-throttle";
+import { isLocked } from "@/lib/login-throttle";
+import { errorJson, lockedResponse, readJson, recordFailedPassword } from "@/lib/api";
 import { LIMITS, overLimit, tooManyRequests } from "@/lib/rate-limit";
 
 const WRONG = "Email or password is incorrect";
 
 export async function POST(request: Request) {
   if (await overLimit(request, LIMITS.login)) return tooManyRequests(LIMITS.login);
-  const body = await request.json().catch(() => null);
-  const parsed = loginSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid input" }, { status: 400 });
-  }
+  const parsed = loginSchema.safeParse(await readJson(request));
+  if (!parsed.success) return errorJson("Invalid input", 400);
   const { email, password } = parsed.data;
 
   const [user] = await db
@@ -38,29 +31,14 @@ export async function POST(request: Request) {
   // the password is wrong.
   if (!user) {
     await equalizeTiming(password);
-    return NextResponse.json({ error: WRONG }, { status: 401 });
+    return errorJson(WRONG, 401);
   }
 
-  if (isLocked(user.lockedUntil)) {
-    return NextResponse.json(
-      {
-        error: `Too many attempts. Try again in ${LOCKOUT_MINUTES} minutes.`,
-      },
-      { status: 429 },
-    );
-  }
+  if (isLocked(user.lockedUntil)) return lockedResponse();
 
   if (!(await verifyPassword(password, user.passwordHash))) {
-    // Count in SQL so parallel attempts cannot overwrite each other's tally.
-    const reachesLimit = sql`${users.failedLoginCount} + 1 >= ${MAX_FAILED_LOGINS}`;
-    await db
-      .update(users)
-      .set({
-        failedLoginCount: sql`CASE WHEN ${reachesLimit} THEN 0 ELSE ${users.failedLoginCount} + 1 END`,
-        lockedUntil: sql`CASE WHEN ${reachesLimit} THEN ${lockoutUntil()} ELSE ${users.lockedUntil} END`,
-      })
-      .where(eq(users.id, user.id));
-    return NextResponse.json({ error: WRONG }, { status: 401 });
+    await recordFailedPassword(user.id);
+    return errorJson(WRONG, 401);
   }
 
   await db

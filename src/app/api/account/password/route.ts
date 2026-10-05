@@ -2,26 +2,23 @@ import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { users } from "@/db/schema";
-import { getCurrentUser } from "@/lib/session";
 import { changePasswordSchema, firstIssue } from "@/lib/validation";
-import { hashPassword, revokeOtherSessions, verifyPassword } from "@/lib/auth";
+import { hashPassword, revokeOtherSessions } from "@/lib/auth";
+import { confirmPassword, errorJson, readJson, writableUser } from "@/lib/api";
 
 /** Change the password, then sign out every other device. */
 export async function POST(request: Request) {
-  const user = await getCurrentUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { user, response } = await writableUser();
+  if (response) return response;
 
-  const body = await request.json().catch(() => null);
-  const parsed = changePasswordSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: firstIssue(parsed.error) }, { status: 400 });
-  }
-  if (!(await verifyPassword(parsed.data.currentPassword, user.passwordHash))) {
-    return NextResponse.json(
-      { error: "Your current password is not right" },
-      { status: 403 },
-    );
-  }
+  const parsed = changePasswordSchema.safeParse(await readJson(request));
+  if (!parsed.success) return errorJson(firstIssue(parsed.error), 400);
+  const refused = await confirmPassword(
+    user,
+    parsed.data.currentPassword,
+    "Your current password is not right",
+  );
+  if (refused) return refused;
 
   await db
     .update(users)

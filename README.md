@@ -151,7 +151,7 @@ Nisab (you set the metal prices: gold 90/g, silver 1.05/g)
 16,000 is above both thresholds, so zakat is due.
 
   Lunar year:  16,000 x 2.5%     =  400.00
-  Solar year:  16,000 x 2.5768%  =  412.43
+  Solar year:  16,000 x 2.5768%  =  412.28
 ```
 
 The solar rate is `2.5% x (365.25 / 354.367)`. The lunar year is about eleven

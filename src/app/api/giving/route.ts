@@ -2,12 +2,12 @@ import { NextResponse } from "next/server";
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { givingRecords } from "@/db/schema";
-import { getCurrentUser } from "@/lib/session";
 import { firstIssue, givingSchema } from "@/lib/validation";
+import { errorJson, overRowLimit, readJson, signedInUser, writableUser } from "@/lib/api";
 
 export async function GET() {
-  const user = await getCurrentUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { user, response } = await signedInUser();
+  if (response) return response;
   const rows = await db
     .select()
     .from(givingRecords)
@@ -17,13 +17,12 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const user = await getCurrentUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const body = await request.json().catch(() => null);
-  const parsed = givingSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: firstIssue(parsed.error) }, { status: 400 });
-  }
+  const { user, response } = await writableUser();
+  if (response) return response;
+  const parsed = givingSchema.safeParse(await readJson(request));
+  if (!parsed.success) return errorJson(firstIssue(parsed.error), 400);
+  const full = await overRowLimit("giving", user.id);
+  if (full) return full;
   const data = {
     ...parsed.data,
     // Asnaf tags describe zakat recipients only.

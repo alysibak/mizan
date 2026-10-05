@@ -2,25 +2,21 @@ import { NextResponse } from "next/server";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { assets } from "@/db/schema";
-import { getCurrentUser, getUserSettings } from "@/lib/session";
+import { getUserSettings } from "@/lib/session";
 import { assetSchema, firstIssue } from "@/lib/validation";
 import { normalizeAsset } from "@/lib/asset-write";
+import { errorJson, readJson, writableUser } from "@/lib/api";
 
 type Ctx = { params: Promise<{ id: string }> };
 
 export async function PATCH(request: Request, { params }: Ctx) {
-  const user = await getCurrentUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { user, response } = await writableUser();
+  if (response) return response;
   const { id } = await params;
 
-  const body = await request.json().catch(() => null);
-  const parsed = assetSchema.partial().safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: firstIssue(parsed.error) }, { status: 400 });
-  }
-  if (Object.keys(parsed.data).length === 0) {
-    return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
-  }
+  const parsed = assetSchema.partial().safeParse(await readJson(request));
+  if (!parsed.success) return errorJson(firstIssue(parsed.error), 400);
+  if (Object.keys(parsed.data).length === 0) return errorJson("Nothing to update", 400);
 
   const [existing] = await db
     .select()
@@ -45,8 +41,8 @@ export async function PATCH(request: Request, { params }: Ctx) {
 }
 
 export async function DELETE(_request: Request, { params }: Ctx) {
-  const user = await getCurrentUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { user, response } = await writableUser();
+  if (response) return response;
   const { id } = await params;
 
   const [row] = await db

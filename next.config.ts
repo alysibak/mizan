@@ -3,16 +3,30 @@ import path from "path";
 
 const isDev = process.env.NODE_ENV !== "production";
 
+// Optional cookieless analytics (see src/lib/analytics.ts): allow its script
+// and its event endpoint, and nothing else.
+function analyticsOrigin(): string {
+  if (!process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN?.trim()) return "";
+  try {
+    const src =
+      process.env.NEXT_PUBLIC_PLAUSIBLE_SRC?.trim() || "https://plausible.io/js/script.manual.js";
+    return ` ${new URL(src).origin}`;
+  } catch {
+    return "";
+  }
+}
+const analytics = analyticsOrigin();
+
 // Next inlines small bootstrap scripts and styles, so 'unsafe-inline' stays for
 // those; the policy still pins every fetch, frame, form, and plugin to this
 // origin. Dev mode additionally needs eval and the HMR websocket.
 const csp = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}${analytics}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob:",
   "font-src 'self' data:",
-  `connect-src 'self'${isDev ? " ws: wss:" : ""}`,
+  `connect-src 'self'${isDev ? " ws: wss:" : ""}${analytics}`,
   "worker-src 'self'",
   "manifest-src 'self'",
   "frame-ancestors 'none'",

@@ -11,9 +11,9 @@ import {
   users,
   yearSnapshots,
 } from "@/db/schema";
-import { getCurrentUser } from "@/lib/session";
 import { deleteAccountSchema, firstIssue } from "@/lib/validation";
-import { SESSION_COOKIE, verifyPassword } from "@/lib/auth";
+import { SESSION_COOKIE } from "@/lib/auth";
+import { confirmPassword, errorJson, readJson, writableUser } from "@/lib/api";
 
 /**
  * Permanently delete the account and everything in it. Child rows are
@@ -21,17 +21,13 @@ import { SESSION_COOKIE, verifyPassword } from "@/lib/auth";
  * having foreign-key cascades switched on.
  */
 export async function DELETE(request: Request) {
-  const user = await getCurrentUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { user, response } = await writableUser();
+  if (response) return response;
 
-  const body = await request.json().catch(() => null);
-  const parsed = deleteAccountSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: firstIssue(parsed.error) }, { status: 400 });
-  }
-  if (!(await verifyPassword(parsed.data.password, user.passwordHash))) {
-    return NextResponse.json({ error: "That password is not right" }, { status: 403 });
-  }
+  const parsed = deleteAccountSchema.safeParse(await readJson(request));
+  if (!parsed.success) return errorJson(firstIssue(parsed.error), 400);
+  const refused = await confirmPassword(user, parsed.data.password);
+  if (refused) return refused;
 
   await db.batch([
     db.delete(assets).where(eq(assets.userId, user.id)),

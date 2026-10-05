@@ -3,7 +3,8 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/db";
 import { settings } from "@/db/schema";
-import { getCurrentUser, getUserSettings } from "@/lib/session";
+import { getUserSettings } from "@/lib/session";
+import { errorJson, readJson, writableUser } from "@/lib/api";
 import { firstIssue, isoDaySchema } from "@/lib/validation";
 import { userTodayIso } from "@/lib/today";
 
@@ -14,12 +15,10 @@ const bodySchema = z.object({ date: isoDaySchema });
  * who follow the view that a dip below nisab mid-year breaks the hawl.
  */
 export async function POST(request: Request) {
-  const user = await getCurrentUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const parsed = bodySchema.safeParse(await request.json().catch(() => null));
-  if (!parsed.success) {
-    return NextResponse.json({ error: firstIssue(parsed.error) }, { status: 400 });
-  }
+  const { user, response } = await writableUser();
+  if (response) return response;
+  const parsed = bodySchema.safeParse(await readJson(request));
+  if (!parsed.success) return errorJson(firstIssue(parsed.error), 400);
 
   const current = await getUserSettings(user.id);
   const { date } = parsed.data;

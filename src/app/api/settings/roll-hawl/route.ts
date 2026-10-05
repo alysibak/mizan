@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { settings } from "@/db/schema";
-import { getCurrentUser, getUserSettings } from "@/lib/session";
+import { getUserSettings } from "@/lib/session";
+import { writableUser } from "@/lib/api";
 import { hawlStatus, parseHijriCalendar } from "@/lib/hijri";
 import { userToday } from "@/lib/today";
 import { isIsoDay, isoDay } from "@/lib/dates";
@@ -13,8 +14,8 @@ import { isIsoDay, isoDay } from "@/lib/dates";
  * a stale page or a double click cannot push the hawl into the future.
  */
 export async function POST() {
-  const user = await getCurrentUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { user, response } = await writableUser();
+  if (response) return response;
 
   const current = await getUserSettings(user.id);
   if (!current.hawlStartDate || !isIsoDay(current.hawlStartDate)) {

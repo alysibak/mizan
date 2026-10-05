@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "node scripts/start.cjs",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "db:push": "drizzle-kit push",
@@ -20,7 +20,8 @@
     "docker:down": "docker compose down",
     "docker:logs": "docker compose logs -f",
     "user:reset-password": "node scripts/reset-password.cjs",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "audit:prod": "npm audit --omit=dev --audit-level=moderate"
   },
   "dependencies": {
     "@libsql/client": "^0.17.4",
@@ -39,6 +40,7 @@
     "@types/react-dom": "^19.0.3",
     "autoprefixer": "^10.4.20",
     "drizzle-kit": "^0.31.11",
+    "esbuild": "^0.28.2",
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.3.8",
     "postcss": "^8.5.1",

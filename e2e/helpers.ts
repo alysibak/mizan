@@ -54,3 +54,13 @@ export function watchConsole(page: Page): string[] {
   page.on("pageerror", (e) => errors.push(`${page.url()} :: ${e.message}`));
   return errors;
 }
+
+/** Every id on the page is unique, so each label points at one control. */
+export async function expectUniqueIds(page: Page) {
+  const dupes = await page.evaluate(() => {
+    const seen = new Map<string, number>();
+    for (const el of document.querySelectorAll("[id]")) seen.set(el.id, (seen.get(el.id) ?? 0) + 1);
+    return [...seen].filter(([, n]) => n > 1).map(([id]) => id);
+  });
+  expect(dupes).toEqual([]);
+}

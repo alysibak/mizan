@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Offline · Mizan" };
+export const metadata: Metadata = { title: "Offline", robots: { index: false } };
 
 /**
  * Shown by the service worker when a page cannot load. Static on purpose: it

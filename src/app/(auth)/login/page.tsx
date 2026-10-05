@@ -1,10 +1,20 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import LoginForm from "@/components/LoginForm";
+import DemoButton from "@/components/DemoButton";
+import { demoEmail } from "@/lib/demo";
+
+export const metadata: Metadata = {
+  title: "Sign in",
+  description: "Sign in to your Mizan zakat ledger.",
+  alternates: { canonical: "/login" },
+};
 
 export default function LoginPage() {
+  const hasDemo = Boolean(demoEmail());
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6">
+    <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-10">
       <Link href="/" className="mb-8 font-serif text-xl text-ink">
         Mizan
       </Link>
@@ -20,6 +30,15 @@ export default function LoginPage() {
       >
         <LoginForm />
       </Suspense>
+
+      {hasDemo ? (
+        <div className="mt-8 border-t border-mist pt-6">
+          <p className="mb-3 text-sm text-sage">
+            Just looking? Open a sample ledger with a year of holdings and giving.
+          </p>
+          <DemoButton />
+        </div>
+      ) : null}
     </main>
   );
 }

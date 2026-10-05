@@ -22,6 +22,11 @@ const PROTECTED = [
 
 const UNSAFE_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
+// Request bodies are small JSON; only a backup restore is large. Refusing an
+// oversized declared body here saves the route from reading it at all.
+const MAX_BODY_BYTES = 1024 * 1024;
+const MAX_RESTORE_BYTES = 8 * 1024 * 1024;
+
 function under(pathname: string, prefix: string): boolean {
   return pathname === prefix || pathname.startsWith(`${prefix}/`);
 }
@@ -42,6 +47,11 @@ export function proxy(request: NextRequest) {
           { status: 403 },
         );
       }
+      const length = Number(request.headers.get("content-length"));
+      const max = pathname === "/api/import" ? MAX_RESTORE_BYTES : MAX_BODY_BYTES;
+      if (Number.isFinite(length) && length > max) {
+        return NextResponse.json({ error: "That request is too large." }, { status: 413 });
+      }
     }
     return NextResponse.next();
   }
@@ -56,7 +66,9 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (hasSession && (pathname === "/login" || pathname === "/register")) {
+  // Signed-in visitors skip the marketing page and the auth screens, which
+  // lets the landing page be served statically without a database lookup.
+  if (hasSession && (pathname === "/" || pathname === "/login" || pathname === "/register")) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     url.search = "";

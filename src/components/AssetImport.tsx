@@ -79,9 +79,14 @@ export default function AssetImport({
   }
 
   return (
-    <section className="card p-5">
-      <h2 className="font-serif text-lg text-ink">Import from a statement</h2>
-      <p className="mt-1 text-sm text-sage">
+    <details className="card group p-5">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
+        <span className="font-serif text-lg text-ink">Import many at once from a CSV</span>
+        <span className="text-sage transition group-open:rotate-45" aria-hidden>
+          +
+        </span>
+      </summary>
+      <p className="mt-3 text-sm text-sage">
         Paste or upload a CSV. Headers optional. Two columns work as description
         and amount; Mizan will guess the category.
       </p>
@@ -185,6 +190,6 @@ export default function AssetImport({
           </table>
         </div>
       )}
-    </section>
+    </details>
   );
 }

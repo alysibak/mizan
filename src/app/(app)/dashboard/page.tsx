@@ -85,44 +85,23 @@ export default async function DashboardPage({
         </h1>
       </header>
 
+      {assetRows.length === 0 && (
+        <div className="border border-dashed border-mist px-6 py-8 text-center">
+          <p className="text-sm text-sage">No holdings yet.</p>
+          <Link href="/assets" className="btn-primary mt-4">
+            Open the ledger
+          </Link>
+        </div>
+      )}
+
       <DashboardNotices
         items={checklist}
         metalsStale={metalsStale}
         metalsReason={metals.reason}
         metalsAgeDays={metals.ageDays}
         welcome={welcome === "1"}
+        part="top"
       />
-
-      {lastLetter ? (
-        <LastLetterCard
-          snapshotId={lastLetter.id}
-          takenAt={lastLetter.takenAt}
-          letter={lastLetter.letter}
-        />
-      ) : null}
-
-      <EstimateBanner />
-
-      {assetRows.length > 0 && (
-        <section className="border border-mist px-5 py-5">
-          <p className="label text-brassDeep">Close the year</p>
-          <p className="mt-1 font-serif text-xl text-ink">Reckoning night</p>
-          <p className="mt-1 text-sm text-sage">
-            Remember forgotten wealth, watch nisab, sketch envelopes, then pay →
-            freeze → roll hawl → statement.
-          </p>
-          <div className="mt-4 flex flex-wrap gap-3">
-            <Link href="/tools/reckoning-night" className="btn-primary">
-              Open the sitting
-            </Link>
-            {phase === "payable" ? (
-              <Link href="/year#freeze-year" className="btn-ghost">
-                Jump to close path
-              </Link>
-            ) : null}
-          </div>
-        </section>
-      )}
 
       {dueNow && (
         <section className="border border-pine bg-pine/5 px-5 py-5">
@@ -252,14 +231,42 @@ export default async function DashboardPage({
         )}
       </section>
 
-      {assetRows.length === 0 && (
-        <div className="border border-dashed border-mist px-6 py-8 text-center">
-          <p className="text-sm text-sage">No holdings yet.</p>
-          <Link href="/assets" className="btn-primary mt-4">
-            Open the ledger
-          </Link>
-        </div>
+      <DashboardNotices
+        items={checklist}
+        welcome={welcome === "1"}
+        part="bottom"
+      />
+
+      {lastLetter ? (
+        <LastLetterCard
+          snapshotId={lastLetter.id}
+          takenAt={lastLetter.takenAt}
+          letter={lastLetter.letter}
+        />
+      ) : null}
+
+      {assetRows.length > 0 && (
+        <section className="border border-mist px-5 py-5">
+          <p className="label text-brassDeep">Close the year</p>
+          <p className="mt-1 font-serif text-xl text-ink">Reckoning night</p>
+          <p className="mt-1 text-sm text-sage">
+            Remember forgotten wealth, watch nisab, sketch envelopes, then pay →
+            freeze → roll hawl → statement.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Link href="/tools/reckoning-night" className="btn-primary">
+              Open the sitting
+            </Link>
+            {phase === "payable" ? (
+              <Link href="/year#freeze-year" className="btn-ghost">
+                Jump to close path
+              </Link>
+            ) : null}
+          </div>
+        </section>
       )}
+
+      <EstimateBanner />
     </div>
   );
 }

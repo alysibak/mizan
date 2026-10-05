@@ -1,7 +1,20 @@
 import { NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/session";
+import { signedInUser } from "@/lib/api";
+import { ECB_CURRENCIES, crossRate, parseFrankfurter } from "@/lib/price-sources";
 
-export const dynamic = "force-dynamic";
+const CURRENCY_API = [
+  "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json",
+  "https://latest.currency-api.pages.dev/v1/currencies/usd.json",
+];
+
+async function getJson(url: string): Promise<unknown> {
+  try {
+    const res = await fetch(url, { next: { revalidate: 3600 }, signal: AbortSignal.timeout(5000) });
+    return res.ok ? await res.json() : null;
+  } catch {
+    return null;
+  }
+}
 
 const CODE = /^[A-Z]{3}$/;
 
@@ -10,8 +23,8 @@ const CODE = /^[A-Z]{3}$/;
  * saves is the source of truth; this only pre-fills it and may be offline.
  */
 export async function GET(request: Request) {
-  const user = await getCurrentUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { response } = await signedInUser();
+  if (response) return response;
 
   const params = new URL(request.url).searchParams;
   const from = (params.get("from") ?? "").trim().toUpperCase();
@@ -25,17 +38,23 @@ export async function GET(request: Request) {
     { error: "No free rate source answered. Enter the rate by hand." },
     { status: 503 },
   );
-  try {
-    const res = await fetch(
-      `https://api.frankfurter.app/latest?from=${from}&to=${to}`,
-      { cache: "no-store", signal: AbortSignal.timeout(5000) },
-    );
-    if (!res.ok) return unavailable;
-    const data = (await res.json()) as { rates?: Record<string, number>; date?: string };
-    const rate = data.rates?.[to];
-    if (typeof rate !== "number" || !(rate > 0)) return unavailable;
-    return NextResponse.json({ from, to, rate, asOf: data.date ?? null, source: "frankfurter.app" });
-  } catch {
-    return unavailable;
+
+  if (ECB_CURRENCIES.has(from) && ECB_CURRENCIES.has(to)) {
+    const data = (await getJson(`https://api.frankfurter.app/latest?from=${from}&to=${to}`)) as {
+      date?: string;
+    } | null;
+    const rate = parseFrankfurter(data, to);
+    if (rate) {
+      return NextResponse.json({ from, to, rate, asOf: data?.date ?? null, source: "frankfurter.app" });
+    }
   }
+
+  for (const url of CURRENCY_API) {
+    const data = (await getJson(url)) as { date?: string } | null;
+    const rate = crossRate(data, from, to);
+    if (rate) {
+      return NextResponse.json({ from, to, rate, asOf: data?.date ?? null, source: "currency-api" });
+    }
+  }
+  return unavailable;
 }

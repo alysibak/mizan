@@ -2,23 +2,18 @@ import { NextResponse } from "next/server";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { liabilities } from "@/db/schema";
-import { getCurrentUser } from "@/lib/session";
 import { firstIssue, liabilitySchema } from "@/lib/validation";
+import { errorJson, readJson, writableUser } from "@/lib/api";
 
 type Ctx = { params: Promise<{ id: string }> };
 
 export async function PATCH(request: Request, { params }: Ctx) {
-  const user = await getCurrentUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { user, response } = await writableUser();
+  if (response) return response;
   const { id } = await params;
-  const body = await request.json().catch(() => null);
-  const parsed = liabilitySchema.partial().safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: firstIssue(parsed.error) }, { status: 400 });
-  }
-  if (Object.keys(parsed.data).length === 0) {
-    return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
-  }
+  const parsed = liabilitySchema.partial().safeParse(await readJson(request));
+  if (!parsed.success) return errorJson(firstIssue(parsed.error), 400);
+  if (Object.keys(parsed.data).length === 0) return errorJson("Nothing to update", 400);
   const [row] = await db
     .update(liabilities)
     .set(parsed.data)
@@ -29,8 +24,8 @@ export async function PATCH(request: Request, { params }: Ctx) {
 }
 
 export async function DELETE(_request: Request, { params }: Ctx) {
-  const user = await getCurrentUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { user, response } = await writableUser();
+  if (response) return response;
   const { id } = await params;
   const [row] = await db
     .delete(liabilities)

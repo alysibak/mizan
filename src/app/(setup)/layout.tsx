@@ -1,8 +1,12 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getCurrentUser, getUserSettings } from "@/lib/session";
 import SignOutButton from "@/components/SignOutButton";
 import TimezoneSync from "@/components/TimezoneSync";
+
+// A private ledger is nobody's search result.
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 export default async function SetupLayout({
   children,
