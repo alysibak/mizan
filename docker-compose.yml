@@ -18,6 +18,7 @@ services:
       CONTACT_EMAIL: ${CONTACT_EMAIL:-}
     volumes:
       - mizan-data:/data
+    init: true
     restart: unless-stopped
 
 volumes:
