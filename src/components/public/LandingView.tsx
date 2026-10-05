@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
-import SiteFooter from "@/components/SiteFooter";
+import SiteFooter, { toolLinks } from "@/components/SiteFooter";
 import JsonLd from "@/components/JsonLd";
 import { LOCALE_INFO, fmt, languageAlternates, localePath, type Locale } from "@/i18n/config";
 import { messagesFor } from "@/i18n/messages";
@@ -130,6 +130,23 @@ export default function LandingView({ locale }: { locale: Locale }) {
                 </div>
               ))}
             </div>
+          </div>
+        </section>
+
+        <section className="relative z-10 px-5 pt-16 md:px-10" aria-labelledby="free-tools">
+          <div className="mx-auto max-w-6xl">
+            <h2 id="free-tools" className="font-serif text-2xl text-ink">
+              {all.common.footer.toolsHeading}
+            </h2>
+            <ul className="mt-5 flex flex-wrap gap-2">
+              {toolLinks(locale).map((t) => (
+                <li key={t.href}>
+                  <Link href={t.href} className="btn-ghost">
+                    {t.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
 

@@ -1,4 +1,5 @@
 import { splitLocale } from "@/i18n/config";
+import { ENGLISH_TOOL_PATHS } from "@/lib/public-tools";
 
 // Optional, cookieless page and conversion counts (Plausible or a
 // self-hosted Plausible-compatible server). Off unless
@@ -11,6 +12,7 @@ export const PUBLIC_PATHS = [
   "/",
   "/calculator",
   "/nisab",
+  ...ENGLISH_TOOL_PATHS,
   "/method",
   "/trust",
   "/privacy",

@@ -11,6 +11,7 @@ import {
   type Locale,
 } from "@/i18n/config";
 import { messagesFor } from "@/i18n/messages";
+import { currencyName } from "@/lib/currencies";
 import { CALC_CURRENCIES } from "@/lib/calculator";
 import { NISAB_GOLD_GRAMS, NISAB_SILVER_GRAMS } from "@/lib/nisab";
 import { formatMoney } from "@/lib/money";
@@ -58,15 +59,6 @@ export function isNisabCurrency(code: string): boolean {
   );
 }
 
-function currencyName(code: string, locale: Locale): string {
-  try {
-    return (
-      new Intl.DisplayNames([locale], { type: "currency" }).of(code) ?? code
-    );
-  } catch {
-    return code;
-  }
-}
 
 function nisabOf(prices: MetalPrices) {
   return {

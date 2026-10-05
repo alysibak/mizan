@@ -10,8 +10,17 @@ import {
   type ScreeningResult,
 } from "@/lib/screening";
 import { purificationAmount } from "@/lib/zakat";
-import { readStoredValue, setStoredValue, useHydrated } from "@/lib/client-store";
+import {
+  readStoredValue,
+  setStoredValue,
+  useHydrated,
+} from "@/lib/client-store";
 import { amountParam, formatMoney, formatPercent } from "@/lib/money";
+import {
+  CurrencySelect,
+  KeepRecordNudge,
+  useVisitorCurrency,
+} from "@/components/public/VisitorCurrency";
 
 const ACTIVITIES: { key: keyof BusinessActivity; label: string }[] = [
   { key: "alcohol", label: "Alcohol" },
@@ -60,15 +69,36 @@ function readDraft(): Draft | null {
   }
 }
 
-export default function ScreeningTool({ currency = "CAD" }: { currency?: string }) {
+/** With `currency`, the signed-in tool; without, a visitor picks one. */
+export default function ScreeningTool({
+  currency: fixed,
+}: {
+  currency?: string;
+}) {
+  const [visitorCurrency, setVisitorCurrency] = useVisitorCurrency();
   // The draft lives in this browser, so the form mounts once hydrated with it
   // as initial state rather than patching state in after the first render.
   const hydrated = useHydrated();
   if (!hydrated) return null;
-  return <ScreeningForm currency={currency} draft={readDraft()} />;
+  return (
+    <ScreeningForm
+      currency={fixed ?? visitorCurrency}
+      onCurrency={fixed === undefined ? setVisitorCurrency : null}
+      draft={readDraft()}
+    />
+  );
 }
 
-function ScreeningForm({ currency, draft }: { currency: string; draft: Draft | null }) {
+function ScreeningForm({
+  currency,
+  onCurrency,
+  draft,
+}: {
+  currency: string;
+  /** Set for a visitor, who picks the currency here. */
+  onCurrency: ((code: string) => void) | null;
+  draft: Draft | null;
+}) {
   const [name, setName] = useState(draft?.name ?? "");
   const [activity, setActivity] = useState<BusinessActivity>({
     ...EMPTY_ACTIVITY,
@@ -77,7 +107,9 @@ function ScreeningForm({ currency, draft }: { currency: string; draft: Draft | n
   const [denominator, setDenominator] = useState<DenominatorBasis>(
     draft?.denominator === "totalAssets" ? "totalAssets" : "marketCap",
   );
-  const [figures, setFigures] = useState<Record<string, string>>(draft?.figures ?? {});
+  const [figures, setFigures] = useState<Record<string, string>>(
+    draft?.figures ?? {},
+  );
   const [result, setResult] = useState<ScreeningResult | null>(null);
   const [dividend, setDividend] = useState("");
 
@@ -145,8 +177,9 @@ function ScreeningForm({ currency, draft }: { currency: string; draft: Draft | n
         <section className="card p-5">
           <h2 className="font-serif text-lg text-ink">Business activity</h2>
           <p className="mt-1 text-sm text-sage">
-            Tick any impermissible activity that forms part of the company&apos;s core
-            business. Any single one fails the business screen.
+            Tick any impermissible activity that forms part of the
+            company&apos;s core business. Any single one fails the business
+            screen.
           </p>
           <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
             {ACTIVITIES.map((a) => (
@@ -171,8 +204,8 @@ function ScreeningForm({ currency, draft }: { currency: string; draft: Draft | n
         <section className="card p-5">
           <h2 className="font-serif text-lg text-ink">Financial figures</h2>
           <p className="mt-1 text-sm text-sage">
-            Enter values from the company&apos;s filings in any one consistent unit.
-            Ratios are compared against the AAOIFI thresholds of{" "}
+            Enter values from the company&apos;s filings in any one consistent
+            unit. Ratios are compared against the AAOIFI thresholds of{" "}
             {formatPercent(THRESHOLDS.debtRatio, 0)} and{" "}
             {formatPercent(THRESHOLDS.impermissibleRevenueRatio, 0)}.
           </p>
@@ -185,7 +218,9 @@ function ScreeningForm({ currency, draft }: { currency: string; draft: Draft | n
               id="denominator"
               className="field max-w-xs"
               value={denominator}
-              onChange={(e) => setDenominator(e.target.value as DenominatorBasis)}
+              onChange={(e) =>
+                setDenominator(e.target.value as DenominatorBasis)
+              }
             >
               <option value="marketCap">Market capitalisation</option>
               <option value="totalAssets">Total assets</option>
@@ -236,7 +271,9 @@ function ScreeningForm({ currency, draft }: { currency: string; draft: Draft | n
           <div className="flex items-center justify-between gap-3">
             <h2 className="font-serif text-xl text-ink">
               {name ? `${name}: ` : ""}
-              {result.compliant ? "Meets these checks" : "Does not meet these checks"}
+              {result.compliant
+                ? "Meets these checks"
+                : "Does not meet these checks"}
             </h2>
             <span
               className={
@@ -252,11 +289,15 @@ function ScreeningForm({ currency, draft }: { currency: string; draft: Draft | n
 
           <div className="mt-4 space-y-3">
             <div className="flex items-start gap-2">
-              <span className={result.businessPass ? "text-gain" : "text-danger"}>
+              <span
+                className={result.businessPass ? "text-gain" : "text-danger"}
+              >
                 {result.businessPass ? "✓" : "✕"}
               </span>
               <div>
-                <p className="text-sm font-medium text-ink">Business activity</p>
+                <p className="text-sm font-medium text-ink">
+                  Business activity
+                </p>
                 <p className="text-xs text-sage">
                   {result.businessPass
                     ? "Core business is acceptable."
@@ -274,7 +315,9 @@ function ScreeningForm({ currency, draft }: { currency: string; draft: Draft | n
                   <div className="flex items-baseline justify-between">
                     <p className="text-sm font-medium text-ink">{r.label}</p>
                     <p className="text-sm nums text-ink">
-                      {Number.isFinite(r.value) ? formatPercent(r.value) : "n/a"}
+                      {Number.isFinite(r.value)
+                        ? formatPercent(r.value)
+                        : "n/a"}
                     </p>
                   </div>
                   <p className="text-xs text-sage">
@@ -292,11 +335,17 @@ function ScreeningForm({ currency, draft }: { currency: string; draft: Draft | n
                 <span className="text-brassDeep">
                   {formatPercent(result.purificationRatio)}
                 </span>{" "}
-                of any dividend income by giving it away. That gift is not zakat.
+                of any dividend income by giving it away. That gift is not
+                zakat.
               </p>
+              {onCurrency ? (
+                <div className="max-w-xs">
+                  <CurrencySelect value={currency} onChange={onCurrency} />
+                </div>
+              ) : null}
               <div className="max-w-xs">
                 <label className="label mb-1.5" htmlFor="dividend">
-                  Dividend received
+                  Dividend received ({currency})
                 </label>
                 <input
                   id="dividend"
@@ -318,24 +367,28 @@ function ScreeningForm({ currency, draft }: { currency: string; draft: Draft | n
                   </span>
                 </p>
               )}
-              <Link
-                href={
-                  purifyDue > 0
-                    ? `/giving?type=purification&amount=${amountParam(purifyDue)}`
-                    : "/giving?type=purification"
-                }
-                className="btn-primary"
-              >
-                Record purification
-              </Link>
+              {onCurrency ? (
+                <KeepRecordNudge what="what you give" />
+              ) : (
+                <Link
+                  href={
+                    purifyDue > 0
+                      ? `/giving?type=purification&amount=${amountParam(purifyDue)}`
+                      : "/giving?type=purification"
+                  }
+                  className="btn-primary"
+                >
+                  Record purification
+                </Link>
+              )}
             </div>
           )}
 
           <p className="mt-4 text-xs leading-relaxed text-sage">
             These are commonly cited AAOIFI-style thresholds. Index providers
             (Dow Jones Islamic, S&amp;P Shariah, MSCI Islamic) differ. Clearing
-            these checks is a starting point for your own research — not a
-            fatwa and not investment advice.{" "}
+            these checks is a starting point for your own research — not a fatwa
+            and not investment advice.{" "}
             <Link href="/trust" className="text-pine hover:underline">
               What is verified
             </Link>

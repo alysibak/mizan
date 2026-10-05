@@ -4,8 +4,17 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { amountParam, formatMoney } from "@/lib/money";
 import { MAX_FITR_PEOPLE, zakatAlFitr } from "@/lib/fitr";
+import {
+  CurrencySelect,
+  KeepRecordNudge,
+  useVisitorCurrency,
+} from "@/components/public/VisitorCurrency";
 
-export default function FitrTool({ currency }: { currency: string }) {
+/** With `currency`, the signed-in tool; without, a visitor picks one. */
+export default function FitrTool({ currency: fixed }: { currency?: string }) {
+  const [visitorCurrency, setVisitorCurrency] = useVisitorCurrency();
+  const guest = fixed === undefined;
+  const currency = fixed ?? visitorCurrency;
   const [people, setPeople] = useState("1");
   const [perPerson, setPerPerson] = useState("");
 
@@ -16,18 +25,13 @@ export default function FitrTool({ currency }: { currency: string }) {
 
   return (
     <div className="space-y-8">
-      <header>
-        <p className="label text-brassDeep">End of Ramadan</p>
-        <h1 className="mt-1 font-serif text-3xl text-ink">Zakat al-Fitr</h1>
-        <p className="mt-2 max-w-xl text-sm text-sage">
-          A set amount for yourself and each person you provide for — children
-          included — given before the Eid prayer. It is separate from zakat on
-          wealth and does not reduce what you owe for the hawl.
-        </p>
-      </header>
-
       <section className="card space-y-4 p-5">
         <div className="grid gap-4 sm:grid-cols-2">
+          {guest ? (
+            <div className="sm:col-span-2 sm:max-w-xs">
+              <CurrencySelect value={currency} onChange={setVisitorCurrency} />
+            </div>
+          ) : null}
           <div>
             <label className="label mb-1.5" htmlFor="people">
               People you provide for
@@ -81,7 +85,8 @@ export default function FitrTool({ currency }: { currency: string }) {
           )}
         </div>
 
-        {result.valid && (
+        {result.valid && guest ? <KeepRecordNudge what="it" /> : null}
+        {result.valid && !guest && (
           <Link
             href={`/giving?type=fitr&amount=${amountParam(result.total)}`}
             className="btn-primary"

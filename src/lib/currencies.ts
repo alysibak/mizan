@@ -9,3 +9,12 @@ export const COMMON_CURRENCIES = [
   "SAR",
   "MYR",
 ] as const;
+
+/** "Pakistani Rupee" for PKR, in the reader's language; the code if unknown. */
+export function currencyName(code: string, locale = "en"): string {
+  try {
+    return new Intl.DisplayNames([locale], { type: "currency" }).of(code) ?? code;
+  } catch {
+    return code;
+  }
+}
