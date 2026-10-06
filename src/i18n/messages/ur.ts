@@ -19,6 +19,7 @@ const ur: Messages = {
       fitr: "صدقۂ فطر",
       stocks: "حلال اسٹاک اسکریننگ",
       qurbani: "قربانی کے حصے",
+      guides: "زکوٰۃ کی رہنمائی",
       method: "حساب کیسے ہوتا ہے",
       trust: "کیا تصدیق شدہ ہے",
       privacy: "رازداری",

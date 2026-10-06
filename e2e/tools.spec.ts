@@ -82,3 +82,22 @@ test("every tool page is linked from the footer and has no horizontal scroll", a
     expect(overflow, path).toBeLessThanOrEqual(0);
   }
 });
+
+test("guides answer the common questions and lead to the calculator", async ({ page }) => {
+  await page.goto("/guides");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Zakat on what you own");
+  await expect(page.locator("main ul").first().getByRole("link")).toHaveCount(6);
+  await page.getByRole("link", { name: /Zakat on gold and silver/ }).click();
+  await page.waitForURL("**/guides/zakat-on-gold");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Zakat on gold and silver");
+  const types = await page
+    .locator('script[type="application/ld+json"]')
+    .evaluateAll((els) => els.map((e) => JSON.parse(e.textContent ?? "{}")["@type"]));
+  expect(types).toEqual(expect.arrayContaining(["Article", "FAQPage"]));
+  await page.getByRole("link", { name: "Shares and funds" }).click();
+  await page.waitForURL("**/guides/zakat-on-shares");
+  await page.getByRole("link", { name: "Calculate your zakat" }).click();
+  await page.waitForURL("**/calculator");
+
+  expect((await page.request.get("/guides/zakat-on-yachts")).status()).toBe(404);
+});

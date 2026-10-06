@@ -30,6 +30,7 @@ export default function SiteFooter({
   const { footer, inEnglish } = messagesFor(locale).common;
   const tools = toolLinks(locale);
   const about = [
+    { href: "/guides", label: footer.guides + inEnglish },
     { href: "/method", label: footer.method + inEnglish },
     { href: "/trust", label: footer.trust + inEnglish },
     { href: "/privacy", label: footer.privacy + inEnglish },

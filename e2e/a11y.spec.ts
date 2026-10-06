@@ -44,6 +44,8 @@ for (const scheme of ["light", "dark"] as const) {
         "/zakat-al-fitr",
         "/halal-stocks",
         "/qurbani",
+        "/guides",
+        "/guides/zakat-on-pensions",
         "/login",
         "/register",
         "/privacy",

@@ -21,6 +21,7 @@ const en = {
       fitr: "Zakat al-Fitr",
       stocks: "Halal stock screen",
       qurbani: "Qurbani shares",
+      guides: "Zakat guides",
       method: "How the numbers are made",
       trust: "What is verified",
       privacy: "Privacy",

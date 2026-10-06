@@ -13,6 +13,7 @@ export const PUBLIC_PATHS = [
   "/calculator",
   "/nisab",
   ...ENGLISH_TOOL_PATHS,
+  "/guides",
   "/method",
   "/trust",
   "/privacy",
@@ -25,7 +26,7 @@ export const PUBLIC_PATHS = [
 /** Public pages, in any language: "/ar/calculator" counts like "/calculator". */
 export function isPublicPath(pathname: string): boolean {
   const { path } = splitLocale(pathname);
-  return PUBLIC_PATHS.includes(path) || path.startsWith("/nisab/");
+  return PUBLIC_PATHS.includes(path) || path.startsWith("/nisab/") || path.startsWith("/guides/");
 }
 
 export function analyticsConfig(): { domain: string; src: string } | null {

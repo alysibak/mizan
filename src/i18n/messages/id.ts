@@ -19,6 +19,7 @@ const id: Messages = {
       fitr: "Zakat fitrah",
       stocks: "Penyaring saham syariah",
       qurbani: "Patungan kurban",
+      guides: "Panduan zakat",
       method: "Cara angka dihitung",
       trust: "Apa yang terverifikasi",
       privacy: "Privasi",

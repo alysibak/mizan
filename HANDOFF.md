@@ -42,6 +42,10 @@ schema-drift check, and a Docker build that must boot and pass `/api/health`.
 - Public tools: `/inheritance`, `/zakat-al-fitr`, `/halal-stocks`, `/qurbani`.
   The tool components take an optional `currency`; without it they show a
   currency picker and a sign-up nudge (visitor mode).
+- Six guides at `/guides/[slug]` (`src/content/guides.tsx`), English only.
+  Their claims about the calculator (25% default for long-term shares and
+  pensions, the jewellery choice, debts due now) must stay true if those
+  change.
 - Optional email (`src/lib/email.ts`): confirmation, reset links, hawl
   reminders via `/api/cron/reminders`. Off unless configured.
 - Two-step sign-in (`src/lib/totp.ts`, `api/auth/login/two-factor`,
