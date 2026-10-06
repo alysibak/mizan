@@ -55,6 +55,7 @@ test("two-step sign-in: set up, required at sign-in, not skipped by email, off b
     app = authenticator(secret);
 
     const right = await app.next(page);
+    await page.fill("#totp-confirm-password", PASSWORD);
     await page.fill("#totp-confirm", right === "000000" ? "111111" : "000000");
     await page.getByRole("button", { name: "Turn on", exact: true }).click();
     await expect(page.getByText("That code is not right")).toBeVisible();

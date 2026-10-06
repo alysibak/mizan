@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { peekEmailToken } from "@/lib/email-tokens";
+import { eq } from "drizzle-orm";
+import { db } from "@/db";
+import { users } from "@/db/schema";
+import { peekToken } from "@/lib/one-time-tokens";
 import ResetForm from "./ResetForm";
 
 export const metadata: Metadata = {
@@ -17,7 +20,16 @@ export default async function ResetPage({
   searchParams: Promise<{ token?: string }>;
 }) {
   const { token = "" } = await searchParams;
-  const live = Boolean(await peekEmailToken(token, "reset"));
+  const userId = await peekToken(token, "reset");
+  const [owner] = userId
+    ? await db
+        .select({ totpSecret: users.totpSecret })
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1)
+    : [];
+  const live = Boolean(owner);
+  const twoStep = Boolean(owner?.totpSecret);
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-10">
@@ -28,7 +40,9 @@ export default async function ResetPage({
       {live ? (
         <>
           <p className="mt-2 text-sm text-sage">
-            Saving it signs out every other device and signs you in here.
+            {twoStep
+              ? "Saving it signs out every device. Then sign in with it and the code from your authenticator app."
+              : "Saving it signs out every other device and signs you in here."}
           </p>
           <ResetForm token={token} />
         </>

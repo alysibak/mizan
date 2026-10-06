@@ -12,7 +12,8 @@ import {
 import { isLocked } from "@/lib/login-throttle";
 import { errorJson, lockedResponse, readJson, recordFailedPassword } from "@/lib/api";
 import { LIMITS, overLimit, tooManyRequests } from "@/lib/rate-limit";
-import { createLoginChallenge } from "@/lib/two-factor";
+import { createToken } from "@/lib/one-time-tokens";
+import { CHALLENGE_MINUTES } from "@/lib/totp";
 
 const WRONG = "Email or password is incorrect";
 
@@ -46,7 +47,8 @@ export async function POST(request: Request) {
   // clear the failure count either: otherwise each right password would buy
   // a fresh round of guesses at the code.
   if (user.totpSecret) {
-    const ticket = await createLoginChallenge(user.id);
+    // Several devices may be signing in at once, so earlier tickets stay live.
+    const ticket = await createToken(user.id, "login", CHALLENGE_MINUTES, { replace: false });
     return NextResponse.json({ twoFactor: true, ticket });
   }
 

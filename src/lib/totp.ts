@@ -5,6 +5,8 @@
 import { createHmac, randomBytes, timingSafeEqual } from "crypto";
 
 export const TOTP_STEP_SECONDS = 30;
+/** How long after the password the authenticator code may be entered. */
+export const CHALLENGE_MINUTES = 5;
 const DIGITS = 6;
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 

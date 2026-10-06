@@ -1,6 +1,6 @@
 import "server-only";
 import { NextResponse } from "next/server";
-import { count, eq, sql } from "drizzle-orm";
+import { and, count, eq, isNull, lt, or, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { assets, givingRecords, liabilities, users, yearSnapshots, type User } from "@/db/schema";
 import { getCurrentUser } from "./session";
@@ -47,6 +47,26 @@ export async function recordFailedPassword(userId: string): Promise<void> {
       lockedUntil: sql`CASE WHEN ${reachesLimit} THEN ${lockoutUntil()} ELSE ${users.lockedUntil} END`,
     })
     .where(eq(users.id, userId));
+}
+
+/**
+ * Record that an authenticator code from `step` was used, only if no code
+ * from that step or a later one was used before. Done as one conditional
+ * update, so two requests racing with the same code cannot both succeed.
+ */
+export async function claimTotpStep(
+  userId: string,
+  step: number,
+  alsoSet: Partial<typeof users.$inferInsert> = {},
+): Promise<boolean> {
+  const rows = await db
+    .update(users)
+    .set({ ...alsoSet, totpLastStep: step })
+    .where(
+      and(eq(users.id, userId), or(isNull(users.totpLastStep), lt(users.totpLastStep, step))),
+    )
+    .returning({ id: users.id });
+  return rows.length > 0;
 }
 
 export function lockedResponse() {

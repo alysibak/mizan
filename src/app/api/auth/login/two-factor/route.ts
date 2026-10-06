@@ -4,10 +4,16 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { createSession, purgeExpiredSessions } from "@/lib/auth";
 import { isLocked } from "@/lib/login-throttle";
-import { errorJson, lockedResponse, readJson, recordFailedPassword } from "@/lib/api";
+import {
+  claimTotpStep,
+  errorJson,
+  lockedResponse,
+  readJson,
+  recordFailedPassword,
+} from "@/lib/api";
 import { LIMITS, overLimit, tooManyRequests } from "@/lib/rate-limit";
 import { verifyTotp } from "@/lib/totp";
-import { challengeUser, endLoginChallenge } from "@/lib/two-factor";
+import { consumeToken, peekToken } from "@/lib/one-time-tokens";
 import { firstIssue, twoFactorLoginSchema } from "@/lib/validation";
 
 /** The second step of signing in: the code from the authenticator app. */
@@ -20,29 +26,28 @@ export async function POST(request: Request) {
   // `restart`: the browser goes back to the password step.
   const expired = () =>
     NextResponse.json({ error: "That took too long. Sign in again.", restart: true }, { status: 401 });
-  const userId = await challengeUser(ticket);
+  const userId = await peekToken(ticket, "login");
   if (!userId) return expired();
   const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
   if (!user?.totpSecret) return expired();
   if (isLocked(user.lockedUntil)) return lockedResponse();
 
-  const step = verifyTotp(user.totpSecret, code, { lastUsedStep: user.totpLastStep });
-  if (step === null) {
+  const wrong = async () => {
     // Shares the password's failure count and lockout.
     await recordFailedPassword(user.id);
     return errorJson("That code is not right. Check the time on your phone and try again.", 401);
-  }
+  };
+  const step = verifyTotp(user.totpSecret, code, { lastUsedStep: user.totpLastStep });
+  if (step === null) return wrong();
+  // A code already used by a request running alongside this one is refused.
+  const claimed = await claimTotpStep(user.id, step, {
+    lastLoginAt: new Date().toISOString(),
+    failedLoginCount: 0,
+    lockedUntil: null,
+  });
+  if (!claimed) return wrong();
+  if (!(await consumeToken(ticket, "login"))) return expired();
 
-  await endLoginChallenge(ticket);
-  await db
-    .update(users)
-    .set({
-      totpLastStep: step,
-      lastLoginAt: new Date().toISOString(),
-      failedLoginCount: 0,
-      lockedUntil: null,
-    })
-    .where(eq(users.id, user.id));
   await purgeExpiredSessions();
   await createSession(user.id);
   return NextResponse.json({ ok: true });

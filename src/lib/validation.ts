@@ -147,7 +147,10 @@ export const twoFactorLoginSchema = z.object({
   code: totpCode,
 });
 
-export const twoFactorConfirmSchema = z.object({ code: totpCode });
+export const twoFactorConfirmSchema = z.object({
+  password: z.string().min(1, "Enter your password").max(1000),
+  code: totpCode,
+});
 
 export const twoFactorDisableSchema = z.object({
   password: z.string().min(1, "Enter your password").max(1000),

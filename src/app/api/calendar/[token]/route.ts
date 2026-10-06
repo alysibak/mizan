@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { settings } from "@/db/schema";
 import { hashFeedToken } from "@/lib/calendar-feed";
+import { TOKEN_PATTERN } from "@/lib/one-time-tokens";
 import { hawlStatus, parseHijriCalendar } from "@/lib/hijri";
 import { isIsoDay } from "@/lib/dates";
 import { hawlCalendar } from "@/lib/ics";
@@ -19,7 +20,7 @@ type Ctx = { params: Promise<{ token: string }> };
 export async function GET(_request: Request, { params }: Ctx) {
   const { token } = await params;
   const raw = token.replace(/\.ics$/, "");
-  if (!/^[A-Za-z0-9_-]{20,64}$/.test(raw)) return new Response("Not found", { status: 404 });
+  if (!TOKEN_PATTERN.test(raw)) return new Response("Not found", { status: 404 });
 
   const [row] = await db
     .select({
