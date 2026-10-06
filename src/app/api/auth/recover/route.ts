@@ -14,7 +14,9 @@ const WRONG = "That email and recovery code do not match";
 
 /**
  * Reset a forgotten password with the one-time recovery code. The code is
- * used up, every session is signed out, and this browser is signed in.
+ * used up, every session is signed out, and this browser is signed in. The
+ * code is the way back in after losing the authenticator too, so it also
+ * turns two-step sign-in off, to be set up again on the new phone.
  */
 export async function POST(request: Request) {
   if (await overLimit(request, LIMITS.recover)) return tooManyRequests(LIMITS.recover);
@@ -39,6 +41,9 @@ export async function POST(request: Request) {
       .set({
         passwordHash,
         recoveryCodeHash: null,
+        totpSecret: null,
+        totpPendingSecret: null,
+        totpLastStep: null,
         failedLoginCount: 0,
         lockedUntil: null,
         lastLoginAt: new Date().toISOString(),
@@ -47,5 +52,5 @@ export async function POST(request: Request) {
     db.delete(sessions).where(eq(sessions.userId, user.id)),
   ]);
   await createSession(user.id);
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, twoFactorOff: Boolean(user.totpSecret) });
 }

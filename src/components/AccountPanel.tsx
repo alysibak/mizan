@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { sendJson } from "@/lib/client-fetch";
 import EmailPanel, { type EmailState } from "@/components/EmailPanel";
+import TwoFactorPanel from "@/components/TwoFactorPanel";
 
 function ChangePassword() {
   const [busy, setBusy] = useState(false);
@@ -328,12 +329,17 @@ export default function AccountPanel({
   email,
   hasRecoveryCode,
   recovered = false,
+  twoFactor = false,
+  twoFactorTurnedOff = false,
   mail = null,
 }: {
   email: string;
   hasRecoveryCode: boolean;
   /** Just signed in with a recovery code, which is now used up. */
   recovered?: boolean;
+  twoFactor?: boolean;
+  /** The recovery code also turned two-step sign-in off. */
+  twoFactorTurnedOff?: boolean;
   /** Set when this server sends email. */
   mail?: EmailState | null;
 }) {
@@ -346,10 +352,14 @@ export default function AccountPanel({
       {recovered && (
         <p className="border border-brass/40 bg-brass/5 px-4 py-3 text-sm text-ink" role="status">
           Password reset. Your recovery code is used up — make a new one below.
+          {twoFactorTurnedOff
+            ? " Two-step sign-in is off; set it up again with your new phone."
+            : ""}
         </p>
       )}
       {mail ? <EmailPanel email={email} state={mail} /> : null}
       <RecoveryCode hasCode={hasRecoveryCode} emailOn={Boolean(mail)} />
+      <TwoFactorPanel enabled={twoFactor} />
       <ChangePassword />
       <SignOutOthers />
       <DeleteAccount />

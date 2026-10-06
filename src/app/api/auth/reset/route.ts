@@ -9,8 +9,9 @@ import { errorJson, readJson } from "@/lib/api";
 import { LIMITS, overLimit, tooManyRequests } from "@/lib/rate-limit";
 
 /**
- * Set a new password from an emailed link. The link is used up, every
- * session is signed out, and this browser is signed in.
+ * Set a new password from an emailed link. The link is used up and every
+ * session is signed out. This browser is signed in, unless the account has
+ * two-step sign-in: an inbox alone must not get past the authenticator.
  */
 export async function POST(request: Request) {
   if (await overLimit(request, LIMITS.recover)) return tooManyRequests(LIMITS.recover);
@@ -25,6 +26,12 @@ export async function POST(request: Request) {
     return errorJson("This link has expired or was already used. Ask for a new one.", 400);
   }
 
+  const [user] = await db
+    .select({ totpSecret: users.totpSecret })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+  const twoStep = Boolean(user?.totpSecret);
   await db.batch([
     db
       .update(users)
@@ -32,11 +39,12 @@ export async function POST(request: Request) {
         passwordHash,
         failedLoginCount: 0,
         lockedUntil: null,
-        lastLoginAt: new Date().toISOString(),
+        ...(twoStep ? {} : { lastLoginAt: new Date().toISOString() }),
       })
       .where(eq(users.id, userId)),
     db.delete(sessions).where(eq(sessions.userId, userId)),
   ]);
+  if (twoStep) return NextResponse.json({ ok: true, signIn: true });
   await createSession(userId);
   return NextResponse.json({ ok: true });
 }
