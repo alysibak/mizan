@@ -1,0 +1,39 @@
+name: Live site
+
+# Every two hours: is the production site up, and do live gold and silver
+# prices load? GitHub emails the repository owner when a scheduled run fails.
+# Point it at your domain with a repository variable PRODUCTION_URL
+# (Settings → Secrets and variables → Actions → Variables).
+
+on:
+  schedule:
+    - cron: "23 */2 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SITE: ${{ vars.PRODUCTION_URL || 'https://mizan-sandy-eight.vercel.app' }}
+    steps:
+      - name: The site and its database answer
+        run: |
+          curl -fsS --retry 3 --retry-delay 15 --max-time 20 "$SITE/api/health" | tee /dev/stderr \
+            | jq -e '.ok == true' > /dev/null
+      - name: Live gold and silver prices load
+        run: |
+          for currency in USD PKR EUR; do
+            body=$(curl -fsS --retry 3 --retry-delay 15 --max-time 30 "$SITE/api/metals?currency=$currency")
+            echo "$currency: $body"
+            echo "$body" | jq -e '.goldPricePerGram > 0 and .silverPricePerGram > 0' > /dev/null
+          done
+      - name: The nisab page shows figures
+        run: |
+          page=$(curl -fsS --retry 3 --retry-delay 15 --max-time 30 "$SITE/nisab/pkr")
+          if grep -q "Live prices are unavailable" <<< "$page"; then
+            echo "/nisab/pkr is showing the unavailable notice"
+            exit 1
+          fi

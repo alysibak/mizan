@@ -66,11 +66,13 @@ schema-drift check, and a Docker build that must boot and pass `/api/health`.
    wrapper carries `lang`/`dir` from the server. A second root layout would
    fix the document element too, but needs Next's `global-not-found`, still
    experimental in 16.3.
-5. **License.** There is no LICENSE file. Pick one before calling the code
-   open source anywhere.
-6. Live price sources were exercised only through mocks in tests (the build
-   sandbox could not reach them). Check `/api/metals?currency=PKR` and
-   `?currency=EUR` on the first deployment.
+5. **Contributor agreement.** The code is AGPL-3.0-only (`LICENSE`). The
+   owner, as the only copyright holder, can still relicense or sell
+   commercial licenses; before accepting outside contributions, add a CLA if
+   that option should stay open.
+6. Live price sources were exercised only through mocks in tests. The
+   "Live site" workflow (`monitor.yml`) checks them on production every two
+   hours; set the repository variable `PRODUCTION_URL` to the real domain.
 7. Tailwind 4 / ESLint 10 / Zod 4 majors are pending; each is its own change.
 8. TOTP secrets are stored as-is (like most apps). Encrypting them with a
    server key would protect them in a stolen database backup.

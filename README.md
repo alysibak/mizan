@@ -319,6 +319,11 @@ every pull request, plus a runtime dependency audit, a fresh migration, a
 schema-drift check, and a Docker build that must boot and answer its health
 check.
 
+A second workflow (`.github/workflows/monitor.yml`) checks the live site every
+two hours: the health check, live gold and silver prices in USD, PKR and EUR,
+and that `/nisab/pkr` shows figures. GitHub emails the repository owner when a
+run fails. Set the repository variable `PRODUCTION_URL` to your domain.
+
 ## Production
 
 ### Free public hosting (Vercel + Turso)
@@ -385,3 +390,10 @@ explicit about where scholars differ (the gold versus silver standard, worn
 jewellery, long-term equities, pensions, and the treatment of debt). Treat the
 numbers as a careful estimate to help you plan and act, not as a ruling. For
 anything consequential, ask someone qualified.
+
+## License
+
+Mizan is free software under the [GNU Affero General Public License v3.0](LICENSE)
+(`AGPL-3.0-only`). You may use, study, change, and self-host it. If you run a
+modified version for other people over a network, you must offer them its
+source code under the same license.
