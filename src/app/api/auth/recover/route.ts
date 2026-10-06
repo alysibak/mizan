@@ -5,6 +5,7 @@ import { sessions, users } from "@/db/schema";
 import { firstIssue, recoverSchema } from "@/lib/validation";
 import { createSession, hashPassword } from "@/lib/auth";
 import { recoveryCodeMatches } from "@/lib/recovery-code";
+import { revokeSignInTokens } from "@/lib/one-time-tokens";
 import { isLocked } from "@/lib/login-throttle";
 import { errorJson, lockedResponse, readJson, recordFailedPassword } from "@/lib/api";
 import { isDemoUser } from "@/lib/demo";
@@ -50,6 +51,7 @@ export async function POST(request: Request) {
       })
       .where(eq(users.id, user.id)),
     db.delete(sessions).where(eq(sessions.userId, user.id)),
+    revokeSignInTokens(user.id),
   ]);
   await createSession(user.id);
   return NextResponse.json({ ok: true, twoFactorOff: Boolean(user.totpSecret) });

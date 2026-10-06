@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { sessions, users } from "@/db/schema";
-import { consumeEmailToken } from "@/lib/email-tokens";
+import { consumeToken, revokeSignInTokens } from "@/lib/one-time-tokens";
 import { createSession, hashPassword } from "@/lib/auth";
 import { firstIssue, resetPasswordSchema } from "@/lib/validation";
 import { errorJson, readJson } from "@/lib/api";
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
 
   // Hash first: the token is only spent once the new password is ready.
   const passwordHash = await hashPassword(newPassword);
-  const userId = await consumeEmailToken(token, "reset");
+  const userId = await consumeToken(token, "reset");
   if (!userId) {
     return errorJson("This link has expired or was already used. Ask for a new one.", 400);
   }
@@ -37,12 +37,16 @@ export async function POST(request: Request) {
       .update(users)
       .set({
         passwordHash,
-        failedLoginCount: 0,
-        lockedUntil: null,
-        ...(twoStep ? {} : { lastLoginAt: new Date().toISOString() }),
+        // With two-step on, the failure count is the authenticator's guard:
+        // an inbox must not be able to reset it and buy more guesses.
+        ...(twoStep
+          ? {}
+          : { failedLoginCount: 0, lockedUntil: null, lastLoginAt: new Date().toISOString() }),
       })
       .where(eq(users.id, userId)),
     db.delete(sessions).where(eq(sessions.userId, userId)),
+    // Other reset links, and sign-ins begun with the old password.
+    revokeSignInTokens(userId),
   ]);
   if (twoStep) return NextResponse.json({ ok: true, signIn: true });
   await createSession(userId);

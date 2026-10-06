@@ -66,9 +66,14 @@ test("nisab pages answer for every currency and lead into the calculator", async
   ).toBeVisible();
 
   await page.getByRole("link", { name: "Calculate your zakat in EUR" }).click();
-  await page.waitForURL("**/calculator?currency=EUR");
+  await page.waitForURL(/\/calculator/);
   await expect(page.locator("#calc-currency")).toHaveValue("EUR");
   await expect(page.locator("#calc-silver-price")).toHaveValue("0.9");
+  // The link's currency is applied once; a reload keeps the visitor's own choice.
+  await expect(page).toHaveURL(/\/calculator$/);
+  await page.locator("#calc-currency").selectOption("GBP");
+  await page.reload();
+  await expect(page.locator("#calc-currency")).toHaveValue("GBP");
 
   const missing = await page.goto("/nisab/xyz");
   expect(missing?.status()).toBe(404);

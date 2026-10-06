@@ -11,14 +11,28 @@ export const VERIFY_LINK_HOURS = 24;
 /** Days before the hawl day that the first reminder goes out. */
 export const REMINDER_LEAD_DAYS = 7;
 
+/** A day-of reminder still goes out this many days late (missed runs). */
+export const REMINDER_GRACE_DAYS = 2;
+
 export type ReminderKind = "week" | "day";
 
-/** Which reminder, if any, is due today for a hawl ending on `dueDay`. */
-export function reminderKind(dueDay: string, today: Date): ReminderKind | null {
-  const left = daysBetween(today, new Date(`${dueDay}T00:00:00Z`));
-  if (left <= 0) return "day";
-  if (left <= REMINDER_LEAD_DAYS) return "week";
-  return null;
+export interface ReminderDue {
+  kind: ReminderKind;
+  /** Days until the hawl day: 0 on the day, negative when late. */
+  daysLeft: number;
+}
+
+/**
+ * Which reminder, if any, is due today for a hawl ending on `dueDay`. The
+ * lead reminder goes out on the first run within the last week (so someone
+ * who opts in three days ahead still gets it); the day-of one on the day or
+ * shortly after. A hawl day long past gets nothing: that is for the app to
+ * show, not for an email that says "today".
+ */
+export function reminderDue(dueDay: string, today: Date): ReminderDue | null {
+  const daysLeft = daysBetween(today, new Date(`${dueDay}T00:00:00Z`));
+  if (daysLeft > REMINDER_LEAD_DAYS || daysLeft < -REMINDER_GRACE_DAYS) return null;
+  return { kind: daysLeft <= 0 ? "day" : "week", daysLeft };
 }
 
 /** Recorded after sending, so each reminder goes out once. */
@@ -72,17 +86,25 @@ export function reminderEmailMessage(opts: {
   to: string;
   name: string;
   dueDay: string;
-  kind: ReminderKind;
+  due: ReminderDue;
   calendar: HijriCalendar;
   link: string;
 }): EmailMessage {
   const when = `${longDate(opts.dueDay)} (${formatHijri(opts.dueDay, opts.calendar)})`;
+  const { kind, daysLeft } = opts.due;
   const subject =
-    opts.kind === "day" ? "Your zakat year is complete" : "Your zakat year closes in a week";
+    kind === "day"
+      ? "Your zakat year is complete"
+      : daysLeft === 1
+        ? "Your zakat year closes tomorrow"
+        : `Your zakat year closes in ${daysLeft} days`;
+  const hawl = "Your hawl, the year your wealth has been held above nisab,";
   const lead =
-    opts.kind === "day"
-      ? `Your hawl, the year your wealth has been held above nisab, completed on ${when}.`
-      : `Your hawl, the year your wealth has been held above nisab, completes on ${when}.`;
+    kind === "week"
+      ? `${hawl} completes on ${when}.`
+      : daysLeft === 0
+        ? `${hawl} completes today, ${when}.`
+        : `${hawl} completed on ${when}.`;
   return {
     to: opts.to,
     subject,

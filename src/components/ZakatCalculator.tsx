@@ -64,11 +64,23 @@ function LiveCalculator({
   // A link may name the currency (?currency=PKR), as the nisab pages do.
   const asked = useSearchParams().get("currency")?.toUpperCase();
   const wanted = asked && /^[A-Z]{3}$/.test(asked) ? asked : null;
+  // The last currency a link asked for. It outlives the query string, which
+  // is dropped once applied so a reload keeps whatever the visitor picks next.
+  const [applied, setApplied] = useState(wanted);
+  if (wanted && wanted !== applied) setApplied(wanted);
+
+  useEffect(() => {
+    if (!hydrated || !asked) return;
+    const url = new URL(window.location.href);
+    url.searchParams.delete("currency");
+    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+  }, [hydrated, asked]);
+
   if (!hydrated) return empty;
   return (
     <Calculator
-      key={`client-${wanted ?? ""}`}
-      initial={storedOrFresh(wanted)}
+      key={`client-${applied ?? ""}`}
+      initial={storedOrFresh(applied)}
       live
       m={m}
       locale={locale}

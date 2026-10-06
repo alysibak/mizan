@@ -2,8 +2,16 @@ import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { renderSVG } from "uqr";
 import { db } from "@/db";
-import { loginChallenges, users } from "@/db/schema";
-import { confirmPassword, errorJson, readJson, recordFailedPassword, writableUser } from "@/lib/api";
+import { users } from "@/db/schema";
+import {
+  claimTotpStep,
+  confirmPassword,
+  errorJson,
+  readJson,
+  recordFailedPassword,
+  writableUser,
+} from "@/lib/api";
+import { revokeSignInTokens } from "@/lib/one-time-tokens";
 import { SITE_NAME } from "@/lib/site";
 import { groupSecret, newTotpSecret, otpauthUri, verifyTotp } from "@/lib/totp";
 import {
@@ -30,13 +38,19 @@ export async function POST() {
   });
 }
 
-/** Finish setting up with a first code from the app. */
+/**
+ * Finish setting up with a first code from the app, and the password: a
+ * stolen session must not be able to tie the account to someone else's
+ * phone and lock its owner out.
+ */
 export async function PUT(request: Request) {
   const { user, response } = await writableUser();
   if (response) return response;
   const parsed = twoFactorConfirmSchema.safeParse(await readJson(request));
   if (!parsed.success) return errorJson(firstIssue(parsed.error), 400);
   if (!user.totpPendingSecret) return errorJson("Start again: the setup has expired.", 400);
+  const refused = await confirmPassword(user, parsed.data.password);
+  if (refused) return refused;
 
   const step = verifyTotp(user.totpPendingSecret, parsed.data.code);
   if (step === null) return errorJson(WRONG_CODE, 400);
@@ -58,7 +72,7 @@ export async function DELETE(request: Request) {
   const refused = await confirmPassword(user, parsed.data.password);
   if (refused) return refused;
   const step = verifyTotp(user.totpSecret, parsed.data.code, { lastUsedStep: user.totpLastStep });
-  if (step === null) {
+  if (step === null || !(await claimTotpStep(user.id, step))) {
     await recordFailedPassword(user.id);
     return errorJson(WRONG_CODE, 403);
   }
@@ -67,7 +81,7 @@ export async function DELETE(request: Request) {
       .update(users)
       .set({ totpSecret: null, totpPendingSecret: null, totpLastStep: null })
       .where(eq(users.id, user.id)),
-    db.delete(loginChallenges).where(eq(loginChallenges.userId, user.id)),
+    revokeSignInTokens(user.id),
   ]);
   return NextResponse.json({ ok: true });
 }

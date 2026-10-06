@@ -1,10 +1,10 @@
 import { NextResponse, after } from "next/server";
 import { and, eq, gt } from "drizzle-orm";
 import { db } from "@/db";
-import { emailTokens, users } from "@/db/schema";
+import { oneTimeTokens, users } from "@/db/schema";
 import { emailEnabled, emailLink, sendEmail } from "@/lib/email";
 import { RESET_LINK_MINUTES, resetEmailMessage } from "@/lib/email-content";
-import { createEmailToken } from "@/lib/email-tokens";
+import { createToken } from "@/lib/one-time-tokens";
 import { firstIssue, resetRequestSchema } from "@/lib/validation";
 import { errorJson, readJson } from "@/lib/api";
 import { isDemoUser } from "@/lib/demo";
@@ -36,18 +36,18 @@ export async function POST(request: Request) {
       Date.now() + (RESET_LINK_MINUTES - COOLDOWN_MINUTES) * 60_000,
     ).toISOString();
     const [recent] = await db
-      .select({ tokenHash: emailTokens.tokenHash })
-      .from(emailTokens)
+      .select({ tokenHash: oneTimeTokens.tokenHash })
+      .from(oneTimeTokens)
       .where(
         and(
-          eq(emailTokens.userId, user.id),
-          eq(emailTokens.purpose, "reset"),
-          gt(emailTokens.expiresAt, recentFloor),
+          eq(oneTimeTokens.userId, user.id),
+          eq(oneTimeTokens.purpose, "reset"),
+          gt(oneTimeTokens.expiresAt, recentFloor),
         ),
       )
       .limit(1);
     if (recent) return;
-    const token = await createEmailToken(user.id, "reset", RESET_LINK_MINUTES);
+    const token = await createToken(user.id, "reset", RESET_LINK_MINUTES);
     await sendEmail(resetEmailMessage({ to: user.email, link: emailLink(`/reset?token=${token}`) }));
   });
   return NextResponse.json({ ok: true });

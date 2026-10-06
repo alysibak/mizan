@@ -5,6 +5,7 @@ import { users } from "@/db/schema";
 import { changePasswordSchema, firstIssue } from "@/lib/validation";
 import { hashPassword, revokeOtherSessions } from "@/lib/auth";
 import { confirmPassword, errorJson, readJson, writableUser } from "@/lib/api";
+import { revokeSignInTokens } from "@/lib/one-time-tokens";
 
 /** Change the password, then sign out every other device. */
 export async function POST(request: Request) {
@@ -29,6 +30,8 @@ export async function POST(request: Request) {
     })
     .where(eq(users.id, user.id));
   await revokeOtherSessions(user.id);
+  // Reset links and sign-ins begun with the old password stop working.
+  await revokeSignInTokens(user.id);
 
   return NextResponse.json({ ok: true });
 }

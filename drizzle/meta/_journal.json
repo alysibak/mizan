@@ -85,6 +85,13 @@
       "when": 1791240558204,
       "tag": "0011_two_step_sign_in",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1791254727196,
+      "tag": "0012_drop_login_challenges",
+      "breakpoints": true
     }
   ]
 }

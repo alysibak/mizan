@@ -1,30 +1,35 @@
 import { describe, expect, it } from "vitest";
 import {
   REMINDER_LEAD_DAYS,
+  reminderDue,
   reminderEmailMessage,
   reminderKey,
-  reminderKind,
   resetEmailMessage,
   verifyEmailMessage,
 } from "./email-content";
 
 const day = (iso: string) => new Date(`${iso}T00:00:00Z`);
 
-describe("reminderKind", () => {
+describe("reminderDue", () => {
   it("is quiet until a week before the hawl day", () => {
-    expect(reminderKind("2026-11-20", day("2026-11-01"))).toBeNull();
-    expect(reminderKind("2026-11-20", day("2026-11-12"))).toBeNull();
+    expect(reminderDue("2026-11-20", day("2026-11-01"))).toBeNull();
+    expect(reminderDue("2026-11-20", day("2026-11-12"))).toBeNull();
   });
 
-  it("sends the week-ahead reminder in the last seven days", () => {
+  it("sends the lead reminder in the last seven days, with the days left", () => {
     expect(REMINDER_LEAD_DAYS).toBe(7);
-    expect(reminderKind("2026-11-20", day("2026-11-13"))).toBe("week");
-    expect(reminderKind("2026-11-20", day("2026-11-19"))).toBe("week");
+    expect(reminderDue("2026-11-20", day("2026-11-13"))).toEqual({ kind: "week", daysLeft: 7 });
+    expect(reminderDue("2026-11-20", day("2026-11-19"))).toEqual({ kind: "week", daysLeft: 1 });
   });
 
-  it("sends the day-of reminder on the day, or late if a run was missed", () => {
-    expect(reminderKind("2026-11-20", day("2026-11-20"))).toBe("day");
-    expect(reminderKind("2026-11-20", day("2026-11-23"))).toBe("day");
+  it("sends the day-of reminder on the day, or a little late if a run was missed", () => {
+    expect(reminderDue("2026-11-20", day("2026-11-20"))).toEqual({ kind: "day", daysLeft: 0 });
+    expect(reminderDue("2026-11-20", day("2026-11-22"))).toEqual({ kind: "day", daysLeft: -2 });
+  });
+
+  it("says nothing about a hawl day long past", () => {
+    expect(reminderDue("2026-11-20", day("2026-11-23"))).toBeNull();
+    expect(reminderDue("2025-08-01", day("2026-11-20"))).toBeNull();
   });
 
   it("keys each reminder by its hawl day, so the next year starts fresh", () => {
@@ -42,7 +47,7 @@ describe("email messages", () => {
         to: "a@b.c",
         name: "Aisha Khan",
         dueDay: "2026-11-20",
-        kind: "week",
+        due: { kind: "week", daysLeft: 3 },
         calendar: "tabular",
         link: "https://m.app/year",
       }),
@@ -64,13 +69,32 @@ describe("email messages", () => {
       to: "a@b.c",
       name: "Yusuf",
       dueDay: "2026-11-20",
-      kind: "day",
+      due: { kind: "day", daysLeft: 0 },
       calendar: "tabular",
       link: "https://m.app/year",
     });
     expect(m.subject).toBe("Your zakat year is complete");
+    expect(m.text).toContain("completes today");
     expect(m.text).toContain("Friday, 20 November 2026");
     expect(m.text).toMatch(/\d+ \S+.* \d{4} AH/);
     expect(m.text).toContain("turn them off in Settings");
+  });
+});
+
+describe("lead reminder subject", () => {
+  const subject = (daysLeft: number) =>
+    reminderEmailMessage({
+      to: "a@b.c",
+      name: "Yusuf",
+      dueDay: "2026-11-20",
+      due: { kind: "week", daysLeft },
+      calendar: "tabular",
+      link: "https://m.app/year",
+    }).subject;
+
+  it("counts the real days left", () => {
+    expect(subject(7)).toBe("Your zakat year closes in 7 days");
+    expect(subject(3)).toBe("Your zakat year closes in 3 days");
+    expect(subject(1)).toBe("Your zakat year closes tomorrow");
   });
 });

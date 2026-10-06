@@ -31,8 +31,13 @@ export default function TwoFactorPanel({ enabled }: { enabled: boolean }) {
     e.preventDefault();
     setBusy(true);
     setError(null);
-    const code = new FormData(e.currentTarget).get("code");
-    const res = await sendJson("/api/account/two-factor", "PUT", { code }, "Could not turn it on");
+    const form = new FormData(e.currentTarget);
+    const res = await sendJson(
+      "/api/account/two-factor",
+      "PUT",
+      { code: form.get("code"), password: form.get("password") },
+      "Could not turn it on",
+    );
     setBusy(false);
     if (!res.ok) return setError(res.error);
     setSetup(null);
@@ -100,20 +105,35 @@ export default function TwoFactorPanel({ enabled }: { enabled: boolean }) {
           <p className="select-all break-all font-mono text-sm tracking-wider text-ink">
             {setup.secret}
           </p>
-          <div className="max-w-xs">
-            <label className="label mb-1.5" htmlFor="totp-confirm">
-              2. Enter the code it shows
-            </label>
-            <input
-              id="totp-confirm"
-              name="code"
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              pattern="[0-9 ]{6,7}"
-              maxLength={7}
-              required
-              className="field nums tracking-widest"
-            />
+          <div className="grid max-w-md gap-3 sm:grid-cols-2">
+            <div>
+              <label className="label mb-1.5" htmlFor="totp-confirm">
+                2. Enter the code it shows
+              </label>
+              <input
+                id="totp-confirm"
+                name="code"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                pattern="[0-9 ]{6,7}"
+                maxLength={7}
+                required
+                className="field nums tracking-widest"
+              />
+            </div>
+            <div>
+              <label className="label mb-1.5" htmlFor="totp-confirm-password">
+                3. Your password
+              </label>
+              <input
+                id="totp-confirm-password"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                required
+                className="field"
+              />
+            </div>
           </div>
           <div className="flex flex-wrap gap-2">
             <button type="submit" className="btn-primary" disabled={busy}>

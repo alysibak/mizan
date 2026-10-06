@@ -4,7 +4,7 @@ import { db } from "@/db";
 import { settings } from "@/db/schema";
 import { emailEnabled, emailLink, sendEmail } from "@/lib/email";
 import { VERIFY_LINK_HOURS, verifyEmailMessage } from "@/lib/email-content";
-import { createEmailToken } from "@/lib/email-tokens";
+import { createToken } from "@/lib/one-time-tokens";
 import { emailRemindersSchema, firstIssue } from "@/lib/validation";
 import { errorJson, readJson, writableUser } from "@/lib/api";
 import { LIMITS, overLimit, tooManyRequests } from "@/lib/rate-limit";
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
   if (user.emailVerifiedAt) return NextResponse.json({ ok: true, verified: true });
   if (await overLimit(request, LIMITS.emailLink)) return tooManyRequests(LIMITS.emailLink);
 
-  const token = await createEmailToken(user.id, "verify", VERIFY_LINK_HOURS * 60);
+  const token = await createToken(user.id, "verify", VERIFY_LINK_HOURS * 60);
   const sent = await sendEmail(
     verifyEmailMessage({
       to: user.email,

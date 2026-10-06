@@ -37,31 +37,18 @@ export const users = sqliteTable("users", {
   createdAt: now(),
 });
 
-// Between a correct password and a correct authenticator code. Holds the
-// SHA-256 of a short-lived ticket the browser presents with the code.
-export const loginChallenges = sqliteTable(
-  "login_challenges",
-  {
-    tokenHash: text("token_hash").primaryKey(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    expiresAt: text("expires_at").notNull(),
-    createdAt: now(),
-  },
-  (t) => [index("login_challenges_user_idx").on(t.userId)],
-);
-
-// One-time links sent by email: confirm the address, or reset the password.
-// Only the SHA-256 of the token is stored; each is deleted when used.
-export const emailTokens = sqliteTable(
+// One-time tokens: links sent by email (confirm the address, reset the
+// password) and the sign-in ticket between a right password and a right
+// authenticator code. Only the SHA-256 of each is stored; each is deleted
+// when used. (The table name predates the sign-in tickets.)
+export const oneTimeTokens = sqliteTable(
   "email_tokens",
   {
     tokenHash: text("token_hash").primaryKey(),
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    purpose: text("purpose").notNull(), // 'verify' | 'reset'
+    purpose: text("purpose").notNull(), // see lib/one-time-tokens.ts
     expiresAt: text("expires_at").notNull(),
     createdAt: now(),
   },

@@ -46,7 +46,7 @@ test("confirm an address, get a hawl reminder once, and reset a password by link
     const auth = { headers: { authorization: `Bearer ${CRON_SECRET}` } };
     expect((await request.get("/api/cron/reminders", auth)).ok()).toBe(true);
     const reminders = () =>
-      emailsTo(email).filter((m) => m.subject === "Your zakat year closes in a week");
+      emailsTo(email).filter((m) => /^Your zakat year closes (in \d days|tomorrow)$/.test(m.subject));
     expect(reminders()).toHaveLength(1);
     expect(reminders()[0].text).toContain("http://localhost:3210/year");
     expect(reminders()[0].text).not.toMatch(/20,?000/);
