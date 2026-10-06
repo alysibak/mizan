@@ -37,12 +37,24 @@ work.
 
 **For everyone, no account**
 
-- **Zakat calculator** (`/calculator`). Live gold and silver prices in some
-  sixty currencies (picked from the visitor's region), gold or silver nisab,
-  worn jewellery by school, metal by weight and karat, long-term shares and
-  pensions at a share you set, and debts due now. It runs in the browser;
-  figures stay in that browser's storage and come along into a new account at
-  setup.
+- **Zakat calculator** (`/calculator`). Live gold and silver prices in 59
+  currencies (picked from the visitor's region), gold or silver nisab, worn
+  jewellery by school, metal by weight and karat, long-term shares and pensions
+  at a share you set, and debts due now. It runs in the browser; figures stay
+  in that browser's storage and come along into a new account at setup.
+- **Seven languages.** The landing page, the calculator, its FAQ, and the nisab
+  pages read in English, Arabic, Urdu, Indonesian, Malay, Turkish, and French
+  (`/ar`, `/ur`, `/id`, `/ms`, `/tr`, `/fr`). Arabic and Urdu are right to left
+  with an Arabic-script face, and amounts typed in Arabic-Indic digits work.
+  Every page links its translations for search engines.
+- **Nisab today** (`/nisab`, `/nisab/{currency}`). Today's silver and gold
+  thresholds in every currency, refreshed hourly, each with a link that opens
+  the calculator in that currency.
+- **Free tools.** An Islamic inheritance calculator (`/inheritance`, exact
+  Quranic shares with awl, radd, and blocking explained), Zakat al-Fitr for a
+  household (`/zakat-al-fitr`), a halal stock screen with dividend purification
+  (`/halal-stocks`), and qurbani shares (`/qurbani`). Each page explains the
+  rulings it rests on and where the schools differ.
 - **Read-only demo** (optional). One click on the sign-in page opens a sample
   ledger nobody can change.
 
@@ -69,8 +81,13 @@ work.
 - **Tools.** Screening (manual, AAOIFI-style), mirath sketch, udhiyah shares,
   reverse zakat, forgiving a debt, and more.
 - **Your account.** Change password (signs out other devices), one-time
-  recovery codes (Mizan sends no email), sign out everywhere, download or
-  restore a full backup, and delete the account with everything in it.
+  recovery codes, two-step sign-in with any authenticator app, sign out
+  everywhere, download or restore a full backup, and delete the account with
+  everything in it.
+- **Email, if the server sends it** (optional, off by default). Confirm your
+  address, reset a forgotten password by link, and opt in to a reminder a week
+  before your hawl day and on the day. Emails carry a date and a link, never
+  amounts.
 - **On your phone.** An installable web app with dark mode and an offline
   notice. The main pages are audited against WCAG 2.1 AA in light and dark on
   every change.
@@ -174,6 +191,7 @@ src/
   proxy.ts             redirects, cross-site write refusal, body-size limit
   instrumentation.ts   one structured log line per server error
   db/                  schema, client, demo seed
+  i18n/                languages: config, and one typed message file each
   lib/
     zakat.ts           calculation engine (pure)
     nisab.ts · hijri.ts · giving-window.ts · madhhab.ts · screening.ts
@@ -183,17 +201,24 @@ src/
     api.ts             route guards: signed in, writable, password re-check,
                        row limits, capped body reads
     auth.ts · session.ts · rate-limit.ts · validation.ts · site.ts
+    totp.ts            authenticator codes (RFC 6238, pure)
+    email.ts · email-content.ts · one-time-tokens.ts
   app/
     page.tsx           landing (static)
     calculator/        public calculator (static)
+    [locale]/          the translated landing, calculator, and nisab pages
+    nisab/             nisab today, per currency (hourly)
+    inheritance/ zakat-al-fitr/ halal-stocks/ qurbani/   free tools
     privacy/ terms/ method/ trust/
     (auth)/            sign in, register, forgot
+    reset/             new password from an emailed link
     (setup)/begin/     setup wizard
     (app)/             balance, ledger, year, give, statement, tools, settings
     api/               JSON routes, each scoped to the signed-in user
   components/
-drizzle/               SQL migrations (0000…0009)
-e2e/                   Playwright: yearly cycle, public pages, accessibility
+drizzle/               SQL migrations (0000…0012)
+e2e/                   Playwright: yearly cycle, public pages, languages,
+                       tools, email, two-step sign-in, accessibility
 ```
 
 ## Configuration
@@ -211,6 +236,10 @@ environment variables; with Docker, in `.env` next to `docker-compose.yml`.
 | `DEMO_EMAIL` | Makes that account the read-only, one-click demo. |
 | `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` | Turns on cookieless [Plausible](https://plausible.io) analytics for public pages only, with `Signup`, `Demo`, and `Calculated` events. Build time. |
 | `NEXT_PUBLIC_PLAUSIBLE_SRC` | Script URL for a self-hosted Plausible (defaults to plausible.io, manual mode). |
+| `EMAIL_FROM` | Sender for optional email, e.g. `Mizan <hello@mizan.example>`. Email is on only when this, `APP_URL`, and a sender below are set. |
+| `RESEND_API_KEY` | Sends through [Resend](https://resend.com)'s HTTP API. |
+| `EMAIL_OUTBOX_FILE` | Development: append each message to this file as JSON instead of sending it. |
+| `CRON_SECRET` | Protects the daily reminder run, `GET /api/cron/reminders`. Vercel Cron sends it (see `vercel.json`); elsewhere, call it once a day with `Authorization: Bearer <secret>`. |
 | `PORT` | Host port for Docker Compose (default 3080). |
 
 ## Security
@@ -228,6 +257,16 @@ environment variables; with Docker, in `.env` next to `docker-compose.yml`.
 - Writes from another site are refused (`Sec-Fetch-Site`); request bodies are
   size-capped before they are read; each account has row limits. Pages ship a
   Content-Security-Policy, HSTS, and frame denial.
+- Two-step sign-in (TOTP): after a right password the browser gets a
+  five-minute ticket, not a session. Wrong codes share the password lockout,
+  and a right password alone does not reset it. Each code's time step is
+  claimed once, atomically, so codes cannot be replayed. A recovery code turns
+  two-step off (for a lost phone); an emailed reset never skips it.
+- Optional email: links are built from `APP_URL`, never the request's Host
+  header. Reset links go only to confirmed addresses, last 30 minutes, work
+  once, and are revoked by any password change. A reset request looks the same
+  whether or not the address has an account: the lookup and send run after the
+  response.
 - All input is validated with Zod. Backup restores are validated and applied in
   one transaction, so a bad file never leaves you half-restored.
 - Server errors are logged as one JSON line with the error digest the user sees,
@@ -250,20 +289,25 @@ mizan.example {
 ## Testing
 
 ```bash
-npm run lint && npm run typecheck && npm test   # 205 unit tests
+npm run lint && npm run typecheck && npm test   # 249 unit tests
 npm run build && npm run test:e2e               # Playwright, needs Chromium
 ```
 
 Unit tests cover the zakat engine, nisab, Hijri conversion (every day for a
 century round-trips), hawl and payment windows across a roll, cent rounding,
 inheritance shares (awl, radd, Umariyyatan, Mushtaraka), screening, CSV import,
-metal by weight, the calculator (including amounts typed with a decimal comma),
-price-feed parsing, and input validation.
+metal by weight, the calculator (including amounts typed with a decimal comma
+or Arabic-Indic digits), price-feed parsing, input validation, every language's
+messages against English (placeholders, no gaps), authenticator codes against
+the RFC 4226 and 6238 vectors, and reminder timing.
 
 End-to-end tests run the production build on a phone and a desktop: a full
 zakat year, the calculator carried into a new account, the read-only demo,
-legal and search files, and an axe audit of 26 pages against WCAG 2.1 AA in
-light and dark.
+legal and search files, Arabic right to left with Arabic-Indic input, every
+language and hreflang, the nisab pages into the calculator, the four free
+tools, email confirmation, reminders and reset links (through a file outbox),
+two-step sign-in end to end, and an axe audit of 36 pages against WCAG 2.1 AA
+in light and dark.
 
 CI (`.github/workflows/ci.yml`) runs all of that on every push to `master` and
 every pull request, plus a runtime dependency audit, a fresh migration, a

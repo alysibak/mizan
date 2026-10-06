@@ -118,6 +118,8 @@ Locally the DB defaults to `./mizan.db`. In production it points at Turso via `D
 2. Login → random 32-byte token in an HTTP-only cookie
 3. Only the **SHA-256 hash** of that token is stored in `sessions`
 4. Sessions expire after 30 days
+5. With two-step sign-in on, a right password returns a five-minute ticket; the authenticator code exchanges it for a session (`/api/auth/login/two-factor`)
+6. Forgotten password: a one-time recovery code, or (when the server sends email) a 30-minute link to a confirmed address
 
 ### Two layers of protection
 
@@ -240,10 +242,13 @@ All inputs are manual — no paid financial data API.
 
 ### Public
 
-- **`/`** — Landing page (static): calculator first, features, privacy, FAQ
+- **`/`** — Landing page (static): calculator first, features, free tools, privacy, FAQ
 - **`/calculator`** — No-account zakat calculator with live prices; figures stay in the browser and carry into a new ledger
+- **`/ar`, `/ur`, `/id`, `/ms`, `/tr`, `/fr`** — the landing page, calculator, and nisab pages in six more languages (Arabic and Urdu right to left)
+- **`/nisab`**, **`/nisab/{code}`** — today's silver and gold nisab in 59 currencies, hourly
+- **`/inheritance`**, **`/zakat-al-fitr`**, **`/halal-stocks`**, **`/qurbani`** — free tools with explainers
 - **`/method`**, **`/trust`**, **`/privacy`**, **`/terms`**
-- **`/login`** (with the optional one-click demo), **`/register`**, **`/forgot`**
+- **`/login`** (with the optional one-click demo and two-step code), **`/register`**, **`/forgot`**, **`/reset`**
 
 ### Authenticated app (`(app)/` layout)
 
@@ -371,10 +376,11 @@ Fly.io config exists but is **not recommended** — free trial expires and suspe
 
 Shipped since the early README wishlist: round-up sadaqah, metals suggest, yearly statement, year snapshots, Begin wizard, reckoning night, asnaf, unique tools, installable PWA, metals by weight, Zakat al-Fitr, giving CSV, account controls, recovery codes, foreign-currency holdings (manual FX), hawl restart after a nisab dip, calendar-feed reminders, Umm al-Qura, the public calculator, a read-only demo, and legal and SEO pages.
 
+Since then: seven languages with right-to-left layout on the public pages, live nisab pages per currency, public inheritance / Zakat al-Fitr / halal stocks / qurbani tools, optional email (confirmation, reset links, hawl reminders), and two-step sign-in.
+
 Still worth considering, roughly in order of reach:
 
-- Translations and right-to-left layout (Arabic, Urdu, Bahasa, Turkish, French), public pages first
-- Optional email (password reset, hawl-day reminder), off unless a provider is configured
+- Native-speaker review of the translations; then the tools and the app itself in those languages
 - Shared encrypted ledger for 2–3 people (today: one user = one ledger)
 - Mid-hawl nisab breach rules (estimate-labeled)
 - Purification ↔ screening loop stored in DB
