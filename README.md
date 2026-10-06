@@ -55,6 +55,9 @@ work.
   household (`/zakat-al-fitr`), a halal stock screen with dividend purification
   (`/halal-stocks`), and qurbani shares (`/qurbani`). Each page explains the
   rulings it rests on and where the schools differ.
+- **Guides** (`/guides`). Zakat on gold and silver, savings, shares and funds,
+  cryptocurrency, pensions, and property: what counts, how to value it, and
+  where the schools differ, each ending in the calculator.
 - **Read-only demo** (optional). One click on the sign-in page opens a sample
   ledger nobody can change.
 
@@ -209,6 +212,7 @@ src/
     [locale]/          the translated landing, calculator, and nisab pages
     nisab/             nisab today, per currency (hourly)
     inheritance/ zakat-al-fitr/ halal-stocks/ qurbani/   free tools
+    guides/            zakat on gold, savings, shares, crypto, pensions, property
     privacy/ terms/ method/ trust/
     (auth)/            sign in, register, forgot
     reset/             new password from an emailed link
@@ -216,6 +220,7 @@ src/
     (app)/             balance, ledger, year, give, statement, tools, settings
     api/               JSON routes, each scoped to the signed-in user
   components/
+  content/guides.tsx   the guides' text, kept in step with the calculator
 drizzle/               SQL migrations (0000…0012)
 e2e/                   Playwright: yearly cycle, public pages, languages,
                        tools, email, two-step sign-in, accessibility
@@ -305,8 +310,8 @@ End-to-end tests run the production build on a phone and a desktop: a full
 zakat year, the calculator carried into a new account, the read-only demo,
 legal and search files, Arabic right to left with Arabic-Indic input, every
 language and hreflang, the nisab pages into the calculator, the four free
-tools, email confirmation, reminders and reset links (through a file outbox),
-two-step sign-in end to end, and an axe audit of 36 pages against WCAG 2.1 AA
+tools and guides, email confirmation, reminders and reset links (through a file outbox),
+two-step sign-in end to end, and an axe audit of 38 pages against WCAG 2.1 AA
 in light and dark.
 
 CI (`.github/workflows/ci.yml`) runs all of that on every push to `master` and

@@ -19,6 +19,7 @@ const ms: Messages = {
       fitr: "Zakat fitrah",
       stocks: "Saringan saham patuh syariah",
       qurbani: "Bahagian korban",
+      guides: "Panduan zakat",
       method: "Cara angka dikira",
       trust: "Apa yang disahkan",
       privacy: "Privasi",

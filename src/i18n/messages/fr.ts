@@ -19,6 +19,7 @@ const fr: Messages = {
       fitr: "Zakat al-Fitr",
       stocks: "Filtre d’actions halal",
       qurbani: "Parts de sacrifice (udhiya)",
+      guides: "Guides de la zakat",
       method: "Comment les chiffres sont établis",
       trust: "Ce qui est vérifié",
       privacy: "Confidentialité",

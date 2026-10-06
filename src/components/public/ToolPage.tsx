@@ -6,7 +6,7 @@ import JsonLd from "@/components/JsonLd";
 import { FaqList } from "@/components/public/LandingView";
 import { faqJsonLd, type Faq } from "@/lib/faq";
 import { PUBLIC_TOOLS } from "@/lib/public-tools";
-import { siteUrl } from "@/lib/site";
+import { SITE_NAME, siteUrl } from "@/lib/site";
 
 export interface ToolPageCopy {
   path: string;
@@ -19,6 +19,10 @@ export interface ToolPageCopy {
   lede: string;
   sections: { heading: string; body: React.ReactNode }[];
   faq: Faq[];
+  /** A guide is an article: no tool, and Article rather than app data. */
+  kind?: "tool" | "guide";
+  /** YYYY-MM-DD the content was last checked (guides). */
+  updated?: string;
 }
 
 export function toolMetadata(copy: ToolPageCopy): Metadata {
@@ -35,13 +39,19 @@ export function toolMetadata(copy: ToolPageCopy): Metadata {
   };
 }
 
-/** A free tool's public page: the tool, then what it rests on, then its FAQ. */
+/**
+ * A free tool's public page: the tool, then what it rests on, then its FAQ.
+ * Guides use the same page with a call to the calculator in place of a tool.
+ */
 export default function ToolPage({
   copy,
   children,
+  after,
 }: {
   copy: ToolPageCopy;
   children: React.ReactNode;
+  /** Shown after the FAQ, before the other tools (e.g. related guides). */
+  after?: React.ReactNode;
 }) {
   const url = new URL(copy.path, siteUrl()).toString();
   return (
@@ -78,22 +88,36 @@ export default function ToolPage({
           <FaqList items={copy.faq} />
         </section>
 
+        {after}
         <MoreTools except={copy.path} />
       </main>
       <SiteFooter />
       <JsonLd data={faqJsonLd(copy.faq)} />
       <JsonLd
-        data={{
-          "@context": "https://schema.org",
-          "@type": "WebApplication",
-          name: copy.appName,
-          url,
-          inLanguage: "en",
-          applicationCategory: "FinanceApplication",
-          operatingSystem: "Any",
-          offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-          description: copy.metaDescription,
-        }}
+        data={
+          copy.kind === "guide"
+            ? {
+                "@context": "https://schema.org",
+                "@type": "Article",
+                headline: copy.title,
+                description: copy.metaDescription,
+                url,
+                inLanguage: "en",
+                dateModified: copy.updated,
+                publisher: { "@type": "Organization", name: SITE_NAME },
+              }
+            : {
+                "@context": "https://schema.org",
+                "@type": "WebApplication",
+                name: copy.appName,
+                url,
+                inLanguage: "en",
+                applicationCategory: "FinanceApplication",
+                operatingSystem: "Any",
+                offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+                description: copy.metaDescription,
+              }
+        }
       />
     </div>
   );

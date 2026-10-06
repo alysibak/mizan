@@ -19,6 +19,7 @@ const tr: Messages = {
       fitr: "Fitre",
       stocks: "Helal hisse taraması",
       qurbani: "Kurban hisseleri",
+      guides: "Zekât rehberleri",
       method: "Rakamlar nasıl hesaplanır",
       trust: "Neler doğrulandı",
       privacy: "Gizlilik",

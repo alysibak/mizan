@@ -15,6 +15,8 @@ describe("isPublicPath", () => {
       "/zakat-al-fitr",
       "/halal-stocks",
       "/qurbani",
+      "/guides",
+      "/guides/zakat-on-gold",
     ]) {
       expect(isPublicPath(p)).toBe(true);
     }

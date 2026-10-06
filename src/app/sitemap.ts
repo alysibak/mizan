@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { LOCALES, languageAlternates, localePath } from "@/i18n/config";
 import { CALC_CURRENCIES } from "@/lib/calculator";
 import { ENGLISH_TOOL_PATHS } from "@/lib/public-tools";
+import { GUIDES } from "@/content/guides";
 import { siteUrl } from "@/lib/site";
 
 // Read at request time, so a self-hosted image picks up its own APP_URL.
@@ -29,6 +30,8 @@ const ENGLISH: { path: string; priority: number; changeFrequency: Freq }[] = [
     priority: 0.8,
     changeFrequency: "monthly" as const,
   })),
+  { path: "/guides", priority: 0.7, changeFrequency: "monthly" },
+  ...GUIDES.map((g) => ({ path: g.path, priority: 0.7, changeFrequency: "monthly" as const })),
   { path: "/method", priority: 0.6, changeFrequency: "monthly" },
   { path: "/trust", priority: 0.6, changeFrequency: "monthly" },
   { path: "/register", priority: 0.5, changeFrequency: "yearly" },
