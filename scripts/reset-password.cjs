@@ -1,6 +1,8 @@
 /**
  * Operator tool: give an account a new temporary password when its owner has
- * lost both their password and recovery code. Signs out every session.
+ * lost both their password and recovery code. Signs out every session and
+ * turns two-step sign-in off (they may have lost that phone too); they can
+ * set it up again in Settings.
  *
  *   DATABASE_URL=... node scripts/reset-password.cjs someone@example.com
  *
@@ -42,7 +44,7 @@ async function main() {
   await client.batch(
     [
       {
-        sql: "UPDATE users SET password_hash = ?, failed_login_count = 0, locked_until = NULL WHERE id = ?",
+        sql: "UPDATE users SET password_hash = ?, failed_login_count = 0, locked_until = NULL, totp_secret = NULL, totp_pending_secret = NULL, totp_last_step = NULL WHERE id = ?",
         args: [hash, id],
       },
       { sql: "DELETE FROM sessions WHERE user_id = ?", args: [id] },
@@ -51,6 +53,7 @@ async function main() {
   );
   client.close();
   console.log(`Temporary password for ${email}: ${temporary}`);
+  console.log("Two-step sign-in, if it was on, is now off.");
 }
 
 main().catch((err) => {

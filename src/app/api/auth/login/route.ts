@@ -12,6 +12,7 @@ import {
 import { isLocked } from "@/lib/login-throttle";
 import { errorJson, lockedResponse, readJson, recordFailedPassword } from "@/lib/api";
 import { LIMITS, overLimit, tooManyRequests } from "@/lib/rate-limit";
+import { createLoginChallenge } from "@/lib/two-factor";
 
 const WRONG = "Email or password is incorrect";
 
@@ -39,6 +40,14 @@ export async function POST(request: Request) {
   if (!(await verifyPassword(password, user.passwordHash))) {
     await recordFailedPassword(user.id);
     return errorJson(WRONG, 401);
+  }
+
+  // With two-step sign-in, the password alone does not sign in, and does not
+  // clear the failure count either: otherwise each right password would buy
+  // a fresh round of guesses at the code.
+  if (user.totpSecret) {
+    const ticket = await createLoginChallenge(user.id);
+    return NextResponse.json({ twoFactor: true, ticket });
   }
 
   await db

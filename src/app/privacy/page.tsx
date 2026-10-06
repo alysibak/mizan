@@ -73,6 +73,10 @@ export default function PrivacyPage() {
             A hash of your recovery code and of your calendar-feed link, if you
             make them, so they can be checked but not read.
           </li>
+          <li>
+            If you turn on two-step sign-in, the key shared with your
+            authenticator app, which the server needs to check its codes.
+          </li>
           {mail ? (
             <li>
               If you confirm your email address: when you did, whether you

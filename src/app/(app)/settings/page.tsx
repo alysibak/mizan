@@ -40,7 +40,9 @@ export default async function SettingsPage({
       <AccountPanel
         email={user.email}
         hasRecoveryCode={Boolean(user.recoveryCodeHash)}
-        recovered={recovered === "1"}
+        recovered={recovered === "1" || recovered === "2fa"}
+        twoFactorTurnedOff={recovered === "2fa"}
+        twoFactor={Boolean(user.totpSecret)}
         mail={
           emailEnabled()
             ? {

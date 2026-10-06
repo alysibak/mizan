@@ -28,8 +28,29 @@ export const users = sqliteTable("users", {
   // When the user followed a confirmation link sent to their address. Reset
   // links and reminders only ever go to a confirmed address.
   emailVerifiedAt: text("email_verified_at"),
+  // Two-step sign-in: the authenticator-app secret once confirmed, the one
+  // being set up, and the last 30-second step whose code was accepted (so a
+  // code cannot be replayed).
+  totpSecret: text("totp_secret"),
+  totpPendingSecret: text("totp_pending_secret"),
+  totpLastStep: integer("totp_last_step"),
   createdAt: now(),
 });
+
+// Between a correct password and a correct authenticator code. Holds the
+// SHA-256 of a short-lived ticket the browser presents with the code.
+export const loginChallenges = sqliteTable(
+  "login_challenges",
+  {
+    tokenHash: text("token_hash").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    expiresAt: text("expires_at").notNull(),
+    createdAt: now(),
+  },
+  (t) => [index("login_challenges_user_idx").on(t.userId)],
+);
 
 // One-time links sent by email: confirm the address, or reset the password.
 // Only the SHA-256 of the token is stored; each is deleted when used.

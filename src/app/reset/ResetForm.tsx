@@ -18,7 +18,7 @@ export default function ResetForm({ token }: { token: string }) {
       return;
     }
     setBusy(true);
-    const res = await sendJson(
+    const res = await sendJson<{ signIn?: boolean }>(
       "/api/auth/reset",
       "POST",
       { token, newPassword: form.get("newPassword") },
@@ -29,7 +29,8 @@ export default function ResetForm({ token }: { token: string }) {
       setBusy(false);
       return;
     }
-    router.replace("/dashboard");
+    // With two-step sign-in, the new password still needs the app's code.
+    router.replace(res.data.signIn ? "/login?reset=1" : "/dashboard");
     router.refresh();
   }
 

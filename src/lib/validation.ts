@@ -137,6 +137,23 @@ export const emailRemindersSchema = z.object({
   reminders: z.boolean(),
 });
 
+const totpCode = z
+  .string()
+  .transform((v) => v.replace(/\s/g, ""))
+  .pipe(z.string().regex(/^\d{6}$/, "Enter the 6-digit code from your app"));
+
+export const twoFactorLoginSchema = z.object({
+  ticket: z.string().trim().min(20).max(64),
+  code: totpCode,
+});
+
+export const twoFactorConfirmSchema = z.object({ code: totpCode });
+
+export const twoFactorDisableSchema = z.object({
+  password: z.string().min(1, "Enter your password").max(1000),
+  code: totpCode,
+});
+
 export const deleteAccountSchema = z.object({
   password: z.string().min(1, "Enter your password").max(1000),
 });

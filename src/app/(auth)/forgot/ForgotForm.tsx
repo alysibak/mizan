@@ -39,7 +39,7 @@ export default function ForgotForm({ emailLinks }: { emailLinks: boolean }) {
       return;
     }
     setBusy(true);
-    const res = await sendJson(
+    const res = await sendJson<{ twoFactorOff?: boolean }>(
       "/api/auth/recover",
       "POST",
       {
@@ -54,7 +54,7 @@ export default function ForgotForm({ emailLinks }: { emailLinks: boolean }) {
       setBusy(false);
       return;
     }
-    router.push("/settings?recovered=1");
+    router.push(res.data.twoFactorOff ? "/settings?recovered=2fa" : "/settings?recovered=1");
     router.refresh();
   }
 
