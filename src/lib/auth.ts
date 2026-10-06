@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 import { and, eq, lt, ne } from "drizzle-orm";
 import { db } from "@/db";
 import { sessions } from "@/db/schema";
-import { SESSION_COOKIE } from "./constants";
+import { SESSION_COOKIE, SIGNED_IN_HINT } from "./constants";
 
 export { SESSION_COOKIE };
 const SESSION_TTL_DAYS = 30;
@@ -56,6 +56,13 @@ export async function createSession(
     path: "/",
     maxAge: ttlDays * 24 * 60 * 60,
   });
+  store.set(SIGNED_IN_HINT, "1", {
+    httpOnly: false,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: ttlDays * 24 * 60 * 60,
+  });
 }
 
 /** The stored id (token hash) of the session making this request, if any. */
@@ -72,6 +79,7 @@ export async function destroySession(): Promise<void> {
     await db.delete(sessions).where(eq(sessions.id, hashToken(token)));
   }
   store.delete(SESSION_COOKIE);
+  store.delete(SIGNED_IN_HINT);
 }
 
 /** Sign out every other device; keeps the session making this request. */

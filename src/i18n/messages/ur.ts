@@ -7,6 +7,7 @@ const ur: Messages = {
       method: "طریقۂ کار",
       signIn: "سائن اِن",
       openLedger: "کھاتہ کھولیں",
+      yourLedger: "آپ کا کھاتہ",
     },
     footer: {
       disclaimer:

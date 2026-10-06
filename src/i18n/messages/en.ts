@@ -9,6 +9,7 @@ const en = {
       method: "Method",
       signIn: "Sign in",
       openLedger: "Open a ledger",
+      yourLedger: "Your ledger",
     },
     footer: {
       disclaimer:

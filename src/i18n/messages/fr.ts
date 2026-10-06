@@ -7,6 +7,7 @@ const fr: Messages = {
       method: "Méthode",
       signIn: "Se connecter",
       openLedger: "Ouvrir un registre",
+      yourLedger: "Votre registre",
     },
     footer: {
       disclaimer:

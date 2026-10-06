@@ -14,6 +14,7 @@ import {
 } from "@/db/schema";
 import { deleteAccountSchema, firstIssue } from "@/lib/validation";
 import { SESSION_COOKIE } from "@/lib/auth";
+import { SIGNED_IN_HINT } from "@/lib/constants";
 import { confirmPassword, errorJson, readJson, writableUser } from "@/lib/api";
 
 /**
@@ -41,6 +42,8 @@ export async function DELETE(request: Request) {
     db.delete(users).where(eq(users.id, user.id)),
   ]);
 
-  (await cookies()).delete(SESSION_COOKIE);
+  const store = await cookies();
+  store.delete(SESSION_COOKIE);
+  store.delete(SIGNED_IN_HINT);
   return NextResponse.json({ ok: true });
 }

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import AccountLinks from "@/components/AccountLinks";
 import { localePath, type Locale } from "@/i18n/config";
 import { messagesFor } from "@/i18n/messages";
 
@@ -20,12 +21,11 @@ export default function SiteHeader({ locale = "en" }: { locale?: Locale }) {
         <Link href="/method" className="hidden text-sage hover:text-ink md:inline">
           {nav.method}
         </Link>
-        <Link href="/login" className="text-sage hover:text-ink">
-          {nav.signIn}
-        </Link>
-        <Link href="/register" className="btn-primary">
-          {nav.openLedger}
-        </Link>
+        <AccountLinks
+          signIn={nav.signIn}
+          openLedger={nav.openLedger}
+          yourLedger={nav.yourLedger}
+        />
       </nav>
     </header>
   );

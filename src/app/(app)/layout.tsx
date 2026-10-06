@@ -10,6 +10,7 @@ import TimezoneSync from "@/components/TimezoneSync";
 import Nav from "@/components/Nav";
 import MobileHeader from "@/components/MobileHeader";
 import MobileTabBar from "@/components/MobileTabBar";
+import AppFooter from "@/components/AppFooter";
 
 // A private ledger is nobody's search result.
 export const metadata: Metadata = { robots: { index: false, follow: false } };
@@ -49,6 +50,7 @@ export default async function AppLayout({
           <div className="mx-auto max-w-3xl">
             {demo ? <DemoBanner /> : null}
             {children}
+            <AppFooter />
           </div>
         </main>
         <div className="print:hidden">

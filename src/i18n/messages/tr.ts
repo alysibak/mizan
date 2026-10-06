@@ -7,6 +7,7 @@ const tr: Messages = {
       method: "Yöntem",
       signIn: "Giriş yap",
       openLedger: "Defter aç",
+      yourLedger: "Defteriniz",
     },
     footer: {
       disclaimer:

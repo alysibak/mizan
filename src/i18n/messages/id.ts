@@ -7,6 +7,7 @@ const id: Messages = {
       method: "Metode",
       signIn: "Masuk",
       openLedger: "Buka pembukuan",
+      yourLedger: "Pembukuan Anda",
     },
     footer: {
       disclaimer:

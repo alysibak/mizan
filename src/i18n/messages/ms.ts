@@ -7,6 +7,7 @@ const ms: Messages = {
       method: "Kaedah",
       signIn: "Log masuk",
       openLedger: "Buka lejar",
+      yourLedger: "Lejar anda",
     },
     footer: {
       disclaimer:

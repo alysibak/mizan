@@ -2,8 +2,10 @@ import { test, expect } from "@playwright/test";
 import {
   PASSWORD,
   asNewVisitor,
+  daysAgo,
   expectNoHorizontalScroll,
   expectUniqueIds,
+  registerAndSetUp,
   uniqueEmail,
   watchConsole,
 } from "./helpers";
@@ -147,4 +149,28 @@ test("oversized request bodies are refused before they are read", async ({ reque
     data: JSON.stringify({ email: "a@b.co", password: "x".repeat(2 * 1024 * 1024) }),
   });
   expect(res.status()).toBe(413);
+});
+
+test("signed in, the public pages offer your ledger, and the app links to them", async ({
+  page,
+}) => {
+  await registerAndSetUp(page, {
+    email: uniqueEmail("signedin"),
+    hawlStart: daysAgo(30),
+    amount: "1000",
+  });
+  const about = page.getByRole("navigation", { name: "About Mizan" });
+  await about.getByRole("link", { name: "Privacy" }).click();
+  await page.waitForURL("**/privacy");
+  const header = page.getByRole("banner");
+  await expect(header.getByRole("link", { name: "Your ledger" })).toBeVisible();
+  await expect(header.getByRole("link", { name: "Sign in" })).toHaveCount(0);
+  await header.getByRole("link", { name: "Your ledger" }).click();
+  await page.waitForURL(/\/dashboard/);
+
+  // Signed out, the same page offers sign-in again.
+  await page.evaluate(() => fetch("/api/auth/logout", { method: "POST" }));
+  await page.goto("/privacy");
+  await expect(page.getByRole("banner").getByRole("link", { name: "Sign in" })).toBeVisible();
+  await expect(page.getByRole("banner").getByRole("link", { name: "Your ledger" })).toHaveCount(0);
 });

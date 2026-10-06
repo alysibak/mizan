@@ -7,6 +7,7 @@ const ar: Messages = {
       method: "المنهجية",
       signIn: "تسجيل الدخول",
       openLedger: "افتح سجلًا",
+      yourLedger: "سجلّك",
     },
     footer: {
       disclaimer:
