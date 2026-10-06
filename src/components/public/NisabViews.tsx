@@ -16,6 +16,7 @@ import { CALC_CURRENCIES } from "@/lib/calculator";
 import { NISAB_GOLD_GRAMS, NISAB_SILVER_GRAMS } from "@/lib/nisab";
 import { formatMoney } from "@/lib/money";
 import { getMetalPrices, type MetalPrices } from "@/lib/price-fetch";
+import ShareButton from "@/components/public/ShareButton";
 
 /** Currencies shown first on the index, the page language's own on top. */
 const POPULAR = [
@@ -320,6 +321,18 @@ export async function NisabCurrencyView({
             </dl>
             <div className="mt-3">
               <AsOf prices={prices} locale={locale} />
+            </div>
+            <div className="mt-6">
+              <ShareButton
+                label={m.share}
+                text={fmt(m.shareText, {
+                  currency: name,
+                  silver: money(values.silver),
+                  gold: money(values.gold),
+                })}
+                path={localePath(locale, `/nisab/${code.toLowerCase()}`)}
+                labels={all.common.share}
+              />
             </div>
           </>
         ) : (

@@ -30,6 +30,7 @@ const en = {
     },
     /** Appended to links that lead to pages only in English. */
     inEnglish: "",
+    share: { button: "Share", whatsapp: "WhatsApp", copy: "Copy link", copied: "Link copied" },
   },
 
   landing: {
@@ -182,6 +183,8 @@ const en = {
     keepBody:
       "A free account counts your hawl on the Hijri calendar, tells you when zakat falls due, records what you give, and closes each year with a statement. These figures come with you.",
     keepNote: "",
+    share: "Share the calculator",
+    shareText: "A free, private zakat calculator with today’s gold and silver prices. No sign-up.",
     keepCta: "Create a free ledger",
     barDue: "Zakat due",
     barBelow: "Below nisab",
@@ -267,6 +270,8 @@ const en = {
     tableGold: "Gold nisab",
     allCurrencies: "Every currency",
     otherCurrencies: "Nisab in other currencies",
+    share: "Share today’s nisab",
+    shareText: "Nisab today in {currency}: {silver} on the silver standard, {gold} on the gold standard.",
   },
 
   faq: [

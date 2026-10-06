@@ -49,7 +49,10 @@ work.
   Every page links its translations for search engines.
 - **Nisab today** (`/nisab`, `/nisab/{currency}`). Today's silver and gold
   thresholds in every currency, refreshed hourly, each with a link that opens
-  the calculator in that currency.
+  the calculator in that currency. A shared nisab link previews that day's
+  figures in WhatsApp and other apps, and both the calculator and the nisab
+  pages have share buttons (the phone's share sheet, or WhatsApp and copy
+  link). Shared text never includes anything a visitor typed.
 - **Free tools.** An Islamic inheritance calculator (`/inheritance`, exact
   Quranic shares with awl, radd, and blocking explained), Zakat al-Fitr for a
   household (`/zakat-al-fitr`), a halal stock screen with dividend purification

@@ -27,6 +27,7 @@ const id: Messages = {
       languages: "Bahasa",
     },
     inEnglish: " (dalam bahasa Inggris)",
+    share: { button: "Bagikan", whatsapp: "WhatsApp", copy: "Salin tautan", copied: "Tautan disalin" },
   },
 
   landing: {
@@ -181,6 +182,8 @@ const id: Messages = {
     keepBody:
       "Akun gratis menghitung haul Anda dengan kalender Hijriah, memberi tahu saat zakat jatuh tempo, mencatat pemberian Anda, dan menutup setiap tahun dengan laporan. Angka-angka ini ikut bersama Anda.",
     keepNote: "Pembukuan saat ini tersedia dalam bahasa Inggris.",
+    share: "Bagikan kalkulator",
+    shareText: "Kalkulator zakat gratis dan privat dengan harga emas dan perak hari ini. Tanpa daftar.",
     keepCta: "Buat pembukuan gratis",
     barDue: "Zakat wajib",
     barBelow: "Di bawah nisab",
@@ -263,6 +266,8 @@ const id: Messages = {
     tableGold: "Nisab emas",
     allCurrencies: "Semua mata uang",
     otherCurrencies: "Nisab dalam mata uang lain",
+    share: "Bagikan nisab hari ini",
+    shareText: "Nisab hari ini dalam {currency}: {silver} dengan standar perak, {gold} dengan standar emas.",
   },
 
   faq: [

@@ -5,6 +5,7 @@ import SiteFooter from "@/components/SiteFooter";
 import ZakatCalculator from "@/components/ZakatCalculator";
 import JsonLd from "@/components/JsonLd";
 import { FaqList } from "@/components/public/LandingView";
+import ShareButton from "@/components/public/ShareButton";
 import { LOCALE_INFO, languageAlternates, localePath, type Locale } from "@/i18n/config";
 import { messagesFor } from "@/i18n/messages";
 import { faqJsonLd } from "@/lib/faq";
@@ -47,6 +48,15 @@ export default function CalculatorView({ locale }: { locale: Locale }) {
 
         <div className="mt-10">
           <ZakatCalculator m={all.calc} locale={locale} />
+        </div>
+
+        <div className="mt-8">
+          <ShareButton
+            label={all.calc.share}
+            text={all.calc.shareText}
+            path={localePath(locale, "/calculator")}
+            labels={all.common.share}
+          />
         </div>
 
         <section className="mt-20 grid gap-10 md:grid-cols-3" aria-labelledby="how">

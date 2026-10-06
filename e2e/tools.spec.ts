@@ -101,3 +101,28 @@ test("guides answer the common questions and lead to the calculator", async ({ p
 
   expect((await page.request.get("/guides/zakat-on-yachts")).status()).toBe(404);
 });
+
+test("pages can be shared, and nisab links preview today’s figures", async ({ page }) => {
+  await page.goto("/calculator");
+  const share = page.getByRole("group", { name: "Share the calculator" });
+  if (await share.count()) {
+    const href = await share.getByRole("link", { name: "WhatsApp" }).getAttribute("href");
+    expect(href).toMatch(/^https:\/\/wa\.me\/\?text=/);
+    const text = decodeURIComponent(href!.split("text=")[1]);
+    expect(text).toContain("free, private zakat calculator");
+    expect(text).toMatch(/http:\/\/localhost:3210\/calculator$/);
+    await expect(share.getByRole("button", { name: "Copy link" })).toBeVisible();
+  } else {
+    // A browser with its own share sheet gets a single button instead.
+    await expect(page.getByRole("button", { name: "Share the calculator" })).toBeVisible();
+  }
+
+  const card = await page.request.get("/nisab/pkr/opengraph-image");
+  expect(card.status()).toBe(200);
+  expect(card.headers()["content-type"]).toBe("image/png");
+  await page.goto("/nisab/pkr");
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+    "content",
+    /\/nisab\/pkr\/opengraph-image/,
+  );
+});

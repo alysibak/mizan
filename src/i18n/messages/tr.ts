@@ -27,6 +27,7 @@ const tr: Messages = {
       languages: "Dil",
     },
     inEnglish: " (İngilizce)",
+    share: { button: "Paylaş", whatsapp: "WhatsApp", copy: "Bağlantıyı kopyala", copied: "Bağlantı kopyalandı" },
   },
 
   landing: {
@@ -180,6 +181,8 @@ const tr: Messages = {
     keepBody:
       "Ücretsiz bir hesap, havlinizi Hicri takvimle sayar, zekâtın ne zaman düştüğünü söyler, verdiklerinizi kaydeder ve her yılı bir dökümle kapatır. Bu rakamlar sizinle gelir.",
     keepNote: "Defter şimdilik İngilizcedir.",
+    share: "Hesaplayıcıyı paylaş",
+    shareText: "Bugünkü altın ve gümüş fiyatlarıyla ücretsiz ve gizli zekât hesaplayıcı. Kayıt gerekmez.",
     keepCta: "Ücretsiz defter oluşturun",
     barDue: "Ödenecek zekât",
     barBelow: "Nisabın altında",
@@ -265,6 +268,8 @@ const tr: Messages = {
     tableGold: "Altın nisabı",
     allCurrencies: "Tüm para birimleri",
     otherCurrencies: "Diğer para birimlerinde nisap",
+    share: "Bugünkü nisabı paylaş",
+    shareText: "Bugünkü nisap ({currency}): gümüş ölçüsüyle {silver}, altın ölçüsüyle {gold}.",
   },
 
   faq: [

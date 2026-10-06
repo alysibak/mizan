@@ -27,6 +27,7 @@ const ms: Messages = {
       languages: "Bahasa",
     },
     inEnglish: " (dalam bahasa Inggeris)",
+    share: { button: "Kongsi", whatsapp: "WhatsApp", copy: "Salin pautan", copied: "Pautan disalin" },
   },
 
   landing: {
@@ -181,6 +182,8 @@ const ms: Messages = {
     keepBody:
       "Akaun percuma mengira haul anda mengikut kalendar Hijrah, memberitahu apabila zakat wajib dibayar, merekod pemberian anda, dan menutup setiap tahun dengan penyata. Angka ini ikut bersama anda.",
     keepNote: "Lejar kini dalam bahasa Inggeris.",
+    share: "Kongsi kalkulator",
+    shareText: "Kalkulator zakat percuma dan peribadi dengan harga emas dan perak hari ini. Tanpa pendaftaran.",
     keepCta: "Cipta lejar percuma",
     barDue: "Zakat wajib",
     barBelow: "Di bawah nisab",
@@ -263,6 +266,8 @@ const ms: Messages = {
     tableGold: "Nisab emas",
     allCurrencies: "Semua mata wang",
     otherCurrencies: "Nisab dalam mata wang lain",
+    share: "Kongsi nisab hari ini",
+    shareText: "Nisab hari ini dalam {currency}: {silver} mengikut piawaian perak, {gold} mengikut piawaian emas.",
   },
 
   faq: [

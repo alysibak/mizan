@@ -27,6 +27,7 @@ const fr: Messages = {
       languages: "Langue",
     },
     inEnglish: " (en anglais)",
+    share: { button: "Partager", whatsapp: "WhatsApp", copy: "Copier le lien", copied: "Lien copié" },
   },
 
   landing: {
@@ -182,6 +183,8 @@ const fr: Messages = {
     keepBody:
       "Un compte gratuit compte votre hawl selon le calendrier hégirien, vous prévient quand la zakat est due, enregistre vos dons et clôture chaque année avec un relevé. Ces chiffres vous suivent.",
     keepNote: "Le registre est pour l’instant en anglais.",
+    share: "Partager le calculateur",
+    shareText: "Un calculateur de zakat gratuit et confidentiel, avec les cours de l’or et de l’argent du jour. Sans inscription.",
     keepCta: "Créer un registre gratuit",
     barDue: "Zakat due",
     barBelow: "Sous le nisab",
@@ -261,6 +264,8 @@ const fr: Messages = {
     tableGold: "Nisab de l’or",
     allCurrencies: "Toutes les monnaies",
     otherCurrencies: "Le nisab dans d’autres monnaies",
+    share: "Partager le nisab du jour",
+    shareText: "Le nisab aujourd’hui ({currency}) : {silver} selon l’étalon argent, {gold} selon l’étalon or.",
   },
 
   faq: [
