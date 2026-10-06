@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { SESSION_COOKIE } from "@/lib/constants";
+import { SESSION_COOKIE, SIGNED_IN_HINT } from "@/lib/constants";
 
 // Lightweight UX guard. The authoritative check is the database session lookup
 // in getCurrentUser; this only avoids flashing protected pages to logged-out
@@ -75,7 +75,23 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  return NextResponse.next();
+  // Keep the readable "signed in" hint in step with the session cookie, for
+  // sessions that began before the hint existed and for ones that ended
+  // elsewhere. The hint grants nothing; a stale one only shows "Your ledger".
+  const response = NextResponse.next();
+  const hasHint = request.cookies.get(SIGNED_IN_HINT)?.value === "1";
+  if (hasSession && !hasHint) {
+    response.cookies.set(SIGNED_IN_HINT, "1", {
+      httpOnly: false,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 30 * 24 * 60 * 60,
+    });
+  } else if (!hasSession && request.cookies.has(SIGNED_IN_HINT)) {
+    response.cookies.delete(SIGNED_IN_HINT);
+  }
+  return response;
 }
 
 export const config = {

@@ -159,6 +159,9 @@ test("signed in, the public pages offer your ledger, and the app links to them",
     hawlStart: daysAgo(30),
     amount: "1000",
   });
+  // A session from before the hint existed: the next page view restores it.
+  await page.context().clearCookies({ name: "mizan_signed_in" });
+  await page.goto("/dashboard");
   const about = page.getByRole("navigation", { name: "About Mizan" });
   await about.getByRole("link", { name: "Privacy" }).click();
   await page.waitForURL("**/privacy");
