@@ -4,6 +4,7 @@ import { useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { setStoredValue, useHydrated, useStoredValue } from "@/lib/client-store";
+import { sendJson } from "@/lib/client-fetch";
 import {
   getInstallPrompt,
   promptInstall,
@@ -35,6 +36,7 @@ export default function DashboardNotices({
   metalsAgeDays = null,
   welcome = false,
   part = "all",
+  currency = "USD",
 }: {
   items: Item[];
   metalsStale?: boolean;
@@ -47,6 +49,8 @@ export default function DashboardNotices({
    * stale prices). "bottom": the getting-started list and install hint.
    */
   part?: "all" | "top" | "bottom";
+  /** The ledger's currency, for fetching today's metal prices. */
+  currency?: string;
 }) {
   const router = useRouter();
   const hydrated = useHydrated();
@@ -59,6 +63,40 @@ export default function DashboardNotices({
     () => null,
   );
   const [installedNow, setInstalledNow] = useState(false);
+  const [updating, setUpdating] = useState(false);
+  const [priceError, setPriceError] = useState<string | null>(null);
+
+  /** Fetch today's gold and silver prices and save them, in one tap. */
+  async function applyTodaysPrices() {
+    setUpdating(true);
+    setPriceError(null);
+    const res = await fetch(`/api/metals?currency=${encodeURIComponent(currency)}`).catch(
+      () => null,
+    );
+    const data = (await res?.json().catch(() => null)) as {
+      goldPricePerGram?: number;
+      silverPricePerGram?: number;
+    } | null;
+    if (!res?.ok || !data?.goldPricePerGram || !data.silverPricePerGram) {
+      setUpdating(false);
+      setPriceError(
+        "Live prices are unavailable right now. Try again shortly, or enter them in settings.",
+      );
+      return;
+    }
+    const saved = await sendJson(
+      "/api/settings/metals",
+      "PUT",
+      { goldPricePerGram: data.goldPricePerGram, silverPricePerGram: data.silverPricePerGram },
+      "Could not save today’s prices.",
+    );
+    setUpdating(false);
+    if (!saved.ok) {
+      setPriceError(saved.error);
+      return;
+    }
+    router.refresh();
+  }
 
   // Browser-only facts: shown after hydration so server and client agree.
   const ios = hydrated && isIos();
@@ -124,9 +162,24 @@ export default function DashboardNotices({
                     ? "Prices look custom but have no save date yet. Confirm them in settings."
                     : "Gold and silver still match the seed defaults. Suggest or enter today’s prices before you trust the nisab line."}
               </p>
-              <Link href="/settings" className="mt-2 inline-block text-sm text-pine hover:underline">
-                Update in settings
-              </Link>
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  className="btn-primary"
+                  disabled={updating}
+                  onClick={() => void applyTodaysPrices()}
+                >
+                  {updating ? "Fetching today’s prices…" : "Use today’s prices"}
+                </button>
+                <Link href="/settings" className="text-sm text-pine hover:underline">
+                  Enter them yourself
+                </Link>
+              </div>
+              {priceError ? (
+                <p className="mt-2 text-sm text-danger" role="alert">
+                  {priceError}
+                </p>
+              ) : null}
             </div>
             <button
               type="button"

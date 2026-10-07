@@ -4,8 +4,9 @@ import { messagesFor } from "@/i18n/messages";
 
 /** The free tools, labelled in `locale` (most of them are in English only). */
 export function toolLinks(locale: Locale): { href: string; label: string }[] {
-  const { footer, inEnglish } = messagesFor(locale).common;
+  const { footer, inEnglish, nav } = messagesFor(locale).common;
   return [
+    { href: localePath(locale, "/start"), label: nav.start },
     { href: localePath(locale, "/calculator"), label: footer.calculator },
     { href: localePath(locale, "/nisab"), label: footer.nisab },
     { href: "/inheritance", label: footer.inheritance + inEnglish },

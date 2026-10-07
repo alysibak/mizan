@@ -149,6 +149,8 @@ export interface CalcDraft {
 }
 
 export const CALC_STORAGE_KEY = "mizan-calculator-v1";
+/** The currency a visitor last picked anywhere on the public pages. */
+export const VISITOR_CURRENCY_KEY = "mizan-visitor-currency";
 
 export function emptyDraft(currency = "USD", decimal: DecimalMark | null = null): CalcDraft {
   return {

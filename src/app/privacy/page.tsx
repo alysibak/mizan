@@ -100,13 +100,17 @@ export default function PrivacyPage() {
         <p>
           One cookie, <code className="font-mono text-xs">mizan_session</code>,
           keeps you signed in. It is strictly necessary, HttpOnly, and holds a
-          random token whose hash is stored on the server. There are no
-          advertising or tracking cookies.
+          random token whose hash is stored on the server. While you are signed
+          in, a second cookie,{" "}
+          <code className="font-mono text-xs">mizan_signed_in</code>, holds only
+          the value 1, so the public pages can offer a link to your ledger
+          instead of “Sign in”. There are no advertising or tracking cookies.
         </p>
         <p>
           Your browser’s local storage keeps small conveniences on your device
-          only: the calculator draft, which setup step you reached, and notices
-          you dismissed. Clearing your browser data removes them.
+          only: the calculator draft, the language and currency you picked,
+          which setup step you reached, and notices you dismissed. Clearing
+          your browser data removes them.
         </p>
       </LegalSection>
 

@@ -26,6 +26,10 @@ const TITLES: [string, string][] = [
   ["/mirath", "Mirath"],
   ["/settings", "Settings"],
   ["/admin/users", "Visitors"],
+  ["/privacy", "Privacy"],
+  ["/terms", "Terms"],
+  ["/method", "Method"],
+  ["/trust", "What is verified"],
 ];
 
 export default function MobileHeader({ isAdmin = false }: { isAdmin?: boolean }) {

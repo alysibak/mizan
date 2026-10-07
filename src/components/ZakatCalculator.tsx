@@ -4,10 +4,10 @@ import { Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from "
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
-  CALC_CURRENCIES,
   CALC_FIELDS,
   CALC_STORAGE_KEY,
   DEFAULT_PORTION_PERCENT,
+  VISITOR_CURRENCY_KEY,
   computeDraft,
   currencyForLocale,
   decimalMarkFor,
@@ -16,18 +16,22 @@ import {
   parseDraft,
   type CalcDraft,
   type CalcField,
+  type CalcFieldKey,
   type WeighableKey,
 } from "@/lib/calculator";
 import { NISAB_GOLD_GRAMS, NISAB_SILVER_GRAMS } from "@/lib/nisab";
 import { KARAT_PURITY } from "@/lib/metals";
 import { formatMoney, formatPercent } from "@/lib/money";
-import { readStoredValue, useHydrated } from "@/lib/client-store";
+import { readStoredValue, setStoredValue, useHydrated } from "@/lib/client-store";
 import { track } from "@/lib/analytics";
-import { currencyName } from "@/lib/currencies";
+import { CurrencyOptions } from "@/components/public/VisitorCurrency";
 import { LOCALE_INFO, fmt, type Locale } from "@/i18n/config";
 import type { Messages } from "@/i18n/messages/en";
 
 export type CalcMessages = Messages["calc"];
+
+/** What most people hold; everything else waits behind "More kinds of wealth". */
+const COMMON_FIELDS = new Set<CalcFieldKey>(["cash", "bank", "gold", "silver", "jewellery"]);
 
 /**
  * The public calculator. The server renders it empty; once in the browser it
@@ -98,7 +102,10 @@ function storedOrFresh(wanted: string | null): CalcDraft {
     // Prices were per gram in the old currency; they are fetched again.
     return { ...draft, currency: wanted, goldPrice: "", silverPrice: "", pricesAsOf: null };
   }
-  return emptyDraft(wanted ?? currencyForLocale(locale), decimalMarkFor(locale));
+  // A currency picked on another page (the beginner's check, a tool) carries over.
+  const picked = readStoredValue(VISITOR_CURRENCY_KEY);
+  const known = picked && /^[A-Z]{3}$/.test(picked) ? picked : null;
+  return emptyDraft(wanted ?? known ?? currencyForLocale(locale), decimalMarkFor(locale));
 }
 
 type PriceState =
@@ -121,10 +128,21 @@ function Calculator({
 }) {
   const intl = LOCALE_INFO[locale].intl;
   const [draft, setDraft] = useState<CalcDraft>(initial);
-  // A first visit fetches today's prices straight away (see the effect below).
-  const autoFetch = live && !initial.goldPrice && !initial.silverPrice;
+  // Live prices are fetched afresh on every visit, so a draft from last week
+  // is weighed against today's nisab. Prices the visitor typed are left alone.
+  const typedPrices = Boolean(initial.goldPrice || initial.silverPrice) && !initial.pricesAsOf;
+  const autoFetch = live && !typedPrices;
   const [price, setPrice] = useState<PriceState>(
     autoFetch ? { status: "loading" } : { status: "idle" },
+  );
+  const [ownPricesOpen, setOwnPricesOpen] = useState(live && typedPrices);
+  const [moreOpen, setMoreOpen] = useState(() =>
+    CALC_FIELDS.some(
+      (f) =>
+        !COMMON_FIELDS.has(f.key) &&
+        (parseAmount(initial.amounts[f.key], initial.decimal) > 0 ||
+          Boolean(f.portion && initial.portions[f.portion])),
+    ),
   );
   const requested = useRef<string | null>(null);
   const outcome = useMemo(() => computeDraft(draft), [draft]);
@@ -181,6 +199,8 @@ function Calculator({
         // The server's message is English; the page's own words are clearer.
         message: m.pricesUnavailable,
       });
+      // Nothing to suggest: show the boxes to type today's prices in.
+      setOwnPricesOpen(true);
       return;
     }
     setDraft((d) =>
@@ -226,6 +246,8 @@ function Calculator({
     // Prices are per gram in the old currency; they no longer apply.
     update({ currency, goldPrice: "", silverPrice: "", pricesAsOf: null });
     fetchPrices(currency);
+    // The other public pages follow the same choice.
+    setStoredValue(VISITOR_CURRENCY_KEY, currency);
   }
 
   function clearAll() {
@@ -248,83 +270,166 @@ function Calculator({
     track("Calculated");
   }, [answered]);
 
-  const goldNisab = NISAB_GOLD_GRAMS * parseAmount(draft.goldPrice, draft.decimal);
-  const silverNisab = NISAB_SILVER_GRAMS * parseAmount(draft.silverPrice, draft.decimal);
+  const goldPerGram = parseAmount(draft.goldPrice, draft.decimal);
+  const silverPerGram = parseAmount(draft.silverPrice, draft.decimal);
+  const goldNisab = NISAB_GOLD_GRAMS * goldPerGram;
+  const silverNisab = NISAB_SILVER_GRAMS * silverPerGram;
+
+  const holding = (field: CalcField) => (
+    <HoldingField
+      key={field.key}
+      field={field}
+      draft={draft}
+      currency={c}
+      m={m}
+      onAmount={(v) => updateIn("amounts", field.key, v)}
+      onByWeight={(v) => setByWeight(field.key as WeighableKey, v)}
+      onGrams={(v) => updateIn("grams", field.key as WeighableKey, v)}
+      onPurity={(v) => updateIn("purity", field.key as WeighableKey, v)}
+      onPortion={(v) => field.portion && updateIn("portions", field.portion, v)}
+      onJewellery={(v) => update({ jewelleryCounted: v })}
+    />
+  );
 
   return (
     <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
       <div className="space-y-10 print:hidden">
-        {/* 1. Prices */}
-        <section aria-labelledby="calc-prices" className="card p-5 sm:p-6">
+        {/* 1. Currency, with today's prices filled in for it */}
+        <section aria-labelledby="calc-currency-title" className="card p-5 sm:p-6">
           <p className="label text-brassDeep">{fmt(m.step, { n: 1 })}</p>
-          <h2 id="calc-prices" className="mt-1 font-serif text-xl text-ink">
-            {m.pricesTitle}
+          <h2 id="calc-currency-title" className="mt-1 font-serif text-xl text-ink">
+            <label htmlFor="calc-currency">{m.yourCurrency}</label>
           </h2>
-          <p className="mt-1 text-sm text-sage">{m.pricesLede}</p>
+          <p className="mt-1 text-sm text-sage">{m.currencyHint}</p>
+          <select
+            id="calc-currency"
+            className="field mt-4 text-base sm:max-w-sm"
+            value={c}
+            onChange={(e) => changeCurrency(e.target.value)}
+          >
+            <CurrencyOptions value={c} locale={locale} />
+          </select>
 
-          <div className="mt-5 grid gap-4 sm:grid-cols-3">
-            <div>
-              <label className="label mb-1.5" htmlFor="calc-currency">
-                {m.currency}
-              </label>
-              <select
-                id="calc-currency"
-                className="field"
-                value={c}
-                onChange={(e) => changeCurrency(e.target.value)}
-              >
-                {(CALC_CURRENCIES as readonly string[]).includes(c) ? null : (
-                  <option value={c}>{c}</option>
-                )}
-                {CALC_CURRENCIES.map((code) => (
-                  <option key={code} value={code}>
-                    {code} · {currencyName(code, locale)}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <PriceInput
-              id="calc-gold-price"
-              label={m.goldPerGram}
-              currency={c}
-              value={draft.goldPrice}
-              onChange={(v) => typePrice({ goldPrice: v })}
-            />
-            <PriceInput
-              id="calc-silver-price"
-              label={m.silverPerGram}
-              currency={c}
-              value={draft.silverPrice}
-              onChange={(v) => typePrice({ silverPrice: v })}
-            />
+          <div className="mt-5 border-t border-mist pt-4" aria-live="polite">
+            <p className="text-sm text-ink">
+              <span className="label inline">{m.pricesTitle}</span>{" "}
+              {goldPerGram > 0 || silverPerGram > 0 ? (
+                <span className="nums">
+                  {fmt(m.pricesLine, {
+                    gold: goldPerGram > 0 ? money(goldPerGram) : "—",
+                    silver: silverPerGram > 0 ? money(silverPerGram) : "—",
+                  })}
+                </span>
+              ) : price.status === "loading" ? null : (
+                <span className="text-sage">—</span>
+              )}
+            </p>
+            <p className="mt-1 min-h-[1.25rem] text-xs text-sage">
+              {price.status === "loading"
+                ? m.fetching
+                : price.status === "error"
+                  ? price.message
+                  : price.status === "ok" && draft.pricesAsOf
+                    ? fmt(m.livePricesFrom, {
+                        source: price.source,
+                        when: priceTime(draft.pricesAsOf, intl),
+                      })
+                    : draft.pricesAsOf
+                      ? fmt(m.pricesFetched, {
+                          when: new Date(draft.pricesAsOf).toLocaleDateString(intl),
+                        })
+                      : draft.goldPrice || draft.silverPrice
+                        ? m.usingOwnPrices
+                        : null}{" "}
+              {price.status !== "loading" ? (
+                <button
+                  type="button"
+                  className="text-pine underline-offset-2 hover:underline"
+                  onClick={() => fetchPrices(c)}
+                >
+                  {draft.pricesAsOf ? m.refreshPrices : m.fetchPrices}
+                </button>
+              ) : null}
+            </p>
           </div>
 
-          <p className="mt-3 min-h-[1.25rem] text-xs text-sage" aria-live="polite">
-            {price.status === "loading"
-              ? m.fetching
-              : price.status === "error"
-                ? price.message
-                : price.status === "ok" && draft.pricesAsOf
-                  ? fmt(m.livePricesFrom, {
-                      source: price.source,
-                      when: new Date(draft.pricesAsOf).toLocaleString(intl),
-                    })
-                  : draft.pricesAsOf
-                    ? fmt(m.pricesFetched, {
-                        when: new Date(draft.pricesAsOf).toLocaleDateString(intl),
-                      })
-                    : null}{" "}
-            {price.status !== "loading" ? (
-              <button
-                type="button"
-                className="text-pine underline-offset-2 hover:underline"
-                onClick={() => fetchPrices(c)}
-              >
-                {draft.goldPrice || draft.silverPrice ? m.refreshPrices : m.fetchPrices}
-              </button>
-            ) : null}
-          </p>
+          <details
+            className="group mt-3"
+            open={ownPricesOpen}
+            onToggle={(e) => setOwnPricesOpen(e.currentTarget.open)}
+          >
+            <summary className="cursor-pointer text-sm text-pine underline-offset-2 hover:underline">
+              {m.enterOwnPrices}
+            </summary>
+            <p className="mt-2 text-xs leading-relaxed text-sage">{m.pricesLede}</p>
+            <div className="mt-3 grid gap-4 sm:grid-cols-2">
+              <PriceInput
+                id="calc-gold-price"
+                label={m.goldPerGram}
+                currency={c}
+                value={draft.goldPrice}
+                onChange={(v) => typePrice({ goldPrice: v })}
+              />
+              <PriceInput
+                id="calc-silver-price"
+                label={m.silverPerGram}
+                currency={c}
+                value={draft.silverPrice}
+                onChange={(v) => typePrice({ silverPrice: v })}
+              />
+            </div>
+          </details>
+        </section>
 
+        {/* 2. Holdings */}
+        <section aria-labelledby="calc-own" className="card p-5 sm:p-6">
+          <p className="label text-brassDeep">{fmt(m.step, { n: 2 })}</p>
+          <h2 id="calc-own" className="mt-1 font-serif text-xl text-ink">
+            {m.ownTitle}
+          </h2>
+          <p className="mt-1 text-sm text-sage">{m.ownLede}</p>
+          <div className="mt-5 divide-y divide-mist">
+            {CALC_FIELDS.filter((f) => COMMON_FIELDS.has(f.key)).map(holding)}
+          </div>
+          <details
+            className="mt-2 border-t border-mist pt-4"
+            open={moreOpen}
+            onToggle={(e) => setMoreOpen(e.currentTarget.open)}
+          >
+            <summary className="cursor-pointer">
+              <span className="text-sm font-medium text-pine">{m.moreKinds}</span>
+              <span className="mt-0.5 block text-xs text-sage">{m.moreKindsHint}</span>
+            </summary>
+            <div className="mt-2 divide-y divide-mist">
+              {CALC_FIELDS.filter((f) => !COMMON_FIELDS.has(f.key)).map(holding)}
+            </div>
+          </details>
+        </section>
+
+        {/* 3. Debts */}
+        <section aria-labelledby="calc-owe" className="card p-5 sm:p-6">
+          <p className="label text-brassDeep">{fmt(m.step, { n: 3 })}</p>
+          <h2 id="calc-owe" className="mt-1 font-serif text-xl text-ink">
+            {m.oweTitle}
+          </h2>
+          <p className="mt-1 text-sm text-sage">{m.oweLede}</p>
+          <div className="mt-4 max-w-xs">
+            <MoneyInput
+              id="calc-debts"
+              label={m.debtsDueNow}
+              currency={c}
+              value={draft.debts}
+              onChange={(v) => update({ debts: v })}
+            />
+          </div>
+        </section>
+
+        {/* The choices scholars differ on, already set to the common ones. */}
+        <details className="card p-5 sm:p-6">
+          <summary className="cursor-pointer">
+            <span className="font-serif text-lg text-ink">{m.optionsTitle}</span>
+            <span className="mt-0.5 block text-sm text-sage">{m.optionsHint}</span>
+          </summary>
           <fieldset className="mt-5">
             <legend className="label mb-2">{m.nisabStandard}</legend>
             <div className="grid gap-2 sm:grid-cols-2">
@@ -348,50 +453,6 @@ function Calculator({
               />
             </div>
           </fieldset>
-        </section>
-
-        {/* 2. Holdings */}
-        <section aria-labelledby="calc-own" className="card p-5 sm:p-6">
-          <p className="label text-brassDeep">{fmt(m.step, { n: 2 })}</p>
-          <h2 id="calc-own" className="mt-1 font-serif text-xl text-ink">
-            {m.ownTitle}
-          </h2>
-          <p className="mt-1 text-sm text-sage">{m.ownLede}</p>
-          <div className="mt-5 divide-y divide-mist">
-            {CALC_FIELDS.map((field) => (
-              <HoldingField
-                key={field.key}
-                field={field}
-                draft={draft}
-                currency={c}
-                m={m}
-                onAmount={(v) => updateIn("amounts", field.key, v)}
-                onByWeight={(v) => setByWeight(field.key as WeighableKey, v)}
-                onGrams={(v) => updateIn("grams", field.key as WeighableKey, v)}
-                onPurity={(v) => updateIn("purity", field.key as WeighableKey, v)}
-                onPortion={(v) => field.portion && updateIn("portions", field.portion, v)}
-                onJewellery={(v) => update({ jewelleryCounted: v })}
-              />
-            ))}
-          </div>
-        </section>
-
-        {/* 3. Debts */}
-        <section aria-labelledby="calc-owe" className="card p-5 sm:p-6">
-          <p className="label text-brassDeep">{fmt(m.step, { n: 3 })}</p>
-          <h2 id="calc-owe" className="mt-1 font-serif text-xl text-ink">
-            {m.oweTitle}
-          </h2>
-          <p className="mt-1 text-sm text-sage">{m.oweLede}</p>
-          <div className="mt-4 max-w-xs">
-            <MoneyInput
-              id="calc-debts"
-              label={m.debtsDueNow}
-              currency={c}
-              value={draft.debts}
-              onChange={(v) => update({ debts: v })}
-            />
-          </div>
           <fieldset className="mt-6">
             <legend className="label mb-2">{m.yearBasis}</legend>
             <div className="grid gap-2 sm:grid-cols-2">
@@ -411,7 +472,7 @@ function Calculator({
               />
             </div>
           </fieldset>
-        </section>
+        </details>
       </div>
 
       {/* Result */}
@@ -498,6 +559,23 @@ function Calculator({
             <p className="mt-4 text-xs text-warn">{m.weightPriceMissing}</p>
           ) : null}
 
+          {!empty && !outcome.needsPrices ? (
+            result.isDue ? (
+              <div className="mt-5 border-t border-mist pt-4">
+                <p className="text-sm font-medium text-ink">{m.nextTitle}</p>
+                <ol className="mt-2 list-decimal space-y-1.5 ps-5 text-sm leading-relaxed text-sage">
+                  {m.nextSteps.map((step) => (
+                    <li key={step}>{step}</li>
+                  ))}
+                </ol>
+              </div>
+            ) : (
+              <p className="mt-5 border-t border-mist pt-4 text-sm leading-relaxed text-sage">
+                {m.belowNext}
+              </p>
+            )
+          ) : null}
+
           <p className="mt-5 text-xs leading-relaxed text-sage">{m.hawlNote}</p>
 
           <div className="mt-5 flex flex-wrap gap-2 print:hidden">
@@ -537,6 +615,13 @@ function Calculator({
       ) : null}
     </div>
   );
+}
+
+/** "7 Oct 2026, 6:43 p.m", without a final dot: the sentence supplies one. */
+function priceTime(iso: string, intl: string): string {
+  return new Date(iso)
+    .toLocaleString(intl, { dateStyle: "medium", timeStyle: "short" })
+    .replace(/\.$/, "");
 }
 
 function purityOptionsFor(

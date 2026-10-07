@@ -15,6 +15,7 @@ const TRANSLATED: { path: string; priority: number; changeFrequency: Freq }[] =
   [
     { path: "/", priority: 1, changeFrequency: "monthly" },
     { path: "/calculator", priority: 0.9, changeFrequency: "monthly" },
+    { path: "/start", priority: 0.9, changeFrequency: "monthly" },
     { path: "/nisab", priority: 0.8, changeFrequency: "hourly" },
     ...CALC_CURRENCIES.map((c) => ({
       path: `/nisab/${c.toLowerCase()}`,

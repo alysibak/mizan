@@ -62,8 +62,24 @@ export default function LandingView({ locale }: { locale: Locale }) {
             >
               {m.lede}
             </p>
+            <Link
+              href={localePath(locale, "/start")}
+              className="animate-fade-up group mt-8 flex max-w-xl items-center justify-between gap-4 border border-brass/60 bg-paper/80 px-5 py-4 transition hover:border-brassDeep"
+              style={{ animationDelay: "110ms" }}
+            >
+              <span>
+                <span className="block font-serif text-xl text-ink">{m.newHere}</span>
+                <span className="mt-0.5 block text-sm text-sage">{m.newHereHint}</span>
+              </span>
+              <span
+                className="text-2xl text-brassDeep transition group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1"
+                aria-hidden
+              >
+                →
+              </span>
+            </Link>
             <div
-              className="animate-fade-up mt-10 flex flex-wrap items-center gap-3"
+              className="animate-fade-up mt-6 flex flex-wrap items-center gap-3"
               style={{ animationDelay: "140ms" }}
             >
               <Link href={calculator} className="btn-primary px-6 py-3 text-base">

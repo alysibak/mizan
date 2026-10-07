@@ -44,6 +44,11 @@ export default function CalculatorView({ locale }: { locale: Locale }) {
           <p className="label text-brassDeep">{m.eyebrow}</p>
           <h1 className="mt-2 font-serif text-4xl leading-tight text-ink sm:text-5xl">{m.title}</h1>
           <p className="mt-4 text-base leading-relaxed text-sage">{m.lede}</p>
+          <p className="mt-3 text-sm">
+            <Link href={localePath(locale, "/start")} className="font-medium text-pine hover:underline">
+              {all.landing.newHere}
+            </Link>
+          </p>
         </header>
 
         <div className="mt-10">

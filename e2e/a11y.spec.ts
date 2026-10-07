@@ -34,6 +34,8 @@ for (const scheme of ["light", "dark"] as const) {
       for (const path of [
         "/",
         "/calculator",
+        "/start",
+        "/ur/start",
         "/nisab",
         "/nisab/usd",
         "/ar",
@@ -87,6 +89,8 @@ for (const scheme of ["light", "dark"] as const) {
         "/tools/asnaf",
         "/screening",
         "/mirath",
+        "/privacy",
+        "/method",
       ]) {
         await page.goto(path);
         await page.waitForLoadState("load");

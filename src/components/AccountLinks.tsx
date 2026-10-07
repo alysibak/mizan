@@ -29,17 +29,19 @@ export default function AccountLinks({
   );
   if (isSignedIn) {
     return (
-      <Link href="/dashboard" className="btn-primary">
+      <Link href="/dashboard" className="btn-primary whitespace-nowrap px-3 sm:px-4">
         {yourLedger}
       </Link>
     );
   }
+  // On a phone there is room for one: returning visitors need "Sign in", and
+  // new ones meet "Open a free ledger" on the page itself.
   return (
     <>
-      <Link href="/login" className="text-sage hover:text-ink">
+      <Link href="/login" className="whitespace-nowrap text-sage hover:text-ink">
         {signIn}
       </Link>
-      <Link href="/register" className="btn-primary">
+      <Link href="/register" className="btn-primary hidden whitespace-nowrap sm:inline-flex">
         {openLedger}
       </Link>
     </>

@@ -52,6 +52,7 @@ test("the calculator answers without an account, and the answer comes along", as
   const result = page.locator("#result");
   await expect(result).toContainText("$568.75");
   await expect(result).toContainText("$22,750.00");
+  await expect(result).toContainText("What to do now");
   await expectNoHorizontalScroll(page);
   await expectUniqueIds(page);
 
@@ -151,7 +152,7 @@ test("oversized request bodies are refused before they are read", async ({ reque
   expect(res.status()).toBe(413);
 });
 
-test("signed in, the public pages offer your ledger, and the app links to them", async ({
+test("signed in, the about pages open inside the app and public pages offer your ledger", async ({
   page,
 }) => {
   await registerAndSetUp(page, {
@@ -159,21 +160,77 @@ test("signed in, the public pages offer your ledger, and the app links to them",
     hawlStart: daysAgo(30),
     amount: "1000",
   });
+  // Today's prices can be saved in one step, as the balance page's stale notice does.
+  const saved = await page.evaluate(async () => {
+    const res = await fetch("/api/settings/metals", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ goldPricePerGram: 101, silverPricePerGram: 1.3 }),
+    });
+    const settings = await (await fetch("/api/settings")).json();
+    return [res.status, settings.goldPricePerGram, settings.silverPricePerGram];
+  });
+  expect(saved).toEqual([200, 101, 1.3]);
+
   // A session from before the hint existed: the next page view restores it.
   await page.context().clearCookies({ name: "mizan_signed_in" });
   await page.goto("/dashboard");
   const about = page.getByRole("navigation", { name: "About Mizan" });
   await about.getByRole("link", { name: "Privacy" }).click();
   await page.waitForURL("**/privacy");
+  // Privacy reads as part of the ledger: the app's own navigation, no public header.
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Privacy policy");
+  await expect(page.getByRole("link", { name: "Balance" }).first()).toBeVisible();
+  await expect(page.getByRole("banner").getByRole("link", { name: "Sign in" })).toHaveCount(0);
+  await page.goto("/method");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("The method");
+  await expect(page.getByRole("link", { name: "Balance" }).first()).toBeVisible();
+
+  await page.goto("/calculator");
   const header = page.getByRole("banner");
   await expect(header.getByRole("link", { name: "Your ledger" })).toBeVisible();
   await expect(header.getByRole("link", { name: "Sign in" })).toHaveCount(0);
   await header.getByRole("link", { name: "Your ledger" }).click();
   await page.waitForURL(/\/dashboard/);
 
-  // Signed out, the same page offers sign-in again.
+  // Signed out, the same pages are public again and offer sign-in.
   await page.evaluate(() => fetch("/api/auth/logout", { method: "POST" }));
   await page.goto("/privacy");
   await expect(page.getByRole("banner").getByRole("link", { name: "Sign in" })).toBeVisible();
   await expect(page.getByRole("banner").getByRole("link", { name: "Your ledger" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Balance" })).toHaveCount(0);
+});
+
+test("a beginner is asked three questions and sent on with today’s nisab", async ({ page }) => {
+  const errors = watchConsole(page);
+  await page.route("**/api/metals?*", (route) => route.fulfill({ json: PRICES }));
+  await page.goto("/");
+  await page.getByRole("link", { name: /New to zakat\? Start here/ }).click();
+  await page.waitForURL("**/start");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Zakat, in plain words");
+
+  await page.locator("#check-currency").selectOption("USD");
+  const check = page.locator("section", { has: page.getByRole("heading", { name: "Do I have to pay zakat?" }) });
+  await check.getByRole("button", { name: "Yes", exact: true }).click();
+  // 595 g × $1.20 = $714
+  await expect(check.getByText(/Are your savings worth more than \S*714\?/)).toBeVisible();
+  await check.getByRole("button", { name: "No", exact: true }).last().click();
+  await expect(check.getByText("You do not have to pay zakat now")).toBeVisible();
+
+  await check.getByRole("button", { name: "Start again" }).click();
+  for (let i = 0; i < 3; i++) await check.getByRole("button", { name: "Yes", exact: true }).nth(i).click();
+  await expect(check.getByText("You probably have to pay zakat")).toBeVisible();
+  await expectNoHorizontalScroll(page);
+  await expectUniqueIds(page);
+
+  await check.getByRole("link", { name: "Work out my zakat" }).click();
+  await page.waitForURL(/\/calculator/);
+  await expect(page.locator("#calc-currency")).toHaveValue("USD");
+  await expect(page.locator("#calc-silver-price")).toHaveValue("1.2");
+  // Everyday holdings first; the rest wait behind one click.
+  await expect(page.locator("#calc-cash")).toBeVisible();
+  await expect(page.locator("#calc-crypto")).toBeHidden();
+  await page.getByText("More kinds of wealth").click();
+  await expect(page.locator("#calc-crypto")).toBeVisible();
+  expect(errors).toEqual([]);
 });

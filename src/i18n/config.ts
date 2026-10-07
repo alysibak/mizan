@@ -51,6 +51,17 @@ export function splitLocale(pathname: string): { locale: Locale; path: string } 
   return { locale: DEFAULT_LOCALE, path: pathname || "/" };
 }
 
+/** Whether a path (without its language prefix) has a page in every language. */
+export function isLocalizedPath(path: string): boolean {
+  return (
+    path === "/" ||
+    path === "/start" ||
+    path === "/calculator" ||
+    path === "/nisab" ||
+    /^\/nisab\/[a-z]{3}$/.test(path)
+  );
+}
+
 /** hreflang alternates for a page that exists in every language. */
 export function languageAlternates(path: string): Record<string, string> {
   const out: Record<string, string> = {};

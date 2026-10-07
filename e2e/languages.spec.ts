@@ -46,10 +46,40 @@ test("every language has its landing page and calculator, linked for search engi
     .evaluateAll((els) => els.map((e) => e.getAttribute("hreflang")));
   expect(hreflang).toEqual(expect.arrayContaining(["en", "ar", "ur", "id", "ms", "tr", "fr", "x-default"]));
 
-  // The language picker keeps you on the same page.
-  await page.getByRole("link", { name: "Türkçe" }).click();
+  // The footer's language links keep you on the same page.
+  await page.getByRole("contentinfo").getByRole("link", { name: "Türkçe" }).click();
   await page.waitForURL("**/tr/calculator");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Bu yıl zekâtınız ne kadar?");
+  for (const locale of ["ar", "ur", "id", "ms", "tr", "fr"]) {
+    expect((await request.get(`/${locale}/start`)).status(), locale).toBe(200);
+  }
+});
+
+test("the header switches language in two taps, and the choice is offered back", async ({
+  page,
+}) => {
+  await page.goto("/calculator");
+  const header = page.getByRole("banner");
+  await header.locator("summary", { hasText: "English" }).click();
+  await header.getByRole("link", { name: "اردو" }).click();
+  await page.waitForURL("**/ur/calculator");
+  await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+  await expect(page.getByRole("banner").getByText("یہ صفحہ اردو میں پڑھیں")).toHaveCount(0);
+
+  // Landing on an English page later, the chosen language is one tap away.
+  await page.goto("/nisab");
+  const offer = page.getByRole("link", { name: "یہ صفحہ اردو میں پڑھیں" });
+  await expect(offer).toBeVisible();
+  await offer.click();
+  await page.waitForURL("**/ur/nisab");
+
+  // "Not now" puts it away.
+  await page.goto("/start");
+  await page.getByRole("button", { name: "ابھی نہیں" }).click();
+  await expect(page.getByRole("link", { name: "یہ صفحہ اردو میں پڑھیں" })).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Zakat, in plain words");
+  await expect(page.getByRole("link", { name: "یہ صفحہ اردو میں پڑھیں" })).toHaveCount(0);
 });
 
 test("nisab pages answer for every currency and lead into the calculator", async ({ page }) => {

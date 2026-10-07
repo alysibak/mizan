@@ -111,6 +111,12 @@ export default function Nav({
         >
           How numbers are made
         </Link>
+        <Link
+          href="/privacy"
+          className="block border-l-2 border-transparent px-3 py-2 text-xs text-sage hover:text-ink"
+        >
+          Privacy
+        </Link>
         <button
           type="button"
           onClick={() => void signOut(router)}

@@ -26,7 +26,9 @@ expires.**
   database-backed sessions). No third-party auth service.
 - Nisab depends on gold and silver prices. A free, keyless source can suggest
   today's prices, but the figure you confirm is the source of truth, and
-  everything works with no outside service at all.
+  everything works with no outside service at all. When a ledger's saved
+  prices go stale, the balance page offers today's in one tap; it never
+  changes them on its own.
 - Stock screening takes figures by hand, so it never depends on a paid
   financial data API either.
 
@@ -37,16 +39,29 @@ work.
 
 **For everyone, no account**
 
-- **Zakat calculator** (`/calculator`). Live gold and silver prices in 59
-  currencies (picked from the visitor's region), gold or silver nisab, worn
-  jewellery by school, metal by weight and karat, long-term shares and pensions
-  at a share you set, and debts due now. It runs in the browser; figures stay
-  in that browser's storage and come along into a new account at setup.
-- **Seven languages.** The landing page, the calculator, its FAQ, and the nisab
-  pages read in English, Arabic, Urdu, Indonesian, Malay, Turkish, and French
-  (`/ar`, `/ur`, `/id`, `/ms`, `/tr`, `/fr`). Arabic and Urdu are right to left
-  with an Arabic-script face, and amounts typed in Arabic-Indic digits work.
-  Every page links its translations for search engines.
+- **Start here** (`/start`). Zakat for someone who knows nothing about it yet,
+  in short plain sentences: what it is, three yes-or-no questions that answer
+  "do I have to pay?" against today's nisab in their own currency, how much,
+  what counts and what does not, when, to whom, and the words they will meet.
+  The home page and the calculator lead to it first.
+- **Zakat calculator** (`/calculator`). The visitor's currency comes first
+  (named in their language, picked from their region or from any public page
+  they used before), and today's gold and silver prices are fetched afresh on
+  every visit unless they typed their own. The everyday holdings (cash, bank,
+  gold, silver, jewellery) come first; shares, crypto, business stock, money
+  owed, and pensions wait behind "More kinds of wealth", and the points
+  scholars differ on (gold or silver nisab, lunar or solar year) behind "How
+  zakat is counted", already set to the common choices. A result that is due
+  ends with what to do now. It runs in the browser; figures stay in that
+  browser's storage and come along into a new account at setup.
+- **Seven languages.** The landing page, the beginner's page, the calculator,
+  its FAQ, and the nisab pages read in English, Arabic, Urdu, Indonesian,
+  Malay, Turkish, and French (`/ar`, `/ur`, `/id`, `/ms`, `/tr`, `/fr`). A
+  language menu sits in the header on every screen size, and a visitor whose
+  browser (or earlier choice) prefers another language is offered the page in
+  it, in that language. Arabic and Urdu are right to left with an
+  Arabic-script face, and amounts typed in Arabic-Indic digits work. Every page
+  links its translations for search engines.
 - **Nisab today** (`/nisab`, `/nisab/{currency}`). Today's silver and gold
   thresholds in every currency, refreshed hourly, each with a link that opens
   the calculator in that currency. A shared nisab link previews that day's
@@ -212,11 +227,12 @@ src/
   app/
     page.tsx           landing (static)
     calculator/        public calculator (static)
-    [locale]/          the translated landing, calculator, and nisab pages
+    start/             zakat for beginners, with the "do I have to pay?" check
+    [locale]/          the translated landing, start, calculator, and nisab pages
     nisab/             nisab today, per currency (hourly)
     inheritance/ zakat-al-fitr/ halal-stocks/ qurbani/   free tools
     guides/            zakat on gold, savings, shares, crypto, pensions, property
-    privacy/ terms/ method/ trust/
+    privacy/ terms/ method/ trust/   inside the app's frame when signed in
     (auth)/            sign in, register, forgot
     reset/             new password from an emailed link
     (setup)/begin/     setup wizard

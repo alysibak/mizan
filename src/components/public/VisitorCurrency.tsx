@@ -10,12 +10,12 @@ import {
 import {
   CALC_CURRENCIES,
   CALC_STORAGE_KEY,
+  VISITOR_CURRENCY_KEY as KEY,
   currencyForLocale,
   parseDraft,
 } from "@/lib/calculator";
 import { currencyName } from "@/lib/currencies";
-
-const KEY = "mizan-visitor-currency";
+import { LOCALE_INFO, type Locale } from "@/i18n/config";
 
 /**
  * The currency a visitor without an account works in: the one they last
@@ -35,20 +35,45 @@ export function useVisitorCurrency(): [string, (code: string) => void] {
   return [currency, (code) => setStoredValue(KEY, code)];
 }
 
+/**
+ * Every currency as "Pakistani rupee (PKR)", in alphabetical order of the
+ * name in the page's language: people know their money by its name sooner
+ * than by its code.
+ */
+export function CurrencyOptions({ value, locale = "en" }: { value: string; locale?: Locale }) {
+  const intl = LOCALE_INFO[locale].intl;
+  const options = CALC_CURRENCIES.map((code) => ({ code, name: currencyName(code, locale) }));
+  options.sort((a, b) => a.name.localeCompare(b.name, intl));
+  const known = (CALC_CURRENCIES as readonly string[]).includes(value);
+  return (
+    <>
+      {known ? null : <option value={value}>{value}</option>}
+      {options.map(({ code, name }) => (
+        <option key={code} value={code}>
+          {name === code ? code : `${name} (${code})`}
+        </option>
+      ))}
+    </>
+  );
+}
+
 export function CurrencySelect({
   value,
   onChange,
   id = "tool-currency",
+  label = "Currency",
+  locale = "en",
 }: {
   value: string;
   onChange: (code: string) => void;
   id?: string;
+  label?: string;
+  locale?: Locale;
 }) {
-  const known = (CALC_CURRENCIES as readonly string[]).includes(value);
   return (
     <div>
       <label className="label mb-1.5" htmlFor={id}>
-        Currency
+        {label}
       </label>
       <select
         id={id}
@@ -56,12 +81,7 @@ export function CurrencySelect({
         value={value}
         onChange={(e) => onChange(e.target.value)}
       >
-        {known ? null : <option value={value}>{value}</option>}
-        {CALC_CURRENCIES.map((code) => (
-          <option key={code} value={code}>
-            {code} · {currencyName(code)}
-          </option>
-        ))}
+        <CurrencyOptions value={value} locale={locale} />
       </select>
     </div>
   );

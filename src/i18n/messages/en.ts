@@ -5,7 +5,9 @@
 const en = {
   common: {
     nav: {
+      start: "Start here",
       calculator: "Calculator",
+      nisab: "Nisab today",
       method: "Method",
       signIn: "Sign in",
       openLedger: "Open a ledger",
@@ -32,6 +34,11 @@ const en = {
     /** Appended to links that lead to pages only in English. */
     inEnglish: "",
     share: { button: "Share", whatsapp: "WhatsApp", copy: "Copy link", copied: "Link copied" },
+    /** The header's language menu. */
+    language: "Language",
+    /** Offered, in this language, to visitors whose browser prefers it. */
+    readHere: "Read this page in English",
+    notNow: "Not now",
   },
 
   landing: {
@@ -39,6 +46,8 @@ const en = {
     metaDescription:
       "A free, private zakat calculator and ledger. Weigh your wealth against nisab, track the hawl on the Hijri calendar, record zakat and sadaqah, and close each year with a clear statement.",
     eyebrow: "الميزان · the balance",
+    newHere: "New to zakat? Start here",
+    newHereHint: "Plain words and three quick questions. No sign-up.",
     title: "Zakat, worked out with care.",
     lede: "A free, private zakat calculator and ledger. Weigh what you hold against nisab with live metal prices, keep your hawl on the Hijri calendar, and close each year with a figure you can trust.",
     ctaCalculate: "Calculate your zakat",
@@ -131,6 +140,24 @@ const en = {
 
   calc: {
     step: "Step {n}",
+    yourCurrency: "Your currency",
+    currencyHint: "The money you count in. Amounts and today’s prices follow it.",
+    pricesLine: "Gold {gold} a gram · Silver {silver} a gram",
+    usingOwnPrices: "Using the prices you entered.",
+    enterOwnPrices: "Enter prices yourself",
+    moreKinds: "More kinds of wealth",
+    moreKindsHint: "Shares, crypto, business stock, money owed to you, pensions, and more.",
+    optionsTitle: "How zakat is counted",
+    optionsHint:
+      "Already set to the most common choices. Change them only if you follow a different view.",
+    nextTitle: "What to do now",
+    nextSteps: [
+      "Give it to people in need, yourself or through a mosque or charity you trust.",
+      "Pay it soon. Once zakat is due, it should not be delayed.",
+      "Note today’s date. In one Islamic year, on the same date, work it out again.",
+    ],
+    belowNext:
+      "You can still give sadaqah, charity by choice, at any time. Check again if your savings grow.",
     pricesTitle: "Today’s prices",
     pricesLede:
       "Nisab is set by the price of gold or silver. Filled in from a free public source when it answers; check it against your local market.",
@@ -245,6 +272,105 @@ const en = {
         hint: "Rental income saved, a deposit you will get back, and the like.",
       },
     },
+  },
+
+  start: {
+    metaTitle: "Zakat for beginners: do I have to pay, and how much?",
+    metaDescription:
+      "Zakat explained in plain words. Answer three simple questions to see if you have to pay, with today’s nisab in your own currency. Free, private, no sign-up.",
+    eyebrow: "New to zakat? Start here",
+    title: "Zakat, in plain words",
+    lede: "You do not need to know anything to begin. This page explains zakat simply, and three quick questions tell you whether you have to pay.",
+    whatTitle: "What is zakat?",
+    whatBody:
+      "Zakat is a yearly gift from your savings to people in need. It is one of the five pillars of Islam. If your savings stay above a set amount for a whole year, you give a small part of them: 2.5%. It purifies your wealth and helps the poor.",
+    checkTitle: "Do I have to pay zakat?",
+    checkLede: "Answer three questions. Nothing you choose here is saved or sent anywhere.",
+    showIn: "Amounts shown in",
+    q1: "Do you have any savings?",
+    q1Hint: "Count cash at home, money in the bank, and gold or silver you keep.",
+    q2: "Are your savings worth more than {amount}?",
+    q2NoPrice: "Are your savings worth more than the price of 595 grams of silver?",
+    q2Hint:
+      "This amount is called nisab: the price of 595 grams of silver today. Some scholars use gold instead, which is {gold}.",
+    q3: "Have you had at least this much for about a year?",
+    q3Hint:
+      "Zakat is due once your savings have stayed above nisab for one Islamic (lunar) year, about 354 days.",
+    yes: "Yes",
+    no: "No",
+    notSure: "I’m not sure",
+    noTitle: "You do not have to pay zakat now",
+    noBody:
+      "Zakat is only due on savings above nisab. You can still give charity (sadaqah) whenever you like, and it is rewarded. Check again if your savings grow.",
+    notYetTitle: "Not yet",
+    notYetBody:
+      "Zakat becomes due when your savings have stayed above nisab for one Islamic year. Note today’s date and check again in a year. A free ledger can count the year for you and remind you.",
+    yesTitle: "You probably have to pay zakat",
+    yesBody:
+      "Zakat is 2.5% of your savings: for every 1,000 you have, you give 25. The calculator adds everything up for you in a few minutes.",
+    unsureTitle: "Let’s add it up together",
+    unsureBody:
+      "That is fine. The calculator asks about each kind of saving, one at a time, and tells you whether zakat is due and how much.",
+    ctaCalculate: "Work out my zakat",
+    ctaYear: "Count the year for me",
+    startAgain: "Start again",
+    howMuchTitle: "How much do I give?",
+    howMuchBody:
+      "Zakat is 2.5% of your savings, which is one fortieth. To work it out, divide your savings by 40.",
+    howMuchExample: "Example: savings of 200,000 ÷ 40 = 5,000 zakat.",
+    countsTitle: "What counts",
+    counts: [
+      "Cash at home or in your wallet",
+      "Money in bank accounts",
+      "Gold and silver, including coins and bars",
+      "Shares, funds, and crypto",
+      "Goods your business holds to sell",
+      "Money others owe you that you expect back",
+    ],
+    notCountsTitle: "What does not count",
+    notCounts: [
+      "The home you live in",
+      "Your car, clothes, and furniture",
+      "Things you use every day, like your phone",
+      "Money you need for debts that are due now",
+    ],
+    jewelleryNote: "Jewellery you wear: scholars differ. The calculator lets you choose.",
+    whenTitle: "When do I pay?",
+    whenBody:
+      "Once a year. Many people pick a day, often in Ramadan, and add up their savings on that day every year. Once zakat is due, pay it without delay.",
+    whoTitle: "Who do I give it to?",
+    whoBody:
+      "To people in need: the poor, people who cannot meet their needs, people crushed by debt, travellers in difficulty, and the other groups named in the Quran (9:60). Many mosques and trusted charities collect it and pass it on. Zakat is not given to your parents or children, or by a husband to his wife: providing for them is already your duty. Other relatives in need can receive it.",
+    wordsTitle: "Words you will see",
+    words: [
+      {
+        term: "Nisab",
+        meaning:
+          "The least savings on which zakat is due: the price of 595 g of silver or 85 g of gold.",
+      },
+      {
+        term: "Hawl",
+        meaning: "One Islamic (lunar) year, about 354 days. Savings must stay above nisab this long.",
+      },
+      {
+        term: "Sadaqah",
+        meaning: "Any charity you give by choice, at any time, of any amount.",
+      },
+      {
+        term: "Zakat al-Fitr",
+        meaning:
+          "A small payment for each person in the family, given before the Eid prayer at the end of Ramadan. It is separate from zakat on savings.",
+      },
+      {
+        term: "Madhhab",
+        meaning:
+          "A school of Islamic law, such as Hanafi or Shafi‘i. Where they differ, Mizan lets you choose.",
+      },
+    ],
+    askTitle: "Still not sure?",
+    askBody:
+      "That is normal. Ask the imam at your local mosque, or someone of knowledge you trust. Mizan helps you add things up; it does not give rulings.",
+    guidesLink: "Read the zakat guides",
   },
 
   nisabPage: {

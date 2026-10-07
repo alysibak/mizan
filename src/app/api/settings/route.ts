@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
-import { and, eq, isNotNull, or } from "drizzle-orm";
 import type { BatchItem } from "drizzle-orm/batch";
 import { db } from "@/db";
-import { assets, settings } from "@/db/schema";
+import { settings } from "@/db/schema";
 import { getUserSettings } from "@/lib/session";
 import { firstIssue, settingsSchema } from "@/lib/validation";
-import { normalizeAsset } from "@/lib/asset-write";
+import { assetRevaluations } from "@/lib/asset-revalue";
 import { errorJson, readJson, signedInUser, writableUser } from "@/lib/api";
 
 export async function GET() {
@@ -61,31 +60,13 @@ export async function PUT(request: Request) {
   // whose currency becomes the base is a plain amount again, in the same write.
   const currencyChanged = parsed.data.currency !== current.currency;
   if (pricesChanged || currencyChanged) {
-    const special = await db
-      .select()
-      .from(assets)
-      .where(
-        and(
-          eq(assets.userId, user.id),
-          or(isNotNull(assets.grams), isNotNull(assets.foreignCurrency)),
-        ),
-      );
-    const prices = { goldPricePerGram: gold, silverPricePerGram: silver };
-    for (const asset of special) {
-      const next = normalizeAsset(asset, prices, parsed.data.currency);
-      const amount =
-        asset.foreignCurrency && !next.foreignCurrency
-          ? asset.foreignAmount ?? asset.amount // now held in the base currency
-          : next.amount;
-      if (amount !== asset.amount || next.foreignCurrency !== asset.foreignCurrency) {
-        statements.push(
-          db
-            .update(assets)
-            .set({ ...next, amount })
-            .where(and(eq(assets.id, asset.id), eq(assets.userId, user.id))),
-        );
-      }
-    }
+    statements.push(
+      ...(await assetRevaluations(
+        user.id,
+        { goldPricePerGram: gold, silverPricePerGram: silver },
+        parsed.data.currency,
+      )),
+    );
   }
 
   await db.batch(statements as [BatchItem<"sqlite">, ...BatchItem<"sqlite">[]]);

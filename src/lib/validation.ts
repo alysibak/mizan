@@ -209,6 +209,12 @@ export const givingSchema = z.object({
   date: isoDaySchema,
 });
 
+/** Today's metal prices, saved in one tap from the balance page. */
+export const metalPricesSchema = z.object({
+  goldPricePerGram: positive("Enter a gold price", 1e7),
+  silverPricePerGram: positive("Enter a silver price", 1e7),
+});
+
 export const settingsSchema = z.object({
   currency: currencySchema,
   nisabStandard: z.enum(["gold", "silver"]),

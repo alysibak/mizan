@@ -106,6 +106,7 @@ export default async function DashboardPage({
         metalsAgeDays={metals.ageDays}
         welcome={welcome === "1"}
         part="top"
+        currency={settings.currency}
       />
 
       {dueNow && (
