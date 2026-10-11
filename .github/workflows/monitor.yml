@@ -1,11 +1,14 @@
 name: Live site
 
 # Every two hours: is the production site up, and do live gold and silver
-# prices load? GitHub emails the repository owner when a scheduled run fails.
-# Point it at your domain with a repository variable PRODUCTION_URL
+# prices load? After each push to master, also: does production move to that
+# commit? GitHub emails the repository owner when a run fails. Point it at
+# your domain with a repository variable PRODUCTION_URL
 # (Settings → Secrets and variables → Actions → Variables).
 
 on:
+  push:
+    branches: [master]
   schedule:
     - cron: "23 */2 * * *"
   workflow_dispatch:
@@ -15,10 +18,27 @@ permissions: {}
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 16
     env:
       SITE: ${{ vars.PRODUCTION_URL || 'https://mizan-sandy-eight.vercel.app' }}
     steps:
+      - name: Production moves to the pushed commit
+        if: github.event_name == 'push'
+        timeout-minutes: 12
+        run: |
+          want="${GITHUB_SHA:0:7}"
+          got="unknown"
+          for _ in $(seq 1 40); do
+            got=$(curl -fsS --max-time 20 "$SITE/api/health" | jq -r '.commit // "an older build"' || echo "unreachable")
+            if [ "$got" = "$want" ]; then
+              echo "Production is serving $want."
+              exit 0
+            fi
+            echo "Production is serving $got; waiting for $want…"
+            sleep 15
+          done
+          echo "::error::Production is still serving $got, not $want. In Vercel, open the project's Deployments, then on the newest deployment choose ⋯ → Promote. A rollback or promote of an older deployment stops new ones from going live on their own."
+          exit 1
       - name: The site and its database answer
         run: |
           curl -fsS --retry 3 --retry-delay 15 --max-time 20 "$SITE/api/health" | tee /dev/stderr \
@@ -37,3 +57,10 @@ jobs:
             echo "/nisab/pkr is showing the unavailable notice"
             exit 1
           fi
+      - name: The beginner pages answer
+        run: |
+          for path in /start /ur/start /calculator; do
+            code=$(curl -sS -o /dev/null -w "%{http_code}" --retry 3 --retry-delay 15 --max-time 30 "$SITE$path")
+            echo "$path: $code"
+            [ "$code" = "200" ] || exit 1
+          done
