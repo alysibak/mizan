@@ -108,9 +108,12 @@ export default function PrivacyPage() {
         </p>
         <p>
           Your browser’s local storage keeps small conveniences on your device
-          only: the calculator draft, the language and currency you picked,
-          which setup step you reached, and notices you dismissed. Clearing
-          your browser data removes them.
+          only: the calculator draft, the language, currency, and text size
+          you picked, which setup step you reached, and notices you
+          dismissed. The browser also keeps copies of the public pages you
+          have opened (the beginner’s pages, the calculator, nisab today), so
+          they open without a signal; pages inside your account are never
+          kept. Clearing your browser data removes all of it.
         </p>
       </LegalSection>
 

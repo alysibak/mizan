@@ -27,6 +27,8 @@ import {
   type CalcField,
   type CalcFieldKey,
   type WeighableKey,
+  type WeightUnit,
+  weightUnitOf,
 } from "@/lib/calculator";
 import { NISAB_GOLD_GRAMS, NISAB_SILVER_GRAMS } from "@/lib/nisab";
 import { KARAT_PURITY, TOLA_GRAMS, usesTola } from "@/lib/metals";
@@ -313,7 +315,14 @@ function Calculator({
       m={m}
       onAmount={(v) => updateIn("amounts", field.key, v)}
       onByWeight={(v) => setByWeight(field.key as WeighableKey, v)}
-      onGrams={(v) => updateIn("grams", field.key as WeighableKey, v)}
+      onGrams={(v) =>
+        setDraft((d) => ({
+          ...d,
+          grams: { ...d.grams, [field.key]: v },
+          weightUnit: d.weightUnit ?? weightUnitOf(d),
+        }))
+      }
+      onUnit={(unit) => update({ weightUnit: unit })}
       onPurity={(v) => updateIn("purity", field.key as WeighableKey, v)}
       onPortion={(v) => field.portion && updateIn("portions", field.portion, v)}
       onJewellery={(v) => update({ jewelleryCounted: v })}
@@ -737,6 +746,44 @@ export function Choice({
   );
 }
 
+/** Grams or tola, for every weight in the draft. */
+export function WeightUnitSwitch({
+  unit,
+  onUnit,
+  m,
+  className = "",
+}: {
+  unit: WeightUnit;
+  onUnit: (unit: WeightUnit) => void;
+  m: CalcMessages;
+  className?: string;
+}) {
+  return (
+    <div className={"flex items-center gap-1.5 text-xs " + className} role="group" aria-label={m.weighIn}>
+      <span className="text-sage">{m.weighIn}</span>
+      {(
+        [
+          ["g", m.unitGrams],
+          ["tola", m.unitTola],
+        ] as const
+      ).map(([value, label]) => (
+        <button
+          key={value}
+          type="button"
+          aria-pressed={unit === value}
+          onClick={() => onUnit(value)}
+          className={
+            "min-h-[32px] border px-2.5 transition " +
+            (unit === value ? "border-pine bg-pine/10 font-medium text-pine" : "border-mist text-ink hover:border-sage")
+          }
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 /**
  * "Given so far", for anyone who gives their zakat in parts through the year
  * or through Ramadan: what is left, and a word when it is all given.
@@ -838,6 +885,7 @@ function HoldingField({
   onAmount,
   onByWeight,
   onGrams,
+  onUnit,
   onPurity,
   onPortion,
   onJewellery,
@@ -849,6 +897,7 @@ function HoldingField({
   onAmount: (v: string) => void;
   onByWeight: (v: boolean) => void;
   onGrams: (v: string) => void;
+  onUnit: (unit: WeightUnit) => void;
   onPurity: (v: string) => void;
   onPortion: (v: string) => void;
   onJewellery: (v: boolean) => void;
@@ -857,6 +906,7 @@ function HoldingField({
   const weighKey = field.metal ? (field.key as WeighableKey) : null;
   const byWeight = weighKey ? Boolean(draft.byWeight[weighKey]) : false;
   const purityOptions = purityOptionsFor(weighKey, m);
+  const unit = weightUnitOf(draft);
   const text = m.fields[field.key];
   const explain = useContext(ExplainContext);
   const explainFor = (key: CalcFieldKey): string | null =>
@@ -919,7 +969,7 @@ function HoldingField({
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="sr-only" htmlFor={`${id}-grams`}>
-                {fmt(m.grams, { label: text.label })}
+                {fmt(unit === "tola" ? m.tolaLabel : m.grams, { label: text.label })}
               </label>
               <div className="relative">
                 <input
@@ -933,7 +983,7 @@ function HoldingField({
                   onChange={(e) => onGrams(e.target.value)}
                 />
                 <span className="pointer-events-none absolute inset-y-0 end-3 flex items-center text-xs text-sage">
-                  {m.gramUnit}
+                  {unit === "tola" ? m.tolaUnit : m.gramUnit}
                 </span>
               </div>
             </div>
@@ -954,6 +1004,7 @@ function HoldingField({
                 ))}
               </select>
             </div>
+            <WeightUnitSwitch unit={unit} onUnit={onUnit} m={m} className="col-span-2" />
           </div>
         ) : (
           <div className="relative">

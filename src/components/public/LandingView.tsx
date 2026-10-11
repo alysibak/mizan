@@ -4,6 +4,14 @@ import SiteHeader from "@/components/SiteHeader";
 import SiteFooter, { toolLinks } from "@/components/SiteFooter";
 import JsonLd from "@/components/JsonLd";
 import RamadanCountdown from "@/components/public/RamadanCountdown";
+import {
+  IconBalance,
+  IconCash,
+  IconCheckCircle,
+  IconCoins,
+  IconGiving,
+  IconGoldBar,
+} from "@/components/icons";
 import { LOCALE_INFO, fmt, languageAlternates, localePath, type Locale } from "@/i18n/config";
 import { messagesFor } from "@/i18n/messages";
 import { formatMoney } from "@/lib/money";
@@ -128,6 +136,42 @@ export default function LandingView({ locale }: { locale: Locale }) {
             </dl>
             <figcaption className="mt-4 text-xs text-sage">{m.sample.caption}</figcaption>
           </figure>
+        </section>
+
+        {/* One tap to the task, for anyone who would rather not read first. */}
+        <section className="relative z-10 px-5 pb-16 md:px-10" aria-labelledby="choose">
+          <div className="mx-auto max-w-6xl">
+            <h2 id="choose" className="font-serif text-2xl text-ink sm:text-3xl">
+              {m.chooseTitle}
+            </h2>
+            <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {(
+                [
+                  ["/start", m.choose.start, IconCheckCircle],
+                  ["/guide", m.choose.guide, IconCoins],
+                  ["/what-counts", m.choose.counts, IconGoldBar],
+                  ["/who-can-receive", m.choose.who, IconGiving],
+                  ["/zakat-al-fitr", m.choose.fitr, IconCash],
+                  ["/nisab", m.choose.nisab, IconBalance],
+                ] as const
+              ).map(([path, label, Icon]) => (
+                <li key={path}>
+                  <Link
+                    href={localePath(locale, path)}
+                    className="card flex min-h-[72px] items-center gap-4 px-4 py-3 transition hover:border-pine"
+                  >
+                    <span
+                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-pine/30 bg-pine/5 text-pine"
+                      aria-hidden
+                    >
+                      <Icon className="h-6 w-6" />
+                    </span>
+                    <span className="text-base font-medium text-ink">{label}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         </section>
 
         <section

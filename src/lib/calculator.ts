@@ -3,7 +3,7 @@
 // Pure, so every rule here is unit-tested.
 
 import { calculateZakat, type ZakatResult } from "./zakat";
-import { valueByWeight, type Metal } from "./metals";
+import { TOLA_GRAMS, usesTola, valueByWeight, type Metal } from "./metals";
 import { toCents } from "./money";
 import type { CategoryKey } from "./categories";
 
@@ -148,6 +148,18 @@ export interface CalcDraft {
   debts: string;
   /** What has been given so far toward this zakat, for those who give in parts. */
   given: string;
+  /**
+   * The unit weights were typed in. Null: not chosen yet, so it follows the
+   * currency (tola where gold is weighed in tola, else grams).
+   */
+  weightUnit: WeightUnit | null;
+}
+
+export type WeightUnit = "g" | "tola";
+
+/** The unit weights are read in: the one chosen, else the currency's custom. */
+export function weightUnitOf(draft: Pick<CalcDraft, "weightUnit" | "currency">): WeightUnit {
+  return draft.weightUnit ?? (usesTola(draft.currency) ? "tola" : "g");
 }
 
 export const CALC_STORAGE_KEY = "mizan-calculator-v1";
@@ -172,6 +184,7 @@ export function emptyDraft(currency = "USD", decimal: DecimalMark | null = null)
     portions: {},
     debts: "",
     given: "",
+    weightUnit: null,
   };
 }
 
@@ -294,7 +307,8 @@ export function draftLines(draft: CalcDraft): CalcLine[] {
     let grams: number | null = null;
     let purity: number | null = null;
     if (weighable && draft.byWeight[weighable]) {
-      grams = Math.min(parseAmount(draft.grams[weighable], draft.decimal), MAX_GRAMS);
+      const perUnit = weightUnitOf(draft) === "tola" ? TOLA_GRAMS : 1;
+      grams = Math.min(parseAmount(draft.grams[weighable], draft.decimal) * perUnit, MAX_GRAMS);
       purity = parsePurity(draft.purity[weighable]);
       const perGram =
         field.metal === "silver" ? prices.silverPricePerGram : prices.goldPricePerGram;
@@ -416,6 +430,13 @@ export function parseDraft(raw: string | null | undefined): CalcDraft | null {
     portions: strMap(data.portions, PORTION_KEYS),
     debts: str(data.debts),
     given: str(data.given),
+    // Drafts from before the choice existed were typed in grams.
+    weightUnit:
+      data.weightUnit === "g" || data.weightUnit === "tola"
+        ? data.weightUnit
+        : "weightUnit" in data
+          ? null
+          : "g",
   };
 }
 

@@ -1,9 +1,12 @@
 /*
  * Mizan service worker.
  *
- * Privacy rule: pages and API responses carry someone's finances, so they are
- * never cached. Only content-hashed build assets, icons, and the static
- * /offline page are stored. A navigation that fails offline shows /offline.
+ * Privacy rule: pages and API responses inside an account carry someone's
+ * finances, so they are never cached. What is stored: content-hashed build
+ * assets, icons, the static /offline page, and the public beginner pages
+ * (the same for everyone, in each language) once someone has opened them, so
+ * they still open with a weak or no signal. Any other navigation that fails
+ * offline shows /offline.
  */
 const VERSION = "mizan-v1";
 const STATIC_CACHE = `${VERSION}-static`;
@@ -17,6 +20,11 @@ const PRECACHE = [
   "/manifest.webmanifest",
 ];
 const RUNTIME_LIMIT = 120;
+const PAGE_CACHE = `${VERSION}-pages`;
+
+/** Public pages that read the same for everyone, with or without a language prefix. */
+const PUBLIC_PAGE =
+  /^(?:\/(?:ar|ur|id|ms|tr|fr))?\/(?:start|guide|calculator|who-can-receive|what-counts|zakat-al-fitr|sources|nisab(?:\/[a-z]{3})?)$/;
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -70,10 +78,25 @@ async function cacheFirst(request) {
 }
 
 async function navigate(request) {
+  const path = new URL(request.url).pathname;
+  const keep = PUBLIC_PAGE.test(path);
   try {
-    return await fetch(request);
+    const response = await fetch(request);
+    // Only the page itself: never a redirect's target, which could be private.
+    if (
+      keep &&
+      response.ok &&
+      response.type === "basic" &&
+      !response.redirected &&
+      new URL(response.url).pathname === path
+    ) {
+      const cache = await caches.open(PAGE_CACHE);
+      await cache.put(path, response.clone());
+    }
+    return response;
   } catch {
-    return (await caches.match(OFFLINE_URL)) || Response.error();
+    const saved = keep ? await caches.match(path) : undefined;
+    return saved || (await caches.match(OFFLINE_URL)) || Response.error();
   }
 }
 

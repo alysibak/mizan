@@ -13,6 +13,7 @@ import {
   type CalcDraft,
   type CalcFieldKey,
   type WeighableKey,
+  weightUnitOf,
 } from "@/lib/calculator";
 import { NISAB_GOLD_GRAMS, NISAB_SILVER_GRAMS } from "@/lib/nisab";
 import { formatMoney, formatPercent } from "@/lib/money";
@@ -39,6 +40,7 @@ import {
   Choice,
   GivenTracker,
   MoneyInput,
+  WeightUnitSwitch,
   purityOptionsFor,
   storedOrFresh,
   type CalcMessages,
@@ -319,7 +321,7 @@ function Guide({
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="label mb-1.5" htmlFor={`guide-${key}-grams`}>
-                {m.grams}
+                {weightUnitOf(draft) === "tola" ? m.tolaWeight : m.grams}
               </label>
               <input
                 id={`guide-${key}-grams`}
@@ -333,7 +335,15 @@ function Guide({
                   updateIn("byWeight", { [key]: true });
                   updateIn("grams", { [key]: e.target.value });
                   if (!draft.purity[key]) updateIn("purity", { [key]: DEFAULT_PURITY[key] });
+                  // A weight is read in the unit it was typed in, whatever the currency later.
+                  if (!draft.weightUnit) update({ weightUnit: weightUnitOf(draft) });
                 }}
+              />
+              <WeightUnitSwitch
+                unit={weightUnitOf(draft)}
+                onUnit={(unit) => update({ weightUnit: unit })}
+                m={calc}
+                className="mt-2"
               />
               {key !== "silver" ? <p className="mt-1 text-xs text-sage">{m.tolaHint}</p> : null}
             </div>

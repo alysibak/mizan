@@ -77,8 +77,12 @@ work.
   pays on their own wealth, and its answer can be shared to WhatsApp.
 - **A poster for the mosque** (`/poster`), in every language: one A4 page
   with a QR code that opens the beginner's page in that language.
-- **Tola.** Where gold is weighed in tola (PKR, INR, BDT), prices show per
-  tola as well as per gram, in the calculator and on the nisab pages.
+- **Tola.** Where gold is weighed in tola (PKR, INR, BDT), weights are typed
+  in tola by default (grams a tap away) and prices show per tola as well as
+  per gram, in the calculator, the walk-through, and the nisab pages.
+- **Works with a weak signal.** Once opened, the beginner's pages, the
+  calculator, and the nisab pages open again offline; pages inside an
+  account are never kept.
 - **Zakat al-Fitr** (`/zakat-al-fitr`), in every language: the household's
   fitrana from the amount the local mosque announced, with who gives it, how
   much, when, and where the schools differ.

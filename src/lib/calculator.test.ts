@@ -11,6 +11,7 @@ import {
   parseDraft,
   parsePercent,
   parsePurity,
+  weightUnitOf,
   type CalcDraft,
 } from "./calculator";
 import { CATEGORIES } from "./categories";
@@ -282,5 +283,38 @@ describe("currencyForLocale", () => {
     [null, "USD"],
   ])("%s → %s", (locale, currency) => {
     expect(currencyForLocale(locale)).toBe(currency);
+  });
+});
+
+describe("weights in tola", () => {
+  it("follows the currency until a unit is chosen", () => {
+    expect(weightUnitOf({ currency: "PKR", weightUnit: null })).toBe("tola");
+    expect(weightUnitOf({ currency: "GBP", weightUnit: null })).toBe("g");
+    expect(weightUnitOf({ currency: "PKR", weightUnit: "g" })).toBe("g");
+  });
+
+  it("values a weight typed in tola at 11.6638 g each", () => {
+    const tola = computeDraft(
+      draft({
+        currency: "PKR",
+        goldPrice: "100",
+        byWeight: { gold: true },
+        grams: { gold: "2" },
+        purity: { gold: "1" },
+      }),
+    );
+    expect(tola.lines[0].grams).toBeCloseTo(23.3276, 4);
+    expect(tola.lines[0].amount).toBeCloseTo(2332.76, 2);
+    const grams = computeDraft(
+      draft({ currency: "PKR", goldPrice: "100", byWeight: { gold: true }, grams: { gold: "2" }, purity: { gold: "1" }, weightUnit: "g" }),
+    );
+    expect(grams.lines[0].amount).toBe(200);
+  });
+
+  it("reads drafts saved before the choice existed as grams", () => {
+    const old = JSON.stringify({ ...emptyDraft("PKR"), weightUnit: undefined });
+    expect(parseDraft(old)?.weightUnit).toBe("g");
+    expect(parseDraft(JSON.stringify(emptyDraft("PKR")))?.weightUnit).toBeNull();
+    expect(parseDraft(JSON.stringify({ ...emptyDraft("PKR"), weightUnit: "tola" }))?.weightUnit).toBe("tola");
   });
 });

@@ -383,3 +383,39 @@ test("prices per tola where gold is weighed in tola", async ({ page }) => {
   await page.selectOption("#calc-currency", "GBP");
   await expect(page.getByText(/a tola/)).toHaveCount(0);
 });
+
+test("gold can be weighed in tola, the unit people in Pakistan know it by", async ({ page }) => {
+  await page.route("**/api/metals?*", (route) =>
+    route.fulfill({ json: { ...PRICES, currency: "PKR", goldPricePerGram: 36000, silverPricePerGram: 400 } }),
+  );
+  await page.goto("/guide");
+  await page.locator("#guide-currency").selectOption("PKR");
+  await page.getByRole("button", { name: "Next" }).click();
+  await page.getByRole("button", { name: "I don’t have this" }).click();
+  await page.getByRole("button", { name: "I don’t have this" }).click();
+  // Rupees: weights default to tola. 1 tola × 11.6638 g × 36,000 × 0.999 = 419,476.90
+  await expect(page.getByText("Weight in tola")).toBeVisible();
+  await page.fill("#guide-gold-grams", "1");
+  await expect(page.getByText(/Worth about \S*\s?419,476\.90/)).toBeVisible();
+  await page.getByRole("button", { name: "Grams", exact: true }).click();
+  await expect(page.getByText(/Worth about \S*\s?35,964\.00/)).toBeVisible();
+});
+
+test("beginner pages are kept for a weak signal; account pages never are", async ({ page }) => {
+  await page.goto("/start");
+  await page.evaluate(() => navigator.serviceWorker.ready);
+  await page.reload();
+  await page.goto("/ur/guide");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("آئیے مل کر آپ کی زکوٰۃ نکالیں");
+  // Signed out, /settings redirects to /login: neither may be stored.
+  await page.goto("/settings");
+  await expect(page).toHaveURL(/\/login/);
+
+  // The service worker's own fetches ignore the browser's offline switch, so
+  // look in its page store directly.
+  const kept = await page.evaluate(async () => {
+    const cache = await caches.open("mizan-v1-pages");
+    return (await cache.keys()).map((request) => new URL(request.url).pathname).sort();
+  });
+  expect(kept).toEqual(["/start", "/ur/guide"]);
+});
