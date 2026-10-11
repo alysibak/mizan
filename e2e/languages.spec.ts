@@ -53,7 +53,9 @@ test("every language has its landing page and calculator, linked for search engi
   for (const locale of ["ar", "ur", "id", "ms", "tr", "fr"]) {
     expect((await request.get(`/${locale}/start`)).status(), locale).toBe(200);
     expect((await request.get(`/${locale}/guide`)).status(), locale).toBe(200);
-    expect((await request.get(`/${locale}/who-can-receive`)).status(), locale).toBe(200);
+    for (const page of ["who-can-receive", "what-counts", "sources", "zakat-al-fitr", "poster"]) {
+      expect((await request.get(`/${locale}/${page}`)).status(), `${locale}/${page}`).toBe(200);
+    }
   }
 });
 

@@ -5,6 +5,7 @@ import SiteFooter from "@/components/SiteFooter";
 import JsonLd from "@/components/JsonLd";
 import ReadAloud from "@/components/ReadAloud";
 import FitrCalc from "@/components/public/FitrCalc";
+import RamadanCountdown from "@/components/public/RamadanCountdown";
 import { FaqList } from "@/components/public/LandingView";
 import { MoreTools } from "@/components/public/ToolPage";
 import { LOCALE_INFO, languageAlternates, localePath, type Locale } from "@/i18n/config";
@@ -52,6 +53,8 @@ export default function FitrView({ locale }: { locale: Locale }) {
             stop={all.common.stopListening}
           />
         </header>
+
+        <RamadanCountdown m={all.ramadan} locale={locale} className="mt-6 max-w-2xl" />
 
         <div className="mt-10">
           <FitrCalc m={m} currencyLabel={all.calc.currency} locale={locale} />

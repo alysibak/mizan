@@ -29,7 +29,7 @@ import {
   type WeighableKey,
 } from "@/lib/calculator";
 import { NISAB_GOLD_GRAMS, NISAB_SILVER_GRAMS } from "@/lib/nisab";
-import { KARAT_PURITY } from "@/lib/metals";
+import { KARAT_PURITY, TOLA_GRAMS, usesTola } from "@/lib/metals";
 import { formatMoney, formatPercent } from "@/lib/money";
 import { readStoredValue, setStoredValue, useHydrated } from "@/lib/client-store";
 import { track } from "@/lib/analytics";
@@ -353,6 +353,14 @@ function Calculator({
                 <span className="text-sage">—</span>
               )}
             </p>
+            {usesTola(c) && goldPerGram > 0 && silverPerGram > 0 ? (
+              <p className="mt-0.5 text-sm text-ink nums">
+                {fmt(m.tolaLine, {
+                  gold: money(goldPerGram * TOLA_GRAMS),
+                  silver: money(silverPerGram * TOLA_GRAMS),
+                })}
+              </p>
+            ) : null}
             <p className="mt-1 min-h-[1.25rem] text-xs text-sage">
               {price.status === "loading"
                 ? m.fetching
@@ -608,6 +616,16 @@ function Calculator({
                     <li key={step}>{step}</li>
                   ))}
                 </ol>
+                <GivenTracker
+                  id="calc-given"
+                  due={result.zakatDue}
+                  value={draft.given}
+                  decimal={draft.decimal}
+                  currency={c}
+                  money={money}
+                  onChange={(v) => update({ given: v })}
+                  m={m}
+                />
               </div>
             ) : (
               <p className="mt-5 border-t border-mist pt-4 text-sm leading-relaxed text-sage">
@@ -716,6 +734,52 @@ export function Choice({
         <span className="block text-xs text-sage">{detail}</span>
       </span>
     </label>
+  );
+}
+
+/**
+ * "Given so far", for anyone who gives their zakat in parts through the year
+ * or through Ramadan: what is left, and a word when it is all given.
+ */
+export function GivenTracker({
+  id,
+  due,
+  value,
+  decimal,
+  currency,
+  money,
+  onChange,
+  m,
+}: {
+  id: string;
+  due: number;
+  value: string;
+  decimal: CalcDraft["decimal"];
+  currency: string;
+  money: (n: number) => string;
+  onChange: (v: string) => void;
+  m: CalcMessages;
+}) {
+  const given = parseAmount(value, decimal);
+  const left = Math.max(0, due - given);
+  const share = due > 0 ? Math.min(1, given / due) : 0;
+  return (
+    <div className="mt-5 border-t border-mist pt-4">
+      <div className="max-w-[15rem]">
+        <MoneyInput id={id} label={m.givenTitle} currency={currency} value={value} onChange={onChange} />
+      </div>
+      <p className="mt-1 text-xs leading-relaxed text-sage">{m.givenHint}</p>
+      {given > 0 ? (
+        <>
+          <div className="mt-3 h-2 overflow-hidden bg-mist" aria-hidden>
+            <div className="h-full bg-pine transition-all" style={{ width: `${Math.round(share * 100)}%` }} />
+          </div>
+          <p className="mt-2 text-sm font-medium text-ink nums" aria-live="polite">
+            {left > 0 ? fmt(m.stillToGive, { amount: money(left) }) : m.allGiven}
+          </p>
+        </>
+      ) : null}
+    </div>
   );
 }
 

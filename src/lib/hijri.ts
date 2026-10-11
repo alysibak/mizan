@@ -230,3 +230,36 @@ export function hawlStatus(
     isComplete: remainingDays === 0,
   };
 }
+
+export interface RamadanStatus {
+  inRamadan: boolean;
+  /** The Hijri year of this Ramadan, or of the next one. */
+  hijriYear: number;
+  /** 1 Ramadan and 1 Shawwal (Eid al-Fitr), as Gregorian dates (UTC midnight). */
+  start: Date;
+  eid: Date;
+  /** Days from today until 1 Ramadan; 0 while it is Ramadan. */
+  daysUntil: number;
+  /** Today's day of Ramadan, while it is Ramadan. */
+  day: number | null;
+}
+
+/**
+ * This Ramadan or the next, from a calendar day (UTC midnight). An estimate:
+ * the start depends on the moon sighting where you live.
+ */
+export function ramadanStatus(today: Date, calendar: HijriCalendar = "umalqura"): RamadanStatus {
+  const h = gregorianToHijri(today, calendar);
+  const year = h.month <= 9 ? h.year : h.year + 1;
+  const start = hijriToGregorian({ year, month: 9, day: 1 }, calendar);
+  const eid = hijriToGregorian({ year, month: 10, day: 1 }, calendar);
+  const inRamadan = h.month === 9;
+  return {
+    inRamadan,
+    hijriYear: year,
+    start,
+    eid,
+    daysUntil: inRamadan ? 0 : daysBetween(today, start),
+    day: inRamadan ? h.day : null,
+  };
+}

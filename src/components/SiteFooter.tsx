@@ -10,6 +10,7 @@ export function toolLinks(locale: Locale): { href: string; label: string }[] {
     { href: localePath(locale, "/start"), label: nav.start },
     { href: localePath(locale, "/calculator"), label: footer.calculator },
     { href: localePath(locale, "/nisab"), label: footer.nisab },
+    { href: localePath(locale, "/what-counts"), label: all.applies.nav },
     { href: localePath(locale, "/who-can-receive"), label: all.who.nav },
     { href: localePath(locale, "/zakat-al-fitr"), label: footer.fitr },
     { href: "/inheritance", label: footer.inheritance + inEnglish },
@@ -30,9 +31,12 @@ export default function SiteFooter({
   locale?: Locale;
   path?: string;
 }) {
-  const { footer, inEnglish } = messagesFor(locale).common;
+  const all = messagesFor(locale);
+  const { footer, inEnglish } = all.common;
   const tools = toolLinks(locale);
   const about = [
+    { href: localePath(locale, "/sources"), label: all.sources.nav },
+    { href: localePath(locale, "/poster"), label: all.poster.nav },
     { href: "/guides", label: footer.guides + inEnglish },
     { href: "/method", label: footer.method + inEnglish },
     { href: "/trust", label: footer.trust + inEnglish },

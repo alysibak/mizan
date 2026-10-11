@@ -3,6 +3,7 @@ import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter, { toolLinks } from "@/components/SiteFooter";
 import JsonLd from "@/components/JsonLd";
+import RamadanCountdown from "@/components/public/RamadanCountdown";
 import { LOCALE_INFO, fmt, languageAlternates, localePath, type Locale } from "@/i18n/config";
 import { messagesFor } from "@/i18n/messages";
 import { formatMoney } from "@/lib/money";
@@ -95,6 +96,7 @@ export default function LandingView({ locale }: { locale: Locale }) {
             >
               {m.trustLine}
             </p>
+            <RamadanCountdown m={all.ramadan} locale={locale} className="mt-6 max-w-xl" />
           </div>
 
           <figure

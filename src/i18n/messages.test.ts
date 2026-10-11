@@ -56,6 +56,9 @@ describe("translations", () => {
       expect(m.start.notCounts, locale).toHaveLength(en.start.notCounts.length);
       expect(m.start.words, locale).toHaveLength(en.start.words.length);
       expect(m.calc.nextSteps, locale).toHaveLength(en.calc.nextSteps.length);
+      expect(m.sources.items, locale).toHaveLength(en.sources.items.length);
+      expect(m.fitr.sections, locale).toHaveLength(en.fitr.sections.length);
+      expect(m.fitr.faq, locale).toHaveLength(en.fitr.faq.length);
     }
   });
 });

@@ -277,11 +277,18 @@ test("the step-by-step guide explains each step and ends with things to do", asy
   await page.getByRole("button", { name: "Remind me next year" }).click();
   expect((await download).suggestedFilename()).toBe("zakat-reminder.ics");
 
+  // Giving in parts: what is left, then a word when it is all given.
+  await page.fill("#guide-given", "200");
+  await expect(page.getByText(/Still to give: \S*293\.75/)).toBeVisible();
+  await page.fill("#guide-given", "493.75");
+  await expect(page.getByText("All given. May Allah accept it from you.")).toBeVisible();
+
   // The calculator picks up the same figures.
   await page.getByRole("link", { name: "Check it in the full calculator" }).click();
   await page.waitForURL("**/calculator");
   await expect(page.locator("#calc-bank")).toHaveValue("18000");
   await expect(page.locator("#result")).toContainText("493.75");
+  await expect(page.locator("#calc-given")).toHaveValue("493.75");
   await expectNoHorizontalScroll(page);
   expect(errors).toEqual([]);
 });
@@ -318,4 +325,61 @@ test("larger text applies everywhere and survives a reload", async ({ page }) =>
   await expect(html).not.toHaveClass(/text-large/);
   await page.reload();
   await expect(html).not.toHaveClass(/text-large/);
+});
+
+test("the Ramadan countdown, and Zakat al-Fitr while it is Ramadan", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-10-11T10:00:00"));
+  await page.goto("/start");
+  await expect(page.getByText(/Ramadan 1448 begins around .*2027/)).toBeVisible();
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Remind me a week before Ramadan" }).click();
+  expect((await download).suggestedFilename()).toBe("ramadan-reminder.ics");
+
+  await page.clock.setFixedTime(new Date("2027-02-15T10:00:00"));
+  await page.goto("/");
+  await expect(page.getByText(/It is Ramadan, day \d+/)).toBeVisible();
+  await page.getByRole("link", { name: "Work out Zakat al-Fitr" }).click();
+  await page.waitForURL("**/zakat-al-fitr");
+});
+
+test("do I pay zakat on…: each thing answered, with the sources a tap away", async ({ page }) => {
+  await page.goto("/what-counts");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Do I pay zakat on…?");
+  const home = page.locator("details", { hasText: "The home you live in" });
+  await expect(home.locator("summary")).toContainText("No");
+  await expect(page.locator("details", { hasText: "Your salary" }).locator("summary")).toContainText(
+    "Only what you still have",
+  );
+  await home.locator("summary").click();
+  await expect(home.getByText(/however much it is worth/)).toBeVisible();
+  await expectNoHorizontalScroll(page);
+
+  await page.getByRole("link", { name: "Where this comes from" }).first().click();
+  await page.waitForURL("**/sources");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Where this comes from");
+  await expect(page.getByText(/Quran 9:60/)).toBeVisible();
+  await expect(page.locator("main ol > li")).toHaveCount(12);
+});
+
+test("a poster for the mosque, with a code that opens the beginner's page", async ({ page }) => {
+  await page.goto("/ur/poster");
+  await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+  const poster = page.getByRole("article", { name: "کیا آپ پر زکوٰۃ فرض ہے؟" });
+  await expect(poster).toBeVisible();
+  const code = poster.locator("[role=img][aria-label]");
+  await expect(code).toHaveAttribute("aria-label", /\/ur\/start$/);
+  await expect(code.locator("svg")).toBeVisible();
+  await expectNoHorizontalScroll(page);
+});
+
+test("prices per tola where gold is weighed in tola", async ({ page }) => {
+  await page.route("**/api/metals?*", (route) =>
+    route.fulfill({ json: { ...PRICES, currency: "PKR", goldPricePerGram: 36000, silverPricePerGram: 400 } }),
+  );
+  await page.goto("/calculator");
+  await page.selectOption("#calc-currency", "PKR");
+  // 36,000 × 11.6638 = 419,896.80
+  await expect(page.getByText(/Gold \S*\s?419,896\.80 a tola/)).toBeVisible();
+  await page.selectOption("#calc-currency", "GBP");
+  await expect(page.getByText(/a tola/)).toHaveCount(0);
 });

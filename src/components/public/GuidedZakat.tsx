@@ -21,6 +21,7 @@ import { hawlDueDate } from "@/lib/hijri";
 import { hawlCalendar } from "@/lib/ics";
 import { track } from "@/lib/analytics";
 import { CurrencyOptions } from "@/components/public/VisitorCurrency";
+import ShareButton, { type ShareLabels } from "@/components/public/ShareButton";
 import ReadAloud from "@/components/ReadAloud";
 import {
   IconBalance,
@@ -36,6 +37,7 @@ import {
 } from "@/components/icons";
 import {
   Choice,
+  GivenTracker,
   MoneyInput,
   purityOptionsFor,
   storedOrFresh,
@@ -104,11 +106,13 @@ export default function GuidedZakat({
   m,
   calc,
   speech,
+  share,
   locale,
 }: {
   m: GuideMessages;
   calc: CalcMessages;
   speech: Speech;
+  share: ShareLabels;
   locale: Locale;
 }) {
   const hydrated = useHydrated();
@@ -121,6 +125,7 @@ export default function GuidedZakat({
         m={m}
         calc={calc}
         speech={speech}
+        share={share}
         locale={locale}
       />
     );
@@ -133,6 +138,7 @@ export default function GuidedZakat({
       m={m}
       calc={calc}
       speech={speech}
+      share={share}
       locale={locale}
     />
   );
@@ -144,6 +150,7 @@ function Guide({
   m,
   calc,
   speech,
+  share,
   locale,
 }: {
   initial: CalcDraft;
@@ -151,6 +158,7 @@ function Guide({
   m: GuideMessages;
   calc: CalcMessages;
   speech: Speech;
+  share: ShareLabels;
   locale: Locale;
 }) {
   const intl = LOCALE_INFO[locale].intl;
@@ -392,6 +400,9 @@ function Guide({
           >
             <CurrencyOptions value={c} locale={locale} />
           </select>
+          <p className="mt-4 border-s-2 border-brass ps-3 text-sm leading-relaxed text-ink">
+            {m.steps.currency.yours}
+          </p>
           <p className="mt-4 text-sm leading-relaxed text-ink" aria-live="polite">
             {prices === "loading"
               ? m.steps.currency.loading
@@ -550,6 +561,8 @@ function Guide({
           outcome={outcome}
           money={money}
           onChange={() => go(0)}
+          onGiven={(v) => update({ given: v })}
+          share={share}
         />
       );
       break;
@@ -732,6 +745,8 @@ function Result({
   outcome,
   money,
   onChange,
+  onGiven,
+  share,
 }: {
   m: GuideMessages;
   calc: CalcMessages;
@@ -741,6 +756,8 @@ function Result({
   outcome: ReturnType<typeof computeDraft>;
   money: (n: number) => string;
   onChange: () => void;
+  onGiven: (v: string) => void;
+  share: ShareLabels;
 }) {
   const intl = LOCALE_INFO[locale].intl;
   const { result } = outcome;
@@ -822,11 +839,23 @@ function Result({
       <div>
         <h3 className="font-serif text-xl text-ink">{m.result.doTitle}</h3>
         {result.isDue ? (
-          <ol className="mt-3 list-decimal space-y-1.5 ps-5 text-base leading-relaxed text-sage">
-            {calc.nextSteps.map((s) => (
-              <li key={s}>{s}</li>
-            ))}
-          </ol>
+          <>
+            <ol className="mt-3 list-decimal space-y-1.5 ps-5 text-base leading-relaxed text-sage">
+              {calc.nextSteps.map((s) => (
+                <li key={s}>{s}</li>
+              ))}
+            </ol>
+            <GivenTracker
+              id="guide-given"
+              due={result.zakatDue}
+              value={draft.given}
+              decimal={draft.decimal}
+              currency={draft.currency}
+              money={money}
+              onChange={onGiven}
+              m={calc}
+            />
+          </>
         ) : (
           <p className="mt-3 text-base leading-relaxed text-sage">{calc.belowNext}</p>
         )}
@@ -864,6 +893,15 @@ function Result({
         <button type="button" className="text-pine hover:underline" onClick={onChange}>
           {m.result.change}
         </button>
+      </div>
+
+      <div className="border-t border-mist pt-4">
+        <ShareButton
+          label={m.result.share}
+          text={m.result.shareText}
+          path={localePath(locale, "/guide")}
+          labels={share}
+        />
       </div>
     </div>
   );

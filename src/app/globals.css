@@ -220,3 +220,14 @@
     line-height: 1.35;
   }
 }
+
+/* The mosque poster prints on its own A4 sheet; other pages keep the printer's paper. */
+@media print {
+  .poster {
+    page: poster;
+  }
+  @page poster {
+    size: A4;
+    margin: 12mm;
+  }
+}

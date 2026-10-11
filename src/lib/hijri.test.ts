@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { gregorianToHijri, hawlDueDate, hijriToGregorian, formatHijri } from "./hijri";
+import { gregorianToHijri, hawlDueDate, hijriToGregorian, formatHijri, ramadanStatus } from "./hijri";
 
 describe("Umm al-Qura", () => {
   it("matches the published 1 Muharram 1446 (7 July 2024)", () => {
@@ -37,5 +37,36 @@ describe("Umm al-Qura", () => {
         dh.year === h.year + 1 + (h.month === 12 ? 1 : 0);
       expect(sameDay || rolledOver).toBe(true);
     }
+  });
+});
+
+describe("ramadanStatus", () => {
+  const near = (a: Date, iso: string, days = 2) =>
+    Math.abs(a.getTime() - new Date(`${iso}T00:00:00Z`).getTime()) <= days * 86_400_000;
+
+  it("counts down to the next Ramadan", () => {
+    const s = ramadanStatus(new Date("2026-10-11T00:00:00Z"));
+    expect(s.inRamadan).toBe(false);
+    expect(s.hijriYear).toBe(1448);
+    expect(near(s.start, "2027-02-08")).toBe(true);
+    expect(s.daysUntil).toBeGreaterThan(115);
+    expect(s.daysUntil).toBeLessThan(125);
+    expect(s.day).toBeNull();
+  });
+
+  it("knows when it is Ramadan, and when Eid falls", () => {
+    const s = ramadanStatus(new Date("2026-03-01T00:00:00Z"));
+    expect(s.inRamadan).toBe(true);
+    expect(s.hijriYear).toBe(1447);
+    expect(s.day).toBeGreaterThanOrEqual(10);
+    expect(s.day).toBeLessThanOrEqual(13);
+    expect(s.daysUntil).toBe(0);
+    expect(near(s.eid, "2026-03-20")).toBe(true);
+  });
+
+  it("looks to next year once Ramadan has passed", () => {
+    const s = ramadanStatus(new Date("2026-04-15T00:00:00Z"), "tabular");
+    expect(s.hijriYear).toBe(1448);
+    expect(s.inRamadan).toBe(false);
   });
 });

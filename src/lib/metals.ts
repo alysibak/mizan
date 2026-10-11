@@ -2,6 +2,16 @@ import { toCents } from "./money";
 
 export const TROY_OUNCE_GRAMS = 31.1034768;
 
+/** The tola, as gold is weighed in South Asia: 11.6638 g. */
+export const TOLA_GRAMS = 11.6638;
+
+/** Currencies of the places where gold is usually priced by the tola. */
+export const TOLA_CURRENCIES: readonly string[] = ["PKR", "INR", "BDT", "NPR"];
+
+export function usesTola(currency: string): boolean {
+  return TOLA_CURRENCIES.includes(currency);
+}
+
 /** Convert a USD-per-troy-ounce metal price into per-gram in another currency. */
 export function perGramFromPerOunce(
   usdPerOunce: number,

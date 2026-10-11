@@ -142,6 +142,7 @@ const id: Messages = {
     yourCurrency: "Mata uang Anda",
     currencyHint: "Mata uang yang Anda pakai. Jumlah dan harga hari ini mengikutinya.",
     pricesLine: "Emas {gold} per gram · Perak {silver} per gram",
+    tolaLine: "Emas {gold} per tola · Perak {silver} per tola",
     usingOwnPrices: "Memakai harga yang Anda masukkan.",
     enterOwnPrices: "Masukkan harga sendiri",
     moreKinds: "Jenis harta lainnya",
@@ -156,6 +157,10 @@ const id: Messages = {
     ],
     belowNext: "Anda tetap bisa bersedekah kapan saja. Hitung lagi jika tabungan Anda bertambah.",
     guideLink: "Lebih suka satu pertanyaan sekali? Ikuti langkah demi langkah",
+    givenTitle: "Sudah diberikan",
+    givenHint: "Jika Anda membayar zakat secara bertahap, catat yang sudah Anda berikan. Tersimpan di perangkat ini saja.",
+    stillToGive: "Masih perlu diberikan: {amount}",
+    allGiven: "Semua sudah diberikan. Semoga Allah menerimanya.",
     difference: "Apa bedanya?",
     basisDifference: "Zakat dihitung dengan tahun Hijriah (qamariah), sekitar 354 hari. Jika Anda membayar pada tanggal Masehi yang sama setiap tahun, tahun Anda sekitar 11 hari lebih panjang, jadi kadarnya naik sedikit menjadi 2,577% untuk menutupinya.",
     pricesTitle: "Harga hari ini",
@@ -384,6 +389,7 @@ const id: Messages = {
         nisab: "Nisab hari ini: {silver} menurut perak, atau {gold} menurut emas.",
         loading: "Mengambil harga emas dan perak hari ini…",
         unavailable: "Harga terkini sedang tidak tersedia. Anda bisa lanjut; kami akan menanyakan harga hari ini sebelum selesai.",
+        yours: "Hitung hanya harta milik Anda. Dalam keluarga, setiap orang menzakati hartanya sendiri: misalnya istri atas perhiasan dan tabungannya sendiri.",
       },
       cash: {
         title: "Berapa uang tunai yang Anda punya?",
@@ -445,7 +451,182 @@ const id: Messages = {
       calculator: "Periksa di kalkulator lengkap",
       change: "Ubah jawaban saya",
       who: "Siapa yang berhak menerima zakat?",
+      share: "Bagikan kepada keluarga dan teman",
+      shareText: "Hitung zakat Anda langkah demi langkah, dengan bahasa sederhana. Gratis dan privat:",
     },
+  },
+
+  ramadan: {
+    before: "Ramadan {year} dimulai sekitar {date}, {when}.",
+    during: "Hari ini Ramadan hari ke-{day}. Idulfitri sekitar {date}.",
+    hint: "Banyak orang menghitung dan membayar zakat di bulan Ramadan. Tanggal pastinya mengikuti rukyat hilal di tempat Anda.",
+    duringHint: "Bayarlah zakat fitrah sebelum salat Id.",
+    today: "Hari ini {date}.",
+    remind: "Ingatkan saya seminggu sebelum Ramadan",
+    reminderSummary: "Ramadan segera tiba: saatnya menghitung zakat",
+    reminderBody: "Ramadan dimulai sekitar seminggu lagi. Hitung zakat Anda dan rencanakan sedekah Anda.",
+    fitrLink: "Hitung zakat fitrah",
+  },
+
+  poster: {
+    metaTitle: "Poster zakat gratis untuk masjid Anda",
+    metaDescription: "Cetak poster satu halaman yang membantu jamaah masjid atau komunitas Anda menghitung zakat, dengan kode untuk dipindai. Dalam tujuh bahasa.",
+    nav: "Poster untuk masjid",
+    eyebrow: "Untuk masjid dan pusat komunitas",
+    title: "Poster untuk masjid Anda",
+    lede: "Cetak di kertas A4 dan pasang di papan pengumuman. Jamaah memindai kodenya dengan ponsel dan langsung menuju panduan sederhana dalam bahasa ini.",
+    print: "Cetak poster",
+    headline: "Apakah Anda wajib berzakat?",
+    points: [
+      "Zakat adalah 2,5% dari tabungan yang sudah Anda miliki selama setahun.",
+      "Wajib jika tabungan Anda lebih dari nisab: harga 595 gram perak.",
+      "Cari tahu dengan tiga pertanyaan, gratis dan privat, dalam bahasa Anda.",
+    ],
+    scan: "Pindai dengan ponsel Anda",
+    orVisit: "atau kunjungi",
+  },
+
+  applies: {
+    metaTitle: "Apakah rumah, mobil, gaji, atau tabungan saya wajib dizakati?",
+    metaDescription: "Ketuk sesuatu untuk melihat apakah wajib dizakati: rumah yang Anda tinggali, mobil, gaji, tabungan haji atau pernikahan, tanah, properti sewaan, emas, batu permata, piutang, saham, dan dana pensiun. Dengan bahasa sederhana, dan di mana ulama berbeda pendapat.",
+    nav: "Apakah … wajib dizakati?",
+    eyebrow: "Yang dihitung",
+    title: "Apakah … wajib dizakati?",
+    lede: "Ketuk hal yang ingin Anda ketahui. Anda akan melihat jawaban singkat dan alasannya, dengan bahasa sederhana.",
+    verdicts: {
+      yes: "Ya",
+      no: "Tidak",
+      mostNo: "Mayoritas ulama: tidak",
+      partly: "Sebagian saja",
+      ifSaved: "Hanya yang masih tersisa",
+      differ: "Ulama berbeda pendapat",
+    },
+    cases: {
+      home: {
+        label: "Rumah yang Anda tinggali",
+        answer: "Tidak. Rumah untuk ditinggali sendiri tidak dihitung, berapa pun nilainya.",
+      },
+      car: {
+        label: "Mobil, perabot, dan barang yang Anda pakai",
+        answer: "Tidak. Barang untuk keperluan pribadi tidak dihitung.",
+      },
+      salary: {
+        label: "Gaji Anda",
+        answer: "Zakat tidak dibayar dari setiap gaji. Pada hari zakat Anda, sisa gaji yang masih Anda simpan dihitung bersama tabungan lainnya.",
+      },
+      goals: {
+        label: "Tabungan untuk haji, pernikahan, atau rumah",
+        answer: "Ya, jika masih ada pada hari zakat Anda. Tabungan tetap dihitung apa pun rencana penggunaannya.",
+      },
+      bullion: {
+        label: "Koin atau batangan emas dan perak",
+        answer: "Ya, dengan nilai hari ini, menurut berat dan kadarnya.",
+      },
+      jewellery: {
+        label: "Perhiasan emas yang Anda pakai",
+        answer: "Ulama berbeda pendapat. Mazhab Hanafi menghitungnya. Mazhab Maliki, Syafi’i, dan Hanbali tidak menghitung perhiasan yang dipakai secara wajar.",
+      },
+      gems: {
+        label: "Berlian, mutiara, dan batu permata",
+        answer: "Tidak, kecuali Anda menyimpannya untuk dijual. Batu permata tidak dihitung seperti emas dan perak.",
+      },
+      landToSell: {
+        label: "Tanah atau properti yang dibeli untuk dijual",
+        answer: "Ya, dengan harga jual hari ini, setiap tahun selama Anda memilikinya.",
+      },
+      landToLive: {
+        label: "Tanah yang dibeli untuk membangun rumah sendiri",
+        answer: "Mayoritas ulama: tidak, karena tidak untuk dijual. Jika Anda memutuskan menjualnya, ia dihitung sejak itu.",
+      },
+      rental: {
+        label: "Properti yang Anda sewakan",
+        answer: "Bangunannya tidak dihitung. Uang sewa yang Anda simpan sampai hari zakat dihitung bersama tabungan Anda.",
+      },
+      business: {
+        label: "Barang di toko atau usaha Anda",
+        answer: "Ya, dengan harga jual hari ini. Tokonya sendiri, raknya, dan peralatannya tidak dihitung.",
+      },
+      lent: {
+        label: "Uang yang Anda pinjamkan",
+        answer: "Ya, jika Anda berharap uang itu kembali. Jika Anda ragu, banyak ulama mengatakan zakatnya dibayar saat uang itu kembali.",
+      },
+      shares: {
+        label: "Saham dan reksa dana",
+        answer: "Ya. Saham yang Anda perdagangkan dihitung penuh. Untuk saham jangka panjang, hanya sebagian nilainya yang dihitung; seperempat adalah perkiraan yang umum.",
+      },
+      crypto: {
+        label: "Kripto",
+        answer: "Ulama yang membolehkan memilikinya menghitungnya seperti uang, dengan nilai hari ini.",
+      },
+      pension: {
+        label: "Dana pensiun yang belum bisa dicairkan",
+        answer: "Ulama berbeda pendapat. Banyak yang mengatakan dizakati saat sudah bisa dicairkan; yang lain menghitung bagian yang bisa diambil hari ini.",
+      },
+      bonds: {
+        label: "Sertifikat tabungan dan obligasi",
+        answer: "Pokok yang Anda setor dihitung. Bunganya bukan milik Anda: salurkan terpisah, dan itu tidak terhitung sebagai zakat.",
+      },
+    },
+  },
+
+  sources: {
+    metaTitle: "Dari mana aturan zakat Mizan berasal: Al-Qur’an dan hadis",
+    metaDescription: "Ayat Al-Qur’an dan hadis yang menjadi dasar zakat: kadar 2,5%, nisab perak dan emas, haul, delapan golongan penerima, dan zakat fitrah, dengan bahasa sederhana.",
+    nav: "Dari mana ini berasal",
+    eyebrow: "Sumber",
+    title: "Dari mana ini berasal",
+    lede: "Setiap aturan yang dipakai Mizan, beserta ayat Al-Qur’an atau hadis yang menjadi dasarnya, dengan bahasa sederhana.",
+    note: "Hadis disebut menurut kitabnya, bukan nomornya, karena penomoran berbeda antar-edisi. Berat dalam gram adalah konversi modern yang umum dari ukuran lama. Untuk keadaan Anda sendiri, tanyakan kepada ulama.",
+    items: [
+      {
+        rule: "Zakat adalah kewajiban dan salah satu dari lima rukun Islam.",
+        source: "Al-Qur’an berkali-kali menyandingkan salat dan zakat, seperti dalam Al-Baqarah: 43 dan 110. Nabi ﷺ bersabda bahwa Islam dibangun di atas lima perkara, di antaranya zakat (Sahih al-Bukhari, Sahih Muslim).",
+      },
+      {
+        rule: "Zakat menyucikan harta Anda.",
+        source: "“Ambillah zakat dari harta mereka, guna membersihkan dan menyucikan mereka” (At-Taubah: 103).",
+      },
+      {
+        rule: "Tidak ada zakat di bawah nisab: 595 gram perak, atau 85 gram emas.",
+        source: "Tidak ada zakat pada perak yang kurang dari lima uqiyah (Sahih al-Bukhari, Sahih Muslim). Tidak ada zakat pada emas sampai mencapai dua puluh dinar (Sunan Abi Dawud).",
+      },
+      {
+        rule: "Kadarnya 2,5%, yaitu seperempat puluh.",
+        source: "Pada dua ratus dirham yang telah genap setahun, zakatnya lima dirham (hadis Ali, Sunan Abi Dawud).",
+      },
+      {
+        rule: "Zakat wajib setelah harta genap setahun.",
+        source: "Tidak ada zakat pada harta sampai genap setahun (Sunan Abi Dawud, Sunan Ibnu Majah).",
+      },
+      {
+        rule: "Ada delapan golongan penerima zakat.",
+        source: "Fakir, miskin, amil, mualaf, memerdekakan budak, orang berutang, di jalan Allah, dan ibnu sabil (At-Taubah: 60).",
+      },
+      {
+        rule: "Zakat tidak untuk keluarga Nabi ﷺ.",
+        source: "Sedekah tidak halal bagi Muhammad dan keluarga Muhammad (Sahih Muslim).",
+      },
+      {
+        rule: "Memberi kepada kerabat yang membutuhkan berpahala ganda.",
+        source: "Sedekah kepada orang miskin adalah sedekah; kepada kerabat bernilai dua: sedekah dan silaturahmi (Sunan at-Tirmidzi).",
+      },
+      {
+        rule: "Banyak ulama membolehkan istri memberi zakat kepada suaminya yang membutuhkan.",
+        source: "Hadis Zainab, istri Ibnu Mas’ud (Sahih al-Bukhari, Sahih Muslim). Ulama berbeda pendapat apakah itu tentang zakat atau sedekah sunah.",
+      },
+      {
+        rule: "Zakat fitrah: satu sha’ per orang, sebelum salat Id.",
+        source: "Rasulullah ﷺ mewajibkan zakat fitrah satu sha’ kurma atau satu sha’ gandum atas setiap Muslim, kecil maupun besar, dan memerintahkan agar ditunaikan sebelum orang-orang keluar untuk salat (Ibnu Umar, Sahih al-Bukhari, Sahih Muslim).",
+      },
+      {
+        rule: "Jika dibayar setelah salat Id, terhitung sedekah biasa.",
+        source: "Siapa menunaikannya sebelum salat, itu zakat yang diterima; siapa menunaikannya setelah salat, itu salah satu sedekah (Ibnu Abbas, Sunan Abi Dawud).",
+      },
+      {
+        rule: "Memberi tidak membuat Anda miskin.",
+        source: "Sedekah tidak mengurangi harta (Sahih Muslim).",
+      },
+    ],
   },
 
   who: {

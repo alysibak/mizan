@@ -147,6 +147,8 @@ const en = {
     yourCurrency: "Your currency",
     currencyHint: "The money you count in. Amounts and today’s prices follow it.",
     pricesLine: "Gold {gold} a gram · Silver {silver} a gram",
+    /** For currencies where people weigh gold in tola (11.66 g). */
+    tolaLine: "Gold {gold} a tola · Silver {silver} a tola",
     usingOwnPrices: "Using the prices you entered.",
     enterOwnPrices: "Enter prices yourself",
     moreKinds: "More kinds of wealth",
@@ -163,6 +165,10 @@ const en = {
     belowNext:
       "You can still give sadaqah, charity by choice, at any time. Check again if your savings grow.",
     guideLink: "Prefer one question at a time? Go step by step",
+    givenTitle: "Given so far",
+    givenHint: "If you give your zakat in parts, note what you have given. It stays on this device.",
+    stillToGive: "Still to give: {amount}",
+    allGiven: "All given. May Allah accept it from you.",
     difference: "What’s the difference?",
     basisDifference:
       "Zakat is counted by the Islamic (lunar) year, about 354 days. If you pay on the same Gregorian date each year instead, your year is about 11 days longer, so the rate goes up slightly, to 2.577%, to make up for it.",
@@ -411,6 +417,8 @@ const en = {
         loading: "Getting today’s gold and silver prices…",
         unavailable:
           "Live prices are unavailable right now. You can carry on; we will ask for today’s prices before the end.",
+        yours:
+          "Count only what is yours. In a family, each person gives zakat on their own wealth: a wife on her own jewellery and savings, for example.",
       },
       cash: {
         title: "How much cash do you have?",
@@ -479,7 +487,197 @@ const en = {
       calculator: "Check it in the full calculator",
       change: "Change my answers",
       who: "Who can receive zakat?",
+      share: "Share this with family and friends",
+      shareText: "Work out your zakat step by step, in plain words. Free and private:",
     },
+  },
+
+  ramadan: {
+    /** {when} is "in 120 days", "tomorrow", … in the page's language. */
+    before: "Ramadan {year} begins around {date}, {when}.",
+    during: "It is Ramadan, day {day}. Eid al-Fitr is around {date}.",
+    hint: "Many people work out and give their zakat in Ramadan. The exact day depends on the moon sighting where you live.",
+    duringHint: "Give Zakat al-Fitr before the Eid prayer.",
+    today: "Today is {date}.",
+    remind: "Remind me a week before Ramadan",
+    reminderSummary: "Ramadan is coming: time to work out your zakat",
+    reminderBody: "Ramadan begins in about a week. Work out your zakat and plan your giving.",
+    fitrLink: "Work out Zakat al-Fitr",
+  },
+
+  poster: {
+    metaTitle: "A free zakat poster for your mosque",
+    metaDescription:
+      "Print a one-page poster that helps people in your mosque or community work out their zakat, with a code to scan. In seven languages.",
+    nav: "Poster for your mosque",
+    eyebrow: "For mosques and community centres",
+    title: "A poster for your mosque",
+    lede: "Print it on A4 and put it on the noticeboard. People scan the code with their phone and are taken to plain-words help in this language.",
+    print: "Print the poster",
+    headline: "Do you have to pay zakat?",
+    points: [
+      "Zakat is 2.5% of savings you have had for a year.",
+      "It is due if your savings are worth more than nisab: the price of 595 grams of silver.",
+      "Find out in three questions, free and private, in your own language.",
+    ],
+    scan: "Scan with your phone",
+    orVisit: "or visit",
+  },
+
+  applies: {
+    metaTitle: "Do I pay zakat on my house, car, salary, or savings?",
+    metaDescription:
+      "Tap a thing to see whether zakat is due on it: the home you live in, your car, your salary, savings for Hajj or a wedding, land, rented property, gold, gems, loans, shares, and pensions. Plain words, and where scholars differ.",
+    nav: "Do I pay zakat on…?",
+    eyebrow: "What counts",
+    title: "Do I pay zakat on…?",
+    lede: "Tap what you are wondering about. You will see the short answer and why, in plain words.",
+    verdicts: {
+      yes: "Yes",
+      no: "No",
+      mostNo: "Most scholars say no",
+      partly: "Only part of it",
+      ifSaved: "Only what you still have",
+      differ: "Scholars differ",
+    },
+    cases: {
+      home: {
+        label: "The home you live in",
+        answer: "No. A home for your own use is not counted, however much it is worth.",
+      },
+      car: {
+        label: "Your car, furniture, and things you use",
+        answer: "No. Things you keep for your own use are not counted.",
+      },
+      salary: {
+        label: "Your salary",
+        answer:
+          "Zakat is not paid on each salary. On your zakat day, whatever you still have saved from it is counted with your other savings.",
+      },
+      goals: {
+        label: "Money saved for Hajj, a wedding, or a house",
+        answer: "Yes, if it is still with you on your zakat day. Savings count whatever you plan to spend them on.",
+      },
+      bullion: {
+        label: "Gold or silver coins and bars",
+        answer: "Yes, at today’s value, by weight and purity.",
+      },
+      jewellery: {
+        label: "Gold jewellery you wear",
+        answer:
+          "Scholars differ. The Hanafi school counts it. The Maliki, Shafi‘i, and Hanbali schools do not count jewellery worn in the normal way.",
+      },
+      gems: {
+        label: "Diamonds, pearls, and other gems",
+        answer: "No, unless you keep them to sell. Gems are not counted the way gold and silver are.",
+      },
+      landToSell: {
+        label: "Land or property you bought to sell",
+        answer: "Yes, at what it would sell for today, each year you hold it.",
+      },
+      landToLive: {
+        label: "Land you bought to build your own home",
+        answer: "Most scholars say no, because it is not for sale. If you decide to sell it, it counts from then.",
+      },
+      rental: {
+        label: "Property you rent out",
+        answer: "The building is not counted. The rent you have saved by your zakat day is counted with your savings.",
+      },
+      business: {
+        label: "Goods in your shop or business",
+        answer:
+          "Yes, at what they would sell for today. The shop itself, its shelves, and its equipment are not counted.",
+      },
+      lent: {
+        label: "Money you lent to someone",
+        answer:
+          "Yes, if you expect to get it back. If you doubt you will, many scholars say you pay on it when it is returned.",
+      },
+      shares: {
+        label: "Shares and funds",
+        answer:
+          "Yes. Shares you trade count in full. For shares you keep for the long term, only part of the value is counted; a quarter is a common estimate.",
+      },
+      crypto: {
+        label: "Cryptocurrency",
+        answer: "Scholars who allow holding it count it like money, at today’s value.",
+      },
+      pension: {
+        label: "A pension you cannot draw yet",
+        answer:
+          "Scholars differ. Many say pay on it once you can draw it; others count the part you could take out today.",
+      },
+      bonds: {
+        label: "Savings certificates and bonds",
+        answer:
+          "The amount you put in counts. Interest is not yours to keep: give it away separately, and it does not count as zakat.",
+      },
+    },
+  },
+
+  sources: {
+    metaTitle: "Where Mizan’s zakat rules come from: Quran and hadith",
+    metaDescription:
+      "The Quran verses and hadith behind zakat: the 2.5% rate, nisab in silver and gold, the year, the eight groups who receive it, and Zakat al-Fitr, in plain words.",
+    nav: "Where this comes from",
+    eyebrow: "Sources",
+    title: "Where this comes from",
+    lede: "Each rule Mizan uses, and the verse of the Quran or the hadith it rests on, in plain words.",
+    note: "Hadith are named by their collection rather than a number, because numbering differs between editions. Gram weights are the common modern conversions of the old measures. For your own situation, ask a scholar.",
+    items: [
+      {
+        rule: "Zakat is a duty and one of the five pillars of Islam.",
+        source:
+          "The Quran pairs prayer and zakat many times, as in 2:43 and 2:110. The Prophet ﷺ said Islam is built on five, zakat among them (Sahih al-Bukhari, Sahih Muslim).",
+      },
+      {
+        rule: "It purifies your wealth.",
+        source: "“Take from their wealth a charity to purify them and cause them to grow” (Quran 9:103).",
+      },
+      {
+        rule: "Nothing is due below nisab: 595 grams of silver, or 85 grams of gold.",
+        source:
+          "No zakat is due on less than five awqiyah of silver (Sahih al-Bukhari, Sahih Muslim). Nothing is due on gold until it reaches twenty dinars (Sunan Abi Dawud).",
+      },
+      {
+        rule: "The rate is 2.5%, one fortieth.",
+        source: "On two hundred dirhams held for a year, five dirhams are due (the hadith of ‘Ali, Sunan Abi Dawud).",
+      },
+      {
+        rule: "Zakat is due once a year has passed over the wealth.",
+        source: "No zakat is due on wealth until a year has passed over it (Sunan Abi Dawud, Sunan Ibn Majah).",
+      },
+      {
+        rule: "Eight groups receive zakat.",
+        source:
+          "The poor, the needy, those who collect it, those whose hearts are being won over, freeing captives, people in debt, in the way of God, and the stranded traveller (Quran 9:60).",
+      },
+      {
+        rule: "Zakat is not for the family of the Prophet ﷺ.",
+        source: "Charity is not lawful for Muhammad or the family of Muhammad (Sahih Muslim).",
+      },
+      {
+        rule: "Giving to a relative in need is rewarded twice.",
+        source: "Charity to the poor is charity; to a relative it is two: charity and keeping family ties (Sunan al-Tirmidhi).",
+      },
+      {
+        rule: "Many scholars let a wife give her zakat to a husband in need.",
+        source: "The hadith of Zaynab, the wife of Ibn Mas‘ud (Sahih al-Bukhari, Sahih Muslim). Scholars differ on whether it was about zakat or voluntary charity.",
+      },
+      {
+        rule: "Zakat al-Fitr: one sa‘ for each person, before the Eid prayer.",
+        source:
+          "The Prophet ﷺ made Zakat al-Fitr a duty, a sa‘ of dates or of barley, on every Muslim, young and old, to be given before people go out to the prayer (Ibn ‘Umar, Sahih al-Bukhari, Sahih Muslim).",
+      },
+      {
+        rule: "Given after the Eid prayer, it counts as ordinary charity.",
+        source: "Whoever gives it before the prayer, it is accepted zakat; whoever gives it after the prayer, it is one of the charities (Ibn ‘Abbas, Sunan Abi Dawud).",
+      },
+      {
+        rule: "Giving does not make you poorer.",
+        source: "Charity does not decrease wealth (Sahih Muslim).",
+      },
+    ],
   },
 
   who: {

@@ -59,6 +59,26 @@ work.
   Sayyid, someone not Muslim, the well-off, one's own workers), each with the
   short answer in view (yes, yes if in need, no, most scholars say no,
   scholars differ) and the reason a tap away.
+- **Do I pay zakat on…?** (`/what-counts`). Sixteen things beginners ask
+  about (the home they live in, a car, salary, savings for Hajj or a wedding,
+  coins and bars, worn jewellery, gems, land to sell or to build on, rented
+  property, shop stock, money lent, shares, crypto, pensions, savings
+  certificates), each with the short answer in view and the reason a tap away.
+- **Where this comes from** (`/sources`). Each rule beside the verse or hadith
+  it rests on (cited by collection, since numbering differs by edition).
+- **Ramadan countdown.** Today's Islamic date and how far off Ramadan is on the
+  home page, the beginner's page, and the fitrana page, with a calendar
+  reminder a week before; during Ramadan, the day of it and a nudge to give
+  Zakat al-Fitr before the Eid prayer. Worked out in the browser, so a static
+  page still counts from today.
+- **Given so far.** Anyone who gives in parts notes what they have given and
+  sees what is left, on the calculator and the walk-through, kept on the
+  device. The walk-through also reminds people that each person in a family
+  pays on their own wealth, and its answer can be shared to WhatsApp.
+- **A poster for the mosque** (`/poster`), in every language: one A4 page
+  with a QR code that opens the beginner's page in that language.
+- **Tola.** Where gold is weighed in tola (PKR, INR, BDT), prices show per
+  tola as well as per gram, in the calculator and on the nisab pages.
 - **Zakat al-Fitr** (`/zakat-al-fitr`), in every language: the household's
   fitrana from the amount the local mosque announced, with who gives it, how
   much, when, and where the schools differ.
@@ -254,6 +274,9 @@ src/
     start/             zakat for beginners, with the "do I have to pay?" check
     guide/             the calculator one explained question at a time
     who-can-receive/   "can I give zakat to…?", person by person
+    what-counts/       "do I pay zakat on…?", thing by thing
+    sources/           the verse or hadith behind each rule
+    poster/            a printable A4 poster with a QR code
     zakat-al-fitr/     fitrana for a household (translated)
     [locale]/          every page above in Arabic, Urdu, Indonesian, Malay, Turkish, French
     nisab/             nisab today, per currency (hourly)

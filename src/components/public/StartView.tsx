@@ -5,6 +5,7 @@ import SiteFooter from "@/components/SiteFooter";
 import JsonLd from "@/components/JsonLd";
 import PayCheck from "@/components/public/PayCheck";
 import ReadAloud from "@/components/ReadAloud";
+import RamadanCountdown from "@/components/public/RamadanCountdown";
 import { LOCALE_INFO, languageAlternates, localePath, type Locale } from "@/i18n/config";
 import { messagesFor } from "@/i18n/messages";
 import { faqJsonLd } from "@/lib/faq";
@@ -86,6 +87,7 @@ export default function StartView({ locale }: { locale: Locale }) {
             listen={all.common.listen}
             stop={all.common.stopListening}
           />
+          <RamadanCountdown m={all.ramadan} locale={locale} className="mt-6" />
         </header>
 
         <div className="mt-12 space-y-12">
@@ -144,6 +146,14 @@ export default function StartView({ locale }: { locale: Locale }) {
             </div>
             <div className="space-y-3 sm:col-span-2">
               <p className="text-sm text-sage">{m.jewelleryNote}</p>
+              <p>
+                <Link
+                  href={localePath(locale, "/what-counts")}
+                  className="text-sm font-medium text-pine hover:underline"
+                >
+                  {all.applies.nav}
+                </Link>
+              </p>
               <ReadAloud
                 text={`${m.countsTitle}: ${m.counts.join(", ")}. ${m.notCountsTitle}: ${m.notCounts.join(", ")}. ${m.jewelleryNote}`}
                 lang={locale}
@@ -191,6 +201,9 @@ export default function StartView({ locale }: { locale: Locale }) {
               </Link>
               <Link href={localePath(locale, "/nisab")} className="text-sm text-pine hover:underline">
                 {all.common.footer.nisab}
+              </Link>
+              <Link href={localePath(locale, "/sources")} className="text-sm text-pine hover:underline">
+                {all.sources.nav}
               </Link>
               <Link href="/guides" className="text-sm text-pine hover:underline">
                 {m.guidesLink + all.common.inEnglish}

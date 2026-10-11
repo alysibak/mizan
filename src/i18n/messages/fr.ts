@@ -143,6 +143,7 @@ const fr: Messages = {
     yourCurrency: "Votre devise",
     currencyHint: "La monnaie dans laquelle vous comptez. Les montants et les prix du jour la suivent.",
     pricesLine: "Or {gold} le gramme · Argent {silver} le gramme",
+    tolaLine: "Or {gold} le tola · Argent {silver} le tola",
     usingOwnPrices: "Ce sont les prix que vous avez saisis.",
     enterOwnPrices: "Saisir les prix vous-même",
     moreKinds: "Autres types de biens",
@@ -157,6 +158,10 @@ const fr: Messages = {
     ],
     belowNext: "Vous pouvez toujours donner une sadaqa, une aumône libre, à tout moment. Refaites le calcul si votre épargne augmente.",
     guideLink: "Une question à la fois ? Avancez pas à pas",
+    givenTitle: "Déjà donné",
+    givenHint: "Si vous versez votre zakat en plusieurs fois, notez ce que vous avez donné. Cela reste sur cet appareil.",
+    stillToGive: "Reste à donner : {amount}",
+    allGiven: "Tout est donné. Qu’Allah l’accepte de vous.",
     difference: "Quelle différence ?",
     basisDifference: "La zakat se compte sur l’année hégirienne (lunaire), environ 354 jours. Si vous la versez chaque année à la même date grégorienne, votre année dure environ 11 jours de plus ; le taux monte donc légèrement, à 2,577 %, pour compenser.",
     pricesTitle: "Les cours du jour",
@@ -382,6 +387,7 @@ const fr: Messages = {
         nisab: "Nisab du jour : {silver} selon l’argent, ou {gold} selon l’or.",
         loading: "Récupération des prix de l’or et de l’argent du jour…",
         unavailable: "Les prix en direct sont indisponibles pour le moment. Vous pouvez continuer ; nous vous demanderons les prix du jour avant la fin.",
+        yours: "Ne comptez que ce qui est à vous. Dans une famille, chacun donne la zakat sur ses propres biens : une épouse sur ses bijoux et son épargne, par exemple.",
       },
       cash: {
         title: "Combien d’argent liquide avez-vous ?",
@@ -443,7 +449,182 @@ const fr: Messages = {
       calculator: "Vérifier dans le calculateur complet",
       change: "Modifier mes réponses",
       who: "Qui peut recevoir la zakat ?",
+      share: "Partager avec la famille et les amis",
+      shareText: "Calculez votre zakat pas à pas, en mots simples. Gratuit et privé :",
     },
+  },
+
+  ramadan: {
+    before: "Le Ramadan {year} commence vers le {date}, {when}.",
+    during: "C’est le Ramadan, jour {day}. L’Aïd al-Fitr est vers le {date}.",
+    hint: "Beaucoup calculent et versent leur zakat pendant le Ramadan. Le jour exact dépend de l’observation du croissant chez vous.",
+    duringHint: "Donnez la zakat al-Fitr avant la prière de l’Aïd.",
+    today: "Nous sommes le {date}.",
+    remind: "Me le rappeler une semaine avant le Ramadan",
+    reminderSummary: "Le Ramadan approche : calculez votre zakat",
+    reminderBody: "Le Ramadan commence dans une semaine environ. Calculez votre zakat et prévoyez vos dons.",
+    fitrLink: "Calculer la zakat al-Fitr",
+  },
+
+  poster: {
+    metaTitle: "Une affiche zakat gratuite pour votre mosquée",
+    metaDescription: "Imprimez une affiche d’une page qui aide les fidèles de votre mosquée ou de votre communauté à calculer leur zakat, avec un code à scanner. En sept langues.",
+    nav: "Affiche pour la mosquée",
+    eyebrow: "Pour les mosquées et centres communautaires",
+    title: "Une affiche pour votre mosquée",
+    lede: "Imprimez-la en A4 et affichez-la au tableau. Chacun scanne le code avec son téléphone et arrive sur une aide en mots simples, dans cette langue.",
+    print: "Imprimer l’affiche",
+    headline: "Devez-vous payer la zakat ?",
+    points: [
+      "La zakat est de 2,5 % de l’épargne que vous avez depuis un an.",
+      "Elle est due si votre épargne dépasse le nisab : le prix de 595 grammes d’argent.",
+      "Découvrez-le en trois questions, gratuitement et en privé, dans votre langue.",
+    ],
+    scan: "Scannez avec votre téléphone",
+    orVisit: "ou rendez-vous sur",
+  },
+
+  applies: {
+    metaTitle: "Dois-je payer la zakat sur ma maison, ma voiture, mon salaire ou mon épargne ?",
+    metaDescription: "Touchez un bien pour savoir si la zakat est due dessus : la maison où vous vivez, votre voiture, votre salaire, l’épargne pour le hajj ou un mariage, un terrain, un bien loué, l’or, les pierres précieuses, les prêts, les actions et la retraite. En mots simples, avec les divergences des savants.",
+    nav: "La zakat est-elle due sur… ?",
+    eyebrow: "Ce qui compte",
+    title: "La zakat est-elle due sur… ?",
+    lede: "Touchez ce qui vous intéresse. Vous verrez la réponse courte et sa raison, en mots simples.",
+    verdicts: {
+      yes: "Oui",
+      no: "Non",
+      mostNo: "La plupart des savants : non",
+      partly: "Une partie seulement",
+      ifSaved: "Seulement ce qui reste",
+      differ: "Les savants divergent",
+    },
+    cases: {
+      home: {
+        label: "La maison où vous vivez",
+        answer: "Non. Un logement pour votre propre usage ne compte pas, quelle que soit sa valeur.",
+      },
+      car: {
+        label: "Votre voiture, vos meubles et ce que vous utilisez",
+        answer: "Non. Ce que vous gardez pour votre usage personnel ne compte pas.",
+      },
+      salary: {
+        label: "Votre salaire",
+        answer: "La zakat ne se paie pas sur chaque salaire. Le jour de votre zakat, ce qu’il vous en reste est compté avec le reste de votre épargne.",
+      },
+      goals: {
+        label: "L’argent mis de côté pour le hajj, un mariage ou une maison",
+        answer: "Oui, s’il est encore là le jour de votre zakat. L’épargne compte, quel que soit l’usage que vous comptez en faire.",
+      },
+      bullion: {
+        label: "Pièces et lingots d’or ou d’argent",
+        answer: "Oui, à leur valeur du jour, selon le poids et le titre.",
+      },
+      jewellery: {
+        label: "Les bijoux en or que vous portez",
+        answer: "Les savants divergent. L’école hanafite les compte. Les écoles malikite, chafiite et hanbalite ne comptent pas les bijoux portés normalement.",
+      },
+      gems: {
+        label: "Diamants, perles et pierres précieuses",
+        answer: "Non, sauf si vous les gardez pour les vendre. Les pierres ne comptent pas comme l’or et l’argent.",
+      },
+      landToSell: {
+        label: "Un terrain ou un bien acheté pour être revendu",
+        answer: "Oui, à son prix de vente du jour, chaque année où vous le détenez.",
+      },
+      landToLive: {
+        label: "Un terrain acheté pour construire votre maison",
+        answer: "La plupart des savants : non, car il n’est pas à vendre. Si vous décidez de le vendre, il compte à partir de là.",
+      },
+      rental: {
+        label: "Un bien que vous louez",
+        answer: "Le bâtiment ne compte pas. Les loyers que vous avez gardés jusqu’au jour de votre zakat comptent avec votre épargne.",
+      },
+      business: {
+        label: "Les marchandises de votre boutique ou commerce",
+        answer: "Oui, à leur prix de vente du jour. La boutique elle-même, ses étagères et son matériel ne comptent pas.",
+      },
+      lent: {
+        label: "L’argent que vous avez prêté",
+        answer: "Oui, si vous comptez le récupérer. Si vous en doutez, beaucoup de savants disent de payer quand il vous est rendu.",
+      },
+      shares: {
+        label: "Actions et fonds",
+        answer: "Oui. Les actions que vous négociez comptent en entier. Pour celles gardées à long terme, seule une partie de la valeur compte ; un quart est une estimation courante.",
+      },
+      crypto: {
+        label: "Cryptomonnaies",
+        answer: "Les savants qui en permettent la détention les comptent comme de l’argent, à leur valeur du jour.",
+      },
+      pension: {
+        label: "Une retraite que vous ne pouvez pas encore toucher",
+        answer: "Les savants divergent. Beaucoup disent de payer quand vous pouvez la toucher ; d’autres comptent la part que vous pourriez retirer aujourd’hui.",
+      },
+      bonds: {
+        label: "Bons d’épargne et obligations",
+        answer: "Le montant placé compte. Les intérêts ne vous reviennent pas : donnez-les à part, et ils ne comptent pas comme zakat.",
+      },
+    },
+  },
+
+  sources: {
+    metaTitle: "D’où viennent les règles de zakat de Mizan : Coran et hadith",
+    metaDescription: "Les versets du Coran et les hadiths sur lesquels repose la zakat : le taux de 2,5 %, le nisab en argent et en or, l’année, les huit catégories de bénéficiaires et la zakat al-Fitr, en mots simples.",
+    nav: "D’où cela vient",
+    eyebrow: "Sources",
+    title: "D’où cela vient",
+    lede: "Chaque règle utilisée par Mizan, avec le verset du Coran ou le hadith sur lequel elle repose, en mots simples.",
+    note: "Les hadiths sont cités par recueil plutôt que par numéro, car la numérotation varie selon les éditions. Les poids en grammes sont les conversions modernes courantes des anciennes mesures. Pour votre situation, demandez à un savant.",
+    items: [
+      {
+        rule: "La zakat est une obligation et l’un des cinq piliers de l’islam.",
+        source: "Le Coran associe souvent la prière et la zakat, comme en 2:43 et 2:110. Le Prophète ﷺ a dit que l’islam est bâti sur cinq piliers, dont la zakat (Sahih al-Bukhari, Sahih Muslim).",
+      },
+      {
+        rule: "Elle purifie vos biens.",
+        source: "« Prélève de leurs biens une aumône par laquelle tu les purifies et les fais croître » (Coran 9:103).",
+      },
+      {
+        rule: "Rien n’est dû sous le nisab : 595 grammes d’argent, ou 85 grammes d’or.",
+        source: "Aucune zakat n’est due sur moins de cinq awqiyah d’argent (Sahih al-Bukhari, Sahih Muslim). Rien n’est dû sur l’or tant qu’il n’atteint pas vingt dinars (Sunan Abi Dawud).",
+      },
+      {
+        rule: "Le taux est de 2,5 %, un quarantième.",
+        source: "Sur deux cents dirhams détenus pendant un an, cinq dirhams sont dus (hadith de ‘Ali, Sunan Abi Dawud).",
+      },
+      {
+        rule: "La zakat est due quand une année est passée sur le bien.",
+        source: "Aucune zakat n’est due sur un bien tant qu’une année n’est pas passée dessus (Sunan Abi Dawud, Sunan Ibn Majah).",
+      },
+      {
+        rule: "Huit catégories reçoivent la zakat.",
+        source: "Les pauvres, les démunis, ceux qui la collectent, ceux dont les cœurs sont à gagner, l’affranchissement des captifs, les endettés, le sentier de Dieu, et le voyageur en difficulté (Coran 9:60).",
+      },
+      {
+        rule: "La zakat n’est pas pour la famille du Prophète ﷺ.",
+        source: "L’aumône n’est licite ni pour Muhammad ni pour la famille de Muhammad (Sahih Muslim).",
+      },
+      {
+        rule: "Donner à un proche dans le besoin est récompensé deux fois.",
+        source: "L’aumône au pauvre est une aumône ; au proche, elle en vaut deux : aumône et lien de parenté (Sunan at-Tirmidhi).",
+      },
+      {
+        rule: "Beaucoup de savants permettent à une femme de donner sa zakat à son mari dans le besoin.",
+        source: "Le hadith de Zaynab, l’épouse d’Ibn Mas‘ud (Sahih al-Bukhari, Sahih Muslim). Les savants divergent : s’agissait-il de la zakat ou d’une aumône volontaire ?",
+      },
+      {
+        rule: "Zakat al-Fitr : un sa‘ par personne, avant la prière de l’Aïd.",
+        source: "Le Prophète ﷺ a rendu obligatoire la zakat al-Fitr, un sa‘ de dattes ou d’orge, pour chaque musulman, petit ou grand, à donner avant que les gens ne sortent pour la prière (Ibn ‘Umar, Sahih al-Bukhari, Sahih Muslim).",
+      },
+      {
+        rule: "Donnée après la prière de l’Aïd, elle compte comme une aumône ordinaire.",
+        source: "Celui qui la donne avant la prière, c’est une zakat acceptée ; celui qui la donne après, c’est une aumône parmi les aumônes (Ibn ‘Abbas, Sunan Abi Dawud).",
+      },
+      {
+        rule: "Donner ne vous appauvrit pas.",
+        source: "L’aumône ne diminue pas les biens (Sahih Muslim).",
+      },
+    ],
   },
 
   who: {

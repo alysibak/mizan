@@ -142,6 +142,7 @@ const tr: Messages = {
     yourCurrency: "Para biriminiz",
     currencyHint: "Hesap yaptığınız para birimi. Tutarlar ve bugünkü fiyatlar ona göre gösterilir.",
     pricesLine: "Altının gramı {gold} · Gümüşün gramı {silver}",
+    tolaLine: "Altının tolası {gold} · Gümüşün tolası {silver}",
     usingOwnPrices: "Girdiğiniz fiyatlar kullanılıyor.",
     enterOwnPrices: "Fiyatları kendiniz girin",
     moreKinds: "Diğer mal türleri",
@@ -156,6 +157,10 @@ const tr: Messages = {
     ],
     belowNext: "İstediğiniz zaman gönüllü sadaka verebilirsiniz. Birikiminiz artarsa yeniden hesaplayın.",
     guideLink: "Her seferinde tek soru mu istersiniz? Adım adım ilerleyin",
+    givenTitle: "Şimdiye kadar verilen",
+    givenHint: "Zekâtınızı parça parça veriyorsanız verdiğinizi not edin. Yalnızca bu cihazda kalır.",
+    stillToGive: "Verilecek kalan: {amount}",
+    allGiven: "Hepsi verildi. Allah kabul etsin.",
     difference: "Farkı ne?",
     basisDifference: "Zekât hicri (kameri) yıla göre hesaplanır; bu yaklaşık 354 gündür. Her yıl aynı miladi tarihte veriyorsanız yılınız yaklaşık 11 gün daha uzundur, bu yüzden oran bunu karşılamak için biraz artarak %2,577 olur.",
     pricesTitle: "Bugünkü fiyatlar",
@@ -386,6 +391,7 @@ const tr: Messages = {
         nisab: "Bugünkü nisap: gümüşe göre {silver}, altına göre {gold}.",
         loading: "Bugünkü altın ve gümüş fiyatları getiriliyor…",
         unavailable: "Canlı fiyatlara şu an ulaşılamıyor. Devam edebilirsiniz; bitirmeden önce bugünkü fiyatları soracağız.",
+        yours: "Yalnızca size ait olanı sayın. Ailede herkes kendi malının zekâtını verir: örneğin hanım kendi ziynetinin ve birikiminin.",
       },
       cash: {
         title: "Ne kadar nakdiniz var?",
@@ -447,7 +453,182 @@ const tr: Messages = {
       calculator: "Tam hesaplayıcıda kontrol edin",
       change: "Cevaplarımı değiştir",
       who: "Zekât kimlere verilir?",
+      share: "Bunu ailenizle ve arkadaşlarınızla paylaşın",
+      shareText: "Zekâtınızı adım adım, sade bir dille hesaplayın. Ücretsiz ve gizli:",
     },
+  },
+
+  ramadan: {
+    before: "{year} Ramazanı yaklaşık {date} tarihinde başlıyor, {when}.",
+    during: "Ramazan’ın {day}. günü. Ramazan Bayramı yaklaşık {date}.",
+    hint: "Pek çok kişi zekâtını Ramazan’da hesaplayıp verir. Kesin gün, bulunduğunuz yerdeki hilal gözlemine bağlıdır.",
+    duringHint: "Fitreyi bayram namazından önce verin.",
+    today: "Bugün {date}.",
+    remind: "Ramazan’dan bir hafta önce hatırlat",
+    reminderSummary: "Ramazan geliyor: zekâtınızı hesaplama zamanı",
+    reminderBody: "Ramazan yaklaşık bir hafta sonra başlıyor. Zekâtınızı hesaplayın ve bağışlarınızı planlayın.",
+    fitrLink: "Fitreyi hesaplayın",
+  },
+
+  poster: {
+    metaTitle: "Caminiz için ücretsiz zekât afişi",
+    metaDescription: "Caminizdeki veya topluluğunuzdaki insanların zekâtını hesaplamasına yardım eden, taranabilir kodlu tek sayfalık bir afiş yazdırın. Yedi dilde.",
+    nav: "Cami için afiş",
+    eyebrow: "Camiler ve topluluk merkezleri için",
+    title: "Caminiz için bir afiş",
+    lede: "A4’e yazdırıp ilan panosuna asın. İnsanlar kodu telefonlarıyla tarar ve bu dilde sade bir anlatıma ulaşır.",
+    print: "Afişi yazdır",
+    headline: "Zekât vermeniz gerekiyor mu?",
+    points: [
+      "Zekât, bir yıldır sahip olduğunuz birikimin %2,5’idir.",
+      "Birikiminiz nisabı aşarsa farz olur: 595 gram gümüşün fiyatı.",
+      "Üç soruda öğrenin; ücretsiz, gizli ve kendi dilinizde.",
+    ],
+    scan: "Telefonunuzla tarayın",
+    orVisit: "veya ziyaret edin",
+  },
+
+  applies: {
+    metaTitle: "Evim, arabam, maaşım veya birikimim zekâta tabi mi?",
+    metaDescription: "Bir şeye dokunun ve zekâta tabi olup olmadığını görün: oturduğunuz ev, arabanız, maaşınız, hac veya düğün birikimi, arsa, kiraya verilen mülk, altın, değerli taşlar, alacaklar, hisseler ve emeklilik. Sade bir dille ve âlimlerin farklı görüşte olduğu yerlerle.",
+    nav: "Zekâtı … verilir mi?",
+    eyebrow: "Neler sayılır",
+    title: "Zekâtı … verilir mi?",
+    lede: "Merak ettiğiniz şeye dokunun. Kısa cevabı ve nedenini sade bir dille göreceksiniz.",
+    verdicts: {
+      yes: "Evet",
+      no: "Hayır",
+      mostNo: "Çoğu âlim: hayır",
+      partly: "Yalnızca bir kısmı",
+      ifSaved: "Yalnızca kalan kısmı",
+      differ: "Âlimler farklı görüşte",
+    },
+    cases: {
+      home: {
+        label: "Oturduğunuz ev",
+        answer: "Hayır. Kendi oturduğunuz ev, değeri ne olursa olsun sayılmaz.",
+      },
+      car: {
+        label: "Arabanız, eşyalarınız ve kullandığınız şeyler",
+        answer: "Hayır. Kendi kullanımınız için tuttuğunuz şeyler sayılmaz.",
+      },
+      salary: {
+        label: "Maaşınız",
+        answer: "Her maaştan ayrı zekât verilmez. Zekât gününüzde maaştan elinizde kalan, diğer birikimlerinizle birlikte sayılır.",
+      },
+      goals: {
+        label: "Hac, düğün veya ev için biriktirilen para",
+        answer: "Evet, zekât gününüzde hâlâ elinizdeyse. Birikim, neye harcamayı planlarsanız planlayın sayılır.",
+      },
+      bullion: {
+        label: "Altın veya gümüş sikke ve külçeler",
+        answer: "Evet, ağırlığına ve ayarına göre bugünkü değeriyle.",
+      },
+      jewellery: {
+        label: "Taktığınız altın ziynet eşyası",
+        answer: "Âlimler farklı görüşte. Hanefiler sayar. Maliki, Şafii ve Hanbeliler normal şekilde takılan ziyneti saymaz.",
+      },
+      gems: {
+        label: "Elmas, inci ve değerli taşlar",
+        answer: "Hayır, satmak için tutmuyorsanız. Değerli taşlar altın ve gümüş gibi sayılmaz.",
+      },
+      landToSell: {
+        label: "Satmak için aldığınız arsa veya mülk",
+        answer: "Evet, elinizde tuttuğunuz her yıl bugünkü satış değeriyle.",
+      },
+      landToLive: {
+        label: "Kendi evinizi yapmak için aldığınız arsa",
+        answer: "Çoğu âlim: hayır, çünkü satılık değildir. Satmaya karar verirseniz o andan itibaren sayılır.",
+      },
+      rental: {
+        label: "Kiraya verdiğiniz mülk",
+        answer: "Binanın kendisi sayılmaz. Zekât gününe kadar biriktirdiğiniz kira, birikimlerinizle birlikte sayılır.",
+      },
+      business: {
+        label: "Dükkânınızdaki veya işletmenizdeki mallar",
+        answer: "Evet, bugünkü satış değeriyle. Dükkânın kendisi, rafları ve ekipmanı sayılmaz.",
+      },
+      lent: {
+        label: "Birine borç verdiğiniz para",
+        answer: "Evet, geri almayı bekliyorsanız. Şüpheliyseniz pek çok âlim, geri ödendiğinde zekâtının verileceğini söyler.",
+      },
+      shares: {
+        label: "Hisseler ve fonlar",
+        answer: "Evet. Alıp sattığınız hisseler tamamen sayılır. Uzun vadeli tuttuğunuz hisselerin yalnızca bir kısmı sayılır; dörtte bir yaygın bir tahmindir.",
+      },
+      crypto: {
+        label: "Kripto para",
+        answer: "Sahip olunmasına izin veren âlimler onu para gibi, bugünkü değeriyle sayar.",
+      },
+      pension: {
+        label: "Henüz çekemediğiniz emeklilik birikimi",
+        answer: "Âlimler farklı görüşte. Pek çoğu çekilebildiğinde zekâtının verileceğini söyler; diğerleri bugün çekilebilecek kısmı sayar.",
+      },
+      bonds: {
+        label: "Tasarruf sertifikaları ve tahviller",
+        answer: "Yatırdığınız ana para sayılır. Faiz sizin değildir: onu ayrıca verin; bu zekât yerine geçmez.",
+      },
+    },
+  },
+
+  sources: {
+    metaTitle: "Mizan’ın zekât hükümleri nereden geliyor: Kur’an ve hadis",
+    metaDescription: "Zekâtın dayandığı âyetler ve hadisler: %2,5 oranı, gümüş ve altın nisabı, havl, zekât verilecek sekiz grup ve fitre, sade bir dille.",
+    nav: "Bu nereden geliyor",
+    eyebrow: "Kaynaklar",
+    title: "Bu nereden geliyor",
+    lede: "Mizan’ın kullandığı her hüküm ve dayandığı âyet ya da hadis, sade bir dille.",
+    note: "Hadisler numarayla değil kitabının adıyla verilmiştir, çünkü numaralar baskıdan baskıya değişir. Gram ağırlıklar eski ölçülerin yaygın modern karşılıklarıdır. Kendi durumunuz için bir âlime danışın.",
+    items: [
+      {
+        rule: "Zekât farzdır ve İslam’ın beş şartından biridir.",
+        source: "Kur’an namaz ile zekâtı pek çok yerde birlikte anar; örneğin Bakara 43 ve 110. Peygamber ﷺ İslam’ın beş şey üzerine kurulduğunu, zekâtın da bunlardan biri olduğunu söylemiştir (Sahîh-i Buhârî, Sahîh-i Müslim).",
+      },
+      {
+        rule: "Zekât malınızı arındırır.",
+        source: "“Mallarından, kendilerini temizleyeceğin ve arındıracağın bir sadaka al” (Tevbe 103).",
+      },
+      {
+        rule: "Nisabın altında zekât yoktur: 595 gram gümüş veya 85 gram altın.",
+        source: "Beş ukiyyeden az gümüşte zekât yoktur (Sahîh-i Buhârî, Sahîh-i Müslim). Altın yirmi dinara ulaşmadıkça ondan bir şey gerekmez (Sünen-i Ebû Dâvûd).",
+      },
+      {
+        rule: "Oran %2,5’tir, yani kırkta bir.",
+        source: "Üzerinden bir yıl geçmiş iki yüz dirhemde beş dirhem zekât vardır (Hz. Ali’nin hadisi, Sünen-i Ebû Dâvûd).",
+      },
+      {
+        rule: "Zekât, mal üzerinden bir yıl geçince farz olur.",
+        source: "Üzerinden bir yıl geçmedikçe malda zekât yoktur (Sünen-i Ebû Dâvûd, Sünen-i İbn Mâce).",
+      },
+      {
+        rule: "Zekât sekiz gruba verilir.",
+        source: "Fakirler, yoksullar, zekât toplayan görevliler, kalpleri İslam’a ısındırılacak olanlar, köleler, borçlular, Allah yolunda olanlar ve yolda kalmışlar (Tevbe 60).",
+      },
+      {
+        rule: "Zekât Peygamber ﷺ ailesine verilmez.",
+        source: "Sadaka Muhammed’e ve Muhammed’in ailesine helal değildir (Sahîh-i Müslim).",
+      },
+      {
+        rule: "İhtiyaç sahibi akrabaya vermenin iki sevabı vardır.",
+        source: "Yoksula verilen sadaka bir sadakadır; akrabaya verilen ise ikidir: sadaka ve akrabalık bağını gözetmek (Sünen-i Tirmizî).",
+      },
+      {
+        rule: "Pek çok âlim, kadının ihtiyaç sahibi kocasına zekât vermesine izin verir.",
+        source: "İbn Mesud’un hanımı Zeyneb’in hadisi (Sahîh-i Buhârî, Sahîh-i Müslim). Âlimler bunun zekât mı yoksa nafile sadaka mı olduğu konusunda farklı görüştedir.",
+      },
+      {
+        rule: "Fitre: kişi başı bir sa‘, bayram namazından önce.",
+        source: "Resûlullah ﷺ fitreyi, küçük büyük her Müslüman üzerine bir sa‘ hurma veya bir sa‘ arpa olarak farz kılmış ve insanlar namaza çıkmadan önce verilmesini emretmiştir (İbn Ömer, Sahîh-i Buhârî, Sahîh-i Müslim).",
+      },
+      {
+        rule: "Bayram namazından sonra verilirse sıradan sadaka sayılır.",
+        source: "Kim onu namazdan önce verirse kabul edilmiş bir zekâttır; kim namazdan sonra verirse sadakalardan bir sadakadır (İbn Abbas, Sünen-i Ebû Dâvûd).",
+      },
+      {
+        rule: "Vermek sizi fakirleştirmez.",
+        source: "Sadaka maldan bir şey eksiltmez (Sahîh-i Müslim).",
+      },
+    ],
   },
 
   who: {

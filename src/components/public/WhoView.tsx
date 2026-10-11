@@ -44,7 +44,12 @@ export default function WhoView({ locale }: { locale: Locale }) {
           />
         </div>
         <p className="mt-8 border-s-2 border-brass ps-4 text-base leading-relaxed text-ink">{m.eight}</p>
-        <p className="mt-4 text-sm text-sage">{m.ask}</p>
+        <p className="mt-4 text-sm text-sage">
+          {m.ask}{" "}
+          <Link href={localePath(locale, "/sources")} className="text-pine hover:underline">
+            {all.sources.nav}
+          </Link>
+        </p>
         <div className="mt-8 flex flex-wrap items-center gap-3">
           <Link href={localePath(locale, "/guide")} className="btn-primary px-5 py-3 text-base">
             {all.start.ctaGuide}

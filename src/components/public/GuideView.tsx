@@ -40,6 +40,7 @@ export default function GuideView({ locale }: { locale: Locale }) {
             m={m}
             calc={all.calc}
             speech={{ listen: all.common.listen, stop: all.common.stopListening }}
+            share={all.common.share}
             locale={locale}
           />
         </div>

@@ -14,6 +14,7 @@ import { messagesFor } from "@/i18n/messages";
 import { currencyName } from "@/lib/currencies";
 import { CALC_CURRENCIES } from "@/lib/calculator";
 import { NISAB_GOLD_GRAMS, NISAB_SILVER_GRAMS } from "@/lib/nisab";
+import { TOLA_GRAMS, usesTola } from "@/lib/metals";
 import { formatMoney } from "@/lib/money";
 import { getMetalPrices, type MetalPrices } from "@/lib/price-fetch";
 import ShareButton from "@/components/public/ShareButton";
@@ -319,6 +320,14 @@ export async function NisabCurrencyView({
                 </dd>
               </div>
             </dl>
+            {usesTola(code) ? (
+              <p className="mt-3 text-sm text-ink nums">
+                {fmt(all.calc.tolaLine, {
+                  gold: money(prices.goldPricePerGram * TOLA_GRAMS),
+                  silver: money(prices.silverPricePerGram * TOLA_GRAMS),
+                })}
+              </p>
+            ) : null}
             <div className="mt-3">
               <AsOf prices={prices} locale={locale} />
             </div>

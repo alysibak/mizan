@@ -146,6 +146,8 @@ export interface CalcDraft {
   purity: Partial<Record<WeighableKey, string>>;
   portions: Partial<Record<PortionKey, string>>;
   debts: string;
+  /** What has been given so far toward this zakat, for those who give in parts. */
+  given: string;
 }
 
 export const CALC_STORAGE_KEY = "mizan-calculator-v1";
@@ -169,6 +171,7 @@ export function emptyDraft(currency = "USD", decimal: DecimalMark | null = null)
     purity: {},
     portions: {},
     debts: "",
+    given: "",
   };
 }
 
@@ -412,6 +415,7 @@ export function parseDraft(raw: string | null | undefined): CalcDraft | null {
     purity: strMap(data.purity, WEIGHABLE_KEYS),
     portions: strMap(data.portions, PORTION_KEYS),
     debts: str(data.debts),
+    given: str(data.given),
   };
 }
 

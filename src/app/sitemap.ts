@@ -19,6 +19,9 @@ const TRANSLATED: { path: string; priority: number; changeFrequency: Freq }[] =
     { path: "/guide", priority: 0.8, changeFrequency: "monthly" },
     { path: "/who-can-receive", priority: 0.8, changeFrequency: "monthly" },
     { path: "/zakat-al-fitr", priority: 0.8, changeFrequency: "monthly" },
+    { path: "/what-counts", priority: 0.8, changeFrequency: "monthly" },
+    { path: "/sources", priority: 0.6, changeFrequency: "yearly" },
+    { path: "/poster", priority: 0.5, changeFrequency: "yearly" },
     { path: "/nisab", priority: 0.8, changeFrequency: "hourly" },
     ...CALC_CURRENCIES.map((c) => ({
       path: `/nisab/${c.toLowerCase()}`,
