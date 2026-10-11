@@ -40,5 +40,5 @@ export const PUBLIC_TOOLS: PublicTool[] = [
   },
 ];
 
-/** The English-only tool pages (the calculator and nisab pages are translated). */
-export const ENGLISH_TOOL_PATHS = ["/inheritance", "/zakat-al-fitr", "/halal-stocks", "/qurbani"];
+/** The English-only tool pages (the calculator, nisab, and Zakat al-Fitr pages are translated). */
+export const ENGLISH_TOOL_PATHS = ["/inheritance", "/halal-stocks", "/qurbani"];

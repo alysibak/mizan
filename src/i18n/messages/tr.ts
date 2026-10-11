@@ -34,6 +34,9 @@ const tr: Messages = {
     language: "Dil",
     readHere: "Bu sayfayı Türkçe okuyun",
     notNow: "Şimdi değil",
+    listen: "Dinle",
+    stopListening: "Durdur",
+    largerText: "Daha büyük yazı",
   },
 
   landing: {
@@ -445,6 +448,145 @@ const tr: Messages = {
       change: "Cevaplarımı değiştir",
       who: "Zekât kimlere verilir?",
     },
+  },
+
+  who: {
+    metaTitle: "Zekât kimlere verilir? Akrabalarıma zekât verebilir miyim?",
+    metaDescription: "Bir kişiye dokunun ve zekâtınızın ona verilip verilemeyeceğini görün: anne baba, kardeşler, eş, borçlular, hayır kurumları, camiler ve daha fazlası. Sade bir dille ve âlimlerin farklı görüşte olduğu yerlerle.",
+    nav: "Zekâtımı … verebilir miyim?",
+    eyebrow: "Zekâtınızı vermek",
+    title: "Zekâtımı … verebilir miyim?",
+    lede: "Düşündüğünüz kişiye dokunun. Cevabı sade bir dille ve âlimlerin farklı görüşte olduğu yerleri göreceksiniz.",
+    pick: "Kimi düşünüyorsunuz?",
+    verdicts: {
+      yes: "Evet",
+      ifNeed: "Evet, ihtiyaç sahibiyse",
+      no: "Hayır",
+      mostNo: "Çoğu âlim: hayır",
+      differ: "Âlimler farklı görüşte",
+    },
+    cases: {
+      parents: {
+        label: "Annem veya babam",
+        answer: "Hayır. Anne babanıza ve dede-ninelerinize bakmak zaten sizin görevinizdir; onlara verilen zekât geçerli olmaz. Onlara diğer malınızdan yardım edin.",
+      },
+      children: {
+        label: "Oğlum veya kızım",
+        answer: "Hayır. Torunlar için de aynısı geçerlidir: onların geçimi zaten sizin görevinizdir.",
+      },
+      wife: {
+        label: "Hanımım",
+        answer: "Hayır. Koca hanımının geçimini zaten sağlamakla yükümlüdür; bu yüzden zekâtını ona veremez.",
+      },
+      husband: {
+        label: "Kocam",
+        answer: "Âlimler farklı görüşte. Pek çok âlim, İbn Mesud’un hanımı Zeyneb’in hadisine dayanarak kadının ihtiyaç sahibi kocasına zekât vermesine izin verir. Hanefiler dahil diğerleri izin vermez. İmamınıza sorun.",
+      },
+      siblings: {
+        label: "Kardeşim",
+        answer: "Evet, ihtiyaç sahibiyseler. Pek çok âlim bunun daha da iyi olduğunu söyler: hem sadaka hem sıla-i rahimdir. Sizinle yaşıyor ve geçimlerini zaten siz sağlıyorsanız imamınıza sorun.",
+      },
+      relatives: {
+        label: "Amca, dayı, hala, teyze, kuzen veya akraba",
+        answer: "Evet, ihtiyaç sahibiyseler. İhtiyaç sahibi akrabaya vermenin iki sevabı vardır: sadaka ve akrabalık bağını gözetmek.",
+      },
+      poor: {
+        label: "Yoksul bir komşu, arkadaş veya yabancı",
+        answer: "Evet, temel ihtiyaçlarını karşılayamıyorsa. Ona bunun zekât olduğunu söylemeniz gerekmez; onurunu koruyacak şekilde verin.",
+      },
+      debt: {
+        label: "Borcunu ödeyemeyen biri",
+        answer: "Evet. Ödeyemediği borçların altında ezilen kişiler, Kur’an’da (Tevbe 9:60) zekât verilecekler arasında sayılmıştır.",
+      },
+      student: {
+        label: "İhtiyaç sahibi bir öğrenci",
+        answer: "Evet, yoksulsa ve okurken geçimini karşılayamıyorsa.",
+      },
+      charity: {
+        label: "Hayır kurumu veya zekât toplayan bir kuruluş",
+        answer: "Evet, zekâtı ayrı tutuyor ve yalnızca hak sahiplerine veriyorsa. Vermeden önce zekâtı nasıl kullandıklarını sorun.",
+      },
+      mosque: {
+        label: "Cami yapımı veya giderleri",
+        answer: "Çoğu âlim: hayır. Zekât ihtiyaç sahibi insanlar içindir, binalar için değil. Camiyi sadakanızla destekleyin.",
+      },
+      sayyid: {
+        label: "Seyyid (Peygamber ﷺ soyundan)",
+        answer: "Çoğu âlim: hayır. Peygamber ﷺ zekâtın Muhammed’in ailesine helal olmadığını söylemiştir. Onlara hediye veya sadaka ile yardım edin.",
+      },
+      nonMuslim: {
+        label: "Müslüman olmayan biri",
+        answer: "Çoğu âlime göre zekât ihtiyaç sahibi Müslümanlar içindir. Sadaka ile herkese yardım edebilirsiniz.",
+      },
+      wealthy: {
+        label: "İhtiyacı olmayan biri",
+        answer: "Hayır. Zekât ihtiyaç sahipleri ve Kur’an’da sayılan diğer gruplar içindir, zaten yeterince olanlar için değil.",
+      },
+      employee: {
+        label: "Çalışanım, maaşının bir parçası olarak",
+        answer: "Hayır. Zekâtla birine borçlu olduğunuz iş ücreti ödenmez. İhtiyaç sahibi bir çalışana maaşının üstüne zekât verebilirsiniz.",
+      },
+    },
+    eight: "Kur’an (Tevbe 9:60) zekât verilecek sekiz grubu sayar: fakirler, yoksullar, zekât toplayan görevliler, kalpleri İslam’a ısındırılacak olanlar, köleler, borçlular, Allah yolunda olanlar ve yolda kalmışlar.",
+    ask: "Durumunuzdan emin değil misiniz? Caminizin imamına sorun.",
+  },
+
+  fitr: {
+    metaTitle: "Haneniz için fitre (fıtır sadakası) hesaplayıcı",
+    metaDescription: "Bakmakla yükümlü olduğunuz herkes için fitreyi hesaplayın: kim verir, ne kadar ve bayram namazından önce ne zaman. Ücretsiz, hesap gerekmez.",
+    appName: "Mizan fitre hesaplayıcı",
+    eyebrow: "Ramazan’ın sonu",
+    title: "Fitre (fıtır sadakası) hesaplayıcı",
+    lede: "Kendiniz ve çocuklar dahil bakmakla yükümlü olduğunuz her kişi için bayram namazından önce verilen belirli bir tutar. Caminizin veya kurumunuzun bu yıl açıkladığı tutarı girin.",
+    people: "Bakmakla yükümlü olduğunuz kişiler",
+    peopleHint: "Kendiniz dahil.",
+    perPerson: "Kişi başı tutar ({currency})",
+    perPersonHint: "Caminizin veya kurumunuzun bu yıl açıkladığı tutar: bulunduğunuz yerde bir sa‘ temel gıdanın fiyatı.",
+    needPeople: "Bakmakla yükümlü olduğunuz herkesi sayın: 1 ile {max} arasında bir tam sayı.",
+    needAmount: "Caminizin veya kurumunuzun açıkladığı kişi başı tutarı girin.",
+    line: "{people} × {amount}",
+    total: "Verilecek fitre",
+    schools: "Mezhepler gıda ya da değerini para olarak vermek ve ölçünün miktarı konusunda farklı görüştedir. Güvendiğiniz kişilerin rehberliğine uyun; bu araç yalnızca çarpma yapar.",
+    ledgerLink: "Ücretsiz defter açın",
+    ledgerRest: "ve bunu zekâtınızın yanında, yıl sonu dökümüyle birlikte kayıtlı tutun.",
+    sections: [
+      {
+        heading: "Kim verir",
+        body: "Bayram günü ve gecesinin ihtiyacından fazlasına sahip her Müslüman, kendisi ve bakmakla yükümlü olduğu kişiler için verir: eşi, küçük çocukları ve diğer bakmakla yükümlü oldukları. Çoğu mezhep Ramazan’ın son günü güneş batmadan doğan çocuğu da dahil eder. Hanefiler bu yükümlülüğü, ihtiyaç fazlası nisap miktarı mala sahip olmaya bağlar.",
+      },
+      {
+        heading: "Ne kadar",
+        body: "Kişi başı bir sa‘ yerel temel gıda: yaklaşık 2,5–3 kg hurma, arpa, kuru üzüm, buğday veya pirinç. Hanefiler yarım sa‘ buğdayı kabul eder ve değerinin para olarak verilmesine izin verir; diğer âlimlerin çoğu gıdanın kendisini tercih eder. Kurumlar ve camiler her Ramazan yerel fiyatlara göre bir tutar açıklar; bu yüzden Mizan bunu tahmin etmez.",
+      },
+      {
+        heading: "Ne zaman verilir",
+        body: "Ramazan Bayramı namazından önce. Pek çok kişi yoksullara zamanında ulaşsın diye bir iki gün önce verir; Şafiiler Ramazan’ın başından, Hanefiler daha da önceden verilmesine izin verir. Namazdan sonra verilirse sıradan sadaka sayılır ve borç devam eder. Fitre, yoksullar da bayramı sevinçle karşılasın diye onlara verilir.",
+      },
+      {
+        heading: "Birikimin zekâtı değildir",
+        body: "Fitre, günün ihtiyacından fazla neyiniz olursa olsun kişi başına verilir. Birikimin zekâtı ise bir kameri yıl boyunca nisabın üzerinde sahip olduğunuz malın %2,5’idir.",
+      },
+    ],
+    calculatorLink: "Birikiminizin zekâtını hesaplayın",
+    faqTitle: "Sorular",
+    faq: [
+      {
+        q: "Çocuklarım için de fitre verir miyim?",
+        a: "Evet. Hane reisi, geçimini sağladığı çocuklar dahil bakmakla yükümlü olduğu herkes için verir. Çoğu âlim Ramazan bitmeden doğan çocuğu da dahil eder.",
+      },
+      {
+        q: "Gıda yerine para verebilir miyim?",
+        a: "Hanefiler değerinin para olarak verilmesine izin verir; bu yüzden pek çok kurum bir para tutarı açıklar. Maliki, Şafii ve Hanbeliler temel gıdanın kendisini tercih eder. Güvendiğiniz âlimlere uyun.",
+      },
+      {
+        q: "Fitre ile zekâtü’l-fıtr aynı şey mi?",
+        a: "Evet. Fitre, fıtır sadakası ve zekâtü’l-fıtr, Ramazan’ın sonundaki aynı yükümlülüğün adlarıdır.",
+      },
+      {
+        q: "Vaktini kaçırırsam ne olur?",
+        a: "En kısa sürede verin. Bayram namazından sonra verilirse fitre değil sadaka sayılır, ama yükümlülük gecikmekle düşmez.",
+      },
+    ],
   },
 
   nisabPage: {

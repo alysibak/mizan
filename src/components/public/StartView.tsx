@@ -4,6 +4,7 @@ import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import JsonLd from "@/components/JsonLd";
 import PayCheck from "@/components/public/PayCheck";
+import ReadAloud from "@/components/ReadAloud";
 import { LOCALE_INFO, languageAlternates, localePath, type Locale } from "@/i18n/config";
 import { messagesFor } from "@/i18n/messages";
 import { faqJsonLd } from "@/lib/faq";
@@ -27,17 +28,32 @@ export function startMetadata(locale: Locale): Metadata {
 function Section({
   id,
   title,
+  speak,
+  locale,
   children,
 }: {
   id: string;
   title: string;
+  /** The section's words, read aloud on request. */
+  speak?: string;
+  locale: Locale;
   children: React.ReactNode;
 }) {
+  const { listen, stopListening } = messagesFor(locale).common;
   return (
     <section aria-labelledby={id} className="border-t border-mist pt-8">
       <h2 id={id} className="font-serif text-2xl text-ink sm:text-3xl">
         {title}
       </h2>
+      {speak ? (
+        <ReadAloud
+          className="mt-3"
+          text={`${title}. ${speak}`}
+          lang={locale}
+          listen={listen}
+          stop={stopListening}
+        />
+      ) : null}
       <div className="mt-3 space-y-3 text-base leading-relaxed text-sage">{children}</div>
     </section>
   );
@@ -63,10 +79,17 @@ export default function StartView({ locale }: { locale: Locale }) {
             {m.title}
           </h1>
           <p className="mt-4 text-lg leading-relaxed text-sage">{m.lede}</p>
+          <ReadAloud
+            className="mt-4"
+            text={`${m.title}. ${m.lede}`}
+            lang={locale}
+            listen={all.common.listen}
+            stop={all.common.stopListening}
+          />
         </header>
 
         <div className="mt-12 space-y-12">
-          <Section id="what" title={m.whatTitle}>
+          <Section id="what" title={m.whatTitle} speak={m.whatBody} locale={locale}>
             <p>{m.whatBody}</p>
           </Section>
 
@@ -80,7 +103,7 @@ export default function StartView({ locale }: { locale: Locale }) {
             </div>
           </section>
 
-          <Section id="how-much" title={m.howMuchTitle}>
+          <Section id="how-much" title={m.howMuchTitle} speak={`${m.howMuchBody} ${m.howMuchExample}`} locale={locale}>
             <p>{m.howMuchBody}</p>
             <p className="border-s-2 border-brass ps-4 text-ink nums">{m.howMuchExample}</p>
             <p>
@@ -119,18 +142,34 @@ export default function StartView({ locale }: { locale: Locale }) {
                 ))}
               </ul>
             </div>
-            <p className="text-sm text-sage sm:col-span-2">{m.jewelleryNote}</p>
+            <div className="space-y-3 sm:col-span-2">
+              <p className="text-sm text-sage">{m.jewelleryNote}</p>
+              <ReadAloud
+                text={`${m.countsTitle}: ${m.counts.join(", ")}. ${m.notCountsTitle}: ${m.notCounts.join(", ")}. ${m.jewelleryNote}`}
+                lang={locale}
+                listen={all.common.listen}
+                stop={all.common.stopListening}
+              />
+            </div>
           </section>
 
-          <Section id="when" title={m.whenTitle}>
+          <Section id="when" title={m.whenTitle} speak={m.whenBody} locale={locale}>
             <p>{m.whenBody}</p>
           </Section>
 
-          <Section id="who" title={m.whoTitle}>
+          <Section id="who" title={m.whoTitle} speak={m.whoBody} locale={locale}>
             <p>{m.whoBody}</p>
+            <p>
+              <Link
+                href={localePath(locale, "/who-can-receive")}
+                className="font-medium text-pine hover:underline"
+              >
+                {all.who.nav}
+              </Link>
+            </p>
           </Section>
 
-          <Section id="words" title={m.wordsTitle}>
+          <Section id="words" title={m.wordsTitle} speak={m.words.map((w) => `${w.term}: ${w.meaning}`).join(" ")} locale={locale}>
             <dl className="divide-y divide-mist border-y border-mist">
               {m.words.map((w) => (
                 <div key={w.term} className="grid gap-1 py-3 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-4">
@@ -141,7 +180,7 @@ export default function StartView({ locale }: { locale: Locale }) {
             </dl>
           </Section>
 
-          <Section id="ask" title={m.askTitle}>
+          <Section id="ask" title={m.askTitle} speak={m.askBody} locale={locale}>
             <p>{m.askBody}</p>
             <div className="flex flex-wrap items-center gap-3 pt-2">
               <Link href={guide} className="btn-primary px-5 py-3 text-base">

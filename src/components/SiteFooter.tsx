@@ -4,13 +4,15 @@ import { messagesFor } from "@/i18n/messages";
 
 /** The free tools, labelled in `locale` (most of them are in English only). */
 export function toolLinks(locale: Locale): { href: string; label: string }[] {
-  const { footer, inEnglish, nav } = messagesFor(locale).common;
+  const all = messagesFor(locale);
+  const { footer, inEnglish, nav } = all.common;
   return [
     { href: localePath(locale, "/start"), label: nav.start },
     { href: localePath(locale, "/calculator"), label: footer.calculator },
     { href: localePath(locale, "/nisab"), label: footer.nisab },
+    { href: localePath(locale, "/who-can-receive"), label: all.who.nav },
+    { href: localePath(locale, "/zakat-al-fitr"), label: footer.fitr },
     { href: "/inheritance", label: footer.inheritance + inEnglish },
-    { href: "/zakat-al-fitr", label: footer.fitr + inEnglish },
     { href: "/halal-stocks", label: footer.stocks + inEnglish },
     { href: "/qurbani", label: footer.qurbani + inEnglish },
   ];

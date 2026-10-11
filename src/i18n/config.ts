@@ -57,6 +57,8 @@ export function isLocalizedPath(path: string): boolean {
     path === "/" ||
     path === "/start" ||
     path === "/guide" ||
+    path === "/who-can-receive" ||
+    path === "/zakat-al-fitr" ||
     path === "/calculator" ||
     path === "/nisab" ||
     /^\/nisab\/[a-z]{3}$/.test(path)

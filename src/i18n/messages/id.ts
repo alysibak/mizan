@@ -34,6 +34,9 @@ const id: Messages = {
     language: "Bahasa",
     readHere: "Baca halaman ini dalam Bahasa Indonesia",
     notNow: "Nanti saja",
+    listen: "Dengarkan",
+    stopListening: "Berhenti",
+    largerText: "Teks lebih besar",
   },
 
   landing: {
@@ -443,6 +446,145 @@ const id: Messages = {
       change: "Ubah jawaban saya",
       who: "Siapa yang berhak menerima zakat?",
     },
+  },
+
+  who: {
+    metaTitle: "Siapa yang berhak menerima zakat? Bolehkah zakat untuk keluarga?",
+    metaDescription: "Ketuk seseorang untuk melihat apakah zakat Anda boleh diberikan kepadanya: orang tua, saudara, suami atau istri, orang berutang, lembaga, masjid, dan lainnya. Dengan bahasa sederhana, dan di mana ulama berbeda pendapat.",
+    nav: "Bolehkah zakat untuk…?",
+    eyebrow: "Menyalurkan zakat Anda",
+    title: "Bolehkah saya memberi zakat kepada…?",
+    lede: "Ketuk orang yang Anda maksud. Anda akan melihat jawabannya dengan bahasa sederhana, dan di mana ulama berbeda pendapat.",
+    pick: "Siapa yang Anda maksud?",
+    verdicts: {
+      yes: "Ya",
+      ifNeed: "Ya, jika membutuhkan",
+      no: "Tidak",
+      mostNo: "Mayoritas ulama: tidak",
+      differ: "Ulama berbeda pendapat",
+    },
+    cases: {
+      parents: {
+        label: "Ibu atau ayah saya",
+        answer: "Tidak. Menafkahi orang tua dan kakek-nenek sudah menjadi kewajiban Anda, jadi zakat kepada mereka tidak sah. Bantu mereka dari harta Anda yang lain.",
+      },
+      children: {
+        label: "Anak saya",
+        answer: "Tidak. Begitu juga cucu: menafkahi mereka sudah menjadi kewajiban Anda.",
+      },
+      wife: {
+        label: "Istri saya",
+        answer: "Tidak. Suami sudah wajib menafkahi istrinya, jadi zakat suami tidak boleh diberikan kepadanya.",
+      },
+      husband: {
+        label: "Suami saya",
+        answer: "Ulama berbeda pendapat. Banyak ulama membolehkan istri memberi zakat kepada suaminya yang membutuhkan, berdasarkan hadis Zainab, istri Ibnu Mas’ud. Ulama lain, termasuk mazhab Hanafi, tidak membolehkan. Tanyakan kepada imam Anda.",
+      },
+      siblings: {
+        label: "Saudara laki-laki atau perempuan saya",
+        answer: "Ya, jika mereka membutuhkan. Banyak ulama mengatakan ini lebih utama: bernilai sedekah sekaligus menyambung silaturahmi. Jika mereka tinggal bersama Anda dan sudah Anda nafkahi, tanyakan kepada imam Anda.",
+      },
+      relatives: {
+        label: "Paman, bibi, sepupu, atau ipar",
+        answer: "Ya, jika mereka membutuhkan. Memberi kepada kerabat yang membutuhkan berpahala ganda: sedekah dan silaturahmi.",
+      },
+      poor: {
+        label: "Tetangga, teman, atau orang asing yang miskin",
+        answer: "Ya, jika ia tidak mampu memenuhi kebutuhan pokoknya. Anda tidak wajib memberi tahu bahwa itu zakat; berikan dengan cara yang menjaga martabatnya.",
+      },
+      debt: {
+        label: "Orang yang tidak mampu membayar utangnya",
+        answer: "Ya. Orang yang terlilit utang dan tidak mampu membayarnya disebut dalam Al-Qur’an (At-Taubah: 60) sebagai penerima zakat.",
+      },
+      student: {
+        label: "Pelajar yang membutuhkan",
+        answer: "Ya, jika ia miskin dan tidak mampu menanggung biaya hidup selama belajar.",
+      },
+      charity: {
+        label: "Lembaga amil atau lembaga sosial",
+        answer: "Ya, jika lembaga itu memisahkan dana zakat dan hanya menyalurkannya kepada yang berhak. Tanyakan cara mereka menyalurkan zakat sebelum Anda memberi.",
+      },
+      mosque: {
+        label: "Membangun atau membiayai masjid",
+        answer: "Mayoritas ulama: tidak. Zakat untuk orang yang membutuhkan, bukan untuk bangunan. Dukung masjid dari sedekah Anda.",
+      },
+      sayyid: {
+        label: "Sayid/habib (keturunan Nabi ﷺ)",
+        answer: "Mayoritas ulama: tidak. Nabi ﷺ bersabda bahwa zakat tidak halal bagi keluarga Muhammad. Bantu mereka dengan hadiah atau sedekah.",
+      },
+      nonMuslim: {
+        label: "Orang non-Muslim",
+        answer: "Mayoritas ulama berpendapat zakat untuk Muslim yang membutuhkan. Anda bisa membantu siapa pun dengan sedekah.",
+      },
+      wealthy: {
+        label: "Orang yang tidak membutuhkan",
+        answer: "Tidak. Zakat untuk orang yang membutuhkan dan golongan lain yang disebut dalam Al-Qur’an, bukan untuk orang yang sudah berkecukupan.",
+      },
+      employee: {
+        label: "Pekerja saya, sebagai bagian dari upahnya",
+        answer: "Tidak. Zakat tidak boleh untuk membayar upah yang menjadi kewajiban Anda. Anda boleh memberi zakat kepada pekerja yang membutuhkan di luar upahnya.",
+      },
+    },
+    eight: "Al-Qur’an (At-Taubah: 60) menyebut delapan golongan penerima zakat: fakir, miskin, amil, mualaf, memerdekakan budak, orang berutang, di jalan Allah, dan ibnu sabil.",
+    ask: "Tidak yakin dengan keadaan Anda? Tanyakan kepada imam masjid Anda.",
+  },
+
+  fitr: {
+    metaTitle: "Kalkulator zakat fitrah untuk keluarga Anda",
+    metaDescription: "Hitung zakat fitrah untuk setiap orang yang Anda tanggung: siapa yang membayar, berapa, dan kapan sebelum salat Id. Gratis, tanpa akun.",
+    appName: "Kalkulator zakat fitrah Mizan",
+    eyebrow: "Akhir Ramadan",
+    title: "Kalkulator zakat fitrah",
+    lede: "Satu jumlah tetap untuk diri Anda dan setiap orang yang Anda tanggung, termasuk anak-anak, dibayar sebelum salat Id. Masukkan jumlah yang diumumkan masjid atau lembaga zakat Anda tahun ini.",
+    people: "Orang yang Anda tanggung",
+    peopleHint: "Termasuk diri Anda.",
+    perPerson: "Jumlah per orang ({currency})",
+    perPersonHint: "Jumlah yang diumumkan masjid atau lembaga zakat Anda tahun ini: harga satu sha’ makanan pokok di tempat Anda.",
+    needPeople: "Hitung semua orang yang Anda tanggung: bilangan bulat dari 1 sampai {max}.",
+    needAmount: "Masukkan jumlah per orang yang diumumkan masjid atau lembaga zakat Anda.",
+    line: "{people} × {amount}",
+    total: "Zakat fitrah yang dibayar",
+    schools: "Mazhab berbeda pendapat tentang membayar dengan makanan atau uang senilainya, dan tentang ukuran sha’. Ikuti arahan orang yang Anda percayai; alat ini hanya melakukan perkalian.",
+    ledgerLink: "Buka pembukuan gratis",
+    ledgerRest: "untuk mencatatnya bersama zakat Anda, dengan laporan di akhir tahun.",
+    sections: [
+      {
+        heading: "Siapa yang membayar",
+        body: "Setiap Muslim yang memiliki kelebihan dari kebutuhan hari dan malam Id membayarnya untuk dirinya dan orang yang ia tanggung: istri, anak-anak kecil, dan tanggungan lainnya. Sebagian besar mazhab juga memasukkan bayi yang lahir sebelum terbenam matahari pada hari terakhir Ramadan. Mazhab Hanafi mengaitkan kewajibannya dengan memiliki harta senisab di luar kebutuhan.",
+      },
+      {
+        heading: "Berapa",
+        body: "Satu sha’ makanan pokok setempat per orang: sekitar 2,5 hingga 3 kg kurma, gandum, kismis, atau beras. Mazhab Hanafi menerima setengah sha’ gandum dan membolehkan membayar dengan uang senilainya; kebanyakan ulama lain lebih mengutamakan makanan. Lembaga dan masjid mengumumkan jumlah uang setiap Ramadan berdasarkan harga setempat, jadi Mizan tidak menebaknya.",
+      },
+      {
+        heading: "Kapan dibayar",
+        body: "Sebelum salat Idulfitri. Banyak orang membayarnya sehari atau dua hari sebelumnya agar sampai kepada fakir miskin tepat waktu; mazhab Syafi’i membolehkannya sejak awal Ramadan, dan mazhab Hanafi lebih awal lagi. Jika dibayar setelah salat, terhitung sedekah biasa dan kewajibannya tetap ada. Zakat fitrah untuk fakir miskin agar mereka juga bisa berbahagia di hari raya.",
+      },
+      {
+        heading: "Bukan zakat tabungan",
+        body: "Zakat fitrah wajib per orang, berapa pun harta Anda di luar kebutuhan hari itu. Zakat tabungan adalah 2,5% dari harta yang Anda miliki di atas nisab selama satu tahun qamariah.",
+      },
+    ],
+    calculatorLink: "Hitung zakat tabungan Anda",
+    faqTitle: "Pertanyaan",
+    faq: [
+      {
+        q: "Apakah saya membayar zakat fitrah untuk anak-anak saya?",
+        a: "Ya. Kepala keluarga membayarnya untuk setiap tanggungan, termasuk anak-anak yang ia nafkahi. Kebanyakan ulama juga memasukkan bayi yang lahir sebelum Ramadan berakhir.",
+      },
+      {
+        q: "Bolehkah membayar dengan uang, bukan makanan?",
+        a: "Mazhab Hanafi membolehkan membayar dengan uang senilainya, sehingga banyak lembaga mengumumkan jumlah uang. Mazhab Maliki, Syafi’i, dan Hanbali lebih mengutamakan makanan pokok. Ikuti ulama yang Anda percayai.",
+      },
+      {
+        q: "Apakah zakat fitrah sama dengan zakat al-fitr atau fitrana?",
+        a: "Ya. Zakat fitrah, zakat al-fitr, dan fitrana adalah nama untuk kewajiban yang sama di akhir Ramadan.",
+      },
+      {
+        q: "Bagaimana jika saya terlambat?",
+        a: "Bayarlah secepatnya. Jika dibayar setelah salat Id, terhitung sedekah, bukan zakat fitrah, tetapi kewajibannya tidak gugur karena terlambat.",
+      },
+    ],
   },
 
   nisabPage: {

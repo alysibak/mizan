@@ -3,6 +3,11 @@
 @tailwind utilities;
 
 @layer base {
+  /* "Larger text": every rem-based size grows with the root. */
+  html.text-large {
+    font-size: 118.75%;
+  }
+
   /* Theme tokens as "R G B" so Tailwind opacity modifiers (bg-pine/5) work. */
   :root {
     color-scheme: light;

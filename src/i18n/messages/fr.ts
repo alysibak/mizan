@@ -34,6 +34,9 @@ const fr: Messages = {
     language: "Langue",
     readHere: "Lire cette page en français",
     notNow: "Pas maintenant",
+    listen: "Écouter",
+    stopListening: "Arrêter",
+    largerText: "Texte plus grand",
   },
 
   landing: {
@@ -441,6 +444,145 @@ const fr: Messages = {
       change: "Modifier mes réponses",
       who: "Qui peut recevoir la zakat ?",
     },
+  },
+
+  who: {
+    metaTitle: "Qui peut recevoir la zakat ? Puis-je la donner à ma famille ?",
+    metaDescription: "Touchez une personne pour savoir si votre zakat peut lui revenir : parents, frères et sœurs, mari ou femme, personnes endettées, associations, mosquées, et plus. En mots simples, avec les divergences des savants.",
+    nav: "Puis-je donner ma zakat à… ?",
+    eyebrow: "Donner votre zakat",
+    title: "Puis-je donner ma zakat à… ?",
+    lede: "Touchez la personne à laquelle vous pensez. Vous verrez la réponse en mots simples, et là où les savants divergent.",
+    pick: "À qui pensez-vous ?",
+    verdicts: {
+      yes: "Oui",
+      ifNeed: "Oui, s’il est dans le besoin",
+      no: "Non",
+      mostNo: "La plupart des savants : non",
+      differ: "Les savants divergent",
+    },
+    cases: {
+      parents: {
+        label: "Ma mère ou mon père",
+        answer: "Non. Prendre soin de vos parents et grands-parents est déjà votre devoir, donc la zakat qui leur est donnée ne compte pas. Aidez-les avec votre autre argent.",
+      },
+      children: {
+        label: "Mon fils ou ma fille",
+        answer: "Non. Il en va de même pour les petits-enfants : subvenir à leurs besoins est déjà votre devoir.",
+      },
+      wife: {
+        label: "Ma femme",
+        answer: "Non. Le mari doit déjà subvenir aux besoins de sa femme, donc sa zakat ne peut pas lui revenir.",
+      },
+      husband: {
+        label: "Mon mari",
+        answer: "Les savants divergent. Beaucoup permettent à une femme de donner sa zakat à son mari dans le besoin, d’après le hadith de Zaynab, l’épouse d’Ibn Mas‘ud. D’autres, dont l’école hanafite, ne le permettent pas. Demandez à votre imam.",
+      },
+      siblings: {
+        label: "Mon frère ou ma sœur",
+        answer: "Oui, s’ils sont dans le besoin. Beaucoup de savants disent que c’est même mieux : c’est une aumône et cela entretient les liens familiaux. S’ils vivent avec vous et que vous subvenez déjà à leurs besoins, demandez à votre imam.",
+      },
+      relatives: {
+        label: "Un oncle, une tante, un cousin ou un beau-parent",
+        answer: "Oui, s’ils sont dans le besoin. Donner à un proche dans le besoin est récompensé deux fois : comme aumône et comme lien familial.",
+      },
+      poor: {
+        label: "Un voisin, un ami ou un inconnu pauvre",
+        answer: "Oui, s’il ne peut pas couvrir ses besoins de base. Vous n’avez pas à lui dire que c’est la zakat ; donnez d’une manière qui préserve sa dignité.",
+      },
+      debt: {
+        label: "Quelqu’un qui ne peut pas payer ses dettes",
+        answer: "Oui. Les personnes accablées de dettes qu’elles ne peuvent payer sont citées dans le Coran (9:60) parmi les bénéficiaires de la zakat.",
+      },
+      student: {
+        label: "Un étudiant dans le besoin",
+        answer: "Oui, s’il est pauvre et ne peut pas couvrir ses frais de vie pendant ses études.",
+      },
+      charity: {
+        label: "Une association ou un collecteur de zakat",
+        answer: "Oui, s’ils gardent la zakat à part et ne la versent qu’à ceux qui peuvent la recevoir. Demandez-leur comment ils utilisent la zakat avant de donner.",
+      },
+      mosque: {
+        label: "Construire ou faire tourner une mosquée",
+        answer: "La plupart des savants : non. La zakat va aux personnes dans le besoin, pas aux bâtiments. Soutenez la mosquée avec votre sadaqa.",
+      },
+      sayyid: {
+        label: "Un Sayyid (descendant du Prophète ﷺ)",
+        answer: "La plupart des savants : non. Le Prophète ﷺ a dit que la zakat n’est pas pour sa famille. Aidez-les par des cadeaux ou par la sadaqa.",
+      },
+      nonMuslim: {
+        label: "Une personne non musulmane",
+        answer: "La plupart des savants disent que la zakat est pour les musulmans dans le besoin. Vous pouvez aider qui vous voulez avec la sadaqa.",
+      },
+      wealthy: {
+        label: "Quelqu’un qui n’est pas dans le besoin",
+        answer: "Non. La zakat est pour les personnes dans le besoin et les autres catégories citées dans le Coran, pas pour ceux qui ont déjà assez.",
+      },
+      employee: {
+        label: "Mon employé, comme partie de son salaire",
+        answer: "Non. La zakat ne peut pas payer ce que vous devez à quelqu’un pour son travail. Vous pouvez donner la zakat à un employé dans le besoin en plus de son salaire.",
+      },
+    },
+    eight: "Le Coran (9:60) nomme huit catégories de bénéficiaires : les pauvres, les démunis, ceux qui la collectent, ceux dont les cœurs sont à gagner, l’affranchissement des captifs, les endettés, dans le sentier de Dieu, et le voyageur en difficulté.",
+    ask: "Pas sûr de votre cas ? Demandez à l’imam de votre mosquée.",
+  },
+
+  fitr: {
+    metaTitle: "Calculateur de zakat al-Fitr pour votre foyer",
+    metaDescription: "Calculez la zakat al-Fitr (zakat el-fitr) pour toutes les personnes à votre charge : qui la donne, combien, et quand avant la prière de l’Aïd. Gratuit, sans compte.",
+    appName: "Calculateur de zakat al-Fitr Mizan",
+    eyebrow: "Fin du Ramadan",
+    title: "Calculateur de zakat al-Fitr",
+    lede: "Un montant fixe pour vous et chaque personne à votre charge, enfants compris, donné avant la prière de l’Aïd. Saisissez le montant annoncé cette année par votre mosquée ou votre conseil.",
+    people: "Personnes à votre charge",
+    peopleHint: "Vous compris.",
+    perPerson: "Montant par personne ({currency})",
+    perPersonHint: "Le montant annoncé cette année par votre mosquée ou votre conseil : le prix d’un sa‘ de l’aliment de base chez vous.",
+    needPeople: "Comptez toutes les personnes à votre charge : un nombre entier de 1 à {max}.",
+    needAmount: "Saisissez le montant par personne annoncé par votre mosquée ou votre conseil.",
+    line: "{people} × {amount}",
+    total: "Zakat al-Fitr à donner",
+    schools: "Les écoles divergent sur le don en nature ou en argent, et sur la taille de la mesure. Suivez les conseils de ceux en qui vous avez confiance ; cet outil ne fait que la multiplication.",
+    ledgerLink: "Ouvrez un registre gratuit",
+    ledgerRest: "pour la garder avec votre zakat, avec un relevé en fin d’année.",
+    sections: [
+      {
+        heading: "Qui la donne",
+        body: "Tout musulman qui possède plus que ses besoins du jour et de la nuit de l’Aïd la donne pour lui-même et pour ceux à sa charge : conjoint, jeunes enfants et autres personnes à charge. La plupart des écoles incluent l’enfant né avant le coucher du soleil le dernier jour du Ramadan. L’école hanafite lie l’obligation à la possession du nisab au-delà de ses besoins.",
+      },
+      {
+        heading: "Combien",
+        body: "Un sa‘ de l’aliment de base local par personne : environ 2,5 à 3 kg de dattes, d’orge, de raisins secs, de blé ou de riz. L’école hanafite accepte un demi-sa‘ de blé et permet d’en donner la valeur en argent ; la plupart des autres savants préfèrent l’aliment lui-même. Conseils et mosquées annoncent chaque Ramadan un montant selon les prix locaux, donc Mizan ne le devine pas.",
+      },
+      {
+        heading: "Quand la donner",
+        body: "Avant la prière de l’Aïd al-Fitr. Beaucoup la donnent un jour ou deux plus tôt pour qu’elle parvienne aux pauvres à temps ; l’école chafiite la permet dès le début du Ramadan, et l’école hanafite plus tôt encore. Donnée après la prière, elle compte comme une aumône ordinaire et l’obligation reste due. Elle va aux pauvres et aux démunis, pour qu’eux aussi puissent fêter l’Aïd.",
+      },
+      {
+        heading: "Ce n’est pas la zakat sur l’épargne",
+        body: "La zakat al-Fitr est due par personne, quoi que vous possédiez au-delà des besoins du jour. La zakat sur l’épargne est de 2,5 % de ce que vous détenez au-dessus du nisab pendant une année lunaire.",
+      },
+    ],
+    calculatorLink: "Calculer la zakat sur votre épargne",
+    faqTitle: "Questions",
+    faq: [
+      {
+        q: "Dois-je donner la zakat al-Fitr pour mes enfants ?",
+        a: "Oui. Le chef de famille la donne pour chaque personne à charge, y compris les enfants qui dépendent de lui. La plupart des savants incluent aussi l’enfant né avant la fin du Ramadan.",
+      },
+      {
+        q: "Puis-je donner de l’argent plutôt que de la nourriture ?",
+        a: "L’école hanafite permet d’en donner la valeur en argent, et c’est pourquoi beaucoup de conseils annoncent un montant. Les écoles malikite, chafiite et hanbalite préfèrent l’aliment de base lui-même. Suivez les savants en qui vous avez confiance.",
+      },
+      {
+        q: "La zakat al-Fitr, c’est la même chose que la zakat el-fitr ou la fitra ?",
+        a: "Oui. Zakat el-fitr, fitra, fitrana et zakat fitrah désignent la même obligation de fin de Ramadan.",
+      },
+      {
+        q: "Et si j’ai laissé passer le délai ?",
+        a: "Donnez-la dès que possible. Donnée après la prière de l’Aïd, elle compte comme une aumône et non comme zakat al-Fitr, mais l’obligation ne disparaît pas avec le retard.",
+      },
+    ],
   },
 
   nisabPage: {

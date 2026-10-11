@@ -39,6 +39,10 @@ const en = {
     /** Offered, in this language, to visitors whose browser prefers it. */
     readHere: "Read this page in English",
     notNow: "Not now",
+    /** Read the text aloud with the device's own voice. */
+    listen: "Listen",
+    stopListening: "Stop",
+    largerText: "Larger text",
   },
 
   landing: {
@@ -476,6 +480,158 @@ const en = {
       change: "Change my answers",
       who: "Who can receive zakat?",
     },
+  },
+
+  who: {
+    metaTitle: "Who can receive zakat? Can I give zakat to my family?",
+    metaDescription:
+      "Tap a person to see whether your zakat can go to them: parents, brothers and sisters, a husband or wife, people in debt, charities, mosques, and more. Plain words, and where scholars differ.",
+    nav: "Can I give zakat to…?",
+    eyebrow: "Giving your zakat",
+    title: "Can I give zakat to…?",
+    lede: "Tap who you are thinking of. You will see the answer in plain words, and where scholars differ.",
+    pick: "Who are you thinking of?",
+    verdicts: {
+      yes: "Yes",
+      ifNeed: "Yes, if they are in need",
+      no: "No",
+      mostNo: "Most scholars say no",
+      differ: "Scholars differ",
+    },
+    cases: {
+      parents: {
+        label: "My mother or father",
+        answer:
+          "No. Looking after your parents and grandparents is already your duty, so zakat given to them does not count. Help them from your other money.",
+      },
+      children: {
+        label: "My son or daughter",
+        answer:
+          "No. The same goes for grandchildren: providing for them is already your duty.",
+      },
+      wife: {
+        label: "My wife",
+        answer: "No. A husband must already provide for his wife, so his zakat cannot go to her.",
+      },
+      husband: {
+        label: "My husband",
+        answer:
+          "Scholars differ. Many allow a wife to give her zakat to her husband if he is in need, following the hadith of Zaynab, the wife of Ibn Mas‘ud. Others, including the Hanafi school, do not. Ask your imam.",
+      },
+      siblings: {
+        label: "My brother or sister",
+        answer:
+          "Yes, if they are in need. Many scholars say it is even better: it is charity and it keeps family ties. If they live with you and you already support them, ask your imam.",
+      },
+      relatives: {
+        label: "An uncle, aunt, cousin, or in-law",
+        answer: "Yes, if they are in need. Giving to family in need is rewarded twice: as charity and as keeping family ties.",
+      },
+      poor: {
+        label: "A poor neighbour, friend, or stranger",
+        answer:
+          "Yes, if they cannot meet their basic needs. You do not have to tell them it is zakat; give in a way that keeps their dignity.",
+      },
+      debt: {
+        label: "Someone who cannot pay their debts",
+        answer: "Yes. People weighed down by debts they cannot pay are named in the Quran (9:60) among those who receive zakat.",
+      },
+      student: {
+        label: "A student in need",
+        answer: "Yes, if they are poor and cannot cover their living costs while they study.",
+      },
+      charity: {
+        label: "A charity or zakat collector",
+        answer:
+          "Yes, if they keep zakat apart and pass it only to people who can receive it. Ask them how they use zakat before you give.",
+      },
+      mosque: {
+        label: "Building or running a mosque",
+        answer:
+          "Most scholars say no: zakat goes to people in need, not to buildings. Support the mosque from your sadaqah instead.",
+      },
+      sayyid: {
+        label: "A Sayyid (descendant of the Prophet ﷺ)",
+        answer:
+          "Most scholars say no: the Prophet ﷺ said zakat is not for his family. Help them with gifts or sadaqah instead.",
+      },
+      nonMuslim: {
+        label: "Someone who is not Muslim",
+        answer: "Most scholars say zakat is for Muslims in need. You can help anyone with sadaqah.",
+      },
+      wealthy: {
+        label: "Someone who is not in need",
+        answer: "No. Zakat is for people in need and the other groups named in the Quran, not for people who already have enough.",
+      },
+      employee: {
+        label: "My worker, as part of their pay",
+        answer:
+          "No. Zakat cannot pay what you owe someone for their work. You can give zakat to a worker in need on top of their pay.",
+      },
+    },
+    eight:
+      "The Quran (9:60) names eight groups who receive zakat: the poor, the needy, those who collect it, those whose hearts are being won over, freeing captives, people in debt, in the way of God, and stranded travellers.",
+    ask: "Not sure about your case? Ask the imam at your mosque.",
+  },
+
+  fitr: {
+    metaTitle: "Zakat al-Fitr (fitrana) calculator for your household",
+    metaDescription:
+      "Work out Zakat al-Fitr (fitrana, zakat fitrah) for everyone you provide for: who gives it, how much, and when it is due before the Eid prayer. Free, no account.",
+    appName: "Mizan Zakat al-Fitr calculator",
+    eyebrow: "End of Ramadan",
+    title: "Zakat al-Fitr calculator",
+    lede: "One set amount for yourself and each person you provide for, children included, given before the Eid prayer. Enter the amount your mosque or council announced this year.",
+    people: "People you provide for",
+    peopleHint: "Including yourself.",
+    perPerson: "Amount per person ({currency})",
+    perPersonHint: "The amount your mosque or council announces this year: the price of one sa‘ of staple food where you live.",
+    needPeople: "Count everyone you provide for: a whole number from 1 to {max}.",
+    needAmount: "Enter the per-person amount your mosque or council announced.",
+    line: "{people} × {amount}",
+    total: "Zakat al-Fitr to give",
+    schools:
+      "Schools differ on giving food or its value in money, and on the size of the measure. Follow the guidance of those you trust; this only does the multiplication.",
+    ledgerLink: "Open a free ledger",
+    ledgerRest: "to keep it on record beside your zakat, with a statement at the end of the year.",
+    sections: [
+      {
+        heading: "Who gives it",
+        body: "Every Muslim who has more than they need for the day and night of Eid gives it for themselves and for those they are responsible for: a spouse, young children, and other dependants. Most schools include a child born before sunset on the last day of Ramadan. The Hanafi school ties the duty to owning wealth at the nisab beyond one’s needs.",
+      },
+      {
+        heading: "How much",
+        body: "One sa‘ of the local staple food per person: roughly 2.5 to 3 kg of dates, barley, raisins, wheat, or rice. The Hanafi school accepts half a sa‘ of wheat and allows its value in money; most other scholars prefer the food itself. Councils and mosques announce a money amount each Ramadan from local prices, so Mizan does not guess it.",
+      },
+      {
+        heading: "When it is due",
+        body: "Before the Eid al-Fitr prayer. Many give it a day or two earlier so it reaches the poor in time; the Shafi‘i school allows it from the start of Ramadan, and the Hanafi school earlier still. Given after the prayer, it counts as ordinary charity and the duty remains owed. It goes to the poor and needy, so they too can celebrate.",
+      },
+      {
+        heading: "It is not zakat on savings",
+        body: "Zakat al-Fitr is due per person, whatever you own above the day’s needs. Zakat on savings is 2.5% of what you hold above nisab for a lunar year.",
+      },
+    ],
+    calculatorLink: "Work out zakat on your savings",
+    faqTitle: "Questions",
+    faq: [
+      {
+        q: "Do I pay Zakat al-Fitr for my children?",
+        a: "Yes. The head of the household gives it for every dependant, including children who rely on them. Most scholars also include a child born before the end of Ramadan.",
+      },
+      {
+        q: "Can I give money instead of food?",
+        a: "The Hanafi school permits giving the value in money, and many councils announce a money amount for that reason. The Maliki, Shafi‘i, and Hanbali schools prefer the staple food itself. Follow the scholars you trust.",
+      },
+      {
+        q: "Is Zakat al-Fitr the same as fitrana or zakat fitrah?",
+        a: "Yes. Fitrana (South Asia), zakat fitrah (Southeast Asia), and sadaqat al-fitr all name the same duty at the end of Ramadan.",
+      },
+      {
+        q: "What if I missed the deadline?",
+        a: "Give it as soon as you can. Given after the Eid prayer, it counts as charity rather than Zakat al-Fitr, but the duty is not cancelled by being late.",
+      },
+    ],
   },
 
   nisabPage: {

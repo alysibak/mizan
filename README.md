@@ -53,6 +53,21 @@ work.
   calendar reminder for one Islamic year later, print, or keep it in a free
   ledger. It shares its figures with the calculator, which carries the same
   explanations beside its own choices.
+- **Can I give zakat to…?** (`/who-can-receive`). Fifteen people a beginner
+  asks about (parents, children, a husband or wife, brothers and sisters,
+  other relatives, the poor, people in debt, students, charities, mosques, a
+  Sayyid, someone not Muslim, the well-off, one's own workers), each with the
+  short answer in view (yes, yes if in need, no, most scholars say no,
+  scholars differ) and the reason a tap away.
+- **Zakat al-Fitr** (`/zakat-al-fitr`), in every language: the household's
+  fitrana from the amount the local mosque announced, with who gives it, how
+  much, when, and where the schools differ.
+- **For people who find reading hard.** "Listen" reads the beginner's page,
+  each step of the walk-through, and each answer aloud in the device's own
+  voice for the page's language (and hides itself where the device has none,
+  rather than reading Urdu in an English voice). "AA" in the header makes
+  every page a size larger, remembered on the device and applied before the
+  first paint. Each step of the walk-through has a picture.
 - **Zakat calculator** (`/calculator`). The visitor's currency comes first
   (named in their language, picked from their region or from any public page
   they used before), and today's gold and silver prices are fetched afresh on
@@ -77,9 +92,9 @@ work.
   figures in WhatsApp and other apps, and both the calculator and the nisab
   pages have share buttons (the phone's share sheet, or WhatsApp and copy
   link). Shared text never includes anything a visitor typed.
-- **Free tools.** An Islamic inheritance calculator (`/inheritance`, exact
-  Quranic shares with awl, radd, and blocking explained), Zakat al-Fitr for a
-  household (`/zakat-al-fitr`), a halal stock screen with dividend purification
+- **Free tools** (in English). An Islamic inheritance calculator
+  (`/inheritance`, exact Quranic shares with awl, radd, and blocking
+  explained), a halal stock screen with dividend purification
   (`/halal-stocks`), and qurbani shares (`/qurbani`). Each page explains the
   rulings it rests on and where the schools differ.
 - **Guides** (`/guides`). Zakat on gold and silver, savings, shares and funds,
@@ -238,9 +253,11 @@ src/
     calculator/        public calculator (static)
     start/             zakat for beginners, with the "do I have to pay?" check
     guide/             the calculator one explained question at a time
-    [locale]/          the translated landing, start, guide, calculator, and nisab pages
+    who-can-receive/   "can I give zakat to…?", person by person
+    zakat-al-fitr/     fitrana for a household (translated)
+    [locale]/          every page above in Arabic, Urdu, Indonesian, Malay, Turkish, French
     nisab/             nisab today, per currency (hourly)
-    inheritance/ zakat-al-fitr/ halal-stocks/ qurbani/   free tools
+    inheritance/ halal-stocks/ qurbani/   free tools (English)
     guides/            zakat on gold, savings, shares, crypto, pensions, property
     privacy/ terms/ method/ trust/   inside the app's frame when signed in
     (auth)/            sign in, register, forgot

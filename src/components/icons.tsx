@@ -41,6 +41,74 @@ export const IconGlobe = ({ className = "h-6 w-6" }: P) => (
   </Glyph>
 );
 
+export const IconSpeaker = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" />
+    <path d="M15.5 9a4 4 0 0 1 0 6" />
+    <path d="M18 6.5a7.5 7.5 0 0 1 0 11" />
+  </Glyph>
+);
+
+/** Pictures for the walk-through's steps, so each question is known at a glance. */
+export const IconCoins = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <ellipse cx="9" cy="7" rx="5.5" ry="2.5" />
+    <path d="M3.5 7v4c0 1.4 2.5 2.5 5.5 2.5s5.5-1.1 5.5-2.5V7" />
+    <path d="M9.5 16.4c.9 1.2 3.1 2.1 5.5 2.1 3 0 5.5-1.1 5.5-2.5v-4c0-1.3-2.2-2.4-5-2.5" />
+  </Glyph>
+);
+
+export const IconCash = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <rect x="2.5" y="6" width="19" height="12" rx="1.5" />
+    <circle cx="12" cy="12" r="2.6" />
+    <path d="M6 9.5v5M18 9.5v5" />
+  </Glyph>
+);
+
+export const IconBank = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <path d="M3 9.5 12 4l9 5.5" />
+    <path d="M4.5 10v8M9.5 10v8M14.5 10v8M19.5 10v8" />
+    <path d="M3 20h18" />
+  </Glyph>
+);
+
+export const IconGoldBar = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <path d="M6.5 9h11l3 8h-17z" />
+    <path d="M9 9l1-3h4l1 3" />
+  </Glyph>
+);
+
+export const IconRing = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <circle cx="12" cy="14.5" r="5.5" />
+    <path d="M9.5 9.5 8 6.5l2-2.5h4l2 2.5-1.5 3" />
+  </Glyph>
+);
+
+export const IconChart = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <path d="M4 4v16h16" />
+    <path d="m7 15 4-4 3 3 5-6" />
+  </Glyph>
+);
+
+export const IconReceipt = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <path d="M6 3h12v18l-2-1.5-2 1.5-2-1.5-2 1.5-2-1.5L6 21z" />
+    <path d="M9 8h6M9 12h6M9 16h3" />
+  </Glyph>
+);
+
+export const IconCheckCircle = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="m8 12.5 2.7 2.7L16.5 9" />
+  </Glyph>
+);
+
 export const IconAssets = ({ className = "h-6 w-6" }: P) => (
   <Glyph className={className}>
     <rect x="3" y="6" width="18" height="12" rx="2.5" />

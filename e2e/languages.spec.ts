@@ -53,6 +53,7 @@ test("every language has its landing page and calculator, linked for search engi
   for (const locale of ["ar", "ur", "id", "ms", "tr", "fr"]) {
     expect((await request.get(`/${locale}/start`)).status(), locale).toBe(200);
     expect((await request.get(`/${locale}/guide`)).status(), locale).toBe(200);
+    expect((await request.get(`/${locale}/who-can-receive`)).status(), locale).toBe(200);
   }
 });
 
@@ -108,4 +109,55 @@ test("nisab pages answer for every currency and lead into the calculator", async
 
   const missing = await page.goto("/nisab/xyz");
   expect(missing?.status()).toBe(404);
+});
+
+test("Zakat al-Fitr in Urdu, with the household total", async ({ page }) => {
+  await page.goto("/ur/zakat-al-fitr");
+  await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("صدقۂ فطر کیلکولیٹر");
+  await page.locator("#tool-currency").selectOption("PKR");
+  await page.locator("#people").fill("5");
+  await page.locator("#perPerson").fill("300");
+  await expect(page.getByText("ادا کرنے والا صدقۂ فطر")).toBeVisible();
+  await expect(page.locator("[aria-live=polite]").filter({ hasText: "1,500" })).toBeVisible();
+  await expectNoHorizontalScroll(page);
+});
+
+test("pages read themselves aloud where the device has a voice for the language", async ({ page }) => {
+  // A device with an Urdu voice only.
+  await page.addInitScript(() => {
+    class FakeUtterance {
+      text: string;
+      voice: unknown = null;
+      lang = "";
+      rate = 1;
+      onend: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+      constructor(text: string) {
+        this.text = text;
+      }
+    }
+    const synth = {
+      speaking: false,
+      getVoices: () => [{ lang: "ur-PK", name: "Urdu", default: false, localService: true, voiceURI: "ur" }],
+      speak(u: FakeUtterance) {
+        (window as unknown as { spoken: string }).spoken = u.text;
+      },
+      cancel() {},
+      addEventListener() {},
+      removeEventListener() {},
+    };
+    Object.defineProperty(window, "speechSynthesis", { value: synth, configurable: true });
+    Object.defineProperty(window, "SpeechSynthesisUtterance", { value: FakeUtterance, configurable: true });
+  });
+  await page.goto("/ur/guide");
+  const listen = page.getByRole("button", { name: "سنیں" }).first();
+  await listen.click();
+  await expect(page.getByRole("button", { name: "روکیں" }).first()).toBeVisible();
+  const spoken = await page.evaluate(() => (window as unknown as { spoken: string }).spoken);
+  expect(spoken).toContain("آپ کون سی کرنسی استعمال کرتے ہیں؟");
+
+  // No French voice on this device: no button, rather than French read in Urdu.
+  await page.goto("/fr/start");
+  await expect(page.getByRole("button", { name: "Écouter" })).toHaveCount(0);
 });

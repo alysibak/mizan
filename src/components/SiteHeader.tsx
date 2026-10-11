@@ -1,6 +1,7 @@
 import Link from "next/link";
 import AccountLinks from "@/components/AccountLinks";
 import LanguageMenu from "@/components/LanguageMenu";
+import TextSizeToggle from "@/components/TextSizeToggle";
 import LanguageSuggestion, { type SuggestionTexts } from "@/components/LanguageSuggestion";
 import { LOCALES, localePath, type Locale } from "@/i18n/config";
 import { messagesFor } from "@/i18n/messages";
@@ -20,7 +21,7 @@ function suggestionTexts(): SuggestionTexts {
  * language menu sits beside the account links on every screen size.
  */
 export default function SiteHeader({ locale = "en" }: { locale?: Locale }) {
-  const { nav, language } = messagesFor(locale).common;
+  const { nav, language, largerText } = messagesFor(locale).common;
   const links = [
     { href: localePath(locale, "/start"), label: nav.start },
     { href: localePath(locale, "/calculator"), label: nav.calculator },
@@ -44,6 +45,7 @@ export default function SiteHeader({ locale = "en" }: { locale?: Locale }) {
           ))}
         </nav>
         <div className="flex min-w-0 items-center gap-3 text-sm sm:gap-5">
+          <TextSizeToggle label={largerText} className="hidden md:inline-flex" />
           <LanguageMenu locale={locale} label={language} />
           <AccountLinks
             signIn={nav.signIn}
@@ -53,17 +55,20 @@ export default function SiteHeader({ locale = "en" }: { locale?: Locale }) {
         </div>
       </div>
       {/* Phones: the same links on a row of their own, always in view. */}
-      <nav className="flex gap-1 overflow-x-auto border-y border-mist/70 px-3 text-sm md:hidden">
-        {links.map((l) => (
-          <Link
-            key={l.href}
-            href={l.href}
-            className="whitespace-nowrap px-2 py-2.5 text-sage hover:text-ink"
-          >
-            {l.label}
-          </Link>
-        ))}
-      </nav>
+      <div className="flex items-center gap-2 border-y border-mist/70 pe-3 md:hidden">
+        <nav className="flex min-w-0 flex-1 gap-1 overflow-x-auto px-3 text-sm">
+          {links.map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              className="whitespace-nowrap px-2 py-2.5 text-sage hover:text-ink"
+            >
+              {l.label}
+            </Link>
+          ))}
+        </nav>
+        <TextSizeToggle label={largerText} />
+      </div>
     </header>
   );
 }

@@ -62,6 +62,9 @@ export const metadata: Metadata = {
   formatDetection: { telephone: false },
 };
 
+/** Larger text, if this browser chose it (see TextSizeToggle). */
+const TEXT_SIZE_SCRIPT = `try{if(localStorage.getItem("mizan-text-size")==="large")document.documentElement.classList.add("text-large")}catch(e){}`;
+
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#F3F5F1" },
@@ -79,7 +82,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${literata.variable} ${sourceSans.variable}`}>
+    // The text-size choice is applied before the first paint, so the class
+    // on <html> can differ from the server's.
+    <html
+      lang="en"
+      className={`${literata.variable} ${sourceSans.variable}`}
+      suppressHydrationWarning
+    >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: TEXT_SIZE_SCRIPT }} />
+      </head>
       <body>
         {children}
         <PwaSetup />

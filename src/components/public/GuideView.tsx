@@ -36,7 +36,12 @@ export default function GuideView({ locale }: { locale: Locale }) {
           <p className="mt-4 text-lg leading-relaxed text-sage">{m.lede}</p>
         </header>
         <div className="mt-8">
-          <GuidedZakat m={m} calc={all.calc} locale={locale} />
+          <GuidedZakat
+            m={m}
+            calc={all.calc}
+            speech={{ listen: all.common.listen, stop: all.common.stopListening }}
+            locale={locale}
+          />
         </div>
         <p className="mt-6 text-sm text-sage">
           <Link href={localePath(locale, "/start")} className="text-pine hover:underline">

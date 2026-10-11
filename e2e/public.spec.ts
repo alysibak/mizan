@@ -285,3 +285,37 @@ test("the step-by-step guide explains each step and ends with things to do", asy
   await expectNoHorizontalScroll(page);
   expect(errors).toEqual([]);
 });
+
+test("who can receive zakat: each person answered, the reason a tap away", async ({ page }) => {
+  await page.goto("/who-can-receive");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Can I give zakat to…?");
+  const parents = page.locator("details", { hasText: "My mother or father" });
+  await expect(parents.locator("summary")).toContainText("No");
+  await expect(parents.getByText(/Looking after your parents/)).toBeHidden();
+  await parents.locator("summary").click();
+  await expect(parents.getByText(/Looking after your parents/)).toBeVisible();
+  await expect(page.locator("details", { hasText: "My husband" }).locator("summary")).toContainText(
+    "Scholars differ",
+  );
+  await expectNoHorizontalScroll(page);
+  await expectUniqueIds(page);
+
+  // The walk-through's answer leads here.
+  await page.goto("/start");
+  await page.getByRole("link", { name: "Can I give zakat to…?" }).first().click();
+  await page.waitForURL("**/who-can-receive");
+});
+
+test("larger text applies everywhere and survives a reload", async ({ page }) => {
+  await page.goto("/start");
+  const html = page.locator("html");
+  await expect(html).not.toHaveClass(/text-large/);
+  await page.getByRole("button", { name: "Larger text" }).filter({ visible: true }).click();
+  await expect(html).toHaveClass(/text-large/);
+  await page.goto("/calculator");
+  await expect(html).toHaveClass(/text-large/);
+  await page.getByRole("button", { name: "Larger text" }).filter({ visible: true }).click();
+  await expect(html).not.toHaveClass(/text-large/);
+  await page.reload();
+  await expect(html).not.toHaveClass(/text-large/);
+});

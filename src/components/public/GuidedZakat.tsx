@@ -21,6 +21,19 @@ import { hawlDueDate } from "@/lib/hijri";
 import { hawlCalendar } from "@/lib/ics";
 import { track } from "@/lib/analytics";
 import { CurrencyOptions } from "@/components/public/VisitorCurrency";
+import ReadAloud from "@/components/ReadAloud";
+import {
+  IconBalance,
+  IconBank,
+  IconCash,
+  IconCheckCircle,
+  IconChart,
+  IconCoins,
+  IconGlobe,
+  IconGoldBar,
+  IconReceipt,
+  IconRing,
+} from "@/components/icons";
 import {
   Choice,
   MoneyInput,
@@ -46,6 +59,23 @@ const STEPS = [
   "result",
 ] as const;
 type Step = (typeof STEPS)[number];
+
+/** A picture for each question, so it is recognised before it is read. */
+const STEP_ICON: Record<Step, (p: { className?: string }) => React.ReactNode> = {
+  currency: IconGlobe,
+  cash: IconCash,
+  bank: IconBank,
+  gold: IconGoldBar,
+  jewellery: IconRing,
+  silver: IconCoins,
+  more: IconChart,
+  debts: IconReceipt,
+  nisab: IconBalance,
+  result: IconCheckCircle,
+};
+
+/** Labels for the read-aloud button. */
+type Speech = { listen: string; stop: string };
 
 /** The rarer kinds of wealth, asked about together in one step. */
 const MORE_FIELDS: CalcFieldKey[] = [
@@ -73,17 +103,39 @@ const DEFAULT_PURITY: Record<WeighableKey, string> = {
 export default function GuidedZakat({
   m,
   calc,
+  speech,
   locale,
 }: {
   m: GuideMessages;
   calc: CalcMessages;
+  speech: Speech;
   locale: Locale;
 }) {
   const hydrated = useHydrated();
   if (!hydrated) {
-    return <Guide key="server" initial={emptyDraft()} live={false} m={m} calc={calc} locale={locale} />;
+    return (
+      <Guide
+        key="server"
+        initial={emptyDraft()}
+        live={false}
+        m={m}
+        calc={calc}
+        speech={speech}
+        locale={locale}
+      />
+    );
   }
-  return <Guide key="client" initial={storedOrFresh(null)} live m={m} calc={calc} locale={locale} />;
+  return (
+    <Guide
+      key="client"
+      initial={storedOrFresh(null)}
+      live
+      m={m}
+      calc={calc}
+      speech={speech}
+      locale={locale}
+    />
+  );
 }
 
 function Guide({
@@ -91,12 +143,14 @@ function Guide({
   live,
   m,
   calc,
+  speech,
   locale,
 }: {
   initial: CalcDraft;
   live: boolean;
   m: GuideMessages;
   calc: CalcMessages;
+  speech: Speech;
   locale: Locale;
 }) {
   const intl = LOCALE_INFO[locale].intl;
@@ -501,6 +555,13 @@ function Guide({
       break;
   }
 
+  const Icon = STEP_ICON[step];
+  // What "Listen" reads: the question and why it is asked, or the answer and what to do.
+  const spoken =
+    step === "result"
+      ? [title, ...(outcome.result.isDue && !outcome.needsPrices ? calc.nextSteps : [])].join(". ")
+      : [title, typeof body === "string" ? body : ""].filter(Boolean).join(". ");
+
   return (
     <section aria-labelledby="guide-step" className="card p-5 sm:p-8">
       {step !== "result" ? (
@@ -515,18 +576,33 @@ function Guide({
         </div>
       ) : null}
 
-      <h2
-        id="guide-step"
-        ref={heading}
-        tabIndex={-1}
-        className={
-          "font-serif leading-snug text-ink outline-none " +
-          (step === "result" ? "text-3xl text-pine sm:text-4xl" : "mt-6 text-2xl sm:text-3xl")
-        }
-      >
-        {title}
-      </h2>
+      <div className={"flex items-start gap-4 " + (step === "result" ? "" : "mt-6")}>
+        <span
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-pine/30 bg-pine/5 text-pine"
+          aria-hidden
+        >
+          <Icon className="h-7 w-7" />
+        </span>
+        <h2
+          id="guide-step"
+          ref={heading}
+          tabIndex={-1}
+          className={
+            "pt-1 font-serif leading-snug text-ink outline-none " +
+            (step === "result" ? "text-3xl text-pine sm:text-4xl" : "text-2xl sm:text-3xl")
+          }
+        >
+          {title}
+        </h2>
+      </div>
       {body ? <p className="mt-3 text-base leading-relaxed text-sage">{body}</p> : null}
+      <ReadAloud
+        className="mt-3"
+        text={spoken}
+        lang={locale}
+        listen={speech.listen}
+        stop={speech.stop}
+      />
       {difference ? (
         <details className="mt-4 border-s-2 border-brass/60 ps-3">
           <summary className="cursor-pointer text-sm font-medium text-pine">{m.difference}</summary>
@@ -755,7 +831,7 @@ function Result({
           <p className="mt-3 text-base leading-relaxed text-sage">{calc.belowNext}</p>
         )}
         <p className="mt-2 text-sm">
-          <Link href={`${localePath(locale, "/start")}#who`} className="text-pine hover:underline">
+          <Link href={localePath(locale, "/who-can-receive")} className="text-pine hover:underline">
             {m.result.who}
           </Link>
         </p>
