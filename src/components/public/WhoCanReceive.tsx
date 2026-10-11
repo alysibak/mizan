@@ -1,4 +1,5 @@
-import AnswerList, { type Tone } from "@/components/public/AnswerList";
+import AnswerList, { type AnswerItem, type Tone } from "@/components/public/AnswerList";
+import type { ShareLabels } from "@/components/public/ShareButton";
 import type { Messages } from "@/i18n/messages/en";
 
 type WhoMessages = Messages["who"];
@@ -32,30 +33,38 @@ const TONE: Record<Verdict, Tone> = {
   differ: "mixed",
 };
 
+/** "Can I give zakat to…?", person by person, in one language. */
+export function whoItems(m: WhoMessages): AnswerItem[] {
+  return WHO_CASES.map(({ key, verdict }) => ({
+    key,
+    label: m.cases[key].label,
+    verdict: m.verdicts[verdict],
+    tone: TONE[verdict],
+    answer: m.cases[key].answer,
+  }));
+}
+
 /** "Can I give zakat to…?", person by person. */
 export default function WhoCanReceive({
   m,
   lang,
   listen,
   stop,
+  share,
 }: {
   m: WhoMessages;
   lang: string;
   listen: string;
   stop: string;
+  share?: { label: string; labels: ShareLabels; path: string };
 }) {
   return (
     <AnswerList
-      items={WHO_CASES.map(({ key, verdict }) => ({
-        key,
-        label: m.cases[key].label,
-        verdict: m.verdicts[verdict],
-        tone: TONE[verdict],
-        answer: m.cases[key].answer,
-      }))}
+      items={whoItems(m)}
       lang={lang}
       listen={listen}
       stop={stop}
+      share={share}
     />
   );
 }

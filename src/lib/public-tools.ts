@@ -29,6 +29,11 @@ export const PUBLIC_TOOLS: PublicTool[] = [
     blurb: "What your household gives before the Eid prayer.",
   },
   {
+    path: "/missed-years",
+    name: "Missed years",
+    blurb: "What you owe for past years, and a plan to pay it.",
+  },
+  {
     path: "/halal-stocks",
     name: "Halal stock screen",
     blurb: "Business and ratio checks, and dividend purification.",

@@ -182,6 +182,14 @@ export const IconMirath = ({ className = "h-6 w-6" }: P) => (
   </Glyph>
 );
 
+export const IconQuestion = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M9.5 9.5a2.5 2.5 0 1 1 3.4 2.3c-.6.3-.9.8-.9 1.4v.8" />
+    <path d="M12 17h.01" />
+  </Glyph>
+);
+
 export const IconYear = ({ className = "h-6 w-6" }: P) => (
   <Glyph className={className}>
     <rect x="4" y="5" width="16" height="15" rx="1.5" />

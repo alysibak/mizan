@@ -419,3 +419,85 @@ test("beginner pages are kept for a weak signal; account pages never are", async
   });
   expect(kept).toEqual(["/start", "/ur/guide"]);
 });
+
+test("someone who missed years adds up what they owe and pays it monthly", async ({ page }) => {
+  await page.goto("/start");
+  await page.getByRole("link", { name: "Add up what you missed" }).click();
+  await page.waitForURL("**/missed-years");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "Missed some years? You can still put it right",
+  );
+  await page.locator("#tool-currency").selectOption("USD");
+  await page.fill("#missed-years", "3");
+  await page.fill("#missed-same", "10,000");
+  // 3 years × 2.5% × 10,000
+  await expect(page.getByText("US$750.00")).toBeVisible();
+  await page.getByRole("radio", { name: "Over 6 months" }).check();
+  await expect(page.getByText("US$125.00 a month for 6 months")).toBeVisible();
+
+  // Below the nisab three years ago: that year is left empty.
+  await page.getByRole("button", { name: "It was different each year" }).click();
+  await expect(page.getByLabel("Last year")).toHaveValue("10,000");
+  await page.getByLabel("3 years ago").fill("");
+  await expect(page.getByText("US$500.00")).toBeVisible();
+
+  await page.fill("#missed-given", "200");
+  await expect(page.getByText("Still to give: US$300.00")).toBeVisible();
+  // Kept on this device for the next visit.
+  await page.reload();
+  await expect(page.getByText("Still to give: US$300.00")).toBeVisible();
+});
+
+test("a beginner types a word and finds every answer that mentions it", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("main").getByRole("link", { name: "Ask a question" }).click();
+  await page.waitForURL("**/ask");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Ask a question about zakat");
+  // Before typing, every question is listed.
+  await expect(page.getByRole("heading", { name: "All questions" })).toBeVisible();
+
+  await page.getByLabel("What do you want to know?").fill("salary");
+  await expect(page.getByRole("heading", { name: "Answers" })).toBeVisible();
+  const first = page.getByRole("main").locator("details").first();
+  await expect(first.locator("summary")).toContainText("Your salary");
+  await first.locator("summary").click();
+  await first.getByRole("link", { name: "Do I pay zakat on…?" }).click();
+  // The link lands on that very answer, already open.
+  await page.waitForURL("**/what-counts#salary");
+  await expect(page.locator("#salary details")).toHaveAttribute("open", "");
+
+  await page.goto("/ask");
+  await page.getByLabel("What do you want to know?").fill("camel");
+  await expect(page.getByRole("status")).toHaveText(/No answer mentions that yet/);
+});
+
+test("the answer search understands Urdu as people type it", async ({ page }) => {
+  await page.goto("/ur/ask");
+  await page.locator("#ask-q").fill("سونا");
+  await expect(page.getByRole("main").locator("details").first().locator("summary")).toContainText("سون");
+});
+
+
+test("one answer can be shared, and its link opens straight to it", async ({ page }) => {
+  await page.goto("/who-can-receive#parents");
+  const answer = page.locator("#parents");
+  await expect(answer.locator("details")).toHaveAttribute("open", "");
+  await expect(answer.getByText(/Looking after your parents/)).toBeInViewport();
+  const share = answer.getByRole("group", { name: "Share this answer" });
+  if (await share.count()) {
+    const href = await share.getByRole("link", { name: "WhatsApp" }).getAttribute("href");
+    const text = decodeURIComponent(href!.split("text=")[1]);
+    expect(text).toMatch(/^My mother or father: No\./);
+    expect(text).toMatch(/\/who-can-receive#parents$/);
+  } else {
+    await expect(answer.getByRole("button", { name: "Share this answer" })).toBeVisible();
+  }
+});
+
+test("a worksheet to print and fill in by hand, in the reader's language", async ({ page }) => {
+  await page.goto("/ur/worksheet");
+  const sheet = page.getByRole("article", { name: "میری زکوٰۃ کا حساب" });
+  await expect(sheet).toContainText("ج ÷ 40");
+  await expect(sheet.locator("[role=img][aria-label]")).toHaveAttribute("aria-label", /\/ur\/nisab$/);
+  await expect(page.getByRole("button", { name: "صفحہ پرنٹ کریں" })).toBeVisible();
+});

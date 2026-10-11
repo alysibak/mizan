@@ -41,6 +41,11 @@ export default function WhoView({ locale }: { locale: Locale }) {
             lang={locale}
             listen={all.common.listen}
             stop={all.common.stopListening}
+            share={{
+              label: all.common.shareAnswer,
+              labels: all.common.share,
+              path: localePath(locale, "/who-can-receive"),
+            }}
           />
         </div>
         <p className="mt-8 border-s-2 border-brass ps-4 text-base leading-relaxed text-ink">{m.eight}</p>

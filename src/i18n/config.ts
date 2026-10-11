@@ -61,6 +61,9 @@ export function isLocalizedPath(path: string): boolean {
     path === "/zakat-al-fitr" ||
     path === "/sources" ||
     path === "/what-counts" ||
+    path === "/missed-years" ||
+    path === "/ask" ||
+    path === "/worksheet" ||
     path === "/poster" ||
     path === "/calculator" ||
     path === "/nisab" ||

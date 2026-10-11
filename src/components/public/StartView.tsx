@@ -167,6 +167,18 @@ export default function StartView({ locale }: { locale: Locale }) {
             <p>{m.whenBody}</p>
           </Section>
 
+          <Section id="missed" title={m.missedTitle} speak={m.missedBody} locale={locale}>
+            <p>{m.missedBody}</p>
+            <p>
+              <Link
+                href={localePath(locale, "/missed-years")}
+                className="font-medium text-pine hover:underline"
+              >
+                {m.missedLink}
+              </Link>
+            </p>
+          </Section>
+
           <Section id="who" title={m.whoTitle} speak={m.whoBody} locale={locale}>
             <p>{m.whoBody}</p>
             <p>
@@ -198,6 +210,12 @@ export default function StartView({ locale }: { locale: Locale }) {
               </Link>
               <Link href={calculator} className="btn-ghost px-5 py-3 text-base">
                 {m.ctaCalculate}
+              </Link>
+              <Link href={localePath(locale, "/ask")} className="text-sm text-pine hover:underline">
+                {all.ask.nav}
+              </Link>
+              <Link href={localePath(locale, "/worksheet")} className="text-sm text-pine hover:underline">
+                {all.worksheet.nav}
               </Link>
               <Link href={localePath(locale, "/nisab")} className="text-sm text-pine hover:underline">
                 {all.common.footer.nisab}

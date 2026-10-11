@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { Noto_Naskh_Arabic } from "next/font/google";
+import { Noto_Naskh_Arabic, Noto_Nastaliq_Urdu } from "next/font/google";
 import HtmlLang from "@/components/HtmlLang";
 import { LOCALE_INFO, PREFIXED_LOCALES, isLocale } from "@/i18n/config";
 
@@ -9,6 +9,15 @@ const naskh = Noto_Naskh_Arabic({
   subsets: ["arabic"],
   variable: "--font-naskh",
   display: "swap",
+});
+
+// Urdu is read in Nastaliq in Pakistan and India; Naskh looks foreign to many
+// readers there. Only Urdu pages load it.
+const nastaliq = Noto_Nastaliq_Urdu({
+  subsets: ["arabic"],
+  variable: "--font-nastaliq",
+  display: "swap",
+  preload: false,
 });
 
 // Only the languages Mizan has; anything else under this segment is a 404
@@ -33,7 +42,13 @@ export default async function LocaleLayout({
     <div
       lang={locale}
       dir={dir}
-      className={dir === "rtl" ? `${naskh.variable} script-arabic` : undefined}
+      className={
+        locale === "ur"
+          ? `${naskh.variable} ${nastaliq.variable} script-arabic script-urdu`
+          : dir === "rtl"
+            ? `${naskh.variable} script-arabic`
+            : undefined
+      }
     >
       <HtmlLang lang={locale} dir={dir} />
       {children}

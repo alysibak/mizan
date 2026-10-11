@@ -11,6 +11,8 @@ import {
   IconCoins,
   IconGiving,
   IconGoldBar,
+  IconQuestion,
+  IconYear,
 } from "@/components/icons";
 import { LOCALE_INFO, fmt, languageAlternates, localePath, type Locale } from "@/i18n/config";
 import { messagesFor } from "@/i18n/messages";
@@ -144,7 +146,7 @@ export default function LandingView({ locale }: { locale: Locale }) {
             <h2 id="choose" className="font-serif text-2xl text-ink sm:text-3xl">
               {m.chooseTitle}
             </h2>
-            <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {(
                 [
                   ["/start", m.choose.start, IconCheckCircle],
@@ -153,6 +155,8 @@ export default function LandingView({ locale }: { locale: Locale }) {
                   ["/who-can-receive", m.choose.who, IconGiving],
                   ["/zakat-al-fitr", m.choose.fitr, IconCash],
                   ["/nisab", m.choose.nisab, IconBalance],
+                  ["/missed-years", m.choose.missed, IconYear],
+                  ["/ask", m.choose.ask, IconQuestion],
                 ] as const
               ).map(([path, label, Icon]) => (
                 <li key={path}>

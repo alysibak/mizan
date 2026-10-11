@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
-import AnswerList, { type Tone } from "@/components/public/AnswerList";
+import AnswerList, { type AnswerItem, type Tone } from "@/components/public/AnswerList";
 import { LOCALE_INFO, languageAlternates, localePath, type Locale } from "@/i18n/config";
 import { messagesFor } from "@/i18n/messages";
 import type { Messages } from "@/i18n/messages/en";
@@ -42,6 +42,17 @@ const TONE: Record<Verdict, Tone> = {
   differ: "mixed",
 };
 
+/** "Do I pay zakat on…?", thing by thing, in one language. */
+export function appliesItems(m: Applies): AnswerItem[] {
+  return CASES.map(({ key, verdict }) => ({
+    key,
+    label: m.cases[key].label,
+    verdict: m.verdicts[verdict],
+    tone: TONE[verdict],
+    answer: m.cases[key].answer,
+  }));
+}
+
 export function appliesMetadata(locale: Locale): Metadata {
   const m = messagesFor(locale).applies;
   const url = localePath(locale, PATH);
@@ -73,16 +84,11 @@ export default function AppliesView({ locale }: { locale: Locale }) {
         </header>
         <div className="mt-8">
           <AnswerList
-            items={CASES.map(({ key, verdict }) => ({
-              key,
-              label: m.cases[key].label,
-              verdict: m.verdicts[verdict],
-              tone: TONE[verdict],
-              answer: m.cases[key].answer,
-            }))}
+            items={appliesItems(m)}
             lang={locale}
             listen={all.common.listen}
             stop={all.common.stopListening}
+            share={{ label: all.common.shareAnswer, labels: all.common.share, path: localePath(locale, PATH) }}
           />
         </div>
         <p className="mt-6 text-sm text-sage">

@@ -86,6 +86,25 @@ work.
 - **Zakat al-Fitr** (`/zakat-al-fitr`), in every language: the household's
   fitrana from the amount the local mosque announced, with who gives it, how
   much, when, and where the schools differ.
+- **Missed years** (`/missed-years`), in every language: for someone who has
+  never paid, reassurance first, then a tally of what past years owe (one
+  rough figure, or one per year), a plan to pay it monthly, a "given so far"
+  tracker kept on the device, and plain answers on where scholars differ.
+- **Ask a question** (`/ask`), in every language: one search box over every
+  answer on the site (what counts, who can receive, the FAQ, Zakat al-Fitr,
+  missed years, the words explained). It matches word beginnings without
+  accents or harakat, past Arabic "al-", and Urdu endings (سونا finds سونے);
+  without scripts the full list shows.
+- **Share one answer.** Each answer on "Do I pay zakat on…?", "Can I give
+  zakat to…?", and the search has its own Share button (WhatsApp, copy, or
+  the phone's share sheet); the link (`/who-can-receive#parents`) opens on
+  that answer, unfolded.
+- **A paper worksheet** (`/worksheet`), in every language: one A4 sheet to
+  fill in with a pen (what you have, what you owe, the nisab, C ÷ 40), with
+  a code to today's nisab, for people who prefer paper and volunteers
+  helping elders.
+- **Urdu in Nastaliq.** Urdu pages use Noto Nastaliq Urdu, the script
+  readers in Pakistan and India know, loaded only on Urdu pages.
 - **For people who find reading hard.** "Listen" reads the beginner's page,
   each step of the walk-through, and each answer aloud in the device's own
   voice for the page's language (and hides itself where the device has none,

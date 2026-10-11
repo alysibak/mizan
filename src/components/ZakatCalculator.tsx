@@ -722,7 +722,7 @@ export function Choice({
   checked: boolean;
   onChange: () => void;
   title: string;
-  detail: string;
+  detail?: string;
 }) {
   return (
     <label
@@ -740,7 +740,7 @@ export function Choice({
       />
       <span>
         <span className="block text-sm font-medium text-ink">{title}</span>
-        <span className="block text-xs text-sage">{detail}</span>
+        {detail ? <span className="block text-xs text-sage">{detail}</span> : null}
       </span>
     </label>
   );

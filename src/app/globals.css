@@ -219,11 +219,28 @@
   .script-arabic h2 {
     line-height: 1.35;
   }
+  /* Nastaliq slopes and stacks, so it needs more room between lines. */
+  .script-urdu,
+  .script-urdu .font-serif {
+    font-family: var(--font-nastaliq), var(--font-naskh), var(--font-source), ui-sans-serif, system-ui,
+      sans-serif;
+  }
+  .script-urdu {
+    line-height: 2.1;
+  }
+  .script-urdu h1,
+  .script-urdu h2 {
+    line-height: 1.9;
+  }
+  .script-urdu .label {
+    font-size: 0.9rem;
+  }
 }
 
-/* The mosque poster prints on its own A4 sheet; other pages keep the printer's paper. */
+/* The mosque poster and the worksheet print on their own A4 sheet; other pages keep the printer's paper. */
 @media print {
-  .poster {
+  .poster,
+  .worksheet {
     page: poster;
   }
   @page poster {
