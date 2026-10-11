@@ -4,6 +4,11 @@ function icsDay(day: string): string {
   return day.replace(/-/g, "");
 }
 
+/** Text escaped for an iCalendar property value (RFC 5545 §3.3.11). */
+function icsText(text: string): string {
+  return text.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
+}
+
 function nextDay(day: string): string {
   const d = new Date(`${day}T00:00:00Z`);
   d.setUTCDate(d.getUTCDate() + 1);
@@ -19,6 +24,9 @@ export function hawlCalendar(opts: {
   alarm?: boolean;
   /** Feed name shown by calendar apps. */
   name?: string;
+  /** The event's title and note, e.g. in the visitor's language. */
+  summary?: string;
+  description?: string;
 }): string {
   const stamp = (opts.now ?? new Date()).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
   const lines = [
@@ -38,8 +46,11 @@ export function hawlCalendar(opts: {
       `DTSTAMP:${stamp}`,
       `DTSTART;VALUE=DATE:${icsDay(opts.dueDay)}`,
       `DTEND;VALUE=DATE:${icsDay(nextDay(opts.dueDay))}`,
-      "SUMMARY:Mizan — hawl reckoning day",
-      `DESCRIPTION:One ${opts.calendarLabel} year is complete. Confirm with local moon-sighting before paying. Open Mizan → The year.`,
+      `SUMMARY:${icsText(opts.summary ?? "Mizan — hawl reckoning day")}`,
+      `DESCRIPTION:${icsText(
+        opts.description ??
+          `One ${opts.calendarLabel} year is complete. Confirm with local moon-sighting before paying. Open Mizan → The year.`,
+      )}`,
       "TRANSP:TRANSPARENT",
     );
     if (opts.alarm) {

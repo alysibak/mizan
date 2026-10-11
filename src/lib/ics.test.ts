@@ -16,6 +16,18 @@ describe("hawlCalendar", () => {
     expect(hawlCalendar({ dueDay: null, calendarLabel: "tabular", now })).not.toContain("VEVENT");
   });
 
+  it("carries a title and note in the visitor's language, escaped", () => {
+    const ics = hawlCalendar({
+      dueDay: "2027-09-30",
+      calendarLabel: "lunar",
+      now,
+      summary: "زکوٰۃ: دوبارہ حساب کا وقت",
+      description: "One year, check the moon; then work it out again\\",
+    });
+    expect(ics).toContain("SUMMARY:زکوٰۃ: دوبارہ حساب کا وقت");
+    expect(ics).toContain("DESCRIPTION:One year\\, check the moon\\; then work it out again\\\\");
+  });
+
   it("never mentions money", () => {
     expect(hawlCalendar({ dueDay: "2027-08-07", calendarLabel: "tabular", now })).not.toMatch(/\$|zakat due|\d+\.\d\d/i);
   });

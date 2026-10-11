@@ -1,6 +1,15 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  Suspense,
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
@@ -29,6 +38,21 @@ import { LOCALE_INFO, fmt, type Locale } from "@/i18n/config";
 import type { Messages } from "@/i18n/messages/en";
 
 export type CalcMessages = Messages["calc"];
+type Explanations = Messages["guide"]["steps"];
+
+/** The guide's plain-words explanations, shown here under "What's the difference?". */
+const ExplainContext = createContext<Explanations | null>(null);
+
+/** A choice explained in a sentence or two, closed until asked for. */
+export function Difference({ label, text }: { label: string; text?: string | null }) {
+  if (!text) return null;
+  return (
+    <details className="mt-2 border-s-2 border-brass/60 ps-3">
+      <summary className="cursor-pointer text-xs font-medium text-pine">{label}</summary>
+      <p className="mt-1.5 text-xs leading-relaxed text-sage">{text}</p>
+    </details>
+  );
+}
 
 /** What most people hold; everything else waits behind "More kinds of wealth". */
 const COMMON_FIELDS = new Set<CalcFieldKey>(["cash", "bank", "gold", "silver", "jewellery"]);
@@ -40,18 +64,22 @@ const COMMON_FIELDS = new Set<CalcFieldKey>(["cash", "bank", "gold", "silver", "
  */
 export default function ZakatCalculator({
   m,
+  explain = null,
   locale = "en",
 }: {
   m: CalcMessages;
+  explain?: Explanations | null;
   locale?: Locale;
 }) {
   const empty = <Calculator key="server" initial={emptyDraft()} live={false} m={m} locale={locale} />;
   // Reading the query string opts out of static rendering below this
   // boundary, so the server still sends the empty calculator.
   return (
-    <Suspense fallback={empty}>
-      <LiveCalculator m={m} locale={locale} empty={empty} />
-    </Suspense>
+    <ExplainContext.Provider value={explain}>
+      <Suspense fallback={empty}>
+        <LiveCalculator m={m} locale={locale} empty={empty} />
+      </Suspense>
+    </ExplainContext.Provider>
   );
 }
 
@@ -92,7 +120,7 @@ function LiveCalculator({
   );
 }
 
-function storedOrFresh(wanted: string | null): CalcDraft {
+export function storedOrFresh(wanted: string | null): CalcDraft {
   const locale = typeof navigator === "undefined" ? null : navigator.language;
   const stored = parseDraft(readStoredValue(CALC_STORAGE_KEY));
   if (stored) {
@@ -127,6 +155,7 @@ function Calculator({
   locale: Locale;
 }) {
   const intl = LOCALE_INFO[locale].intl;
+  const explain = useContext(ExplainContext);
   const [draft, setDraft] = useState<CalcDraft>(initial);
   // Live prices are fetched afresh on every visit, so a draft from last week
   // is weighed against today's nisab. Prices the visitor typed are left alone.
@@ -413,6 +442,7 @@ function Calculator({
             {m.oweTitle}
           </h2>
           <p className="mt-1 text-sm text-sage">{m.oweLede}</p>
+          <Difference label={m.difference} text={explain?.debts.difference} />
           <div className="mt-4 max-w-xs">
             <MoneyInput
               id="calc-debts"
@@ -432,6 +462,9 @@ function Calculator({
           </summary>
           <fieldset className="mt-5">
             <legend className="label mb-2">{m.nisabStandard}</legend>
+            <div className="mb-2">
+              <Difference label={m.difference} text={explain?.nisab.difference} />
+            </div>
             <div className="grid gap-2 sm:grid-cols-2">
               <Choice
                 name="standard"
@@ -455,6 +488,9 @@ function Calculator({
           </fieldset>
           <fieldset className="mt-6">
             <legend className="label mb-2">{m.yearBasis}</legend>
+            <div className="mb-2">
+              <Difference label={m.difference} text={m.basisDifference} />
+            </div>
             <div className="grid gap-2 sm:grid-cols-2">
               <Choice
                 name="basis"
@@ -522,7 +558,9 @@ function Calculator({
                 <div key={line.key} className="flex justify-between gap-3">
                   <dt className="text-sage">
                     {m.fields[line.key].label}
-                    {line.zakatablePortion < 1 ? (
+                    {line.zakatablePortion === 0 && line.key === "jewellery" ? (
+                      <span className="block text-xs">{m.jewelleryNo}</span>
+                    ) : line.zakatablePortion < 1 ? (
                       <span className="block text-xs">
                         {fmt(m.shareOf, {
                           share: formatPercent(line.zakatablePortion, 0, intl),
@@ -531,7 +569,9 @@ function Calculator({
                       </span>
                     ) : null}
                   </dt>
-                  <dd className="text-ink nums">{money(line.amount * line.zakatablePortion)}</dd>
+                  <dd className="text-ink nums">
+                    {line.zakatablePortion === 0 ? "—" : money(line.amount * line.zakatablePortion)}
+                  </dd>
                 </div>
               ))}
               {outcome.debts > 0 ? (
@@ -624,7 +664,7 @@ function priceTime(iso: string, intl: string): string {
     .replace(/\.$/, "");
 }
 
-function purityOptionsFor(
+export function purityOptionsFor(
   key: WeighableKey | null,
   m?: CalcMessages,
 ): { label: string; purity: number }[] {
@@ -644,7 +684,7 @@ function purityOptionsFor(
   });
 }
 
-function Choice({
+export function Choice({
   name,
   checked,
   onChange,
@@ -679,7 +719,7 @@ function Choice({
   );
 }
 
-function MoneyInput({
+export function MoneyInput({
   id,
   label,
   currency,
@@ -754,6 +794,17 @@ function HoldingField({
   const byWeight = weighKey ? Boolean(draft.byWeight[weighKey]) : false;
   const purityOptions = purityOptionsFor(weighKey, m);
   const text = m.fields[field.key];
+  const explain = useContext(ExplainContext);
+  const explainFor = (key: CalcFieldKey): string | null =>
+    key === "bank"
+      ? (explain?.bank.difference ?? null)
+      : key === "gold"
+        ? (explain?.gold.difference ?? null)
+        : key === "jewellery"
+          ? (explain?.jewellery.difference ?? null)
+          : key === "longterm"
+            ? (explain?.more.difference ?? null)
+            : null;
 
   return (
     <div className="grid gap-3 py-4 sm:grid-cols-[minmax(0,1fr)_14rem] sm:items-start">
@@ -762,6 +813,7 @@ function HoldingField({
           {text.label}
         </label>
         <p className="mt-0.5 text-xs leading-relaxed text-sage">{text.hint}</p>
+        <Difference label={m.difference} text={explainFor(field.key)} />
         {weighKey ? (
           <button
             type="button"

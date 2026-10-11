@@ -51,6 +51,7 @@ export default function StartView({ locale }: { locale: Locale }) {
   const all = messagesFor(locale);
   const m = all.start;
   const calculator = localePath(locale, "/calculator");
+  const guide = localePath(locale, "/guide");
 
   return (
     <div className="min-h-screen">
@@ -83,8 +84,8 @@ export default function StartView({ locale }: { locale: Locale }) {
             <p>{m.howMuchBody}</p>
             <p className="border-s-2 border-brass ps-4 text-ink nums">{m.howMuchExample}</p>
             <p>
-              <Link href={calculator} className="font-medium text-pine hover:underline">
-                {m.ctaCalculate}
+              <Link href={guide} className="font-medium text-pine hover:underline">
+                {m.ctaGuide}
               </Link>
             </p>
           </Section>
@@ -143,10 +144,13 @@ export default function StartView({ locale }: { locale: Locale }) {
           <Section id="ask" title={m.askTitle}>
             <p>{m.askBody}</p>
             <div className="flex flex-wrap items-center gap-3 pt-2">
-              <Link href={calculator} className="btn-primary px-5 py-3 text-base">
+              <Link href={guide} className="btn-primary px-5 py-3 text-base">
+                {m.ctaGuide}
+              </Link>
+              <Link href={calculator} className="btn-ghost px-5 py-3 text-base">
                 {m.ctaCalculate}
               </Link>
-              <Link href={localePath(locale, "/nisab")} className="btn-ghost px-5 py-3 text-base">
+              <Link href={localePath(locale, "/nisab")} className="text-sm text-pine hover:underline">
                 {all.common.footer.nisab}
               </Link>
               <Link href="/guides" className="text-sm text-pine hover:underline">

@@ -158,6 +158,10 @@ const en = {
     ],
     belowNext:
       "You can still give sadaqah, charity by choice, at any time. Check again if your savings grow.",
+    guideLink: "Prefer one question at a time? Go step by step",
+    difference: "What’s the difference?",
+    basisDifference:
+      "Zakat is counted by the Islamic (lunar) year, about 354 days. If you pay on the same Gregorian date each year instead, your year is about 11 days longer, so the rate goes up slightly, to 2.577%, to make up for it.",
     pricesTitle: "Today’s prices",
     pricesLede:
       "Nisab is set by the price of gold or silver. Filled in from a free public source when it answers; check it against your local market.",
@@ -312,6 +316,7 @@ const en = {
     unsureBody:
       "That is fine. The calculator asks about each kind of saving, one at a time, and tells you whether zakat is due and how much.",
     ctaCalculate: "Work out my zakat",
+    ctaGuide: "Work it out with me, step by step",
     ctaYear: "Count the year for me",
     startAgain: "Start again",
     howMuchTitle: "How much do I give?",
@@ -371,6 +376,106 @@ const en = {
     askBody:
       "That is normal. Ask the imam at your local mosque, or someone of knowledge you trust. Mizan helps you add things up; it does not give rulings.",
     guidesLink: "Read the zakat guides",
+  },
+
+  guide: {
+    metaTitle: "Work out your zakat step by step",
+    metaDescription:
+      "A guided zakat calculator for beginners: one simple question at a time, each step explained in plain words, with today’s gold and silver prices. Free, private, no sign-up.",
+    eyebrow: "Step by step",
+    title: "Let’s work out your zakat together",
+    lede: "One question at a time. Each step says what to count and why. If you don’t have something, skip it.",
+    stepOf: "Step {n} of {total}",
+    next: "Next",
+    back: "Back",
+    skip: "I don’t have this",
+    seeResult: "Show my zakat",
+    difference: "What’s the difference?",
+    byWeight: "I know the weight",
+    byValue: "I know what it’s worth",
+    grams: "Weight in grams",
+    tolaHint: "1 tola is about 11.66 grams.",
+    karat: "Purity (karat)",
+    value: "What it’s worth today",
+    amount: "Amount",
+    worth: "Worth about {amount} at today’s price.",
+    steps: {
+      currency: {
+        title: "Which money do you use?",
+        body: "Choose your currency. We show amounts in it, and today’s nisab: the least savings on which zakat is due.",
+        nisab: "Nisab today: {silver} on silver, or {gold} on gold.",
+        loading: "Getting today’s gold and silver prices…",
+        unavailable:
+          "Live prices are unavailable right now. You can carry on; we will ask for today’s prices before the end.",
+      },
+      cash: {
+        title: "How much cash do you have?",
+        body: "Count the notes and coins at home and in your wallet, as they are today. Zakat looks at what you have on the day you count.",
+      },
+      bank: {
+        title: "How much is in your bank accounts?",
+        body: "Add up current and savings accounts, and money in mobile wallets or payment apps.",
+        difference:
+          "Interest is different. If your bank paid you interest, leave it out here and give it away to charity separately. It is not yours to keep, and giving it away does not count as zakat.",
+      },
+      gold: {
+        title: "Do you keep any gold?",
+        body: "Count coins, bars, and gold you keep as savings rather than wear. If you know the weight, we work out its value from today’s price.",
+        difference:
+          "Karat says how pure the gold is. 24 karat is pure gold; 22 karat is 91.6% gold, 21 karat is 87.5%, and 18 karat is 75%. Only the gold in it is counted.",
+      },
+      jewellery: {
+        title: "Do you wear gold jewellery?",
+        body: "Rings, bangles, necklaces, and other gold jewellery you wear.",
+        question: "Is it counted for you?",
+        difference:
+          "Scholars differ here. The Hanafi school counts jewellery you wear. The Maliki, Shafi‘i, and Hanbali schools do not count jewellery worn in the normal way. If you are not sure which you follow, counting it is the cautious choice, and you can ask your imam.",
+      },
+      silver: {
+        title: "Do you keep any silver?",
+        body: "Coins, bars, and silver you keep as savings.",
+      },
+      more: {
+        title: "Do you have any of these?",
+        body: "Tick what you have and enter what it is worth today. Most people can skip this step.",
+        difference:
+          "Shares you bought to sell soon count in full. Shares you keep for the long term count only in part, because much of a company’s value is buildings and machines, which are not zakatable; a quarter is a common estimate.",
+      },
+      debts: {
+        title: "Do you owe money that is due now?",
+        body: "Bills, rent, and loan payments you must make now are taken off before zakat is worked out.",
+        difference:
+          "Only what is due now is taken off. For a long loan like a mortgage, take off the payments due soon (many scholars say up to a year), not the whole amount still owed.",
+      },
+      nisab: {
+        title: "Which nisab do you follow?",
+        body: "Nisab is the line. If your savings are below it, no zakat is due.",
+        difference:
+          "Nisab was set as 595 grams of silver or 85 grams of gold. Today silver is far cheaper, so the silver line is lower and more people pay zakat, which helps more people in need. Many scholars recommend silver for savings in money; some use gold. If you are not sure, choose silver.",
+        prices: "Enter today’s price of one gram of gold and of silver where you live.",
+      },
+    },
+    result: {
+      due: "Your zakat is {amount}",
+      none: "No zakat is due",
+      total: "Everything you counted comes to {total}.",
+      debts: "Taking off debts due now ({debts}) leaves {net}.",
+      above: "That is above nisab ({nisab}), so zakat is due: {rate} of {net} is {zakat}.",
+      below: "That is below nisab ({nisab}), so no zakat is due now.",
+      hawl: "This assumes you have had at least nisab for a whole Islamic year. If not, zakat is not due yet.",
+      doTitle: "What you can do now",
+      reminder: "Remind me next year",
+      reminderHint: "Adds {date} to your calendar: one Islamic year from today.",
+      reminderSummary: "Zakat: time to work it out again",
+      reminderBody:
+        "One Islamic year has passed since you last worked out your zakat. Check the date with your local moon-sighting.",
+      print: "Print or save",
+      ledger: "Keep this in a free ledger",
+      ledgerHint: "It counts your year, records what you give, and reminds you when zakat is due.",
+      calculator: "Check it in the full calculator",
+      change: "Change my answers",
+      who: "Who can receive zakat?",
+    },
   },
 
   nisabPage: {
@@ -433,6 +538,10 @@ const en = {
     {
       q: "Why is the rate 2.577% on a solar year?",
       a: "Zakat is 2.5% for each lunar year. A solar year is about eleven days longer, so if you reckon on a Gregorian date the rate is scaled by 365.25 / 354.367, about 2.577%, to stay fair over time.",
+    },
+    {
+      q: "Calculator or free ledger: what’s the difference?",
+      a: "The calculator works out this year’s zakat in a few minutes, with no account; your figures stay in your browser. A free ledger keeps the whole year: it remembers when your year began, tells you when zakat is due, records what you give, and keeps your figures safe on any device. Start with the calculator; you can turn it into a ledger at any time.",
     },
     {
       q: "Is what I type saved or sent anywhere?",

@@ -83,6 +83,7 @@ export default function PayCheck({ m, locale }: { m: Messages["start"]; locale: 
   ];
   const shown = outcome ? answers.length : Math.min(answers.length + 1, questions.length);
   const calculator = `${localePath(locale, "/calculator")}?currency=${currency}`;
+  const guide = localePath(locale, "/guide");
 
   return (
     <div className="card p-5 sm:p-7">
@@ -166,9 +167,14 @@ export default function PayCheck({ m, locale }: { m: Messages["start"]; locale: 
                   {m.ctaYear}
                 </Link>
               ) : (
-                <Link href={calculator} className="btn-primary px-5 py-3 text-base">
-                  {m.ctaCalculate}
-                </Link>
+                <>
+                  <Link href={guide} className="btn-primary px-5 py-3 text-base">
+                    {m.ctaGuide}
+                  </Link>
+                  <Link href={calculator} className="btn-ghost px-5 py-3 text-base">
+                    {m.ctaCalculate}
+                  </Link>
+                </>
               )}
               <button
                 type="button"

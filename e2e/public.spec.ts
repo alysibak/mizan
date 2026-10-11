@@ -234,3 +234,54 @@ test("a beginner is asked three questions and sent on with today’s nisab", asy
   await expect(page.locator("#calc-crypto")).toBeVisible();
   expect(errors).toEqual([]);
 });
+
+test("the step-by-step guide explains each step and ends with things to do", async ({ page }) => {
+  const errors = watchConsole(page);
+  await page.route("**/api/metals?*", (route) => route.fulfill({ json: PRICES }));
+  await page.goto("/guide");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Let’s work out your zakat together");
+  const guide = page.getByRole("region", { name: /Which money do you use/ });
+  await page.locator("#guide-currency").selectOption("USD");
+  // 595 g × $1.20 and 85 g × $100
+  await expect(page.getByText(/Nisab today: \S*714\.00 on silver, or \S*8,500\.00 on gold/)).toBeVisible();
+  await expect(guide.getByText("Step 1 of 9")).toBeVisible();
+  await page.getByRole("button", { name: "Next" }).click();
+
+  await expect(page.getByRole("heading", { name: "How much cash do you have?" })).toBeFocused();
+  await page.fill("#guide-cash", "2000");
+  await page.getByRole("button", { name: "Next" }).click();
+  await page.fill("#guide-bank", "18000");
+  await page.getByText("What’s the difference?").click();
+  await expect(page.getByText(/Interest is different/)).toBeVisible();
+  await page.getByRole("button", { name: "Next" }).click();
+
+  // Gold by weight, valued at today's price as you type.
+  await page.fill("#guide-gold-grams", "10");
+  await page.locator("#guide-gold-purity").selectOption("0.75");
+  await expect(page.getByText(/Worth about \S*750\.00 at today’s price/)).toBeVisible();
+  await page.getByRole("button", { name: "Next" }).click();
+  for (const step of ["Do you wear gold jewellery?", "Do you keep any silver?", "Do you have any of these?"]) {
+    await expect(page.getByRole("heading", { name: step })).toBeVisible();
+    await page.getByRole("button", { name: "I don’t have this" }).click();
+  }
+  await page.fill("#guide-debts", "1000");
+  await page.getByRole("button", { name: "Next" }).click();
+  await expect(page.getByRole("heading", { name: "Which nisab do you follow?" })).toBeVisible();
+  await page.getByRole("button", { name: "Show my zakat" }).click();
+
+  // 2,000 + 18,000 + 750 − 1,000 = 19,750; 2.5% = 493.75
+  await expect(page.getByRole("heading", { name: /Your zakat is \S*493\.75/ })).toBeVisible();
+  await expect(page.getByText(/Everything you counted comes to \S*20,750\.00/)).toBeVisible();
+  await expect(page.getByText(/leaves \S*19,750\.00/)).toBeVisible();
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Remind me next year" }).click();
+  expect((await download).suggestedFilename()).toBe("zakat-reminder.ics");
+
+  // The calculator picks up the same figures.
+  await page.getByRole("link", { name: "Check it in the full calculator" }).click();
+  await page.waitForURL("**/calculator");
+  await expect(page.locator("#calc-bank")).toHaveValue("18000");
+  await expect(page.locator("#result")).toContainText("493.75");
+  await expectNoHorizontalScroll(page);
+  expect(errors).toEqual([]);
+});

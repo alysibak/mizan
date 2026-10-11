@@ -44,6 +44,15 @@ work.
   "do I have to pay?" against today's nisab in their own currency, how much,
   what counts and what does not, when, to whom, and the words they will meet.
   The home page and the calculator lead to it first.
+- **Step by step** (`/guide`). The calculator as a conversation for someone
+  who has never done this: one question a screen (currency, cash, bank, gold,
+  jewellery, silver, other wealth, debts, nisab), each saying what to count
+  and why, with "What's the difference?" where scholars or terms differ
+  (interest, karat, worn jewellery, long-term shares, debts, silver or gold
+  nisab). The answer is explained in sentences, and ends with what to do: a
+  calendar reminder for one Islamic year later, print, or keep it in a free
+  ledger. It shares its figures with the calculator, which carries the same
+  explanations beside its own choices.
 - **Zakat calculator** (`/calculator`). The visitor's currency comes first
   (named in their language, picked from their region or from any public page
   they used before), and today's gold and silver prices are fetched afresh on
@@ -228,7 +237,8 @@ src/
     page.tsx           landing (static)
     calculator/        public calculator (static)
     start/             zakat for beginners, with the "do I have to pay?" check
-    [locale]/          the translated landing, start, calculator, and nisab pages
+    guide/             the calculator one explained question at a time
+    [locale]/          the translated landing, start, guide, calculator, and nisab pages
     nisab/             nisab today, per currency (hourly)
     inheritance/ zakat-al-fitr/ halal-stocks/ qurbani/   free tools
     guides/            zakat on gold, savings, shares, crypto, pensions, property

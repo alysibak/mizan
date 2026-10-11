@@ -52,6 +52,7 @@ test("every language has its landing page and calculator, linked for search engi
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Bu yıl zekâtınız ne kadar?");
   for (const locale of ["ar", "ur", "id", "ms", "tr", "fr"]) {
     expect((await request.get(`/${locale}/start`)).status(), locale).toBe(200);
+    expect((await request.get(`/${locale}/guide`)).status(), locale).toBe(200);
   }
 });
 
