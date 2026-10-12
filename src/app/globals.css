@@ -235,6 +235,20 @@
   .script-urdu .label {
     font-size: 0.9rem;
   }
+  /* Bengali joins letters into conjuncts and hangs vowel signs above and
+     below, so it gets the same reset and a little more line height. Phones
+     carry a Bengali face (Noto Sans Bengali, Kohinoor Bangla, Nirmala UI). */
+  .script-bengali {
+    line-height: 1.75;
+  }
+  .script-bengali .label,
+  .script-bengali [class*="tracking-"] {
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .script-bengali .label {
+    font-size: 0.85rem;
+  }
 }
 
 /* The mosque poster and the worksheet print on their own A4 sheet; other pages keep the printer's paper. */

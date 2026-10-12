@@ -10,14 +10,22 @@ import type { Messages } from "@/i18n/messages/en";
 
 const DAY = 86_400_000;
 
+/** How a language marks a Hijri year, where the browser's own word is not the one people use. */
+const HIJRI_ERA: Partial<Record<Locale, string>> = {
+  // Browsers say "যুগ" (era); Bengali readers write "হিজরি".
+  bn: "হিজরি",
+};
+
 /** Today in the Islamic calendar, in the page's language, where the browser can say it. */
-function hijriToday(today: Date, intl: string): string | null {
+function hijriToday(today: Date, locale: Locale): string | null {
   try {
-    return new Intl.DateTimeFormat(intl, {
+    const parts = new Intl.DateTimeFormat(LOCALE_INFO[locale].intl, {
       calendar: "islamic-umalqura",
       dateStyle: "long",
       timeZone: "UTC",
-    }).format(today);
+    }).formatToParts(today);
+    const era = HIJRI_ERA[locale];
+    return parts.map((p) => (p.type === "era" && era ? era : p.value)).join("");
   } catch {
     return null;
   }
@@ -46,7 +54,7 @@ export default function RamadanCountdown({
   const status = ramadanStatus(today);
   const date = (d: Date) => d.toLocaleDateString(intl, { dateStyle: "long", timeZone: "UTC" });
   const when = new Intl.RelativeTimeFormat(intl, { numeric: "auto" }).format(status.daysUntil, "day");
-  const hijri = hijriToday(today, intl);
+  const hijri = hijriToday(today, locale);
   const reminderDay = new Date(status.start.getTime() - 7 * DAY);
 
   function remind() {

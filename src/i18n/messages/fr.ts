@@ -489,7 +489,7 @@ const fr: Messages = {
 
   poster: {
     metaTitle: "Une affiche zakat gratuite pour votre mosquée",
-    metaDescription: "Imprimez une affiche d’une page qui aide les fidèles de votre mosquée ou de votre communauté à calculer leur zakat, avec un code à scanner. En sept langues.",
+    metaDescription: "Imprimez une affiche d’une page qui aide les fidèles de votre mosquée ou de votre communauté à calculer leur zakat, avec un code à scanner. En huit langues.",
     nav: "Affiche pour la mosquée",
     eyebrow: "Pour les mosquées et centres communautaires",
     title: "Une affiche pour votre mosquée",
@@ -508,7 +508,7 @@ const fr: Messages = {
   worksheet: {
     nav: "Fiche papier",
     metaTitle: "Une fiche de calcul de la zakat à imprimer et remplir à la main",
-    metaDescription: "Une page à imprimer et à remplir au stylo : ce que vous avez, ce que vous devez, le nisab et votre zakat, étape par étape. Pour ceux qui préfèrent le papier, ou une mosquée qui aide ses anciens. Gratuit, en sept langues.",
+    metaDescription: "Une page à imprimer et à remplir au stylo : ce que vous avez, ce que vous devez, le nisab et votre zakat, étape par étape. Pour ceux qui préfèrent le papier, ou une mosquée qui aide ses anciens. Gratuit, en huit langues.",
     eyebrow: "Calculer sur papier",
     title: "La zakat sur une seule feuille",
     lede: "Imprimez cette page et remplissez-la au stylo, seul ou avec quelqu’un qui vous aide. Écrivez chaque montant dans votre monnaie.",

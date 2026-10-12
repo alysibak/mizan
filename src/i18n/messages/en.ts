@@ -530,7 +530,7 @@ const en = {
   poster: {
     metaTitle: "A free zakat poster for your mosque",
     metaDescription:
-      "Print a one-page poster that helps people in your mosque or community work out their zakat, with a code to scan. In seven languages.",
+      "Print a one-page poster that helps people in your mosque or community work out their zakat, with a code to scan. In eight languages.",
     nav: "Poster for your mosque",
     eyebrow: "For mosques and community centres",
     title: "A poster for your mosque",
@@ -549,7 +549,7 @@ const en = {
   worksheet: {
     nav: "Paper worksheet",
     metaTitle: "A printable zakat worksheet to fill in by hand",
-    metaDescription: "One page to print and fill in with a pen: what you have, what you owe, the nisab, and your zakat, step by step. For anyone who prefers paper, or a mosque helping its elders. Free, in seven languages.",
+    metaDescription: "One page to print and fill in with a pen: what you have, what you owe, the nisab, and your zakat, step by step. For anyone who prefers paper, or a mosque helping its elders. Free, in eight languages.",
     eyebrow: "Work it out on paper",
     title: "Zakat on one sheet of paper",
     lede: "Print this page and fill it in with a pen, alone or with someone helping you. Write every amount in your own money.",

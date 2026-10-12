@@ -493,7 +493,7 @@ const tr: Messages = {
 
   poster: {
     metaTitle: "Caminiz için ücretsiz zekât afişi",
-    metaDescription: "Caminizdeki veya topluluğunuzdaki insanların zekâtını hesaplamasına yardım eden, taranabilir kodlu tek sayfalık bir afiş yazdırın. Yedi dilde.",
+    metaDescription: "Caminizdeki veya topluluğunuzdaki insanların zekâtını hesaplamasına yardım eden, taranabilir kodlu tek sayfalık bir afiş yazdırın. Sekiz dilde.",
     nav: "Cami için afiş",
     eyebrow: "Camiler ve topluluk merkezleri için",
     title: "Caminiz için bir afiş",
@@ -512,7 +512,7 @@ const tr: Messages = {
   worksheet: {
     nav: "Kâğıt hesap formu",
     metaTitle: "Elle doldurmak için yazdırılabilir zekât hesap formu",
-    metaDescription: "Yazdırıp kalemle dolduracağınız tek sayfa: neyiniz var, neyi ödemeniz gerekiyor, nisab ve zekâtınız, adım adım. Kâğıdı tercih edenler ya da yaşlılarına yardım eden camiler için. Ücretsiz, yedi dilde.",
+    metaDescription: "Yazdırıp kalemle dolduracağınız tek sayfa: neyiniz var, neyi ödemeniz gerekiyor, nisab ve zekâtınız, adım adım. Kâğıdı tercih edenler ya da yaşlılarına yardım eden camiler için. Ücretsiz, sekiz dilde.",
     eyebrow: "Kâğıt üzerinde hesaplayın",
     title: "Tek sayfada zekât",
     lede: "Bu sayfayı yazdırın ve kalemle doldurun; tek başınıza ya da size yardım eden biriyle. Her tutarı kendi para biriminizle yazın.",

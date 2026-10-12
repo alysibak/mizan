@@ -121,9 +121,10 @@ work.
   zakat is counted", already set to the common choices. A result that is due
   ends with what to do now. It runs in the browser; figures stay in that
   browser's storage and come along into a new account at setup.
-- **Seven languages.** The landing page, the beginner's page, the calculator,
-  its FAQ, and the nisab pages read in English, Arabic, Urdu, Indonesian,
-  Malay, Turkish, and French (`/ar`, `/ur`, `/id`, `/ms`, `/tr`, `/fr`). A
+- **Eight languages.** The landing page, the beginner's page, the calculator,
+  its FAQ, and the nisab pages read in English, Arabic, Urdu, Bengali,
+  Indonesian, Malay, Turkish, and French (`/ar`, `/ur`, `/bn`, `/id`, `/ms`,
+  `/tr`, `/fr`). Bengali calls the tola by its local name, bhori (ভরি). A
   language menu sits in the header on every screen size, and a visitor whose
   browser (or earlier choice) prefers another language is offered the page in
   it, in that language. Arabic and Urdu are right to left with an

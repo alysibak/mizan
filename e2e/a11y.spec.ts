@@ -36,6 +36,8 @@ for (const scheme of ["light", "dark"] as const) {
         "/calculator",
         "/start",
         "/ur/start",
+        "/bn/start",
+        "/bn/guide",
         "/guide",
         "/ar/guide",
         "/who-can-receive",

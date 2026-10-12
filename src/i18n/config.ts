@@ -2,7 +2,7 @@
 // (/calculator); every other language under its own prefix (/ar/calculator).
 // The signed-in app is English for now.
 
-export const LOCALES = ["en", "ar", "ur", "id", "ms", "tr", "fr"] as const;
+export const LOCALES = ["en", "ar", "ur", "bn", "id", "ms", "tr", "fr"] as const;
 export type Locale = (typeof LOCALES)[number];
 export const DEFAULT_LOCALE: Locale = "en";
 
@@ -26,6 +26,7 @@ export const LOCALE_INFO: Record<Locale, LocaleInfo> = {
   en: { name: "English", dir: "ltr", intl: "en-CA", og: "en_US" },
   ar: { name: "العربية", dir: "rtl", intl: "ar-u-nu-latn", og: "ar_AR" },
   ur: { name: "اردو", dir: "rtl", intl: "ur-PK-u-nu-latn", og: "ur_PK" },
+  bn: { name: "বাংলা", dir: "ltr", intl: "bn-BD-u-nu-latn", og: "bn_BD" },
   id: { name: "Bahasa Indonesia", dir: "ltr", intl: "id-ID", og: "id_ID" },
   ms: { name: "Bahasa Melayu", dir: "ltr", intl: "ms-MY", og: "ms_MY" },
   tr: { name: "Türkçe", dir: "ltr", intl: "tr-TR", og: "tr_TR" },

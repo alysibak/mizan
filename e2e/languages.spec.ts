@@ -32,7 +32,7 @@ test("every language has its landing page and calculator, linked for search engi
   page,
   request,
 }) => {
-  for (const locale of ["ar", "ur", "id", "ms", "tr", "fr"]) {
+  for (const locale of ["ar", "ur", "bn", "id", "ms", "tr", "fr"]) {
     for (const path of [`/${locale}`, `/${locale}/calculator`]) {
       const res = await request.get(path);
       expect(res.status(), path).toBe(200);
@@ -44,13 +44,13 @@ test("every language has its landing page and calculator, linked for search engi
   const hreflang = await page
     .locator('link[rel="alternate"][hreflang]')
     .evaluateAll((els) => els.map((e) => e.getAttribute("hreflang")));
-  expect(hreflang).toEqual(expect.arrayContaining(["en", "ar", "ur", "id", "ms", "tr", "fr", "x-default"]));
+  expect(hreflang).toEqual(expect.arrayContaining(["en", "ar", "ur", "bn", "id", "ms", "tr", "fr", "x-default"]));
 
   // The footer's language links keep you on the same page.
   await page.getByRole("contentinfo").getByRole("link", { name: "Türkçe" }).click();
   await page.waitForURL("**/tr/calculator");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Bu yıl zekâtınız ne kadar?");
-  for (const locale of ["ar", "ur", "id", "ms", "tr", "fr"]) {
+  for (const locale of ["ar", "ur", "bn", "id", "ms", "tr", "fr"]) {
     expect((await request.get(`/${locale}/start`)).status(), locale).toBe(200);
     expect((await request.get(`/${locale}/guide`)).status(), locale).toBe(200);
     for (const page of ["who-can-receive", "what-counts", "sources", "zakat-al-fitr", "poster", "missed-years", "ask", "worksheet"]) {
@@ -162,4 +162,12 @@ test("pages read themselves aloud where the device has a voice for the language"
   // No French voice on this device: no button, rather than French read in Urdu.
   await page.goto("/fr/start");
   await expect(page.getByRole("button", { name: "Écouter" })).toHaveCount(0);
+});
+
+test("Bengali readers get the beginner's pages in Bengali, with gold in bhori", async ({ page }) => {
+  await page.goto("/bn/start");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("সহজ কথায় যাকাত");
+  await expect(page.locator("html")).toHaveAttribute("lang", "bn");
+  await page.goto("/bn/worksheet");
+  await expect(page.getByRole("article")).toContainText("1 ভরি = 11.66 গ্রাম।");
 });

@@ -491,7 +491,7 @@ const ms: Messages = {
 
   poster: {
     metaTitle: "Poster zakat percuma untuk masjid anda",
-    metaDescription: "Cetak poster satu halaman yang membantu jemaah masjid atau komuniti anda mengira zakat, dengan kod untuk diimbas. Dalam tujuh bahasa.",
+    metaDescription: "Cetak poster satu halaman yang membantu jemaah masjid atau komuniti anda mengira zakat, dengan kod untuk diimbas. Dalam lapan bahasa.",
     nav: "Poster untuk masjid",
     eyebrow: "Untuk masjid dan pusat komuniti",
     title: "Poster untuk masjid anda",
@@ -510,7 +510,7 @@ const ms: Messages = {
   worksheet: {
     nav: "Lembaran kiraan kertas",
     metaTitle: "Lembaran kiraan zakat untuk dicetak dan diisi dengan tangan",
-    metaDescription: "Satu halaman untuk dicetak dan diisi dengan pen: harta anda, hutang anda, nisab, dan zakat anda, langkah demi langkah. Untuk yang lebih suka kertas, atau masjid yang membantu warga emas. Percuma, dalam tujuh bahasa.",
+    metaDescription: "Satu halaman untuk dicetak dan diisi dengan pen: harta anda, hutang anda, nisab, dan zakat anda, langkah demi langkah. Untuk yang lebih suka kertas, atau masjid yang membantu warga emas. Percuma, dalam lapan bahasa.",
     eyebrow: "Kira di atas kertas",
     title: "Zakat dalam sehelai kertas",
     lede: "Cetak halaman ini dan isi dengan pen, sendiri atau bersama orang yang membantu anda. Tulis setiap jumlah dalam mata wang anda.",

@@ -47,7 +47,9 @@ export default async function LocaleLayout({
           ? `${naskh.variable} ${nastaliq.variable} script-arabic script-urdu`
           : dir === "rtl"
             ? `${naskh.variable} script-arabic`
-            : undefined
+            : locale === "bn"
+              ? "script-bengali"
+              : undefined
       }
     >
       <HtmlLang lang={locale} dir={dir} />
