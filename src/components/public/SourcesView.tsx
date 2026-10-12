@@ -40,20 +40,21 @@ export default function SourcesView({ locale }: { locale: Locale }) {
         <ol className="mt-10 space-y-6">
           {m.items.map((item, i) => (
             <li key={item.rule} className="card p-5">
-              <p className="font-serif text-xl leading-snug text-ink">
-                <span className="text-brassDeep nums">{i + 1}. </span>
-                {item.rule}
-              </p>
+              <div className="flex items-start justify-between gap-3">
+                <p className="font-serif text-xl leading-snug text-ink">
+                  <span className="text-brassDeep nums">{i + 1}. </span>
+                  {item.rule}
+                </p>
+                <ReadAloud
+                  text={`${item.rule} ${item.source}`}
+                  lang={locale}
+                  listen={all.common.listen}
+                  stop={all.common.stopListening}
+                />
+              </div>
               <p className="mt-3 border-s-2 border-brass/60 ps-3 text-base leading-relaxed text-sage">
                 {item.source}
               </p>
-              <ReadAloud
-                className="mt-3"
-                text={`${item.rule} ${item.source}`}
-                lang={locale}
-                listen={all.common.listen}
-                stop={all.common.stopListening}
-              />
             </li>
           ))}
         </ol>

@@ -143,7 +143,8 @@ test("pages read themselves aloud where the device has a voice for the language"
       speaking: false,
       getVoices: () => [{ lang: "ur-PK", name: "Urdu", default: false, localService: true, voiceURI: "ur" }],
       speak(u: FakeUtterance) {
-        (window as unknown as { spoken: string }).spoken = u.text;
+        const w = window as unknown as { spoken?: string };
+        w.spoken = `${w.spoken ?? ""} ${u.text}`.trim();
       },
       cancel() {},
       addEventListener() {},

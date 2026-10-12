@@ -612,21 +612,15 @@ function Guide({
           ref={heading}
           tabIndex={-1}
           className={
-            "pt-1 font-serif leading-snug text-ink outline-none " +
+            "min-w-0 flex-1 pt-1 font-serif leading-snug text-ink outline-none " +
             (step === "result" ? "text-3xl text-pine sm:text-4xl" : "text-2xl sm:text-3xl")
           }
         >
           {title}
         </h2>
+        <ReadAloud className="mt-1" text={spoken} lang={locale} listen={speech.listen} stop={speech.stop} />
       </div>
       {body ? <p className="mt-3 text-base leading-relaxed text-sage">{body}</p> : null}
-      <ReadAloud
-        className="mt-3"
-        text={spoken}
-        lang={locale}
-        listen={speech.listen}
-        stop={speech.stop}
-      />
       {difference ? (
         <details className="mt-4 border-s-2 border-brass/60 ps-3">
           <summary className="cursor-pointer text-sm font-medium text-pine">{m.difference}</summary>

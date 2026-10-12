@@ -44,18 +44,14 @@ function Section({
   const { listen, stopListening } = messagesFor(locale).common;
   return (
     <section aria-labelledby={id} className="border-t border-mist pt-8">
-      <h2 id={id} className="font-serif text-2xl text-ink sm:text-3xl">
-        {title}
-      </h2>
-      {speak ? (
-        <ReadAloud
-          className="mt-3"
-          text={`${title}. ${speak}`}
-          lang={locale}
-          listen={listen}
-          stop={stopListening}
-        />
-      ) : null}
+      <div className="flex items-start justify-between gap-3">
+        <h2 id={id} className="font-serif text-2xl text-ink sm:text-3xl">
+          {title}
+        </h2>
+        {speak ? (
+          <ReadAloud text={`${title}. ${speak}`} lang={locale} listen={listen} stop={stopListening} />
+        ) : null}
+      </div>
       <div className="mt-3 space-y-3 text-base leading-relaxed text-sage">{children}</div>
     </section>
   );
@@ -76,18 +72,19 @@ export default function StartView({ locale }: { locale: Locale }) {
       <SiteHeader locale={locale} />
       <main className="mx-auto max-w-3xl px-5 pb-20 pt-6 md:px-10">
         <header>
-          <p className="label text-brassDeep">{m.eyebrow}</p>
+          <div className="flex items-center justify-between gap-3">
+            <p className="label text-brassDeep">{m.eyebrow}</p>
+            <ReadAloud
+              text={`${m.title}. ${m.lede}`}
+              lang={locale}
+              listen={all.common.listen}
+              stop={all.common.stopListening}
+            />
+          </div>
           <h1 className="mt-2 font-serif text-4xl leading-tight text-ink sm:text-5xl">
             {m.title}
           </h1>
           <p className="mt-4 text-lg leading-relaxed text-sage">{m.lede}</p>
-          <ReadAloud
-            className="mt-4"
-            text={`${m.title}. ${m.lede}`}
-            lang={locale}
-            listen={all.common.listen}
-            stop={all.common.stopListening}
-          />
           <RamadanCountdown m={all.ramadan} locale={locale} className="mt-6" />
         </header>
 
@@ -118,9 +115,17 @@ export default function StartView({ locale }: { locale: Locale }) {
 
           <section aria-labelledby="counts" className="grid gap-8 border-t border-mist pt-8">
             <div>
-              <h2 id="counts" className="font-serif text-2xl text-ink">
-                {m.countsTitle}
-              </h2>
+              <div className="flex items-start justify-between gap-3">
+                <h2 id="counts" className="font-serif text-2xl text-ink">
+                  {m.countsTitle}
+                </h2>
+                <ReadAloud
+                  text={`${m.countsTitle}: ${m.counts.join(", ")}. ${m.notCountsTitle}: ${m.notCounts.join(", ")}. ${m.jewelleryNote}`}
+                  lang={locale}
+                  listen={all.common.listen}
+                  stop={all.common.stopListening}
+                />
+              </div>
               <div className="mt-4">
                 <CountTiles items={m.counts} counted />
               </div>
@@ -141,12 +146,7 @@ export default function StartView({ locale }: { locale: Locale }) {
                   {all.applies.nav}
                 </Link>
               </p>
-              <ReadAloud
-                text={`${m.countsTitle}: ${m.counts.join(", ")}. ${m.notCountsTitle}: ${m.notCounts.join(", ")}. ${m.jewelleryNote}`}
-                lang={locale}
-                listen={all.common.listen}
-                stop={all.common.stopListening}
-              />
+
             </div>
           </section>
 

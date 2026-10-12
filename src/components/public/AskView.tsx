@@ -71,16 +71,17 @@ export default function AskView({ locale }: { locale: Locale }) {
       <SiteHeader locale={locale} />
       <main className="mx-auto max-w-3xl px-5 pb-16 pt-6 md:px-10">
         <header className="max-w-2xl">
-          <p className="label text-brassDeep">{m.eyebrow}</p>
+          <div className="flex items-center justify-between gap-3">
+            <p className="label text-brassDeep">{m.eyebrow}</p>
+            <ReadAloud
+              text={`${m.title}. ${m.lede}`}
+              lang={locale}
+              listen={all.common.listen}
+              stop={all.common.stopListening}
+            />
+          </div>
           <h1 className="mt-2 font-serif text-4xl leading-tight text-ink sm:text-5xl">{m.title}</h1>
           <p className="mt-4 text-lg leading-relaxed text-sage">{m.lede}</p>
-          <ReadAloud
-            className="mt-3"
-            text={`${m.title}. ${m.lede}`}
-            lang={locale}
-            listen={all.common.listen}
-            stop={all.common.stopListening}
-          />
         </header>
         <div className="mt-8">
           <AskSearch

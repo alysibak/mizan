@@ -42,16 +42,17 @@ export default function MissedView({ locale }: { locale: Locale }) {
       <SiteHeader locale={locale} />
       <main className="mx-auto max-w-3xl px-5 pb-16 pt-6 md:px-10">
         <header className="max-w-2xl">
-          <p className="label text-brassDeep">{m.eyebrow}</p>
+          <div className="flex items-center justify-between gap-3">
+            <p className="label text-brassDeep">{m.eyebrow}</p>
+            <ReadAloud
+              text={`${m.title}. ${m.lede}`}
+              lang={locale}
+              listen={all.common.listen}
+              stop={all.common.stopListening}
+            />
+          </div>
           <h1 className="mt-2 font-serif text-4xl leading-tight text-ink sm:text-5xl">{m.title}</h1>
           <p className="mt-4 text-lg leading-relaxed text-sage">{m.lede}</p>
-          <ReadAloud
-            className="mt-3"
-            text={`${m.title}. ${m.lede}`}
-            lang={locale}
-            listen={all.common.listen}
-            stop={all.common.stopListening}
-          />
         </header>
 
         <div className="mt-10">
@@ -59,16 +60,17 @@ export default function MissedView({ locale }: { locale: Locale }) {
         </div>
 
         <section className="mt-14" aria-labelledby="steps">
-          <h2 id="steps" className="font-serif text-3xl text-ink">
-            {m.stepsTitle}
-          </h2>
-          <ReadAloud
-            className="mt-3"
-            text={`${m.stepsTitle}. ${m.steps.join(" ")}`}
-            lang={locale}
-            listen={all.common.listen}
-            stop={all.common.stopListening}
-          />
+          <div className="flex items-start justify-between gap-3">
+            <h2 id="steps" className="font-serif text-3xl text-ink">
+              {m.stepsTitle}
+            </h2>
+            <ReadAloud
+              text={`${m.stepsTitle}. ${m.steps.join(" ")}`}
+              lang={locale}
+              listen={all.common.listen}
+              stop={all.common.stopListening}
+            />
+          </div>
           <ol className="mt-5 space-y-4">
             {m.steps.map((step, i) => (
               <li key={step} className="flex gap-4">
