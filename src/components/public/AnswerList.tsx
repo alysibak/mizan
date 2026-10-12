@@ -3,6 +3,7 @@ import OpenFromHash from "@/components/OpenFromHash";
 import ReadAloud from "@/components/ReadAloud";
 import ShareButton, { type ShareLabels } from "@/components/public/ShareButton";
 import { ANSWER_ICONS } from "@/components/public/answerIcons";
+import EvidenceFor from "@/components/public/Evidence";
 
 export type Tone = "yes" | "no" | "mixed";
 
@@ -17,6 +18,8 @@ export interface AnswerItem {
   page?: { href: string; label: string };
   /** A key in ANSWER_ICONS: the picture shown beside the question. */
   icon?: string;
+  /** A key in EVIDENCE: the proofs behind the answer, folded under it. */
+  evidence?: string;
 }
 
 const TONE: Record<Tone, string> = {
@@ -36,6 +39,7 @@ export default function AnswerList({
   stop,
   more,
   share,
+  evidenceSuffix = "",
 }: {
   items: AnswerItem[];
   lang: string;
@@ -45,6 +49,8 @@ export default function AnswerList({
   more?: string;
   /** A share button on each answer, linking to `path#key` (or the answer's own page). */
   share?: { label: string; labels: ShareLabels; path: string };
+  /** Marks the evidence as English on pages in other languages. */
+  evidenceSuffix?: string;
 }) {
   return (
     <ul className="divide-y divide-mist border-y border-mist">
@@ -72,6 +78,7 @@ export default function AnswerList({
             </summary>
             <div className="pb-4">
               <p className="text-base leading-relaxed text-sage">{item.answer}</p>
+              {item.evidence ? <EvidenceFor caseKey={item.evidence} suffix={evidenceSuffix} /> : null}
               {item.page ? (
                 <p className="mt-2 text-sm text-sage">
                   {more}{" "}

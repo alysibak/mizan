@@ -18,6 +18,7 @@ export default function AskSearch({
   listen,
   stop,
   share,
+  evidenceSuffix,
 }: {
   items: AnswerItem[];
   m: Messages["ask"];
@@ -25,6 +26,7 @@ export default function AskSearch({
   listen: string;
   stop: string;
   share: { label: string; labels: ShareLabels; path: string };
+  evidenceSuffix?: string;
 }) {
   const [query, setQuery] = useState("");
   const searching = query.trim().length > 1;
@@ -60,7 +62,15 @@ export default function AskSearch({
         </h2>
         <div className="mt-4">
           {found.length > 0 ? (
-            <AnswerList items={found} lang={locale} listen={listen} stop={stop} more={m.more} share={share} />
+            <AnswerList
+              items={found}
+              lang={locale}
+              listen={listen}
+              stop={stop}
+              more={m.more}
+              share={share}
+              evidenceSuffix={evidenceSuffix}
+            />
           ) : (
             <p role="status" className="text-base text-sage">
               {m.none}

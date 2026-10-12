@@ -303,13 +303,21 @@ test("who can receive zakat: each person answered, the reason a tap away", async
   await page.goto("/who-can-receive");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Can I give zakat to…?");
   const parents = page.locator("details", { hasText: "My mother or father" });
-  await expect(parents.locator("summary")).toContainText("No");
+  await expect(parents.locator(":scope > summary")).toContainText("No");
   await expect(parents.getByText(/Looking after your parents/)).toBeHidden();
-  await parents.locator("summary").click();
+  await parents.locator(":scope > summary").click();
   await expect(parents.getByText(/Looking after your parents/)).toBeVisible();
-  await expect(page.locator("details", { hasText: "My husband" }).locator("summary")).toContainText(
+  await expect(page.locator("details", { hasText: "My husband" }).locator(":scope > summary")).toContainText(
     "Scholars differ",
   );
+  // Each answer carries its evidence, strongest first, with the views where scholars differ.
+  const husband = page.locator("#husband");
+  await husband.locator("summary").first().click();
+  const evidence = husband.locator("details details");
+  await expect(evidence.locator("summary")).toContainText("Strong");
+  await evidence.locator("summary").click();
+  await expect(evidence.getByText("Where scholars differ")).toBeVisible();
+  await expect(evidence.getByText(/Sahih al-Bukhari and Sahih Muslim, from Zaynab/)).toBeVisible();
   // The eight groups of 9:60 as picture cards.
   await expect(page.getByRole("list", { name: /names eight groups/ }).getByRole("listitem")).toHaveCount(8);
   await expectNoHorizontalScroll(page);
@@ -354,11 +362,11 @@ test("do I pay zakat on…: each thing answered, with the sources a tap away", a
   await page.goto("/what-counts");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Do I pay zakat on…?");
   const home = page.locator("details", { hasText: "The home you live in" });
-  await expect(home.locator("summary")).toContainText("No");
-  await expect(page.locator("details", { hasText: "Your salary" }).locator("summary")).toContainText(
+  await expect(home.locator(":scope > summary")).toContainText("No");
+  await expect(page.locator("details", { hasText: "Your salary" }).locator(":scope > summary")).toContainText(
     "Only what you still have",
   );
-  await home.locator("summary").click();
+  await home.locator(":scope > summary").click();
   await expect(home.getByText(/however much it is worth/)).toBeVisible();
   await expectNoHorizontalScroll(page);
 
@@ -467,12 +475,12 @@ test("a beginner types a word and finds every answer that mentions it", async ({
   await page.getByLabel("What do you want to know?").fill("salary");
   await expect(page.getByRole("heading", { name: "Answers" })).toBeVisible();
   const first = page.getByRole("main").locator("details").first();
-  await expect(first.locator("summary")).toContainText("Your salary");
-  await first.locator("summary").click();
+  await expect(first.locator(":scope > summary")).toContainText("Your salary");
+  await first.locator(":scope > summary").click();
   await first.getByRole("link", { name: "Do I pay zakat on…?" }).click();
   // The link lands on that very answer, already open.
   await page.waitForURL("**/what-counts#salary");
-  await expect(page.locator("#salary details")).toHaveAttribute("open", "");
+  await expect(page.locator("#salary > details")).toHaveAttribute("open", "");
 
   await page.goto("/ask");
   await page.getByLabel("What do you want to know?").fill("camel");
@@ -482,14 +490,14 @@ test("a beginner types a word and finds every answer that mentions it", async ({
 test("the answer search understands Urdu as people type it", async ({ page }) => {
   await page.goto("/ur/ask");
   await page.locator("#ask-q").fill("سونا");
-  await expect(page.getByRole("main").locator("details").first().locator("summary")).toContainText("سون");
+  await expect(page.getByRole("main").locator("details").first().locator(":scope > summary")).toContainText("سون");
 });
 
 
 test("one answer can be shared, and its link opens straight to it", async ({ page }) => {
   await page.goto("/who-can-receive#parents");
   const answer = page.locator("#parents");
-  await expect(answer.locator("details")).toHaveAttribute("open", "");
+  await expect(answer.locator(":scope > details")).toHaveAttribute("open", "");
   await expect(answer.getByText(/Looking after your parents/)).toBeInViewport();
   const share = answer.getByRole("group", { name: "Share this answer" });
   if (await share.count()) {

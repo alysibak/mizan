@@ -4,6 +4,7 @@ import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import WhoCanReceive from "@/components/public/WhoCanReceive";
 import { EightGroups } from "@/components/public/Visuals";
+import { EvidenceKey } from "@/components/public/Evidence";
 import { LOCALE_INFO, languageAlternates, localePath, type Locale } from "@/i18n/config";
 import { messagesFor } from "@/i18n/messages";
 
@@ -36,7 +37,10 @@ export default function WhoView({ locale }: { locale: Locale }) {
           <h1 className="mt-2 font-serif text-4xl leading-tight text-ink sm:text-5xl">{m.title}</h1>
           <p className="mt-4 text-lg leading-relaxed text-sage">{m.lede}</p>
         </header>
-        <div className="mt-8">
+        <div className="mt-6">
+          <EvidenceKey suffix={all.common.inEnglish} />
+        </div>
+        <div className="mt-6">
           <WhoCanReceive
             m={m}
             lang={locale}
@@ -47,6 +51,7 @@ export default function WhoView({ locale }: { locale: Locale }) {
               labels: all.common.share,
               path: localePath(locale, "/who-can-receive"),
             }}
+            evidenceSuffix={all.common.inEnglish}
           />
         </div>
         <div className="mt-10">

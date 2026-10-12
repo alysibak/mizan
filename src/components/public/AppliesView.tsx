@@ -3,6 +3,7 @@ import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import AnswerList, { type AnswerItem, type Tone } from "@/components/public/AnswerList";
+import { EvidenceKey } from "@/components/public/Evidence";
 import { LOCALE_INFO, languageAlternates, localePath, type Locale } from "@/i18n/config";
 import { messagesFor } from "@/i18n/messages";
 import type { Messages } from "@/i18n/messages/en";
@@ -51,6 +52,7 @@ export function appliesItems(m: Applies): AnswerItem[] {
     tone: TONE[verdict],
     answer: m.cases[key].answer,
     icon: key,
+    evidence: key,
   }));
 }
 
@@ -83,13 +85,17 @@ export default function AppliesView({ locale }: { locale: Locale }) {
           <h1 className="mt-2 font-serif text-4xl leading-tight text-ink sm:text-5xl">{m.title}</h1>
           <p className="mt-4 text-lg leading-relaxed text-sage">{m.lede}</p>
         </header>
-        <div className="mt-8">
+        <div className="mt-6">
+          <EvidenceKey suffix={all.common.inEnglish} />
+        </div>
+        <div className="mt-6">
           <AnswerList
             items={appliesItems(m)}
             lang={locale}
             listen={all.common.listen}
             stop={all.common.stopListening}
             share={{ label: all.common.shareAnswer, labels: all.common.share, path: localePath(locale, PATH) }}
+            evidenceSuffix={all.common.inEnglish}
           />
         </div>
         <p className="mt-6 text-sm text-sage">

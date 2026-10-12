@@ -120,6 +120,14 @@ work.
   zakat on…?", "Can I give zakat to…?", and the search has its own picture.
   The drawings are numbers and icons, so they read the same in every
   language; each carries its meaning in words for screen readers.
+- **Evidence behind every answer** (`src/content/evidence.ts`). Each answer
+  on "Do I pay zakat on…?" and "Can I give zakat to…?" folds out its proofs,
+  each tagged Strong (Quran, Bukhari and Muslim, scholarly consensus), Sound
+  (other sound hadith, the Companions' practice), or Maybe (weak or disputed
+  hadith, scholars' reasoning), with where it is found. Where scholars
+  differ, each view is listed with who holds it and its own evidence. Hadith
+  are cited by collection and narrator, not number. In English for now; it
+  wants review by a qualified scholar before it is relied on.
 - **Zakat calculator** (`/calculator`). The visitor's currency comes first
   (named in their language, picked from their region or from any public page
   they used before), and today's gold and silver prices are fetched afresh on

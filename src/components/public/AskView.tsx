@@ -91,6 +91,7 @@ export default function AskView({ locale }: { locale: Locale }) {
             listen={all.common.listen}
             stop={all.common.stopListening}
             share={{ label: all.common.shareAnswer, labels: all.common.share, path: localePath(locale, PATH) }}
+            evidenceSuffix={all.common.inEnglish}
           />
         </div>
       </main>

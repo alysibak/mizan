@@ -42,6 +42,7 @@ export function whoItems(m: WhoMessages): AnswerItem[] {
     tone: TONE[verdict],
     answer: m.cases[key].answer,
     icon: key,
+    evidence: key,
   }));
 }
 
@@ -52,12 +53,14 @@ export default function WhoCanReceive({
   listen,
   stop,
   share,
+  evidenceSuffix,
 }: {
   m: WhoMessages;
   lang: string;
   listen: string;
   stop: string;
   share?: { label: string; labels: ShareLabels; path: string };
+  evidenceSuffix?: string;
 }) {
   return (
     <AnswerList
@@ -66,6 +69,7 @@ export default function WhoCanReceive({
       listen={listen}
       stop={stop}
       share={share}
+      evidenceSuffix={evidenceSuffix}
     />
   );
 }
