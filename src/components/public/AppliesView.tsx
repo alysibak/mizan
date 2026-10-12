@@ -50,6 +50,7 @@ export function appliesItems(m: Applies): AnswerItem[] {
     verdict: m.verdicts[verdict],
     tone: TONE[verdict],
     answer: m.cases[key].answer,
+    icon: key,
   }));
 }
 

@@ -6,6 +6,7 @@ import JsonLd from "@/components/JsonLd";
 import PayCheck from "@/components/public/PayCheck";
 import ReadAloud from "@/components/ReadAloud";
 import RamadanCountdown from "@/components/public/RamadanCountdown";
+import { CountTiles, EightGroups, FortyCoins, LunarYear } from "@/components/public/Visuals";
 import { LOCALE_INFO, languageAlternates, localePath, type Locale } from "@/i18n/config";
 import { messagesFor } from "@/i18n/messages";
 import { faqJsonLd } from "@/lib/faq";
@@ -107,7 +108,7 @@ export default function StartView({ locale }: { locale: Locale }) {
 
           <Section id="how-much" title={m.howMuchTitle} speak={`${m.howMuchBody} ${m.howMuchExample}`} locale={locale}>
             <p>{m.howMuchBody}</p>
-            <p className="border-s-2 border-brass ps-4 text-ink nums">{m.howMuchExample}</p>
+            <FortyCoins locale={locale} label={m.howMuchExample} />
             <p>
               <Link href={guide} className="font-medium text-pine hover:underline">
                 {m.ctaGuide}
@@ -115,36 +116,22 @@ export default function StartView({ locale }: { locale: Locale }) {
             </p>
           </Section>
 
-          <section aria-labelledby="counts" className="grid gap-8 border-t border-mist pt-8 sm:grid-cols-2">
+          <section aria-labelledby="counts" className="grid gap-8 border-t border-mist pt-8">
             <div>
               <h2 id="counts" className="font-serif text-2xl text-ink">
                 {m.countsTitle}
               </h2>
-              <ul className="mt-3 space-y-2 text-base text-sage">
-                {m.counts.map((item) => (
-                  <li key={item} className="flex gap-3">
-                    <span className="text-pine" aria-hidden>
-                      ✓
-                    </span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
+              <div className="mt-4">
+                <CountTiles items={m.counts} counted />
+              </div>
             </div>
             <div>
               <h2 className="font-serif text-2xl text-ink">{m.notCountsTitle}</h2>
-              <ul className="mt-3 space-y-2 text-base text-sage">
-                {m.notCounts.map((item) => (
-                  <li key={item} className="flex gap-3">
-                    <span className="text-sage" aria-hidden>
-                      ✕
-                    </span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
+              <div className="mt-4">
+                <CountTiles items={m.notCounts} counted={false} />
+              </div>
             </div>
-            <div className="space-y-3 sm:col-span-2">
+            <div className="space-y-3">
               <p className="text-sm text-sage">{m.jewelleryNote}</p>
               <p>
                 <Link
@@ -164,7 +151,10 @@ export default function StartView({ locale }: { locale: Locale }) {
           </section>
 
           <Section id="when" title={m.whenTitle} speak={m.whenBody} locale={locale}>
-            <p>{m.whenBody}</p>
+            <div className="grid items-center gap-6 sm:grid-cols-[minmax(0,1fr)_15rem]">
+              <p>{m.whenBody}</p>
+              <LunarYear label={m.words[1]?.meaning ?? m.whenBody} />
+            </div>
           </Section>
 
           <Section id="missed" title={m.missedTitle} speak={m.missedBody} locale={locale}>
@@ -181,6 +171,7 @@ export default function StartView({ locale }: { locale: Locale }) {
 
           <Section id="who" title={m.whoTitle} speak={m.whoBody} locale={locale}>
             <p>{m.whoBody}</p>
+            <EightGroups groups={all.who.groups} label={all.who.eight} />
             <p>
               <Link
                 href={localePath(locale, "/who-can-receive")}

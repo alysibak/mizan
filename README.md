@@ -111,6 +111,15 @@ work.
   rather than reading Urdu in an English voice). "AA" in the header makes
   every page a size larger, remembered on the device and applied before the
   first paint. Each step of the walk-through has a picture.
+- **Pictures before words.** The beginner's page shows zakat as one coin in
+  forty (200,000 ÷ 40 = 5,000), what counts and what does not as picture
+  tiles with a tick or a cross, and the Islamic year as a ring of twelve
+  moons. The walk-through's answer is drawn as bars (what you have, debts,
+  what is left) against a dashed nisab line, with the zakat as one coin. The
+  eight groups of 9:60 are picture cards, and every answer on "Do I pay
+  zakat on…?", "Can I give zakat to…?", and the search has its own picture.
+  The drawings are numbers and icons, so they read the same in every
+  language; each carries its meaning in words for screen readers.
 - **Zakat calculator** (`/calculator`). The visitor's currency comes first
   (named in their language, picked from their region or from any public page
   they used before), and today's gold and silver prices are fetched afresh on

@@ -831,6 +831,16 @@ const en = {
           "No. Zakat cannot pay what you owe someone for their work. You can give zakat to a worker in need on top of their pay.",
       },
     },
+    groups: [
+      "The poor",
+      "People in need",
+      "Those who collect it",
+      "Winning hearts",
+      "Freeing captives",
+      "People in debt",
+      "In the way of Allah",
+      "Stranded travellers",
+    ],
     eight:
       "The Quran (9:60) names eight groups who receive zakat: the poor, the needy, those who collect it, those whose hearts are being won over, freeing captives, people in debt, in the way of God, and stranded travellers.",
     ask: "Not sure about your case? Ask the imam at your mosque.",

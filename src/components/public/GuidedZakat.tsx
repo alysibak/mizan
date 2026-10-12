@@ -24,6 +24,7 @@ import { track } from "@/lib/analytics";
 import { CurrencyOptions } from "@/components/public/VisitorCurrency";
 import ShareButton, { type ShareLabels } from "@/components/public/ShareButton";
 import ReadAloud from "@/components/ReadAloud";
+import { ResultPicture } from "@/components/public/Visuals";
 import {
   IconBalance,
   IconBank,
@@ -794,24 +795,46 @@ function Result({
     track("Reminder", { via: "calendar" });
   }
 
+  const sentences = [
+    fmt(m.result.total, { total: money(counted) }),
+    outcome.debts > 0
+      ? fmt(m.result.debts, { debts: money(outcome.debts), net: money(result.netZakatable) })
+      : null,
+    result.isDue
+      ? fmt(m.result.above, {
+          nisab: money(result.nisab),
+          rate,
+          net: money(result.netZakatable),
+          zakat: money(result.zakatDue),
+        })
+      : fmt(m.result.below, { nisab: money(result.nisab) }),
+  ].filter((s): s is string => s !== null);
+
   return (
     <div className="mt-4 space-y-6">
-      {/* How the answer was reached, in sentences. */}
+      {/* The answer as a picture first, then the same in sentences. */}
+      <ResultPicture
+        counted={counted}
+        debts={outcome.debts}
+        net={result.netZakatable}
+        nisab={result.nisab}
+        zakat={result.zakatDue}
+        due={result.isDue}
+        money={money}
+        summary={sentences.join(" ")}
+        labels={{
+          own: calc.ownTitle,
+          debts: calc.debtsDueNow,
+          net: calc.netWealth,
+          nisab: draft.standard === "gold" ? calc.nisabGold : calc.nisabSilver,
+          zakat: calc.resultLabel,
+          none: calc.noneDue,
+        }}
+      />
       <div className="space-y-2 text-base leading-relaxed text-ink">
-        <p>{fmt(m.result.total, { total: money(counted) })}</p>
-        {outcome.debts > 0 ? (
-          <p>{fmt(m.result.debts, { debts: money(outcome.debts), net: money(result.netZakatable) })}</p>
-        ) : null}
-        <p>
-          {result.isDue
-            ? fmt(m.result.above, {
-                nisab: money(result.nisab),
-                rate,
-                net: money(result.netZakatable),
-                zakat: money(result.zakatDue),
-              })
-            : fmt(m.result.below, { nisab: money(result.nisab) })}
-        </p>
+        {sentences.map((s) => (
+          <p key={s}>{s}</p>
+        ))}
         <p className="text-sm text-sage">{m.result.hawl}</p>
       </div>
 

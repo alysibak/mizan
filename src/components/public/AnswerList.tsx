@@ -2,6 +2,7 @@ import Link from "next/link";
 import OpenFromHash from "@/components/OpenFromHash";
 import ReadAloud from "@/components/ReadAloud";
 import ShareButton, { type ShareLabels } from "@/components/public/ShareButton";
+import { ANSWER_ICONS } from "@/components/public/answerIcons";
 
 export type Tone = "yes" | "no" | "mixed";
 
@@ -14,6 +15,8 @@ export interface AnswerItem {
   answer: string;
   /** The page the answer comes from, when listed away from it. */
   page?: { href: string; label: string };
+  /** A key in ANSWER_ICONS: the picture shown beside the question. */
+  icon?: string;
 }
 
 const TONE: Record<Tone, string> = {
@@ -50,7 +53,12 @@ export default function AnswerList({
         <li key={item.key} id={item.key} className="scroll-mt-20">
           <details className="group">
             <summary className="flex min-h-[52px] cursor-pointer list-none flex-wrap items-center justify-between gap-x-4 gap-y-1 py-3 [&::-webkit-details-marker]:hidden">
-              <span className="text-base font-medium text-ink">{item.label}</span>
+              <span className="flex items-center gap-3">
+                {item.icon && ANSWER_ICONS[item.icon] ? (
+                  <AnswerIcon name={item.icon} />
+                ) : null}
+                <span className="text-base font-medium text-ink">{item.label}</span>
+              </span>
               <span className="flex items-center gap-3">
                 {item.verdict ? (
                   <span className={"border px-2 py-0.5 text-sm font-medium " + TONE[item.tone ?? "mixed"]}>
@@ -93,5 +101,17 @@ export default function AnswerList({
         </li>
       ))}
     </ul>
+  );
+}
+
+function AnswerIcon({ name }: { name: string }) {
+  const Icon = ANSWER_ICONS[name];
+  return (
+    <span
+      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-pine/25 bg-pine/5 text-pine"
+      aria-hidden
+    >
+      <Icon className="h-6 w-6" />
+    </span>
   );
 }

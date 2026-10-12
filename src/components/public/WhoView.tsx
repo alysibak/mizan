@@ -3,6 +3,7 @@ import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import WhoCanReceive from "@/components/public/WhoCanReceive";
+import { EightGroups } from "@/components/public/Visuals";
 import { LOCALE_INFO, languageAlternates, localePath, type Locale } from "@/i18n/config";
 import { messagesFor } from "@/i18n/messages";
 
@@ -48,7 +49,9 @@ export default function WhoView({ locale }: { locale: Locale }) {
             }}
           />
         </div>
-        <p className="mt-8 border-s-2 border-brass ps-4 text-base leading-relaxed text-ink">{m.eight}</p>
+        <div className="mt-10">
+          <EightGroups groups={m.groups} label={m.eight} />
+        </div>
         <p className="mt-4 text-sm text-sage">
           {m.ask}{" "}
           <Link href={localePath(locale, "/sources")} className="text-pine hover:underline">

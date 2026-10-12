@@ -208,6 +208,10 @@ test("a beginner is asked three questions and sent on with today’s nisab", asy
   await page.getByRole("link", { name: /New to zakat\? Start here/ }).click();
   await page.waitForURL("**/start");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Zakat, in plain words");
+  // Pictures do the explaining: one coin in forty, what counts, the year of moons.
+  await expect(page.getByRole("img", { name: /200,000 ÷ 40 = 5,000/ })).toBeVisible();
+  await expect(page.getByRole("listitem").filter({ hasText: "The home you live in" })).toBeVisible();
+  await expect(page.getByRole("img", { name: /about 354 days/ })).toBeVisible();
 
   await page.locator("#check-currency").selectOption("USD");
   const check = page.locator("section", { has: page.getByRole("heading", { name: "Do I have to pay zakat?" }) });
@@ -272,6 +276,8 @@ test("the step-by-step guide explains each step and ends with things to do", asy
   // 2,000 + 18,000 + 750 − 1,000 = 19,750; 2.5% = 493.75
   await expect(page.getByRole("heading", { name: /Your zakat is \S*493\.75/ })).toBeVisible();
   await expect(page.getByText(/Everything you counted comes to \S*20,750\.00/)).toBeVisible();
+  // The same answer as a picture, described for screen readers.
+  await expect(page.getByRole("img", { name: /Everything you counted comes to .*493\.75/ })).toBeVisible();
   await expect(page.getByText(/leaves \S*19,750\.00/)).toBeVisible();
   const download = page.waitForEvent("download");
   await page.getByRole("button", { name: "Remind me next year" }).click();
@@ -304,6 +310,8 @@ test("who can receive zakat: each person answered, the reason a tap away", async
   await expect(page.locator("details", { hasText: "My husband" }).locator("summary")).toContainText(
     "Scholars differ",
   );
+  // The eight groups of 9:60 as picture cards.
+  await expect(page.getByRole("list", { name: /names eight groups/ }).getByRole("listitem")).toHaveCount(8);
   await expectNoHorizontalScroll(page);
   await expectUniqueIds(page);
 

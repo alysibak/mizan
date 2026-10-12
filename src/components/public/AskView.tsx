@@ -49,10 +49,16 @@ function allAnswers(locale: Locale): AnswerItem[] {
       key: `who-${item.key}`,
       page: { ...who, href: `${who.href}#${item.key}` },
     })),
-    ...all.faq.map((f, i) => ({ key: `faq-${i}`, label: f.q, answer: f.a, page: calculator })),
-    ...all.missed.faq.map((f, i) => ({ key: `missed-${i}`, label: f.q, answer: f.a, page: missed })),
-    ...all.fitr.faq.map((f, i) => ({ key: `fitr-${i}`, label: f.q, answer: f.a, page: fitr })),
-    ...all.start.words.map((w, i) => ({ key: `word-${i}`, label: w.term, answer: w.meaning, page: start })),
+    ...all.faq.map((f, i) => ({ key: `faq-${i}`, label: f.q, answer: f.a, page: calculator, icon: "question" })),
+    ...all.missed.faq.map((f, i) => ({ key: `missed-${i}`, label: f.q, answer: f.a, page: missed, icon: "missed" })),
+    ...all.fitr.faq.map((f, i) => ({ key: `fitr-${i}`, label: f.q, answer: f.a, page: fitr, icon: "fitr" })),
+    ...all.start.words.map((w, i) => ({
+      key: `word-${i}`,
+      label: w.term,
+      answer: w.meaning,
+      page: start,
+      icon: "word",
+    })),
   ];
 }
 

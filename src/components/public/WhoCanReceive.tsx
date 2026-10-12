@@ -41,6 +41,7 @@ export function whoItems(m: WhoMessages): AnswerItem[] {
     verdict: m.verdicts[verdict],
     tone: TONE[verdict],
     answer: m.cases[key].answer,
+    icon: key,
   }));
 }
 
