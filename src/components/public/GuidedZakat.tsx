@@ -898,6 +898,12 @@ function Result({
                 <li key={s}>{s}</li>
               ))}
             </ol>
+            {/* The giving guide is in English only so far. */}
+            {locale === "en" ? (
+              <Link href="/give" className="mt-3 inline-block text-base font-medium text-pine hover:underline">
+                Where to give it, and how to choose a charity →
+              </Link>
+            ) : null}
             <GivenTracker
               id="guide-given"
               due={result.zakatDue}

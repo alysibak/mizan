@@ -605,3 +605,25 @@ export const IconPaw = ({ className = "h-6 w-6" }: P) => (
     <ellipse cx="14" cy="5.8" rx="1.5" ry="2" />
   </Glyph>
 );
+
+export const IconBox = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <path d="M3.5 7.5 12 3.5l8.5 4v9L12 20.5l-8.5-4v-9Z" />
+    <path d="M3.5 7.5 12 11.5l8.5-4M12 11.5v9" />
+    <path d="M7.8 5.5l8.5 4" />
+  </Glyph>
+);
+
+export const IconShelf = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <path d="M4 3v18M20 3v18M4 8h16M4 14h16M4 20h16" />
+    <path d="M6.5 8V5.5h3V8M12 14v-3.5h2.5V14M15.5 20v-3h2.5v3" />
+  </Glyph>
+);
+
+export const IconFridge = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <rect x="6" y="2.5" width="12" height="19" rx="1.5" />
+    <path d="M6 9.5h12M9 5.5v2M9 12.5v3" />
+  </Glyph>
+);

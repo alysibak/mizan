@@ -750,4 +750,109 @@ export const EVIDENCE: Record<string, CaseEvidence> = {
       },
     ],
   },
+
+  // Where and how to give.
+  giveNear: {
+    evidence: [
+      RELATIVE_TWICE,
+      MUADH,
+      {
+        strength: "quran",
+        text: "“…feeding, on a day of hunger, an orphan who is a relative, or a poor person in the dust.”",
+        ref: "Quran 90:14–16",
+      },
+    ],
+    views: [
+      {
+        who: "The Maliki, Shafi‘i, and Hanbali schools",
+        says: "Zakat is given out in the town where the wealth is, and moved elsewhere only when no one there needs it, or the need elsewhere is far greater.",
+        evidence: [MUADH],
+      },
+      {
+        who: "The Hanafi school",
+        says: "Moving it to another town is disliked, except to poor relatives or to people in greater need, which is allowed and even better.",
+        evidence: [
+          {
+            strength: "reasoning",
+            text: "The hadith of Mu‘adh shows the rule; the reward of giving to relatives, and the greater good of meeting greater need, make room for the exceptions.",
+            ref: "al-Kasani, Bada’i‘ al-Sana’i‘",
+          },
+        ],
+      },
+    ],
+  },
+  giveQuietly: {
+    evidence: [
+      {
+        strength: "quran",
+        text: "“If you give charity openly, it is good; but if you hide it and give it to the poor, that is better for you.”",
+        ref: "Quran 2:271",
+      },
+      {
+        strength: "agreed",
+        text: "Among the seven Allah shades on the Day when there is no shade but His: “a man who gives charity so secretly that his left hand does not know what his right hand gave.”",
+        ref: "Sahih al-Bukhari and Sahih Muslim, from Abu Hurayrah",
+      },
+      {
+        strength: "quran",
+        text: "“Do not cancel your charity by reminding people of it, or by hurting them.”",
+        ref: "Quran 2:264",
+      },
+      {
+        strength: "reasoning",
+        text: "The person receiving it need not be told it is zakat, as long as they are someone who may receive it; many scholars prefer not to say, to spare their dignity.",
+        ref: "Ibn Qudamah, al-Mughni",
+      },
+    ],
+  },
+  giveSoon: {
+    evidence: [
+      {
+        strength: "sahih",
+        text: "The Prophet ﷺ prayed ‘Asr and hurried home, then said: “I left a piece of gold from the charity at home, and I did not want to keep it overnight.”",
+        ref: "Sahih al-Bukhari, from ‘Uqbah ibn al-Harith",
+      },
+      {
+        strength: "disputed",
+        text: "Al-‘Abbas asked to pay his zakat before it was due, and the Prophet ﷺ allowed him. So it may be paid early, but not late.",
+        ref: "Sunan Abi Dawud and Sunan al-Tirmidhi, from ‘Ali",
+      },
+    ],
+  },
+
+  // Interest a bank has paid you.
+  interest: {
+    evidence: [
+      RIBA,
+      PURE,
+      {
+        strength: "agreed",
+        text: "The Prophet ﷺ cursed the one who takes riba and the one who pays it, its writer, and its two witnesses, and said, “They are all alike.”",
+        ref: "Sahih Muslim, from Jabir; a shorter wording in Sahih al-Bukhari",
+      },
+      {
+        strength: "reasoning",
+        text: "Contemporary councils of scholars say interest already received is not kept or used for yourself, but given away to the poor or to public good, hoping for no reward, to be rid of it.",
+        ref: "International Islamic Fiqh Academy and other fatwa councils",
+      },
+    ],
+    views: [
+      {
+        who: "Most contemporary scholars",
+        says: "Take it from the bank rather than leave it there, and give it all away, to the poor or to public works. It is not zakat and not sadaqah you are rewarded for: you are only getting rid of it.",
+        evidence: [PURE],
+      },
+      {
+        who: "Some scholars",
+        says: "It may also go to public works that no one is rewarded for, such as roads and toilets, rather than to the poor; and a few allow using it to pay an unjust tax.",
+        evidence: [
+          {
+            strength: "reasoning",
+            text: "Money that has no rightful owner goes to the public good; which uses are best is a matter of judgement.",
+            ref: "Scholars’ reasoning, recorded in fatwa collections",
+          },
+        ],
+      },
+    ],
+  },
 };

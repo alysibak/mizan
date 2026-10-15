@@ -34,6 +34,16 @@ export const PUBLIC_TOOLS: PublicTool[] = [
     blurb: "Zakat, fitrana, and a gift spread over the last ten nights.",
   },
   {
+    path: "/give",
+    name: "Where to give",
+    blurb: "Who first, six questions for a charity, and giving well.",
+  },
+  {
+    path: "/interest",
+    name: "Bank interest",
+    blurb: "Interest your bank paid you: what to do with it.",
+  },
+  {
     path: "/sadaqah",
     name: "Sadaqah without money",
     blurb: "A smile, a kind word, water: charity anyone can give today.",
@@ -47,6 +57,11 @@ export const PUBLIC_TOOLS: PublicTool[] = [
     path: "/family",
     name: "Family zakat",
     blurb: "Each person’s own zakat: who owes, and how much.",
+  },
+  {
+    path: "/shop",
+    name: "Shop zakat",
+    blurb: "Stock, till, and money owed to you, in pictures.",
   },
   {
     path: "/farm",
@@ -71,4 +86,4 @@ export const PUBLIC_TOOLS: PublicTool[] = [
 ];
 
 /** The English-only tool pages (the calculator, nisab, and Zakat al-Fitr pages are translated). */
-export const ENGLISH_TOOL_PATHS = ["/ramadan", "/sadaqah", "/quiz", "/family", "/farm", "/inheritance", "/halal-stocks", "/qurbani"];
+export const ENGLISH_TOOL_PATHS = ["/ramadan", "/give", "/interest", "/sadaqah", "/quiz", "/family", "/shop", "/farm", "/inheritance", "/halal-stocks", "/qurbani"];

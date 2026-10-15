@@ -1,16 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { IconChild, IconUsers } from "@/components/icons";
 import { CurrencySelect, useVisitorCurrency } from "@/components/public/VisitorCurrency";
 import { BalanceScale } from "@/components/public/Visuals";
 import { MoneyInput } from "@/components/ZakatCalculator";
 import { parseAmount } from "@/lib/calculator";
-import { setStoredValue, useHydrated, useStoredValue } from "@/lib/client-store";
+import { setStoredValue, useStoredValue } from "@/lib/client-store";
+import { useMetalPrices } from "@/components/public/useMetalPrices";
 import { familyZakat } from "@/lib/family";
 import { KARAT_PURITY, TOLA_GRAMS, usesTola } from "@/lib/metals";
 import { formatMoney } from "@/lib/money";
-import { NISAB_GOLD_GRAMS, NISAB_SILVER_GRAMS } from "@/lib/nisab";
 
 const INTL = "en-CA";
 const KEY = "mizan-family-v1";
@@ -92,8 +91,6 @@ function parseFamily(raw: string | null): Family {
   }
 }
 
-type Prices = { currency: string; gold: number; silver: number } | { currency: string; error: true };
-
 /**
  * Zakat for a household, one person at a time: each person's cash, gold, and
  * debts against the nisab on their own, with a scale each, and a warning
@@ -101,34 +98,12 @@ type Prices = { currency: string; gold: number; silver: number } | { currency: s
  * browser only.
  */
 export default function FamilyPlanner() {
-  const hydrated = useHydrated();
   const [currency, setCurrency] = useVisitorCurrency();
   const family = parseFamily(useStoredValue(KEY));
   const save = (next: Family) => setStoredValue(KEY, JSON.stringify(next));
-  const [prices, setPrices] = useState<Prices | null>(null);
-
-  useEffect(() => {
-    if (!hydrated) return;
-    let current = true;
-    fetch(`/api/metals?currency=${encodeURIComponent(currency)}`)
-      .then((res) => (res.ok ? res.json() : null))
-      .catch(() => null)
-      .then((data: { goldPricePerGram?: number; silverPricePerGram?: number } | null) => {
-        if (!current) return;
-        setPrices(
-          data?.goldPricePerGram && data.silverPricePerGram
-            ? { currency, gold: data.goldPricePerGram, silver: data.silverPricePerGram }
-            : { currency, error: true },
-        );
-      });
-    return () => {
-      current = false;
-    };
-  }, [currency, hydrated]);
-
-  const known = prices && prices.currency === currency && !("error" in prices) ? prices : null;
-  const failed = prices && prices.currency === currency && "error" in prices;
-  const nisab = known ? (family.standard === "gold" ? NISAB_GOLD_GRAMS * known.gold : NISAB_SILVER_GRAMS * known.silver) : 0;
+  const prices = useMetalPrices(currency);
+  const known = prices.gold !== null;
+  const nisab = prices.nisab[family.standard];
   const unit = family.unit ?? (usesTola(currency) ? "tola" : "g");
   const money = (n: number) => formatMoney(n, currency, INTL);
   const amount = (s: string) => parseAmount(s, ".");
@@ -140,7 +115,7 @@ export default function FamilyPlanner() {
       goldPurity: Number(m.purity),
       debts: amount(m.debts),
     })),
-    known?.gold ?? 0,
+    prices.gold ?? 0,
     nisab,
   );
   const nameOf = (m: Member) => m.name.trim() || LABEL[m.who];
@@ -215,8 +190,8 @@ export default function FamilyPlanner() {
                   </span>
                   <span className="block text-xs text-sage nums">
                     {known
-                      ? money(s === "silver" ? NISAB_SILVER_GRAMS * known.silver : NISAB_GOLD_GRAMS * known.gold)
-                      : failed
+                      ? money(prices.nisab[s])
+                      : prices.failed
                         ? "Today’s price could not be loaded"
                         : "Loading today’s price…"}
                     {s === "silver" ? " · the lower, more cautious one" : ""}

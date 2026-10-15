@@ -147,6 +147,16 @@ work.
   nose pin, chain, bracelet, bangle, necklace, coin), each drawn and given a
   typical weight. Mizan adds them up, in grams or tola, says plainly that it
   is a rough guess, and suggests a jeweller for the real figure.
+- **Where to give** (`/give`, English): who first, drawn as a ladder from
+  relatives in need to where need is greater; six questions to ask a
+  charity, ticked off one by one; and why to give quietly and soon, each
+  with its evidence. The English walk-through and calculator link to it
+  once zakat is due.
+- **Bank interest** (`/interest`, English): "my bank paid me interest,
+  what now?" The amount is drawn apart from your own money, with three
+  steps: give it away hoping for no reward, it is not zakat, and count the
+  account without it. How to stop it coming, interest you pay, and the
+  views on past interest are covered, with the evidence.
 - **Sadaqah without money** (`/sadaqah`, English): for people who think
   charity is only for the rich. Eighteen kinds of sadaqah the Quran and
   hadith name (a smile, a kind word, moving harm off the road, water,
@@ -166,6 +176,13 @@ work.
   zakat due, the page says so and names who is under the nisab alone. The
   views on children's wealth and paying for someone else are spelled out.
   Kept in the browser only.
+- **Shop zakat** (`/shop`, English): for shopkeepers, starting with
+  pictures of what counts (goods for sale, the till, money customers owe)
+  and what does not (the shop, shelves, fridges, scales, the van). Then the
+  figures, with personal savings added because the nisab is the owner's,
+  suppliers taken off, and the answer on a balance scale.
+- **More to explore**: the English home page has picture tiles for the
+  quiz, sadaqah, family, shop, farm, and Ramadan pages.
 - **Crops and animals** (`/farm`, English): zakat for farmers. The harvest
   by weight (kg or maund) and how the land was watered gives a tenth, half
   a tenth, or three quarters of a tenth, drawn as ten sacks with the share

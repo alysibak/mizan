@@ -69,9 +69,12 @@ test("every tool page is linked from the footer and has no horizontal scroll", a
   await page.goto("/");
   for (const name of [
     "Ramadan giving",
+    "Where to give",
+    "Bank interest",
     "Sadaqah without money",
     "Zakat quiz",
     "Family zakat",
+    "Shop zakat",
     "Crops and animals",
     "Inheritance calculator",
     "Zakat al-Fitr",
@@ -84,7 +87,7 @@ test("every tool page is linked from the footer and has no horizontal scroll", a
     const res = await page.request.get(href!);
     expect(res.status()).toBe(200);
   }
-  for (const path of ["/ramadan", "/sadaqah", "/quiz", "/family", "/farm", "/inheritance", "/zakat-al-fitr", "/halal-stocks", "/qurbani"]) {
+  for (const path of ["/ramadan", "/give", "/interest", "/sadaqah", "/quiz", "/family", "/shop", "/farm", "/inheritance", "/zakat-al-fitr", "/halal-stocks", "/qurbani"]) {
     await page.goto(path);
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -207,6 +210,49 @@ test("sadaqah: one deed for today, and every deed with its source", async ({ pag
   await expect(cards.getByRole("listitem")).toHaveCount(18);
   await cards.getByText("Plant a tree or a seed").click();
   await expect(cards.getByText("Sahih al-Bukhari and Sahih Muslim, from Anas ibn Malik")).toBeVisible();
+});
+
+test("shop: stock, till, and money owed counted; suppliers taken off", async ({ page }) => {
+  await page.route("**/api/metals?*", (route) =>
+    route.fulfill({ json: { currency: "USD", goldPricePerGram: 100, silverPricePerGram: 1.2, source: "test" } }),
+  );
+  await page.goto("/shop");
+  await expect(page.getByRole("list", { name: "Not counted" }).getByRole("listitem")).toHaveCount(5);
+  await page.locator("#tool-currency").selectOption("USD");
+  await page.locator("#shop-stock").fill("30000");
+  await page.locator("#shop-cash").fill("5000");
+  await page.locator("#shop-owedToYou").fill("2000");
+  await page.locator("#shop-owedBySuppliers").fill("7000");
+  // 30,000 + 5,000 + 2,000 − 7,000 = 30,000; 2.5% is 750.
+  await expect(page.getByRole("heading", { name: "Your zakat: US$750.00" })).toBeVisible();
+  await page.locator("#shop-stock").fill("500");
+  await page.locator("#shop-cash").fill("0");
+  await page.locator("#shop-owedToYou").fill("0");
+  await page.locator("#shop-owedBySuppliers").fill("0");
+  await expect(page.getByRole("heading", { name: "Below the nisab: no zakat this year" })).toBeVisible();
+});
+
+test("where to give: nearest first, and six questions for a charity", async ({ page }) => {
+  await page.goto("/give");
+  const near = page.getByRole("region", { name: "Who first: start close, then go outwards" });
+  await expect(near.getByRole("listitem").first()).toContainText("Relatives in need");
+  const questions = page.getByRole("checkbox");
+  await expect(questions).toHaveCount(6);
+  for (let i = 0; i < 6; i++) await questions.nth(i).check();
+  await expect(page.getByText("Good answers to all six: you can give with confidence.")).toBeVisible();
+  // The evidence for giving quietly folds out.
+  await page.getByRole("region", { name: "Give it quietly" }).getByText("Evidence").click();
+  await expect(page.getByText("Quran 2:271")).toBeVisible();
+});
+
+test("bank interest: separated from your money, given away, and left out of zakat", async ({ page }) => {
+  await page.goto("/interest");
+  await page.locator("#tool-currency").selectOption("USD");
+  await page.locator("#interest-balance").fill("10000");
+  await page.locator("#interest-paid").fill("300");
+  await expect(page.getByText("Give away US$300.00")).toBeVisible();
+  await expect(page.getByText("not your zakat")).toBeVisible();
+  await expect(page.getByText("count US$9,700.00 from this account")).toBeVisible();
 });
 
 test("guides answer the common questions and lead to the calculator", async ({ page }) => {

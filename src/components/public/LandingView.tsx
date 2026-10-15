@@ -13,6 +13,11 @@ import {
   IconGiving,
   IconGoldBar,
   IconQuestion,
+  IconShop,
+  IconSmile,
+  IconStar,
+  IconUsers,
+  IconWheat,
   IconYear,
 } from "@/components/icons";
 import { LOCALE_INFO, fmt, languageAlternates, localePath, type Locale } from "@/i18n/config";
@@ -172,6 +177,39 @@ export default function LandingView({ locale }: { locale: Locale }) {
                 </li>
               ))}
             </ul>
+            {/* Pages that are in English only so far. */}
+            {locale === "en" ? (
+              <>
+                <h3 className="mt-10 font-serif text-xl text-ink">More to explore</h3>
+                <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+                  {(
+                    [
+                      ["/quiz", "Zakat in ten questions", IconStar],
+                      ["/sadaqah", "Charity without money", IconSmile],
+                      ["/family", "Zakat for my family", IconUsers],
+                      ["/shop", "Zakat on my shop", IconShop],
+                      ["/farm", "Crops and animals", IconWheat],
+                      ["/ramadan", "Ramadan giving", IconYear],
+                    ] as const
+                  ).map(([path, label, Icon]) => (
+                    <li key={path}>
+                      <Link
+                        href={path}
+                        className="card flex h-full flex-col items-center gap-2 px-3 py-4 text-center transition hover:border-brassDeep"
+                      >
+                        <span
+                          className="flex h-12 w-12 items-center justify-center rounded-full border border-brass/50 bg-brass/10 text-brassDeep"
+                          aria-hidden
+                        >
+                          <Icon className="h-6 w-6" />
+                        </span>
+                        <span className="text-sm font-medium leading-snug text-ink">{label}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : null}
           </div>
         </section>
 

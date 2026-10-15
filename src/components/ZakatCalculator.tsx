@@ -642,6 +642,12 @@ function Calculator({
                     <li key={step}>{step}</li>
                   ))}
                 </ol>
+                {/* The giving guide is in English only so far. */}
+                {locale === "en" ? (
+                  <Link href="/give" className="mt-2 inline-block text-sm font-medium text-pine hover:underline">
+                    Where to give it, and how to choose a charity →
+                  </Link>
+                ) : null}
                 <GivenTracker
                   id="calc-given"
                   due={result.zakatDue}
