@@ -69,6 +69,7 @@ test("every tool page is linked from the footer and has no horizontal scroll", a
   await page.goto("/");
   for (const name of [
     "Ramadan giving",
+    "Zakat quiz",
     "Family zakat",
     "Crops and animals",
     "Inheritance calculator",
@@ -82,7 +83,7 @@ test("every tool page is linked from the footer and has no horizontal scroll", a
     const res = await page.request.get(href!);
     expect(res.status()).toBe(200);
   }
-  for (const path of ["/ramadan", "/family", "/farm", "/inheritance", "/zakat-al-fitr", "/halal-stocks", "/qurbani"]) {
+  for (const path of ["/ramadan", "/quiz", "/family", "/farm", "/inheritance", "/zakat-al-fitr", "/halal-stocks", "/qurbani"]) {
     await page.goto(path);
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -170,6 +171,28 @@ test("family: each person weighed alone, and a warning when pooling misleads", a
   // Kept in this browser.
   await page.reload();
   await expect(page.getByRole("listitem", { name: "Wife or husband", exact: true }).getByLabel("Cash and savings")).toHaveValue("400");
+});
+
+test("quiz: ten picture questions, each answered at once, and a score", async ({ page }) => {
+  await page.goto("/quiz");
+  await expect(page.getByRole("heading", { name: "The home you live in" })).toBeVisible();
+  // A wrong answer is explained.
+  await page.getByRole("button", { name: "Yes", exact: true }).click();
+  await expect(page.getByText("Not quite")).toBeVisible();
+  await expect(page.getByText("A home for your own use is not counted")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Next" })).toBeFocused();
+  await page.keyboard.press("Enter");
+
+  // The rest answered right.
+  for (const yes of [true, false, false, true, true, true, false, false, true]) {
+    await page.getByRole("button", { name: yes ? "Yes" : "No", exact: true }).click();
+    await expect(page.getByText("Right", { exact: true })).toBeVisible();
+    await page.getByRole("button", { name: /^(Next|See my score)$/ }).click();
+  }
+  await expect(page.getByRole("heading", { name: "9 of 10" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "No: read why" })).toHaveAttribute("href", "/what-counts#home");
+  await page.getByRole("button", { name: "Play again" }).click();
+  await expect(page.getByRole("heading", { name: "The home you live in" })).toBeVisible();
 });
 
 test("guides answer the common questions and lead to the calculator", async ({ page }) => {

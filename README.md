@@ -147,6 +147,11 @@ work.
   nose pin, chain, bracelet, bangle, necklace, coin), each drawn and given a
   typical weight. Mizan adds them up, in grams or tola, says plainly that it
   is a rough guess, and suggests a jeweller for the real figure.
+- **Zakat quiz** (`/quiz`, English): ten picture questions, one at a time
+  ("Do I pay zakat on… the home you live in?", "Can I give zakat to… my
+  brother or sister?"). Tap Yes or No and see at once whether it was right
+  and why, then a score with links to the answers missed. The questions
+  and answers are the ones on the two answer pages, so they never drift.
 - **Family zakat** (`/family`, English): zakat is owed by each person on
   what is theirs, so a card for each (me, wife or husband, sons, daughters,
   parents) with cash, gold by weight and karat, and debts, each with its own
