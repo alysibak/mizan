@@ -130,15 +130,16 @@ export function MoreTools({ except }: { except?: string }) {
       <h2 id="more-tools" className="font-serif text-2xl text-ink">
         More free tools
       </h2>
-      <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+      {/* Names only on a phone, two to a row, so the list stays short. */}
+      <ul className="mt-4 grid grid-cols-2 gap-2 sm:gap-3">
         {tools.map((t) => (
           <li key={t.path}>
             <Link
               href={t.path}
-              className="card block h-full px-4 py-3 transition hover:border-sage"
+              className="card flex h-full min-h-[48px] flex-col justify-center px-3 py-2 transition hover:border-sage sm:px-4 sm:py-3"
             >
-              <span className="font-medium text-ink">{t.name}</span>
-              <span className="mt-1 block text-sm text-sage">{t.blurb}</span>
+              <span className="text-sm font-medium text-ink sm:text-base">{t.name}</span>
+              <span className="mt-1 hidden text-sm text-sage sm:block">{t.blurb}</span>
             </Link>
           </li>
         ))}

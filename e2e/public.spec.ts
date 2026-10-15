@@ -485,8 +485,17 @@ test("a beginner types a word and finds every answer that mentions it", async ({
   await expect(page.locator("#salary > details")).toHaveAttribute("open", "");
 
   await page.goto("/ask");
-  await page.getByLabel("What do you want to know?").fill("camel");
+  await page.getByLabel("What do you want to know?").fill("helicopter");
   await expect(page.getByRole("status")).toHaveText(/No answer mentions that yet/);
+
+  // Pages in English only are found too: farm animals, bank interest.
+  await page.getByLabel("What do you want to know?").fill("camels");
+  const farm = page.getByRole("main").locator("details").first();
+  await expect(farm.locator(":scope > summary")).toContainText("My goats, sheep, cows, buffalo, or camels");
+  await farm.locator(":scope > summary").click();
+  await expect(farm.getByRole("link", { name: "Crops and animals" })).toHaveAttribute("href", "/farm");
+  await page.getByLabel("What do you want to know?").fill("interest");
+  await expect(page.getByRole("main").getByText("Interest my bank paid me")).toBeVisible();
 });
 
 test("the answer search understands Urdu as people type it", async ({ page }) => {

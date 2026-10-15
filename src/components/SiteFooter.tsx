@@ -2,6 +2,8 @@ import Link from "next/link";
 import { LOCALES, LOCALE_INFO, localePath, type Locale } from "@/i18n/config";
 import { messagesFor } from "@/i18n/messages";
 
+const LEARN = new Set(["/give", "/interest", "/sadaqah", "/quiz"]);
+
 /** The free tools, labelled in `locale` (most of them are in English only). */
 export function toolLinks(locale: Locale): { href: string; label: string }[] {
   const all = messagesFor(locale);
@@ -47,7 +49,9 @@ export default function SiteFooter({
 }) {
   const all = messagesFor(locale);
   const { footer, inEnglish } = all.common;
-  const tools = toolLinks(locale);
+  // Pages for learning and giving get their own column, so the tools stay findable.
+  const learn = toolLinks(locale).filter((t) => LEARN.has(t.href));
+  const tools = toolLinks(locale).filter((t) => !LEARN.has(t.href));
   const about = [
     { href: localePath(locale, "/ask"), label: all.ask.nav },
     { href: localePath(locale, "/sources"), label: all.sources.nav },
@@ -61,7 +65,14 @@ export default function SiteFooter({
   ];
   return (
     <footer className="relative z-10 border-t border-mist px-5 py-10 text-sm md:px-10 print:hidden">
-      <div className="mx-auto grid max-w-5xl gap-8 sm:grid-cols-2 md:grid-cols-[minmax(0,1.4fr)_repeat(3,minmax(0,1fr))]">
+      <div
+        className={
+          "mx-auto grid max-w-5xl gap-8 sm:grid-cols-2 " +
+          (learn.length
+            ? "md:grid-cols-[minmax(0,1.4fr)_repeat(4,minmax(0,1fr))]"
+            : "md:grid-cols-[minmax(0,1.4fr)_repeat(3,minmax(0,1fr))]")
+        }
+      >
         <div className="max-w-sm sm:col-span-2 md:col-span-1">
           <p className="font-serif text-xl text-ink">Mizan</p>
           <p className="mt-2 text-xs leading-relaxed text-sage">
@@ -69,6 +80,7 @@ export default function SiteFooter({
           </p>
         </div>
         <LinkColumn title={footer.toolsHeading} links={tools} />
+        {learn.length ? <LinkColumn title="Learn and give" links={learn} /> : null}
         <LinkColumn title={footer.aboutHeading} links={about} />
         <nav aria-label={footer.languages}>
           <p className="label mb-2">{footer.languages}</p>
@@ -107,7 +119,8 @@ function LinkColumn({
   return (
     <nav aria-label={title}>
       <p className="label mb-2">{title}</p>
-      <ul className="space-y-2">
+      {/* Two to a row on a phone, where the footer is one long column. */}
+      <ul className="grid grid-cols-2 gap-x-6 gap-y-2 sm:grid-cols-1">
         {links.map((l) => (
           <li key={l.href}>
             <Link href={l.href} className="text-sage hover:text-ink">

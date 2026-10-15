@@ -1,5 +1,6 @@
 import type { ComponentType } from "react";
 import {
+  IconBank,
   IconBook,
   IconBowl,
   IconCar,
@@ -11,6 +12,7 @@ import {
   IconDome,
   IconGem,
   IconGiving,
+  IconGoat,
   IconGlobe,
   IconGoldBar,
   IconHome,
@@ -23,9 +25,11 @@ import {
   IconReceipt,
   IconRing,
   IconShop,
+  IconSmile,
   IconStar,
   IconStatement,
   IconUsers,
+  IconWheat,
   IconYear,
 } from "@/components/icons";
 
@@ -74,4 +78,13 @@ export const ANSWER_ICONS: Record<string, ComponentType<{ className?: string }>>
   missed: IconYear,
   fitr: IconBowl,
   word: IconBook,
+  // English pages found by the English search.
+  crops: IconWheat,
+  livestock: IconGoat,
+  household: IconUsers,
+  shopkeeper: IconShop,
+  interest: IconBank,
+  giveWhere: IconGiving,
+  sadaqah: IconSmile,
+  quiz: IconStar,
 };

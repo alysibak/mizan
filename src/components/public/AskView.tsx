@@ -6,6 +6,7 @@ import AskSearch from "@/components/public/AskSearch";
 import type { AnswerItem } from "@/components/public/AnswerList";
 import { appliesItems } from "@/components/public/AppliesView";
 import { whoItems } from "@/components/public/WhoCanReceive";
+import { ENGLISH_ANSWERS } from "@/content/english-answers";
 import { LOCALE_INFO, languageAlternates, localePath, type Locale } from "@/i18n/config";
 import { messagesFor } from "@/i18n/messages";
 
@@ -59,6 +60,17 @@ function allAnswers(locale: Locale): AnswerItem[] {
       page: start,
       icon: "word",
     })),
+    // Pages in English only so far are found by the English search.
+    ...(locale === "en"
+      ? ENGLISH_ANSWERS.map((a) => ({
+          key: `en-${a.key}`,
+          label: a.label,
+          answer: a.answer,
+          page: { href: a.href, label: a.page },
+          icon: a.key,
+          evidence: a.evidence,
+        }))
+      : []),
   ];
 }
 

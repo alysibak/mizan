@@ -182,7 +182,11 @@ work.
   figures, with personal savings added because the nisab is the owner's,
   suppliers taken off, and the answer on a balance scale.
 - **More to explore**: the English home page has picture tiles for the
-  quiz, sadaqah, family, shop, farm, and Ramadan pages.
+  quiz, sadaqah, family, shop, farm, and Ramadan pages. The English "Ask a
+  question" search finds them too ("goats", "interest", "my shop", "my
+  wife's gold"), and the English footer gives learning and giving pages
+  their own column. On a phone, footer links and the tool list sit two to a
+  row.
 - **Crops and animals** (`/farm`, English): zakat for farmers. The harvest
   by weight (kg or maund) and how the land was watered gives a tenth, half
   a tenth, or three quarters of a tenth, drawn as ten sacks with the share
