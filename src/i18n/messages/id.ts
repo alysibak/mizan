@@ -174,6 +174,7 @@ const id: Messages = {
     givenHint: "Jika Anda membayar zakat secara bertahap, catat yang sudah Anda berikan. Tersimpan di perangkat ini saja.",
     stillToGive: "Masih perlu diberikan: {amount}",
     allGiven: "Semua sudah diberikan. Semoga Allah menerimanya.",
+    acceptDua: "“Ya Tuhan kami, terimalah (amal) dari kami. Sungguh, Engkaulah Yang Maha Mendengar, Maha Mengetahui.” (QS. Al-Baqarah 2:127)",
     difference: "Apa bedanya?",
     basisDifference: "Zakat dihitung dengan tahun Hijriah (qamariah), sekitar 354 hari. Jika Anda membayar pada tanggal Masehi yang sama setiap tahun, tahun Anda sekitar 11 hari lebih panjang, jadi kadarnya naik sedikit menjadi 2,577% untuk menutupinya.",
     pricesTitle: "Harga hari ini",

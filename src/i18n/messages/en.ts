@@ -182,6 +182,8 @@ const en = {
     givenHint: "If you give your zakat in parts, note what you have given. It stays on this device.",
     stillToGive: "Still to give: {amount}",
     allGiven: "All given. May Allah accept it from you.",
+    /** Under the prayer for acceptance (2:127), shown in Arabic once all is given. */
+    acceptDua: "“Our Lord, accept this from us. You are the All-Hearing, the All-Knowing.” (Quran 2:127)",
     difference: "What’s the difference?",
     basisDifference:
       "Zakat is counted by the Islamic (lunar) year, about 354 days. If you pay on the same Gregorian date each year instead, your year is about 11 days longer, so the rate goes up slightly, to 2.577%, to make up for it.",

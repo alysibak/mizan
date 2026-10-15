@@ -853,6 +853,14 @@ export function GivenTracker({
           <p className="mt-2 text-sm font-medium text-ink nums" aria-live="polite">
             {left > 0 ? fmt(m.stillToGive, { amount: money(left) }) : m.allGiven}
           </p>
+          {left === 0 ? (
+            <figure className="mt-3 border border-brass/40 bg-brass/5 px-4 py-4 text-center">
+              <blockquote lang="ar" dir="rtl" className="quran text-2xl text-pine sm:text-3xl">
+                رَبَّنَا تَقَبَّلْ مِنَّا ۖ إِنَّكَ أَنتَ السَّمِيعُ الْعَلِيمُ
+              </blockquote>
+              <figcaption className="mt-2 text-sm leading-relaxed text-sage">{m.acceptDua}</figcaption>
+            </figure>
+          ) : null}
         </>
       ) : null}
     </div>

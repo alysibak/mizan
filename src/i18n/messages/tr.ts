@@ -174,6 +174,7 @@ const tr: Messages = {
     givenHint: "Zekâtınızı parça parça veriyorsanız verdiğinizi not edin. Yalnızca bu cihazda kalır.",
     stillToGive: "Verilecek kalan: {amount}",
     allGiven: "Hepsi verildi. Allah kabul etsin.",
+    acceptDua: "“Rabbimiz! Bizden kabul buyur. Şüphesiz sen hakkıyla işitensin, hakkıyla bilensin.” (Bakara 2:127)",
     difference: "Farkı ne?",
     basisDifference: "Zekât hicri (kameri) yıla göre hesaplanır; bu yaklaşık 354 gündür. Her yıl aynı miladi tarihte veriyorsanız yılınız yaklaşık 11 gün daha uzundur, bu yüzden oran bunu karşılamak için biraz artarak %2,577 olur.",
     pricesTitle: "Bugünkü fiyatlar",

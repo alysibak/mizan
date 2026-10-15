@@ -175,6 +175,7 @@ const ms: Messages = {
     givenHint: "Jika anda membayar zakat secara berperingkat, catat apa yang sudah anda beri. Ia kekal pada peranti ini sahaja.",
     stillToGive: "Masih perlu diberi: {amount}",
     allGiven: "Semua sudah diberi. Semoga Allah menerimanya.",
+    acceptDua: "“Wahai Tuhan kami, terimalah daripada kami. Sesungguhnya Engkaulah Yang Maha Mendengar, lagi Maha Mengetahui.” (Al-Baqarah 2:127)",
     difference: "Apa bezanya?",
     basisDifference: "Zakat dikira mengikut tahun Hijrah (qamariah), kira-kira 354 hari. Jika anda membayar pada tarikh Masihi yang sama setiap tahun, tahun anda kira-kira 11 hari lebih panjang, jadi kadarnya naik sedikit kepada 2.577% untuk menampungnya.",
     pricesTitle: "Harga hari ini",

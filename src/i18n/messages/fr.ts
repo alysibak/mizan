@@ -175,6 +175,7 @@ const fr: Messages = {
     givenHint: "Si vous versez votre zakat en plusieurs fois, notez ce que vous avez donné. Cela reste sur cet appareil.",
     stillToGive: "Reste à donner : {amount}",
     allGiven: "Tout est donné. Qu’Allah l’accepte de vous.",
+    acceptDua: "« Notre Seigneur, accepte ceci de notre part. C’est Toi qui entends tout et qui sais tout. » (Coran 2:127)",
     difference: "Quelle différence ?",
     basisDifference: "La zakat se compte sur l’année hégirienne (lunaire), environ 354 jours. Si vous la versez chaque année à la même date grégorienne, votre année dure environ 11 jours de plus ; le taux monte donc légèrement, à 2,577 %, pour compenser.",
     pricesTitle: "Les cours du jour",
