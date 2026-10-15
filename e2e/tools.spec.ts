@@ -67,14 +67,21 @@ test("qurbani: shares of a cow", async ({ page }) => {
 
 test("every tool page is linked from the footer and has no horizontal scroll", async ({ page }) => {
   await page.goto("/");
-  for (const name of ["Ramadan giving", "Inheritance calculator", "Zakat al-Fitr", "Halal stock screen", "Qurbani shares"]) {
+  for (const name of [
+    "Ramadan giving",
+    "Crops and animals",
+    "Inheritance calculator",
+    "Zakat al-Fitr",
+    "Halal stock screen",
+    "Qurbani shares",
+  ]) {
     const link = page.getByRole("contentinfo").getByRole("link", { name, exact: true });
     await expect(link).toBeVisible();
     const href = await link.getAttribute("href");
     const res = await page.request.get(href!);
     expect(res.status()).toBe(200);
   }
-  for (const path of ["/ramadan", "/inheritance", "/zakat-al-fitr", "/halal-stocks", "/qurbani"]) {
+  for (const path of ["/ramadan", "/farm", "/inheritance", "/zakat-al-fitr", "/halal-stocks", "/qurbani"]) {
     await page.goto(path);
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -108,6 +115,33 @@ test("ramadan: a gift spread over the last ten nights, more on the odd ones", as
   await page.locator("#nights-amount").fill("60");
   await expect(plan.getByRole("listitem").first()).toContainText("Night 24");
   await expect(plan.getByRole("listitem")).toHaveCount(6);
+});
+
+test("farm: a tenth of the harvest, and what each herd owes", async ({ page }) => {
+  await page.goto("/farm");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Zakat on crops and animals");
+
+  // 30 maund is 1,200 kg: a tenth by rain, half a tenth by pump.
+  await page.locator("#farm-unit").selectOption("maund");
+  await page.locator("#farm-harvest").fill("30");
+  await expect(page.getByText("Give 3 maund (120 kg)")).toBeVisible();
+  await expect(page.getByRole("img", { name: "Of every ten sacks, one is given" })).toBeVisible();
+  await page.getByText("A pump, a well, or bought water").click();
+  await expect(page.getByText("Give 1.5 maund (60 kg)")).toBeVisible();
+  await page.locator("#farm-harvest").fill("10");
+  await expect(page.getByText("Below the nisab")).toBeVisible();
+
+  await page.locator("#farm-sheep").fill("150");
+  await page.locator("#farm-cattle").fill("70");
+  await page.locator("#farm-camels").fill("4");
+  await expect(page.getByText("Give 2 sheep or goats")).toBeVisible();
+  await expect(page.getByText("Give 1 musinnah and 1 tabi‘")).toBeVisible();
+  await expect(page.getByText("Nothing yet: zakat starts at 5")).toBeVisible();
+
+  // Fed or working animals are not counted as livestock.
+  await page.getByText("Eat feed you bought or grew").click();
+  await expect(page.getByText("Give 2 sheep or goats")).toHaveCount(0);
+  await expect(page.getByText(/Imam Malik counts them too/)).toBeVisible();
 });
 
 test("guides answer the common questions and lead to the calculator", async ({ page }) => {

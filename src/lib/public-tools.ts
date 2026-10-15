@@ -34,6 +34,11 @@ export const PUBLIC_TOOLS: PublicTool[] = [
     blurb: "Zakat, fitrana, and a gift spread over the last ten nights.",
   },
   {
+    path: "/farm",
+    name: "Crops and animals",
+    blurb: "A tenth of the harvest, and what a herd owes each year.",
+  },
+  {
     path: "/missed-years",
     name: "Missed years",
     blurb: "What you owe for past years, and a plan to pay it.",
@@ -51,4 +56,4 @@ export const PUBLIC_TOOLS: PublicTool[] = [
 ];
 
 /** The English-only tool pages (the calculator, nisab, and Zakat al-Fitr pages are translated). */
-export const ENGLISH_TOOL_PATHS = ["/ramadan", "/inheritance", "/halal-stocks", "/qurbani"];
+export const ENGLISH_TOOL_PATHS = ["/ramadan", "/farm", "/inheritance", "/halal-stocks", "/qurbani"];

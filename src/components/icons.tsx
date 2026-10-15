@@ -442,3 +442,71 @@ export const IconGoldCoin = ({ className = "h-6 w-6" }: P) => (
     <path d="M5 11.5V15c0 1.7 3.1 3 7 3s7-1.3 7-3v-3.5" />
   </Glyph>
 );
+
+export const IconGoat = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <path d="M5.5 9.5h9a2 2 0 0 1 2 2v2a1.5 1.5 0 0 1-1.5 1.5H6a1.5 1.5 0 0 1-1.5-1.5v-3a1 1 0 0 1 1-1Z" />
+    <path d="M6.5 15v4.5M9 15v4.5M12.5 15v4.5M15 15v4.5" />
+    <path d="M15.8 9.6 17.6 6h2.2l1.3 2.4-1.4 1.1h-1.4" />
+    <path d="M18 6c-.4-1.3 0-2.5 1.2-3.2" />
+    <path d="M20.6 8.9l-.2 1.8" />
+    <path d="M4.6 10.3 3.4 8.8" />
+  </Glyph>
+);
+
+export const IconCow = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <path d="M4 9h11.5a2 2 0 0 1 2 2v3.5a1.5 1.5 0 0 1-1.5 1.5H5.5A1.5 1.5 0 0 1 4 14.5V9Z" />
+    <path d="M5.8 16v3.5M8.5 16v3.5M13 16v3.5M15.7 16v3.5" />
+    <path d="M17.5 10.2 20 9.6a1.4 1.4 0 0 1 1.7 1.1l.4 2.2a1 1 0 0 1-.8 1.2l-2 .4" />
+    <path d="M19.3 9.7c-.5-.9-.4-1.9.3-2.6M21.3 9.9c.6-.6.8-1.5.5-2.3" />
+    <path d="M4 10C2.8 11 2.6 12.6 3 14.2" />
+    <path d="M9.5 9v2.2c0 .8.6 1.3 1.4 1.3H12" />
+  </Glyph>
+);
+
+export const IconCamel = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <path d="M4.5 13.2c0-1.9 1.3-3.4 3.1-3.6.7-2.3 2-3.6 3.6-3.6s2.9 1.3 3.6 3.6h1.4a1.6 1.6 0 0 1 1.6 1.6v1.6c0 .9-.7 1.6-1.6 1.6H6.1a1.6 1.6 0 0 1-1.6-1.2Z" />
+    <path d="M6.3 14.4v5.1M8.8 14.4v5.1M13 14.4v5.1M15.5 14.4v5.1" />
+    <path d="M17.6 10.6c1-1.3 1.4-3 1.5-4.7a1.4 1.4 0 0 1 1.6-1.3l1.1.2-.3 1.7h-1.3" />
+    <path d="M4.6 12.4 3.5 14.6" />
+  </Glyph>
+);
+
+export const IconSack = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <path d="M8.5 3.5h7L14 6.8c3 1.5 5 4.6 5 8.1 0 3.5-2.6 5.6-7 5.6s-7-2.1-7-5.6c0-3.5 2-6.6 5-8.1L8.5 3.5Z" />
+    <path d="M9.5 6.8h5" />
+  </Glyph>
+);
+
+export const IconRain = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <path d="M7 14a4 4 0 0 1 .4-8A5 5 0 0 1 17 6.5a3.75 3.75 0 0 1 0 7.5H7Z" />
+    <path d="M8.5 17l-1 2.5M12.5 17l-1 2.5M16.5 17l-1 2.5" />
+  </Glyph>
+);
+
+export const IconPump = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <path d="M4 21h13" />
+    <path d="M8 21V9.5h5.5V21" />
+    <path d="M13.5 11.5h3.5v2.5" />
+    <path d="M8 9.5 4.5 6.5" />
+    <path d="M10.75 9.5V7" />
+    <path d="M17 16.5v1M17 19v.5" />
+  </Glyph>
+);
+
+export const IconWheat = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <path d="M12 21.5V8.5" />
+    <path d="M12 8.5c-1.6-.7-2.4-2.2-2.1-4 1.6.6 2.4 2.1 2.1 4Z" />
+    <path d="M12 8.5c1.6-.7 2.4-2.2 2.1-4-1.6.6-2.4 2.1-2.1 4Z" />
+    <path d="M12 13c-1.7-.4-2.9-1.8-2.9-3.5 1.7.3 2.9 1.7 2.9 3.5Z" />
+    <path d="M12 13c1.7-.4 2.9-1.8 2.9-3.5-1.7.3-2.9 1.7-2.9 3.5Z" />
+    <path d="M12 17.5c-1.7-.4-2.9-1.8-2.9-3.5 1.7.3 2.9 1.7 2.9 3.5Z" />
+    <path d="M12 17.5c1.7-.4 2.9-1.8 2.9-3.5-1.7.3-2.9 1.7-2.9 3.5Z" />
+  </Glyph>
+);

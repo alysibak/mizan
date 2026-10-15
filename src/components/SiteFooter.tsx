@@ -15,6 +15,8 @@ export function toolLinks(locale: Locale): { href: string; label: string }[] {
     { href: localePath(locale, "/zakat-al-fitr"), label: footer.fitr },
     { href: localePath(locale, "/missed-years"), label: all.missed.nav },
     { href: "/ramadan", label: footer.ramadan + inEnglish },
+    // English pages not yet named in other languages are listed in English only.
+    ...(locale === "en" ? [{ href: "/farm", label: "Crops and animals" }] : []),
     { href: "/inheritance", label: footer.inheritance + inEnglish },
     { href: "/halal-stocks", label: footer.stocks + inEnglish },
     { href: "/qurbani", label: footer.qurbani + inEnglish },

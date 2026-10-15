@@ -620,4 +620,134 @@ export const EVIDENCE: Record<string, CaseEvidence> = {
       EIGHT,
     ],
   },
+
+  // Zakat on a farm: crops at harvest, and grazing animals.
+  crops: {
+    evidence: [
+      {
+        strength: "quran",
+        text: "“…and give its due on the day of its harvest.”",
+        ref: "Quran 6:141",
+      },
+      {
+        strength: "quran",
+        text: "“O you who believe, spend from the good things you have earned, and from what We bring forth for you from the earth.”",
+        ref: "Quran 2:267",
+      },
+      {
+        strength: "sahih",
+        text: "“On what is watered by the sky and springs, or draws its own water, a tenth; on what is watered by irrigation, half a tenth.”",
+        ref: "Sahih al-Bukhari, from Ibn ‘Umar",
+      },
+      {
+        strength: "sahih",
+        text: "“On what is watered by rivers and rain, a tenth; on what is watered by camels drawing water, half a tenth.”",
+        ref: "Sahih Muslim, from Jabir ibn ‘Abd Allah",
+      },
+      {
+        strength: "consensus",
+        text: "Land watered both ways, about half the season each, gives three quarters of a tenth. Ibn Qudamah knew of no scholar who disagreed.",
+        ref: "Ibn Qudamah, al-Mughni",
+      },
+    ],
+    views: [
+      {
+        who: "The Maliki, Shafi‘i, and Hanbali schools, and Abu Hanifa’s students Abu Yusuf and Muhammad",
+        says: "Nothing is due on a harvest under five awsuq (about 653 kg of grain; estimates run from about 600 to 700 kg), and zakat is on staple crops that are dried and stored: grains, dates, and raisins. The Hanbali school adds other stored seeds.",
+        evidence: [
+          {
+            strength: "agreed",
+            text: "“There is no sadaqah on less than five awsuq.”",
+            ref: "Sahih al-Bukhari and Sahih Muslim, from Abu Sa‘id al-Khudri",
+          },
+          {
+            strength: "disputed",
+            text: "Abu Musa and Mu‘adh were sent to Yemen and told to take zakat only from barley, wheat, raisins, and dates.",
+            ref: "Reported by al-Hakim and al-Bayhaqi; graded sahih by al-Hakim, weak by others",
+          },
+        ],
+      },
+      {
+        who: "Abu Hanifa",
+        says: "A tenth or half a tenth is due on everything the land is farmed for, fruit and vegetables included, however small the harvest.",
+        evidence: [
+          {
+            strength: "reasoning",
+            text: "The hadith of a tenth names no lower limit and no particular crop, and the Quran says “what We bring forth for you from the earth”. He took the general words as they are.",
+            ref: "al-Sarakhsi, al-Mabsut",
+          },
+        ],
+      },
+    ],
+  },
+  livestock: {
+    evidence: [
+      {
+        strength: "agreed",
+        text: "“Any owner of camels, cattle, or sheep who does not give what is due on them: they will be brought on the Day of Resurrection, bigger and fatter than they were, trampling him with their hooves and butting him with their horns.”",
+        ref: "Sahih al-Bukhari and Sahih Muslim, from Abu Dharr",
+      },
+      {
+        strength: "sahih",
+        text: "Abu Bakr’s letter on what is due: on grazing sheep, one from forty to 120, two to 200, three to 300, then one for every hundred; on camels, a sheep for every five up to 24, then a camel of a set age as the herd grows.",
+        ref: "Sahih al-Bukhari, from Anas ibn Malik",
+      },
+      {
+        strength: "hasan",
+        text: "The Prophet ﷺ sent Mu‘adh to Yemen and told him to take from every thirty cattle a tabi‘ (a yearling), and from every forty a musinnah (a two-year-old).",
+        ref: "Sunan Abi Dawud, Sunan al-Tirmidhi, and Sunan al-Nasa’i, from Mu‘adh ibn Jabal; graded hasan by al-Tirmidhi",
+      },
+      {
+        strength: "consensus",
+        text: "Buffalo are counted with cattle.",
+        ref: "Reported by Ibn al-Mundhir, al-Ijma‘",
+      },
+      YEAR,
+      {
+        strength: "agreed",
+        text: "“Beware of taking the best of their wealth.” And Abu Bakr’s letter: no old or defective animal is taken.",
+        ref: "Sahih al-Bukhari and Sahih Muslim, from Ibn ‘Abbas; Sahih al-Bukhari, from Anas",
+      },
+    ],
+    views: [
+      {
+        who: "The Hanafi, Shafi‘i, and Hanbali schools",
+        says: "Only animals that graze freely for most of the year are counted. Animals their owner feeds, or keeps for work, are not.",
+        evidence: [
+          {
+            strength: "sahih",
+            text: "Abu Bakr’s letter says “on grazing sheep (sa’imah)”, naming grazing as the condition.",
+            ref: "Sahih al-Bukhari, from Anas ibn Malik",
+          },
+          {
+            strength: "hasan",
+            text: "“On grazing camels, in every forty a bint labun.”",
+            ref: "Sunan Abi Dawud and Sunan al-Nasa’i, from Bahz ibn Hakim, from his father, from his grandfather",
+          },
+        ],
+      },
+      {
+        who: "The Maliki school",
+        says: "Fed and working animals are counted too.",
+        evidence: [
+          {
+            strength: "reasoning",
+            text: "The hadith of Abu Dharr names camels, cattle, and sheep with no condition; Malik read “grazing” as describing the usual case, not limiting it.",
+            ref: "Malik, al-Muwatta’; Ibn ‘Abd al-Barr, al-Istidhkar",
+          },
+        ],
+      },
+      {
+        who: "The Hanafi school, on herds of more than 120 camels",
+        says: "The count starts again after 120, with a sheep for every five, instead of a bint labun for every forty and a hiqqah for every fifty. Mizan follows the majority here.",
+        evidence: [
+          {
+            strength: "disputed",
+            text: "A letter to ‘Amr ibn Hazm, read as restarting the count after 120.",
+            ref: "Reported in Abu Dawud’s al-Marasil and by al-Tahawi; others grade it weak",
+          },
+        ],
+      },
+    ],
+  },
 };

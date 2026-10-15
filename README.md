@@ -147,6 +147,15 @@ work.
   nose pin, chain, bracelet, bangle, necklace, coin), each drawn and given a
   typical weight. Mizan adds them up, in grams or tola, says plainly that it
   is a rough guess, and suggests a jeweller for the real figure.
+- **Crops and animals** (`/farm`, English): zakat for farmers. The harvest
+  by weight (kg or maund) and how the land was watered gives a tenth, half
+  a tenth, or three quarters of a tenth, drawn as ten sacks with the share
+  filled in, against a nisab of about 653 kg. Sheep and goats, cows and
+  buffalo, and camels are counted against the tables of Abu Bakr's letter
+  and the hadith of Mu‘adh, and what is owed is drawn as the animals
+  themselves, each with its age. Animals fed or kept for work, and the
+  Hanafi and Maliki views, are spelled out; the evidence for both folds out
+  below.
 - **Ramadan giving** (`/ramadan`, English): the three things in the order
   they come (zakat, the last ten nights, Zakat al-Fitr), with a planner that
   spreads a sum over the last ten nights, twice as much on the odd ones if
