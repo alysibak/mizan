@@ -26,7 +26,7 @@ const PAGE_CACHE = `${VERSION}-pages`;
 
 /** Public pages that read the same for everyone, with or without a language prefix. */
 const PUBLIC_PAGE =
-  /^(?:\/(?:ar|ur|bn|id|ms|tr|fr))?(?:\/(?:start|guide|calculator|who-can-receive|what-counts|missed-years|ask|worksheet|ramadan|farm|zakat-al-fitr|sources|nisab(?:\/[a-z]{3})?))?$/;
+  /^(?:\/(?:ar|ur|bn|id|ms|tr|fr))?(?:\/(?:start|guide|calculator|who-can-receive|what-counts|missed-years|ask|worksheet|ramadan|family|farm|zakat-al-fitr|sources|nisab(?:\/[a-z]{3})?))?$/;
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

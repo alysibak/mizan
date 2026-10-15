@@ -324,12 +324,15 @@ export function BalanceScale({
   money,
   labels,
   className = "",
+  bare = false,
 }: {
   net: number;
   nisab: number;
   money: (n: number) => string;
   labels: { you: string; nisab: string };
   className?: string;
+  /** Only the drawing, for a small scale beside its own words. */
+  bare?: boolean;
 }) {
   const angle = scaleAngle(net, nisab);
   const rad = (angle * Math.PI) / 180;
@@ -372,7 +375,7 @@ export function BalanceScale({
           <path d="M-10 39 L-7 28 H7 L10 39 Z" className="fill-sage" />
         </g>
       </svg>
-      <div className="mt-1 grid grid-cols-2 gap-3 text-center text-xs">
+      <div className={"mt-1 grid grid-cols-2 gap-3 text-center text-xs" + (bare ? " hidden" : "")}>
         <div>
           <p className="text-sage">{labels.you}</p>
           <p className={"font-medium nums " + (above ? "text-pine" : "text-ink")}>{money(net)}</p>

@@ -69,6 +69,7 @@ test("every tool page is linked from the footer and has no horizontal scroll", a
   await page.goto("/");
   for (const name of [
     "Ramadan giving",
+    "Family zakat",
     "Crops and animals",
     "Inheritance calculator",
     "Zakat al-Fitr",
@@ -81,7 +82,7 @@ test("every tool page is linked from the footer and has no horizontal scroll", a
     const res = await page.request.get(href!);
     expect(res.status()).toBe(200);
   }
-  for (const path of ["/ramadan", "/farm", "/inheritance", "/zakat-al-fitr", "/halal-stocks", "/qurbani"]) {
+  for (const path of ["/ramadan", "/family", "/farm", "/inheritance", "/zakat-al-fitr", "/halal-stocks", "/qurbani"]) {
     await page.goto(path);
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -142,6 +143,33 @@ test("farm: a tenth of the harvest, and what each herd owes", async ({ page }) =
   await page.getByText("Eat feed you bought or grew").click();
   await expect(page.getByText("Give 2 sheep or goats")).toHaveCount(0);
   await expect(page.getByText(/Imam Malik counts them too/)).toBeVisible();
+});
+
+test("family: each person weighed alone, and a warning when pooling misleads", async ({ page }) => {
+  await page.route("**/api/metals?*", (route) =>
+    route.fulfill({ json: { currency: "USD", goldPricePerGram: 100, silverPricePerGram: 1.2, source: "test" } }),
+  );
+  await page.goto("/family");
+  await page.locator("#tool-currency").selectOption("USD");
+  // Silver nisab: 595 g at 1.2 is US$714.
+  await expect(page.getByText("US$714.00")).toBeVisible();
+
+  const me = page.getByRole("listitem", { name: "Me", exact: true });
+  await me.getByLabel("Cash and savings").fill("500");
+  await page.getByRole("button", { name: "Wife or husband", exact: true }).click();
+  const wife = page.getByRole("listitem", { name: "Wife or husband", exact: true });
+  await wife.getByLabel("Cash and savings").fill("400");
+  await expect(page.getByRole("heading", { name: "No one in your family owes zakat" })).toBeVisible();
+  await expect(page.getByText(/Added together, your family has US\$900\.00/)).toContainText("you and your wife or husband are under the nisab");
+
+  // 10 g of 22k gold is 916 more: now she owes 2.5% of 1,316.
+  await wife.getByLabel("Gold, in grams").fill("10");
+  await expect(wife.getByText("US$32.90")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Your family gives US$32.90" })).toBeVisible();
+
+  // Kept in this browser.
+  await page.reload();
+  await expect(page.getByRole("listitem", { name: "Wife or husband", exact: true }).getByLabel("Cash and savings")).toHaveValue("400");
 });
 
 test("guides answer the common questions and lead to the calculator", async ({ page }) => {
