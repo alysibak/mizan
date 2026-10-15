@@ -18,6 +18,7 @@ export function toolLinks(locale: Locale): { href: string; label: string }[] {
     // English pages not yet named in other languages are listed in English only.
     ...(locale === "en"
       ? [
+          { href: "/sadaqah", label: "Sadaqah without money" },
           { href: "/quiz", label: "Zakat quiz" },
           { href: "/family", label: "Family zakat" },
           { href: "/farm", label: "Crops and animals" },

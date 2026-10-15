@@ -69,6 +69,7 @@ test("every tool page is linked from the footer and has no horizontal scroll", a
   await page.goto("/");
   for (const name of [
     "Ramadan giving",
+    "Sadaqah without money",
     "Zakat quiz",
     "Family zakat",
     "Crops and animals",
@@ -83,7 +84,7 @@ test("every tool page is linked from the footer and has no horizontal scroll", a
     const res = await page.request.get(href!);
     expect(res.status()).toBe(200);
   }
-  for (const path of ["/ramadan", "/quiz", "/family", "/farm", "/inheritance", "/zakat-al-fitr", "/halal-stocks", "/qurbani"]) {
+  for (const path of ["/ramadan", "/sadaqah", "/quiz", "/family", "/farm", "/inheritance", "/zakat-al-fitr", "/halal-stocks", "/qurbani"]) {
     await page.goto(path);
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -193,6 +194,19 @@ test("quiz: ten picture questions, each answered at once, and a score", async ({
   await expect(page.getByRole("link", { name: "No: read why" })).toHaveAttribute("href", "/what-counts#home");
   await page.getByRole("button", { name: "Play again" }).click();
   await expect(page.getByRole("heading", { name: "The home you live in" })).toBeVisible();
+});
+
+test("sadaqah: one deed for today, and every deed with its source", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-10-11T10:00:00"));
+  await page.goto("/sadaqah");
+  await expect(page.getByRole("heading", { name: "Say a kind word" })).toBeVisible();
+  await page.getByRole("button", { name: "Show me another" }).click();
+  await expect(page.getByRole("heading", { name: "Move something harmful off the road" })).toBeVisible();
+
+  const cards = page.locator("main ul").first();
+  await expect(cards.getByRole("listitem")).toHaveCount(18);
+  await cards.getByText("Plant a tree or a seed").click();
+  await expect(cards.getByText("Sahih al-Bukhari and Sahih Muslim, from Anas ibn Malik")).toBeVisible();
 });
 
 test("guides answer the common questions and lead to the calculator", async ({ page }) => {

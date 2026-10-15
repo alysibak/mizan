@@ -147,6 +147,13 @@ work.
   nose pin, chain, bracelet, bangle, necklace, coin), each drawn and given a
   typical weight. Mizan adds them up, in grams or tola, says plainly that it
   is a rough guess, and suggests a jeweller for the real figure.
+- **Sadaqah without money** (`/sadaqah`, English): for people who think
+  charity is only for the rich. Eighteen kinds of sadaqah the Quran and
+  hadith name (a smile, a kind word, moving harm off the road, water,
+  planting, spending on your family, giving a debtor more time), each a
+  picture card that opens to its source with a strength tag. One is "today's
+  sadaqah", the same for everyone each day, with another a tap away and a
+  WhatsApp share.
 - **Zakat quiz** (`/quiz`, English): ten picture questions, one at a time
   ("Do I pay zakat on… the home you live in?", "Can I give zakat to… my
   brother or sister?"). Tap Yes or No and see at once whether it was right

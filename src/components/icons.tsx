@@ -510,3 +510,98 @@ export const IconWheat = ({ className = "h-6 w-6" }: P) => (
     <path d="M12 17.5c1.7-.4 2.9-1.8 2.9-3.5-1.7.3-2.9 1.7-2.9 3.5Z" />
   </Glyph>
 );
+
+export const IconSmile = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M8 14c1 1.5 2.4 2.3 4 2.3s3-.8 4-2.3" />
+    <path d="M9 9.5h.01M15 9.5h.01" strokeWidth={2.4} />
+  </Glyph>
+);
+
+export const IconSpeech = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <path d="M4 5.5h16a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-9l-4.5 3.5V16.5H4a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1Z" />
+    <path d="M12 13.6c-1.9-1.2-3-2.3-3-3.4a1.6 1.6 0 0 1 3-.8 1.6 1.6 0 0 1 3 .8c0 1.1-1.1 2.2-3 3.4Z" />
+  </Glyph>
+);
+
+export const IconRoad = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <path d="M8 3 4.5 21M16 3l3.5 18" />
+    <path d="M12 4v2.5M12 10v2.5M12 16v2.5" />
+    <path d="M13.8 13.6c.4-1 1.6-1.4 2.5-.8.8.5.9 1.6.2 2.3-.6.6-1.7.7-2.3.1-.5-.4-.6-1-.4-1.6Z" />
+  </Glyph>
+);
+
+export const IconSteps = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <path d="M7.5 12.5c-1.5 0-2.5-1.8-2.5-4S6 4 7.5 4 10 6.3 10 8.5s-1 4-2.5 4Z" />
+    <path d="M6.2 15.5h2.6v1.7a1.3 1.3 0 0 1-2.6 0v-1.7Z" />
+    <path d="M16.5 15.5c-1.5 0-2.5-1.8-2.5-4S15 7 16.5 7 19 9.3 19 11.5s-1 4-2.5 4Z" />
+    <path d="M15.2 18.5h2.6v1.2a1.3 1.3 0 0 1-2.6 0v-1.2Z" />
+  </Glyph>
+);
+
+export const IconBeads = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <circle cx="12" cy="4.5" r="1.5" />
+    <circle cx="7.2" cy="6.6" r="1.5" />
+    <circle cx="16.8" cy="6.6" r="1.5" />
+    <circle cx="5.2" cy="11.3" r="1.5" />
+    <circle cx="18.8" cy="11.3" r="1.5" />
+    <circle cx="7.2" cy="16" r="1.5" />
+    <circle cx="16.8" cy="16" r="1.5" />
+    <path d="M12 17.5v4M10.5 21.5h3" />
+    <circle cx="12" cy="17.5" r="0.4" />
+  </Glyph>
+);
+
+export const IconSun = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <path d="M7 17a5 5 0 0 1 10 0" />
+    <path d="M3 17h18M12 7.5V9.5M5.6 10.6l1.4 1.4M18.4 10.6 17 12M3.5 20.5h17" />
+  </Glyph>
+);
+
+export const IconTree = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <path d="M12 21v-7" />
+    <path d="M12 14c-4 0-6.5-2.2-6.5-5.2S8.2 3 12 3s6.5 2.8 6.5 5.8S16 14 12 14Z" />
+    <path d="M12 11l-2.5-2M12 12.5l2.8-2.6" />
+    <path d="M8 21h8" />
+  </Glyph>
+);
+
+export const IconWater = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <path d="M12 3.5c3 3.6 5.5 6.8 5.5 10a5.5 5.5 0 0 1-11 0c0-3.2 2.5-6.4 5.5-10Z" />
+    <path d="M9.5 14.5a2.6 2.6 0 0 0 2.5 2.5" />
+  </Glyph>
+);
+
+export const IconSignpost = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <path d="M12 3v18M9 21h6" />
+    <path d="M12 5.5h6.5l2 2-2 2H12" />
+    <path d="M12 11.5H5.5l-2 2 2 2H12" />
+  </Glyph>
+);
+
+export const IconDate = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <path d="M12 6.5c3.4 0 5.5 3.2 5.5 7.2S15.4 21 12 21s-5.5-3.3-5.5-7.3S8.6 6.5 12 6.5Z" />
+    <path d="M12 6.5c0-1.6.7-2.8 2-3.5" />
+    <path d="M12 10v7" opacity=".5" />
+  </Glyph>
+);
+
+export const IconPaw = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <path d="M12 12.5c-2.6 0-5 2.6-5 4.8 0 1.6 1.2 2.4 2.6 2.1 1-.2 1.6-.6 2.4-.6s1.4.4 2.4.6c1.4.3 2.6-.5 2.6-2.1 0-2.2-2.4-4.8-5-4.8Z" />
+    <ellipse cx="7" cy="9.5" rx="1.6" ry="2" />
+    <ellipse cx="17" cy="9.5" rx="1.6" ry="2" />
+    <ellipse cx="10" cy="5.8" rx="1.5" ry="2" />
+    <ellipse cx="14" cy="5.8" rx="1.5" ry="2" />
+  </Glyph>
+);

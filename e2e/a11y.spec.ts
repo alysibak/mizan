@@ -61,6 +61,7 @@ for (const scheme of ["light", "dark"] as const) {
         "/farm",
         "/family",
         "/quiz",
+        "/sadaqah",
         "/inheritance",
         "/zakat-al-fitr",
         "/halal-stocks",
