@@ -25,7 +25,8 @@ import { TierTag } from "@/components/public/Evidence";
 import ShareButton, { type ShareLabels } from "@/components/public/ShareButton";
 import { STRENGTH } from "@/content/evidence";
 import { DEEDS, deedOfTheDay, type Deed } from "@/content/sadaqah";
-import { useHydrated } from "@/lib/client-store";
+import { setStoredValue, useHydrated, useStoredValue } from "@/lib/client-store";
+import { dayKey, monthCount, monthGrid, streak } from "@/lib/streak";
 
 export const DEED_ICONS: Record<string, typeof IconSmile> = {
   smile: IconSmile,
@@ -107,5 +108,119 @@ export function DeedCards({ deeds = DEEDS }: { deeds?: Deed[] }) {
         );
       })}
     </ul>
+  );
+}
+
+const DAYS_KEY = "mizan-sadaqah-days-v1";
+const KEEP_DAYS = 400;
+
+/** The days kept in this browser, or none if nothing (or nonsense) was. */
+function parseDays(raw: string | null): Set<string> {
+  try {
+    const v: unknown = raw ? JSON.parse(raw) : [];
+    return new Set(Array.isArray(v) ? v.filter((d): d is string => typeof d === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d)) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+/**
+ * A month of good deeds: tap once a day, see the days fill in and the
+ * streak grow. Kept in this browser only.
+ */
+export function DeedDays() {
+  const hydrated = useHydrated();
+  const days = parseDays(useStoredValue(DAYS_KEY));
+  if (!hydrated) return <div className="card min-h-[20rem]" aria-hidden />;
+  const today = new Date();
+  const key = dayKey(today);
+  const done = days.has(key);
+  const run = streak(days, today);
+  const month = today.toLocaleDateString("en-CA", { month: "long", year: "numeric" });
+
+  function toggle() {
+    const next = new Set(days);
+    if (done) next.delete(key);
+    else next.add(key);
+    setStoredValue(DAYS_KEY, JSON.stringify([...next].sort().slice(-KEEP_DAYS)));
+  }
+
+  return (
+    <section className="card p-5 sm:p-6" aria-labelledby="deed-days">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h2 id="deed-days" className="font-serif text-2xl text-ink">
+            A little, every day
+          </h2>
+          <p className="mt-1 max-w-md text-sm leading-relaxed text-sage">
+            “The deeds most loved by Allah are those done regularly, even if they are small.”
+            <span className="block text-xs">Sahih al-Bukhari and Sahih Muslim, from ‘A’ishah</span>
+          </p>
+        </div>
+        <button
+          type="button"
+          aria-pressed={done}
+          onClick={toggle}
+          className={
+            "min-h-[52px] px-5 text-base font-medium transition " +
+            (done ? "border-2 border-pine bg-pine/5 text-pine" : "btn-primary")
+          }
+        >
+          {done ? "✓ Done today" : "I did a good deed today"}
+        </button>
+      </div>
+
+      <div className="mt-5 grid gap-5 sm:grid-cols-[minmax(0,1fr)_10rem] sm:items-center">
+        <table className="w-full table-fixed text-center text-xs">
+          <caption className="mb-2 text-start text-sm font-medium text-ink">{month}</caption>
+          <thead>
+            <tr className="text-sage">
+              {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((d) => (
+                <th key={d} scope="col" className="pb-1 font-normal">
+                  <span aria-hidden>{d[0]}</span>
+                  <span className="sr-only">{d}</span>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {monthGrid(today).map((week, w) => (
+              <tr key={w}>
+                {week.map((d, i) => {
+                  if (!d) return <td key={i} />;
+                  const k = dayKey(d);
+                  const on = days.has(k);
+                  const isToday = k === key;
+                  return (
+                    <td key={i} className="p-0.5">
+                      <span
+                        className={
+                          "mx-auto flex h-8 w-8 items-center justify-center rounded-full nums " +
+                          (on ? "bg-pine text-surface" : isToday ? "border-2 border-pine text-ink" : "text-sage")
+                        }
+                      >
+                        {d.getDate()}
+                        {on ? <span className="sr-only"> (done)</span> : null}
+                      </span>
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <dl className="grid grid-cols-2 gap-3 text-center sm:grid-cols-1" aria-live="polite">
+          <div>
+            <dt className="text-xs text-sage">Days in a row</dt>
+            <dd className="font-serif text-3xl text-pine nums">{run}</dd>
+          </div>
+          <div>
+            <dt className="text-xs text-sage">This month</dt>
+            <dd className="font-serif text-3xl text-ink nums">{monthCount(days, today)}</dd>
+          </div>
+        </dl>
+      </div>
+      <p className="mt-4 text-xs text-sage">Kept on this phone only. Only Allah needs to know.</p>
+    </section>
   );
 }

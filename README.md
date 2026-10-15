@@ -163,7 +163,10 @@ work.
   planting, spending on your family, giving a debtor more time), each a
   picture card that opens to its source with a strength tag. One is "today's
   sadaqah", the same for everyone each day, with another a tap away and a
-  WhatsApp share.
+  WhatsApp share. "I did a good deed today" fills in that day on a month
+  calendar and counts the days in a row, under the hadith that the deeds
+  Allah loves most are the regular ones, even if small; it stays on the
+  device.
 - **Zakat quiz** (`/quiz`, English): ten picture questions, one at a time
   ("Do I pay zakat on… the home you live in?", "Can I give zakat to… my
   brother or sister?"). Tap Yes or No and see at once whether it was right

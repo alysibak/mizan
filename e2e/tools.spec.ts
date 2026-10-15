@@ -210,6 +210,13 @@ test("sadaqah: one deed for today, and every deed with its source", async ({ pag
   await expect(cards.getByRole("listitem")).toHaveCount(18);
   await cards.getByText("Plant a tree or a seed").click();
   await expect(cards.getByText("Sahih al-Bukhari and Sahih Muslim, from Anas ibn Malik")).toBeVisible();
+
+  // A good deed marked today fills in the day and starts a streak, kept on the device.
+  await page.getByRole("button", { name: "I did a good deed today" }).click();
+  await expect(page.getByRole("button", { name: "✓ Done today" })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("table", { name: "October 2026" }).getByText("11 (done)")).toBeAttached();
+  await page.reload();
+  await expect(page.getByRole("button", { name: "✓ Done today" })).toBeVisible();
 });
 
 test("shop: stock, till, and money owed counted; suppliers taken off", async ({ page }) => {
