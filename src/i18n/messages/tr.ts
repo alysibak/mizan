@@ -12,6 +12,7 @@ const tr: Messages = {
       yourLedger: "Defteriniz",
     },
     footer: {
+      ramadan: "Ramazan bağışları",
       disclaimer:
         "Kişisel bir tahmin aracıdır; ilim ehlinin rehberliğinin yerini tutmaz. Kendi durumunuz için yetkin bir âlime danışın.",
       calculator: "Zekât hesaplama",
@@ -405,6 +406,25 @@ const tr: Messages = {
     value: "Bugünkü değeri",
     amount: "Tutar",
     worth: "Bugünkü fiyatla yaklaşık {amount} eder.",
+    picker: {
+      dontKnow: "Ağırlığını bilmiyorum",
+      title: "Sahip olduğunuz her parçaya dokunun",
+      estimate: "Yaklaşık {weight}: alışılmış ağırlıklardan kaba bir tahmin.",
+      hint: "Parçalar çok farklı olabilir. Bir kuyumcu tam olarak tartabilir.",
+      use: "Bu ağırlığı kullan",
+      add: "Bir tane ekle: {item}",
+      remove: "Bir tane çıkar: {item}",
+      items: {
+        ring: "Yüzük",
+        earrings: "Küpe (çift)",
+        nosePin: "Hızma",
+        chain: "Zincir",
+        bracelet: "Bileklik",
+        bangle: "Bilezik",
+        necklace: "Kolye",
+        coin: "Altın sikke",
+      },
+    },
     steps: {
       currency: {
         title: "Hangi para birimini kullanıyorsunuz?",
@@ -480,6 +500,7 @@ const tr: Messages = {
   },
 
   ramadan: {
+    plan: "Ramazan bağışlarınızı planlayın",
     before: "{year} Ramazanı yaklaşık {date} tarihinde başlıyor, {when}.",
     during: "Ramazan’ın {day}. günü. Ramazan Bayramı yaklaşık {date}.",
     hint: "Pek çok kişi zekâtını Ramazan’da hesaplayıp verir. Kesin gün, bulunduğunuz yerdeki hilal gözlemine bağlıdır.",

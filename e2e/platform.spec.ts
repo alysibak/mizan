@@ -23,6 +23,15 @@ test("installable: manifest, icons, service worker, offline page", async ({ page
   }
   expect(await (await request.get("/offline")).text()).toContain("You are offline");
 
+  // Added from an Urdu page, the home-screen app opens in Urdu, without an
+  // account, with its shortcuts in Urdu.
+  expect(manifest.start_url).toBe("/");
+  const urdu = await (await request.get("/ur/manifest.webmanifest")).json();
+  expect(urdu).toMatchObject({ id: "/", start_url: "/ur", lang: "ur", dir: "rtl" });
+  expect(urdu.shortcuts[0]).toMatchObject({ short_name: "یہاں سے شروع کریں", url: "/ur/start" });
+  await page.goto("/ur");
+  await expect(page.locator('link[rel="manifest"]')).toHaveAttribute("href", "/ur/manifest.webmanifest");
+
   await page.goto("/login");
   const active = await page.evaluate(async () => {
     const reg = await Promise.race([

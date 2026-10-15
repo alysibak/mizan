@@ -14,6 +14,7 @@ const en = {
       yourLedger: "Your ledger",
     },
     footer: {
+      ramadan: "Ramadan giving",
       disclaimer:
         "A personal estimation aid, not a substitute for scholarly guidance. For your situation, consult a qualified person of knowledge.",
       calculator: "Zakat calculator",
@@ -431,6 +432,25 @@ const en = {
     value: "What it’s worth today",
     amount: "Amount",
     worth: "Worth about {amount} at today’s price.",
+    picker: {
+      dontKnow: "I don’t know the weight",
+      title: "Tap each piece you have",
+      estimate: "About {weight}: a rough guess from typical weights.",
+      hint: "Pieces vary a lot. A jeweller can weigh them for an exact figure.",
+      use: "Use this weight",
+      add: "Add one: {item}",
+      remove: "Take one away: {item}",
+      items: {
+        ring: "Ring",
+        earrings: "Earrings (pair)",
+        nosePin: "Nose pin",
+        chain: "Chain",
+        bracelet: "Bracelet",
+        bangle: "Bangle",
+        necklace: "Necklace",
+        coin: "Gold coin",
+      },
+    },
     steps: {
       currency: {
         title: "Which money do you use?",
@@ -515,6 +535,7 @@ const en = {
   },
 
   ramadan: {
+    plan: "Plan your Ramadan giving",
     /** {when} is "in 120 days", "tomorrow", … in the page's language. */
     before: "Ramadan {year} begins around {date}, {when}.",
     during: "It is Ramadan, day {day}. Eid al-Fitr is around {date}.",

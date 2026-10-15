@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { hawlCalendar } from "./ics";
+import { eveningsCalendar, hawlCalendar } from "./ics";
 
 describe("hawlCalendar", () => {
   const now = new Date("2026-10-02T12:00:00Z");
@@ -32,3 +32,23 @@ describe("hawlCalendar", () => {
     expect(hawlCalendar({ dueDay: "2027-08-07", calendarLabel: "tabular", now })).not.toMatch(/\$|zakat due|\d+\.\d\d/i);
   });
 });
+
+describe("eveningsCalendar", () => {
+  it("has one evening event per night, with an alert, at local time", () => {
+    const ics = eveningsCalendar({
+      uid: "nights",
+      time: "19:30",
+      now: new Date("2026-10-14T00:00:00Z"),
+      events: [
+        { day: "2027-02-27", summary: "Night 21: give $10", description: "Last ten nights, plan" },
+        { day: "2027-02-28", summary: "Night 22: give $10", description: "Last ten nights" },
+      ],
+    });
+    expect(ics.match(/BEGIN:VEVENT/g)).toHaveLength(2);
+    expect(ics).toContain("DTSTART:20270227T193000");
+    expect(ics).toContain("DTEND:20270227T194500");
+    expect(ics).toContain("DESCRIPTION:Last ten nights\\, plan");
+    expect(ics.match(/BEGIN:VALARM/g)).toHaveLength(2);
+  });
+});
+

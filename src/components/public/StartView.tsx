@@ -85,7 +85,7 @@ export default function StartView({ locale }: { locale: Locale }) {
             {m.title}
           </h1>
           <p className="mt-4 text-lg leading-relaxed text-sage">{m.lede}</p>
-          <RamadanCountdown m={all.ramadan} locale={locale} className="mt-6" />
+          <RamadanCountdown m={all.ramadan} locale={locale} inEnglish={all.common.inEnglish} className="mt-6" />
         </header>
 
         <div className="mt-12 space-y-12">

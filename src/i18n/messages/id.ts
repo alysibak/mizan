@@ -12,6 +12,7 @@ const id: Messages = {
       yourLedger: "Pembukuan Anda",
     },
     footer: {
+      ramadan: "Sedekah Ramadan",
       disclaimer:
         "Alat bantu perkiraan pribadi, bukan pengganti bimbingan ulama. Untuk keadaan Anda, tanyakan kepada orang berilmu yang berkompeten.",
       calculator: "Kalkulator zakat",
@@ -403,6 +404,25 @@ const id: Messages = {
     value: "Nilainya hari ini",
     amount: "Jumlah",
     worth: "Senilai sekitar {amount} dengan harga hari ini.",
+    picker: {
+      dontKnow: "Saya tidak tahu beratnya",
+      title: "Ketuk setiap perhiasan yang Anda punya",
+      estimate: "Sekitar {weight}: perkiraan kasar dari berat yang biasa.",
+      hint: "Beratnya bisa sangat berbeda. Toko emas bisa menimbangnya dengan tepat.",
+      use: "Pakai berat ini",
+      add: "Tambah satu: {item}",
+      remove: "Kurangi satu: {item}",
+      items: {
+        ring: "Cincin",
+        earrings: "Anting (sepasang)",
+        nosePin: "Tindik hidung",
+        chain: "Kalung rantai",
+        bracelet: "Gelang",
+        bangle: "Gelang keroncong",
+        necklace: "Kalung",
+        coin: "Koin emas",
+      },
+    },
     steps: {
       currency: {
         title: "Mata uang apa yang Anda pakai?",
@@ -478,6 +498,7 @@ const id: Messages = {
   },
 
   ramadan: {
+    plan: "Rencanakan sedekah Ramadan Anda",
     before: "Ramadan {year} dimulai sekitar {date}, {when}.",
     during: "Hari ini Ramadan hari ke-{day}. Idulfitri sekitar {date}.",
     hint: "Banyak orang menghitung dan membayar zakat di bulan Ramadan. Tanggal pastinya mengikuti rukyat hilal di tempat Anda.",

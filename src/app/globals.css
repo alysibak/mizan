@@ -232,6 +232,13 @@
   .script-urdu h2 {
     line-height: 1.9;
   }
+  /* Tailwind's text sizes bring line heights made for Latin type, which
+     squash Nastaliq; an explicit leading-* class still wins. */
+  .script-urdu
+    :is(.text-xs, .text-sm, .text-base, .text-lg, .text-xl, .text-2xl, .text-3xl):not([class*="leading-"]),
+  .script-urdu :is(.leading-snug, .leading-normal, .leading-relaxed) {
+    line-height: 1.95;
+  }
   .script-urdu .label {
     font-size: 0.9rem;
   }

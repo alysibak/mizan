@@ -11,6 +11,7 @@ import {
   type ReactNode,
 } from "react";
 import Link from "next/link";
+import { BalanceScale } from "@/components/public/Visuals";
 import { useSearchParams } from "next/navigation";
 import {
   CALC_FIELDS,
@@ -33,6 +34,7 @@ import {
 import { NISAB_GOLD_GRAMS, NISAB_SILVER_GRAMS } from "@/lib/nisab";
 import { KARAT_PURITY, TOLA_GRAMS, usesTola } from "@/lib/metals";
 import { formatMoney, formatPercent } from "@/lib/money";
+import { amountInWords } from "@/lib/number-words";
 import { readStoredValue, setStoredValue, useHydrated } from "@/lib/client-store";
 import { track } from "@/lib/analytics";
 import { CurrencyOptions } from "@/components/public/VisitorCurrency";
@@ -312,6 +314,7 @@ function Calculator({
       field={field}
       draft={draft}
       currency={c}
+      intl={intl}
       m={m}
       onAmount={(v) => updateIn("amounts", field.key, v)}
       onByWeight={(v) => setByWeight(field.key as WeighableKey, v)}
@@ -467,6 +470,8 @@ function Calculator({
               currency={c}
               value={draft.debts}
               onChange={(v) => update({ debts: v })}
+              intl={intl}
+              decimal={draft.decimal}
             />
           </div>
         </section>
@@ -538,6 +543,18 @@ function Calculator({
           <p className="label text-pine" id="calc-result">
             {m.resultLabel}
           </p>
+          {!outcome.needsPrices && !empty ? (
+            <BalanceScale
+              className="my-3"
+              net={result.netZakatable}
+              nisab={result.nisab}
+              money={money}
+              labels={{
+                you: m.netWealth,
+                nisab: draft.standard === "gold" ? m.nisabGold : m.nisabSilver,
+              }}
+            />
+          ) : null}
           <div aria-live="polite" className="mt-1">
             {outcome.needsPrices ? (
               <p className="font-serif text-xl text-ink">
@@ -634,6 +651,7 @@ function Calculator({
                   money={money}
                   onChange={(v) => update({ given: v })}
                   m={m}
+                  intl={intl}
                 />
               </div>
             ) : (
@@ -797,6 +815,7 @@ export function GivenTracker({
   money,
   onChange,
   m,
+  intl,
 }: {
   id: string;
   due: number;
@@ -806,6 +825,8 @@ export function GivenTracker({
   money: (n: number) => string;
   onChange: (v: string) => void;
   m: CalcMessages;
+  /** The page's number format, to say a large amount in words. */
+  intl?: string;
 }) {
   const given = parseAmount(value, decimal);
   const left = Math.max(0, due - given);
@@ -813,7 +834,15 @@ export function GivenTracker({
   return (
     <div className="mt-5 border-t border-mist pt-4">
       <div className="max-w-[15rem]">
-        <MoneyInput id={id} label={m.givenTitle} currency={currency} value={value} onChange={onChange} />
+        <MoneyInput
+          id={id}
+          label={m.givenTitle}
+          currency={currency}
+          value={value}
+          onChange={onChange}
+          intl={intl}
+          decimal={decimal}
+        />
       </div>
       <p className="mt-1 text-xs leading-relaxed text-sage">{m.givenHint}</p>
       {given > 0 ? (
@@ -836,13 +865,20 @@ export function MoneyInput({
   currency,
   value,
   onChange,
+  intl,
+  decimal,
 }: {
   id: string;
   label: string;
   currency: string;
   value: string;
   onChange: (v: string) => void;
+  /** The page's number format; with it, a large amount is also said in words. */
+  intl?: string;
+  /** The decimal mark the amount was typed with, if not the page's own. */
+  decimal?: CalcDraft["decimal"];
 }) {
+  const words = intl ? amountInWords(parseAmount(value, decimal ?? decimalMarkFor(intl)), intl, currency) : null;
   return (
     <div>
       <label className="label mb-1.5" htmlFor={id}>
@@ -861,9 +897,21 @@ export function MoneyInput({
           className="field ps-12 nums"
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          aria-describedby={words ? `${id}-words` : undefined}
         />
       </div>
+      <AmountWords id={`${id}-words`} words={words} />
     </div>
+  );
+}
+
+/** "= 25 lakh" under a money box, to catch a slipped zero. */
+export function AmountWords({ id, words }: { id: string; words: string | null }) {
+  if (!words) return null;
+  return (
+    <p id={id} className="mt-1 text-sm text-pine nums">
+      {words.startsWith("≈") ? words : `= ${words}`}
+    </p>
   );
 }
 
@@ -881,6 +929,7 @@ function HoldingField({
   field,
   draft,
   currency,
+  intl,
   m,
   onAmount,
   onByWeight,
@@ -893,6 +942,7 @@ function HoldingField({
   field: CalcField;
   draft: CalcDraft;
   currency: string;
+  intl: string;
   m: CalcMessages;
   onAmount: (v: string) => void;
   onByWeight: (v: boolean) => void;
@@ -908,6 +958,7 @@ function HoldingField({
   const purityOptions = purityOptionsFor(weighKey, m);
   const unit = weightUnitOf(draft);
   const text = m.fields[field.key];
+  const words = amountInWords(parseAmount(draft.amounts[field.key] ?? "", draft.decimal), intl, currency);
   const explain = useContext(ExplainContext);
   const explainFor = (key: CalcFieldKey): string | null =>
     key === "bank"
@@ -1020,7 +1071,9 @@ function HoldingField({
               className="field ps-12 nums"
               value={draft.amounts[field.key] ?? ""}
               onChange={(e) => onAmount(e.target.value)}
+              aria-describedby={words ? `${id}-words` : undefined}
             />
+            <AmountWords id={`${id}-words`} words={words} />
           </div>
         )}
         {field.portion ? (

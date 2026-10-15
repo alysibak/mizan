@@ -12,6 +12,7 @@ const fr: Messages = {
       yourLedger: "Votre registre",
     },
     footer: {
+      ramadan: "Dons du Ramadan",
       disclaimer:
         "Un outil d’estimation personnel, qui ne remplace pas l’avis des savants. Pour votre situation, consultez une personne de science qualifiée.",
       calculator: "Calculateur de zakat",
@@ -401,6 +402,25 @@ const fr: Messages = {
     value: "Sa valeur aujourd’hui",
     amount: "Montant",
     worth: "Environ {amount} au prix du jour.",
+    picker: {
+      dontKnow: "Je ne connais pas le poids",
+      title: "Touchez chaque pièce que vous avez",
+      estimate: "Environ {weight} : une estimation grossière à partir de poids habituels.",
+      hint: "Les pièces varient beaucoup. Un bijoutier peut les peser exactement.",
+      use: "Utiliser ce poids",
+      add: "En ajouter une : {item}",
+      remove: "En retirer une : {item}",
+      items: {
+        ring: "Bague",
+        earrings: "Boucles d’oreilles (paire)",
+        nosePin: "Piercing de nez",
+        chain: "Chaîne",
+        bracelet: "Bracelet",
+        bangle: "Jonc",
+        necklace: "Collier",
+        coin: "Pièce d’or",
+      },
+    },
     steps: {
       currency: {
         title: "Quelle monnaie utilisez-vous ?",
@@ -476,6 +496,7 @@ const fr: Messages = {
   },
 
   ramadan: {
+    plan: "Planifiez vos dons du Ramadan",
     before: "Le Ramadan {year} commence vers le {date}, {when}.",
     during: "C’est le Ramadan, jour {day}. L’Aïd al-Fitr est vers le {date}.",
     hint: "Beaucoup calculent et versent leur zakat pendant le Ramadan. Le jour exact dépend de l’observation du croissant chez vous.",

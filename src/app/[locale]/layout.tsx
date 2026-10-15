@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Noto_Naskh_Arabic, Noto_Nastaliq_Urdu } from "next/font/google";
 import HtmlLang from "@/components/HtmlLang";
@@ -26,6 +27,12 @@ export const dynamicParams = false;
 
 export function generateStaticParams() {
   return PREFIXED_LOCALES.map((locale) => ({ locale }));
+}
+
+/** Adding Mizan to the home screen from these pages gives an app in this language. */
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  return isLocale(locale) && locale !== "en" ? { manifest: `/${locale}/manifest.webmanifest` } : {};
 }
 
 export default async function LocaleLayout({

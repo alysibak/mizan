@@ -154,6 +154,7 @@ export default function MissedTally({
               id="missed-same"
               label={fmt(m.sameLabel, { currency })}
               currency={currency}
+              intl={intl}
               value={same}
               onChange={(v) => update({ same: v })}
             />
@@ -210,6 +211,7 @@ export default function MissedTally({
           money={money}
           onChange={(v) => update({ given: v })}
           m={calc}
+          intl={intl}
         />
       ) : null}
 

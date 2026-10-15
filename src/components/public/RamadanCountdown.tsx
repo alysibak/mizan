@@ -40,10 +40,16 @@ export default function RamadanCountdown({
   m,
   locale,
   className = "",
+  planLink = true,
+  inEnglish = "",
 }: {
   m: Messages["ramadan"];
   locale: Locale;
   className?: string;
+  /** Link to the Ramadan giving page (not on that page itself). */
+  planLink?: boolean;
+  /** Marks that link as English on pages in other languages. */
+  inEnglish?: string;
 }) {
   const hydrated = useHydrated();
   if (!hydrated) return null;
@@ -84,22 +90,23 @@ export default function RamadanCountdown({
           : fmt(m.before, { year: status.hijriYear, date: date(status.start), when })}
       </p>
       <p className="mt-1 text-sage">{status.inRamadan ? m.duringHint : m.hint}</p>
-      {status.inRamadan ? (
-        <Link
-          href={localePath(locale, "/zakat-al-fitr")}
-          className="mt-2 inline-block font-medium text-pine hover:underline"
-        >
-          {m.fitrLink}
-        </Link>
-      ) : status.daysUntil > 7 ? (
-        <button
-          type="button"
-          className="mt-2 font-medium text-pine underline-offset-2 hover:underline"
-          onClick={remind}
-        >
-          {m.remind}
-        </button>
-      ) : null}
+      <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1">
+        {status.inRamadan ? (
+          <Link href={localePath(locale, "/zakat-al-fitr")} className="font-medium text-pine hover:underline">
+            {m.fitrLink}
+          </Link>
+        ) : status.daysUntil > 7 ? (
+          <button type="button" className="font-medium text-pine underline-offset-2 hover:underline" onClick={remind}>
+            {m.remind}
+          </button>
+        ) : null}
+        {planLink ? (
+          <Link href="/ramadan" className="font-medium text-pine hover:underline">
+            {m.plan}
+            {inEnglish}
+          </Link>
+        ) : null}
+      </div>
     </div>
   );
 }

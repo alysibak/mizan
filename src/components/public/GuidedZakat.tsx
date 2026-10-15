@@ -25,6 +25,7 @@ import { CurrencyOptions } from "@/components/public/VisitorCurrency";
 import ShareButton, { type ShareLabels } from "@/components/public/ShareButton";
 import ReadAloud from "@/components/ReadAloud";
 import { ResultPicture } from "@/components/public/Visuals";
+import GoldPicker from "@/components/public/GoldPicker";
 import {
   IconBalance,
   IconBank,
@@ -365,6 +366,21 @@ function Guide({
                 ))}
               </select>
             </div>
+            {key !== "silver" ? (
+              <div className="sm:col-span-2">
+                <GoldPicker
+                  m={m.picker}
+                  unit={weightUnitOf(draft)}
+                  unitLabel={weightUnitOf(draft) === "tola" ? calc.tolaUnit : calc.gramUnit}
+                  onUse={(weight) => {
+                    updateIn("byWeight", { [key]: true });
+                    updateIn("grams", { [key]: weight });
+                    if (!draft.purity[key]) updateIn("purity", { [key]: DEFAULT_PURITY[key] });
+                    if (!draft.weightUnit) update({ weightUnit: weightUnitOf(draft) });
+                  }}
+                />
+              </div>
+            ) : null}
           </div>
         ) : (
           <div className="max-w-xs">
@@ -372,6 +388,8 @@ function Guide({
               id={`guide-${key}`}
               label={m.value}
               currency={c}
+              intl={intl}
+              decimal={draft.decimal}
               value={draft.amounts[key] ?? ""}
               onChange={(v) => {
                 updateIn("byWeight", { [key]: false });
@@ -437,6 +455,8 @@ function Guide({
             id={`guide-${step}`}
             label={m.amount}
             currency={c}
+            intl={intl}
+            decimal={draft.decimal}
             value={draft.amounts[step] ?? ""}
             onChange={(v) => updateIn("amounts", { [step]: v })}
           />
@@ -483,7 +503,7 @@ function Guide({
       title = m.steps.more.title;
       body = m.steps.more.body;
       difference = m.steps.more.difference;
-      fields = <MoreKinds draft={draft} calc={calc} currency={c} updateIn={updateIn} />;
+      fields = <MoreKinds draft={draft} calc={calc} currency={c} intl={intl} updateIn={updateIn} />;
       break;
     case "debts":
       title = m.steps.debts.title;
@@ -495,6 +515,8 @@ function Guide({
             id="guide-debts"
             label={calc.debtsDueNow}
             currency={c}
+            intl={intl}
+            decimal={draft.decimal}
             value={draft.debts}
             onChange={(v) => update({ debts: v })}
           />
@@ -663,11 +685,13 @@ function MoreKinds({
   draft,
   calc,
   currency,
+  intl,
   updateIn,
 }: {
   draft: CalcDraft;
   calc: CalcMessages;
   currency: string;
+  intl: string;
   updateIn: <K extends "amounts" | "portions">(key: K, patch: CalcDraft[K]) => void;
 }) {
   const [ticked, setTicked] = useState<Set<CalcFieldKey>>(
@@ -708,6 +732,8 @@ function MoreKinds({
                   id={`guide-${key}`}
                   label={calc.fields[key].label}
                   currency={currency}
+                  intl={intl}
+                  decimal={draft.decimal}
                   value={draft.amounts[key] ?? ""}
                   onChange={(v) => updateIn("amounts", { [key]: v })}
                 />
@@ -881,6 +907,7 @@ function Result({
               money={money}
               onChange={onGiven}
               m={calc}
+              intl={intl}
             />
           </>
         ) : (

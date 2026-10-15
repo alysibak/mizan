@@ -55,7 +55,7 @@ export default function FitrView({ locale }: { locale: Locale }) {
           <p className="mt-4 text-base leading-relaxed text-sage">{m.lede}</p>
         </header>
 
-        <RamadanCountdown m={all.ramadan} locale={locale} className="mt-6 max-w-2xl" />
+        <RamadanCountdown m={all.ramadan} locale={locale} inEnglish={all.common.inEnglish} className="mt-6 max-w-2xl" />
 
         <div className="mt-10">
           <FitrCalc m={m} currencyLabel={all.calc.currency} locale={locale} />

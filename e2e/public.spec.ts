@@ -423,6 +423,8 @@ test("beginner pages are kept for a weak signal; account pages never are", async
   await page.reload();
   await page.goto("/ur/guide");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("آئیے مل کر آپ کی زکوٰۃ نکالیں");
+  // The home page too, which is where the home-screen app opens.
+  await page.goto("/ur");
   // Signed out, /settings redirects to /login: neither may be stored.
   await page.goto("/settings");
   await expect(page).toHaveURL(/\/login/);
@@ -433,7 +435,7 @@ test("beginner pages are kept for a weak signal; account pages never are", async
     const cache = await caches.open("mizan-v1-pages");
     return (await cache.keys()).map((request) => new URL(request.url).pathname).sort();
   });
-  expect(kept).toEqual(["/start", "/ur/guide"]);
+  expect(kept).toEqual(["/start", "/ur", "/ur/guide"]);
 });
 
 test("someone who missed years adds up what they owe and pays it monthly", async ({ page }) => {
@@ -516,4 +518,39 @@ test("a worksheet to print and fill in by hand, in the reader's language", async
   await expect(sheet).toContainText("ج ÷ 40");
   await expect(sheet.locator("[role=img][aria-label]")).toHaveAttribute("aria-label", /\/ur\/nisab$/);
   await expect(page.getByRole("button", { name: "صفحہ پرنٹ کریں" })).toBeVisible();
+});
+
+test("someone who does not know their gold's weight picks pieces instead", async ({ page }) => {
+  await page.route("**/api/metals?*", (route) => route.fulfill({ json: PRICES }));
+  await page.goto("/guide");
+  await page.locator("#guide-currency").selectOption("USD");
+  for (let i = 0; i < 3; i++) await page.getByRole("button", { name: "Next" }).click();
+  await expect(page.getByRole("heading", { name: "Do you keep any gold?" })).toBeVisible();
+  await page.getByRole("button", { name: "I don’t know the weight" }).click();
+  await page.getByRole("button", { name: "Add one: Bangle" }).click();
+  await page.getByRole("button", { name: "Add one: Bangle" }).click();
+  await page.getByRole("button", { name: "Add one: Ring" }).click();
+  // 2 × 12 g + 4 g, a rough guess.
+  await expect(page.getByText("About 28 g: a rough guess from typical weights.")).toBeVisible();
+  await page.getByRole("button", { name: "Use this weight" }).click();
+  await expect(page.locator("#guide-gold-grams")).toHaveValue("28");
+});
+
+test("a large amount is also said in words, so a slipped zero shows", async ({ page }) => {
+  await page.route("**/api/metals?*", (route) => route.fulfill({ json: PRICES }));
+  await page.goto("/calculator");
+  await page.locator("#calc-currency").selectOption("PKR");
+  await page.locator("#calc-cash").fill("2500000");
+  await expect(page.locator("#calc-cash-words")).toHaveText("= 25 lakh");
+  await page.locator("#calc-cash").fill("25000000");
+  await expect(page.locator("#calc-cash-words")).toHaveText("= 2.5 crore");
+  await page.locator("#calc-cash").fill("500");
+  await expect(page.locator("#calc-cash-words")).toHaveCount(0);
+
+  // In Urdu, in the words people say.
+  await page.goto("/ur/guide");
+  await page.locator("#guide-currency").selectOption("PKR");
+  await page.locator("button.btn-primary").last().click();
+  await page.locator("#guide-cash").fill("250000");
+  await expect(page.locator("#guide-cash-words")).toHaveText("= 2.5 لاکھ");
 });

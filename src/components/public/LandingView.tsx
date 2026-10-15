@@ -4,6 +4,7 @@ import SiteHeader from "@/components/SiteHeader";
 import SiteFooter, { toolLinks } from "@/components/SiteFooter";
 import JsonLd from "@/components/JsonLd";
 import RamadanCountdown from "@/components/public/RamadanCountdown";
+import { BalanceScale } from "@/components/public/Visuals";
 import {
   IconBalance,
   IconCash,
@@ -106,7 +107,7 @@ export default function LandingView({ locale }: { locale: Locale }) {
             >
               {m.trustLine}
             </p>
-            <RamadanCountdown m={all.ramadan} locale={locale} className="mt-6 max-w-xl" />
+            <RamadanCountdown m={all.ramadan} locale={locale} inEnglish={all.common.inEnglish} className="mt-6 max-w-xl" />
           </div>
 
           <figure
@@ -114,17 +115,13 @@ export default function LandingView({ locale }: { locale: Locale }) {
             style={{ animationDelay: "220ms" }}
             aria-label={m.sample.aria}
           >
-            <div className="relative mx-auto h-24 max-w-xs" aria-hidden>
-              <div
-                className="absolute left-1/2 top-5 h-px w-56 bg-ink/70"
-                style={{ transform: "translateX(-50%) rotate(-6deg)" }}
-              >
-                <span className="absolute -left-1.5 -top-1 h-3 w-3 rotate-45 border border-brass bg-paper" />
-                <span className="absolute -right-1.5 -top-1 h-3 w-3 rotate-45 border border-brass bg-paper" />
-              </div>
-              <div className="absolute left-1/2 top-5 h-12 w-px -translate-x-1/2 bg-mist" />
-              <div className="absolute bottom-1 left-1/2 h-0 w-0 -translate-x-1/2 border-x-[9px] border-b-[16px] border-x-transparent border-b-ink/80" />
-            </div>
+            {/* The balance that gives Mizan its name, on the example's figures. */}
+            <BalanceScale
+              net={24490}
+              nisab={714}
+              money={money}
+              labels={{ you: all.calc.netWealth, nisab: all.calc.nisabSilver }}
+            />
             <p className="label mt-2 text-pine">{m.sample.due}</p>
             <p className="mt-1 font-serif text-4xl text-pine nums">{money(612.25)}</p>
             <p className="mt-1 text-xs text-sage">{fmt(m.sample.summary, { net: money(24490) })}</p>

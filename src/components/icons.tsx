@@ -385,3 +385,60 @@ export const IconStar = ({ className = "h-6 w-6" }: P) => (
     <path d="M12 3.5l2.5 5.2 5.7.8-4.1 4 1 5.7L12 16.5l-5.1 2.7 1-5.7-4.1-4 5.7-.8z" />
   </Glyph>
 );
+
+/** Jewellery, for estimating gold by the piece. */
+export const IconEarrings = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <path d="M7 3.5v3.5M17 3.5v3.5" />
+    <path d="M7 7c-2 2.5-2.8 4.6-2.8 6.3a2.8 2.8 0 0 0 5.6 0C9.8 11.6 9 9.5 7 7z" />
+    <path d="M17 7c-2 2.5-2.8 4.6-2.8 6.3a2.8 2.8 0 0 0 5.6 0c0-1.7-.8-3.8-2.8-6.3z" />
+  </Glyph>
+);
+
+export const IconNosePin = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <circle cx="12" cy="12" r="2.5" />
+    <path d="M12 5.5v2.5M12 16v2.5M5.5 12H8M16 12h2.5M7.5 7.5l1.6 1.6M14.9 14.9l1.6 1.6M16.5 7.5l-1.6 1.6M9.1 14.9l-1.6 1.6" />
+  </Glyph>
+);
+
+export const IconChain = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <ellipse cx="6.5" cy="17.5" rx="3.6" ry="2.3" transform="rotate(-40 6.5 17.5)" />
+    <ellipse cx="12" cy="12" rx="3.6" ry="2.3" transform="rotate(50 12 12)" />
+    <ellipse cx="17.5" cy="6.5" rx="3.6" ry="2.3" transform="rotate(-40 17.5 6.5)" />
+  </Glyph>
+);
+
+export const IconBracelet = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <circle cx="12" cy="12" r="7.5" />
+    <circle cx="12" cy="12" r="5" />
+  </Glyph>
+);
+
+export const IconBangle = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <circle cx="12" cy="12" r="7.5" />
+    <circle cx="12" cy="4.5" r="1" fill="currentColor" stroke="none" />
+    <circle cx="19.5" cy="12" r="1" fill="currentColor" stroke="none" />
+    <circle cx="12" cy="19.5" r="1" fill="currentColor" stroke="none" />
+    <circle cx="4.5" cy="12" r="1" fill="currentColor" stroke="none" />
+  </Glyph>
+);
+
+export const IconNecklace = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <path d="M4 3.5c0 7.5 3.6 11.5 8 11.5s8-4 8-11.5" />
+    <path d="M12 15v1.5" />
+    <path d="M12 16.5l-2.2 2.6L12 21.5l2.2-2.4z" />
+  </Glyph>
+);
+
+export const IconGoldCoin = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <ellipse cx="12" cy="8" rx="7" ry="3" />
+    <path d="M5 8v3.5c0 1.7 3.1 3 7 3s7-1.3 7-3V8" />
+    <path d="M5 11.5V15c0 1.7 3.1 3 7 3s7-1.3 7-3v-3.5" />
+  </Glyph>
+);

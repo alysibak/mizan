@@ -141,6 +141,32 @@ const NOT_RICH: Evidence = {
 };
 
 export const EVIDENCE: Record<string, CaseEvidence> = {
+  // Giving in the last ten nights of Ramadan.
+  ramadan: {
+    evidence: [
+      {
+        strength: "quran",
+        text: "“The Night of Decree is better than a thousand months.”",
+        ref: "Quran 97:3",
+      },
+      {
+        strength: "sahih",
+        text: "“Seek Laylat al-Qadr in the odd nights of the last ten nights of Ramadan.”",
+        ref: "Sahih al-Bukhari, from ‘A’ishah",
+      },
+      {
+        strength: "agreed",
+        text: "The Prophet ﷺ was the most generous of people, and he was at his most generous in Ramadan.",
+        ref: "Sahih al-Bukhari and Sahih Muslim, from Ibn ‘Abbas",
+      },
+      {
+        strength: "reasoning",
+        text: "Giving every night so that some falls on Laylat al-Qadr is encouraged by many scholars as a way to seek its reward. No text names a special reward for charity on that night beyond its being better than a thousand months.",
+        ref: "Scholars’ advice, drawn from the texts above",
+      },
+    ],
+  },
+
   // Do I pay zakat on…?
   home: { evidence: [PERSONAL_USE, PERSONAL_USE_AGREED] },
   car: {

@@ -67,20 +67,47 @@ test("qurbani: shares of a cow", async ({ page }) => {
 
 test("every tool page is linked from the footer and has no horizontal scroll", async ({ page }) => {
   await page.goto("/");
-  for (const name of ["Inheritance calculator", "Zakat al-Fitr", "Halal stock screen", "Qurbani shares"]) {
+  for (const name of ["Ramadan giving", "Inheritance calculator", "Zakat al-Fitr", "Halal stock screen", "Qurbani shares"]) {
     const link = page.getByRole("contentinfo").getByRole("link", { name, exact: true });
     await expect(link).toBeVisible();
     const href = await link.getAttribute("href");
     const res = await page.request.get(href!);
     expect(res.status()).toBe(200);
   }
-  for (const path of ["/inheritance", "/zakat-al-fitr", "/halal-stocks", "/qurbani"]) {
+  for (const path of ["/ramadan", "/inheritance", "/zakat-al-fitr", "/halal-stocks", "/qurbani"]) {
     await page.goto(path);
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );
     expect(overflow, path).toBeLessThanOrEqual(0);
   }
+});
+
+test("ramadan: a gift spread over the last ten nights, more on the odd ones", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-10-11T10:00:00"));
+  await page.goto("/ramadan");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Your Ramadan giving, in one place");
+  await page.locator("#tool-currency").selectOption("USD");
+  await page.locator("#nights-amount").fill("140");
+  // Ramadan 1448 has 29 days by Umm al-Qura: nights 21 to 29, five of them odd.
+  // 140 over 5 × 2 + 4 × 1 shares is $20 on an odd night and $10 on the others.
+  const plan = page.getByRole("list", { name: "Your plan, night by night" });
+  await expect(plan.getByRole("listitem")).toHaveCount(9);
+  await expect(plan.getByRole("listitem").first()).toContainText("Night 21");
+  await expect(plan.getByRole("listitem").first()).toContainText("US$20.00");
+  await expect(plan.getByRole("listitem").nth(1)).toContainText("US$10.00");
+  await page.getByText("The same every night").click();
+  await expect(plan.getByRole("listitem").first()).toContainText("US$15.55");
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Add a reminder for each night" }).click();
+  expect((await download).suggestedFilename()).toBe("last-ten-nights.ics");
+
+  // During Ramadan, only the nights still to come.
+  await page.clock.setFixedTime(new Date("2027-03-02T10:00:00"));
+  await page.reload();
+  await page.locator("#nights-amount").fill("60");
+  await expect(plan.getByRole("listitem").first()).toContainText("Night 24");
+  await expect(plan.getByRole("listitem")).toHaveCount(6);
 });
 
 test("guides answer the common questions and lead to the calculator", async ({ page }) => {

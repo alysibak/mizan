@@ -80,9 +80,18 @@ work.
 - **Tola.** Where gold is weighed in tola (PKR, INR, BDT), weights are typed
   in tola by default (grams a tap away) and prices show per tola as well as
   per gram, in the calculator, the walk-through, and the nisab pages.
-- **Works with a weak signal.** Once opened, the beginner's pages, the
-  calculator, and the nisab pages open again offline; pages inside an
-  account are never kept.
+- **Works with a weak signal.** Once opened, the home page, the beginner's
+  pages, the calculator, and the nisab pages open again offline; pages
+  inside an account are never kept.
+- **A home-screen app in your language.** Added to the home screen from an
+  Urdu page, Mizan opens in Urdu (and so on for every language), with
+  long-press shortcuts in that language: Start here, step by step, ask a
+  question, Zakat al-Fitr. It opens on the home page, which sends a
+  signed-in visitor on to their ledger.
+- **Amounts in words.** Under every money box, a large amount is also
+  written the way people say it: "25 lakh" or "1.2 crore" for rupees and
+  taka, "2.5 million" elsewhere, and in each language's own words (لاکھ,
+  লাখ, juta, milyon). An extra zero typed by mistake shows at once.
 - **Zakat al-Fitr** (`/zakat-al-fitr`), in every language: the household's
   fitrana from the amount the local mosque announced, with who gives it, how
   much, when, and where the schools differ.
@@ -128,6 +137,22 @@ work.
   differ, each view is listed with who holds it and its own evidence. Hadith
   are cited by collection and narrator, not number. In English for now; it
   wants review by a qualified scholar before it is relied on.
+- **The balance scale.** Mizan means balance, so every answer is drawn as
+  one: what you own in one pan, the nisab in the other. The scale tips (and,
+  where motion is welcome, swings) toward whichever is heavier, so "over or
+  under" is visible before any number is read. It sits on the home page, at
+  the top of the walk-through's answer, and in the calculator's result.
+- **Gold by picture.** Someone who has never weighed their jewellery taps
+  "I don't know the weight" and adds the pieces they own (rings, earrings,
+  nose pin, chain, bracelet, bangle, necklace, coin), each drawn and given a
+  typical weight. Mizan adds them up, in grams or tola, says plainly that it
+  is a rough guess, and suggests a jeweller for the real figure.
+- **Ramadan giving** (`/ramadan`, English): the three things in the order
+  they come (zakat, the last ten nights, Zakat al-Fitr), with a planner that
+  spreads a sum over the last ten nights, twice as much on the odd ones if
+  wished, and a calendar file with a reminder each evening. During Ramadan it
+  covers only the nights still to come. The countdown on every Ramadan card
+  links here.
 - **Zakat calculator** (`/calculator`). The visitor's currency comes first
   (named in their language, picked from their region or from any public page
   they used before), and today's gold and silver prices are fetched afresh on
@@ -253,8 +278,8 @@ its dates.
 - **Android:** open it in Chrome and tap *Install* (the dashboard also offers a
   button).
 
-Pages are never cached on the device (they hold your finances); offline, Mizan
-shows a notice instead. Regenerate the icons after changing `src/app/icon.svg`
+Account pages are never cached on the device (they hold your finances);
+offline, Mizan shows a notice instead. Regenerate the icons after changing `src/app/icon.svg`
 with `node scripts/generate-icons.mjs`.
 
 ## How the zakat math works

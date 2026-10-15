@@ -67,3 +67,43 @@ export function hawlCalendar(opts: {
   lines.push("END:VCALENDAR");
   return `${lines.join("\r\n")}\r\n`;
 }
+
+/**
+ * Reminders for a giving plan: one short event per evening at a local time
+ * (floating, so it follows the phone wherever it is), each with its own
+ * alert. `events` carry their own words, in the visitor's language.
+ */
+export function eveningsCalendar(opts: {
+  events: { day: string; summary: string; description: string }[];
+  /** Local time of day, "HH:MM". */
+  time?: string;
+  uid: string;
+  now?: Date;
+}): string {
+  const stamp = (opts.now ?? new Date()).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  const [hh, mm] = (opts.time ?? "19:30").split(":");
+  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Mizan//Plan//EN", "CALSCALE:GREGORIAN", "METHOD:PUBLISH"];
+  for (const e of opts.events) {
+    const start = `${icsDay(e.day)}T${hh}${mm}00`;
+    const endMinutes = Number(hh) * 60 + Number(mm) + 15;
+    const end = `${icsDay(e.day)}T${String(Math.floor(endMinutes / 60) % 24).padStart(2, "0")}${String(endMinutes % 60).padStart(2, "0")}00`;
+    lines.push(
+      "BEGIN:VEVENT",
+      `UID:${opts.uid}-${icsDay(e.day)}@mizan.app`,
+      `DTSTAMP:${stamp}`,
+      `DTSTART:${start}`,
+      `DTEND:${end}`,
+      `SUMMARY:${icsText(e.summary)}`,
+      `DESCRIPTION:${icsText(e.description)}`,
+      "TRANSP:TRANSPARENT",
+      "BEGIN:VALARM",
+      "ACTION:DISPLAY",
+      `DESCRIPTION:${icsText(e.summary)}`,
+      "TRIGGER:PT0S",
+      "END:VALARM",
+      "END:VEVENT",
+    );
+  }
+  lines.push("END:VCALENDAR");
+  return `${lines.join("\r\n")}\r\n`;
+}
