@@ -39,6 +39,15 @@ const tr: Messages = {
     listen: "Dinle",
     stopListening: "Durdur",
     largerText: "Daha büyük yazı",
+    menu: {
+      open: "Menü",
+      close: "Menüyü kapat",
+      work: "Zekâtımı hesapla",
+      give: "Zekâtı ver",
+      learn: "Öğren",
+      tools: "Diğer araçlar",
+    },
+    resume: { title: "Kaldığınız yerden devam edin", continue: "Devam et" },
   },
 
   landing: {

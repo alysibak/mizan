@@ -537,7 +537,7 @@ function Calculator({
       <aside
         id="result"
         aria-labelledby="calc-result"
-        className="scroll-mt-6 lg:sticky lg:top-6"
+        className="scroll-mt-24 lg:sticky lg:top-24"
       >
         <div className="card border-pine/40 p-5 sm:p-6">
           <p className="label text-pine" id="calc-result">

@@ -29,6 +29,10 @@ const copy: ToolPageCopy = {
       ),
     },
   ],
+  next: [
+    { href: "/start", label: "Do I owe zakat as well?", icon: "start" },
+    { href: "/quiz", label: "Zakat in ten questions", icon: "quiz" },
+  ],
   faq: [
     {
       q: "Is a smile really charity?",

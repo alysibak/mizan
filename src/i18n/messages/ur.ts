@@ -39,6 +39,15 @@ const ur: Messages = {
     listen: "سنیں",
     stopListening: "روکیں",
     largerText: "بڑا متن",
+    menu: {
+      open: "مینو",
+      close: "مینو بند کریں",
+      work: "اپنی زکوٰۃ نکالیں",
+      give: "زکوٰۃ ادا کریں",
+      learn: "سیکھیں",
+      tools: "مزید ٹولز",
+    },
+    resume: { title: "جہاں چھوڑا تھا وہیں سے جاری رکھیں", continue: "جاری رکھیں" },
   },
 
   landing: {

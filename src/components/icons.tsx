@@ -627,3 +627,16 @@ export const IconFridge = ({ className = "h-6 w-6" }: P) => (
     <path d="M6 9.5h12M9 5.5v2M9 12.5v3" />
   </Glyph>
 );
+
+export const IconMenu = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <path d="M4 7h16M4 12h16M4 17h16" />
+  </Glyph>
+);
+
+export const IconMoon = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <path d="M15.5 3.5a8.5 8.5 0 1 0 5 13.6A7 7 0 0 1 15.5 3.5Z" />
+    <path d="M18 6.5l.5 1.2 1.2.5-1.2.5-.5 1.2-.5-1.2-1.2-.5 1.2-.5.5-1.2Z" />
+  </Glyph>
+);

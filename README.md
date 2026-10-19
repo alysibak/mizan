@@ -184,12 +184,25 @@ work.
   and what does not (the shop, shelves, fridges, scales, the van). Then the
   figures, with personal savings added because the nisab is the owner's,
   suppliers taken off, and the answer on a balance scale.
-- **More to explore**: the English home page has picture tiles for the
-  quiz, sadaqah, family, shop, farm, and Ramadan pages. The English "Ask a
-  question" search finds them too ("goats", "interest", "my shop", "my
-  wife's gold"), and the English footer gives learning and giving pages
-  their own column. On a phone, footer links and the tool list sit two to a
-  row.
+- **Built around what a visitor is trying to do**, not around the footer:
+  - A **Menu** button in a top bar that stays in view on every page, in
+    every language, opens everything as pictures grouped by intent: work
+    out my zakat, give it, learn, more tools.
+  - **Pick up where you left off**: a returning visitor sees, at the top of
+    the home page, the zakat they worked out and what is still to give,
+    their catch-up plan, their good-deed streak, and their family's cards,
+    each with one Continue button. Read from the browser only.
+  - **What do you have?** (English home page): tap what is true (cash, gold,
+    a shop, crops or animals, family money, bank interest, missed years,
+    not sure) and get a numbered plan in the order that keeps the sums
+    right: interest set aside first, this year before past years, giving
+    last.
+  - On a phone, the home page's first screen is things to do; the worked
+    example and the Ramadan box come after the choices.
+  - Every new tool ends with **What next?** picture buttons straight under
+    the tool, so no page is a dead end.
+  - The English "Ask a question" search finds the English-only pages too
+    ("goats", "interest", "my shop", "my wife's gold").
 - **Crops and animals** (`/farm`, English): zakat for farmers. The harvest
   by weight (kg or maund) and how the land was watered gives a tenth, half
   a tenth, or three quarters of a tenth, drawn as ten sacks with the share

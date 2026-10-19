@@ -39,6 +39,15 @@ const id: Messages = {
     listen: "Dengarkan",
     stopListening: "Berhenti",
     largerText: "Teks lebih besar",
+    menu: {
+      open: "Menu",
+      close: "Tutup menu",
+      work: "Hitung zakat saya",
+      give: "Salurkan zakat",
+      learn: "Belajar",
+      tools: "Alat lainnya",
+    },
+    resume: { title: "Lanjutkan yang terakhir", continue: "Lanjutkan" },
   },
 
   landing: {

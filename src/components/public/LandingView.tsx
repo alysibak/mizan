@@ -4,6 +4,8 @@ import SiteHeader from "@/components/SiteHeader";
 import SiteFooter, { toolLinks } from "@/components/SiteFooter";
 import JsonLd from "@/components/JsonLd";
 import RamadanCountdown from "@/components/public/RamadanCountdown";
+import ResumeCard from "@/components/public/ResumeCard";
+import PlanPicker from "@/components/public/PlanPicker";
 import { BalanceScale } from "@/components/public/Visuals";
 import {
   IconBalance,
@@ -13,11 +15,6 @@ import {
   IconGiving,
   IconGoldBar,
   IconQuestion,
-  IconShop,
-  IconSmile,
-  IconStar,
-  IconUsers,
-  IconWheat,
   IconYear,
 } from "@/components/icons";
 import { LOCALE_INFO, fmt, languageAlternates, localePath, type Locale } from "@/i18n/config";
@@ -59,22 +56,65 @@ export default function LandingView({ locale }: { locale: Locale }) {
     [m.sample.debts, `−${money(1800)}`, true],
   ];
 
+  // A worked example: beside the title on a wide screen, after the choices
+  // on a phone, so a phone's first screen is all things to do.
+  const sample = (
+    <figure
+                className="animate-fade-up card relative z-10 p-6"
+                style={{ animationDelay: "220ms" }}
+                aria-label={m.sample.aria}
+              >
+                {/* The balance that gives Mizan its name, on the example's figures. */}
+                <BalanceScale
+                  net={24490}
+                  nisab={714}
+                  money={money}
+                  labels={{ you: all.calc.netWealth, nisab: all.calc.nisabSilver }}
+                />
+                <p className="label mt-2 text-pine">{m.sample.due}</p>
+                <p className="mt-1 font-serif text-4xl text-pine nums">{money(612.25)}</p>
+                <p className="mt-1 text-xs text-sage">{fmt(m.sample.summary, { net: money(24490) })}</p>
+                <dl className="mt-5 space-y-1.5 border-t border-mist pt-4 text-sm">
+                  {rows.map(([label, value, debt]) => (
+                    <div key={label} className="flex justify-between gap-3">
+                      <dt className="text-sage">{label}</dt>
+                      <dd className={"nums " + (debt ? "text-danger" : "text-ink")}>{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+                <figcaption className="mt-4 text-xs text-sage">{m.sample.caption}</figcaption>
+              </figure>
+  );
+
   return (
-    <div className="relative min-h-screen overflow-hidden bg-porcelain bg-pine-wash">
+    <div className="relative min-h-screen overflow-x-clip bg-porcelain bg-pine-wash">
       <div className="pointer-events-none absolute inset-0 bg-grain opacity-80" aria-hidden />
       <SiteHeader locale={locale} />
 
       <main>
-        <section className="relative z-10 mx-auto grid max-w-6xl items-center gap-12 px-5 pb-20 pt-10 md:px-10 lg:grid-cols-[minmax(0,1fr)_26rem] lg:pt-16">
-          <div>
+        <section className="relative z-10 mx-auto grid max-w-6xl items-center gap-12 px-5 pb-16 pt-10 md:px-10 lg:grid-cols-[minmax(0,1fr)_26rem] lg:pt-16">
+          <div className="order-1">
             <p className="animate-fade-up font-serif text-sm tracking-[0.2em] text-brassDeep">
               {m.eyebrow}
             </p>
             <h1 className="animate-fade-up mt-4 font-serif text-5xl leading-[1.08] tracking-tight text-ink sm:text-6xl md:text-7xl">
               {m.title}
             </h1>
+            <div className="mt-6 max-w-xl empty:hidden">
+              <ResumeCard
+                locale={locale}
+                labels={{
+                  title: all.common.resume.title,
+                  continue: all.common.resume.continue,
+                  zakatIs: all.guide.result.due,
+                  stillToGive: all.calc.stillToGive,
+                  allGiven: all.calc.allGiven,
+                  missed: m.choose.missed,
+                }}
+              />
+            </div>
             <p
-              className="animate-fade-up mt-6 max-w-xl text-lg leading-relaxed text-sage"
+              className="animate-fade-up mt-6 hidden max-w-xl text-lg leading-relaxed text-sage sm:block"
               style={{ animationDelay: "80ms" }}
             >
               {m.lede}
@@ -112,39 +152,15 @@ export default function LandingView({ locale }: { locale: Locale }) {
             >
               {m.trustLine}
             </p>
-            <RamadanCountdown m={all.ramadan} locale={locale} inEnglish={all.common.inEnglish} className="mt-6 max-w-xl" />
           </div>
 
-          <figure
-            className="animate-fade-up card relative z-10 p-6"
-            style={{ animationDelay: "220ms" }}
-            aria-label={m.sample.aria}
-          >
-            {/* The balance that gives Mizan its name, on the example's figures. */}
-            <BalanceScale
-              net={24490}
-              nisab={714}
-              money={money}
-              labels={{ you: all.calc.netWealth, nisab: all.calc.nisabSilver }}
-            />
-            <p className="label mt-2 text-pine">{m.sample.due}</p>
-            <p className="mt-1 font-serif text-4xl text-pine nums">{money(612.25)}</p>
-            <p className="mt-1 text-xs text-sage">{fmt(m.sample.summary, { net: money(24490) })}</p>
-            <dl className="mt-5 space-y-1.5 border-t border-mist pt-4 text-sm">
-              {rows.map(([label, value, debt]) => (
-                <div key={label} className="flex justify-between gap-3">
-                  <dt className="text-sage">{label}</dt>
-                  <dd className={"nums " + (debt ? "text-danger" : "text-ink")}>{value}</dd>
-                </div>
-              ))}
-            </dl>
-            <figcaption className="mt-4 text-xs text-sage">{m.sample.caption}</figcaption>
-          </figure>
-        </section>
+          <div className="order-3 lg:order-2">
+            {sample}
+            <RamadanCountdown m={all.ramadan} locale={locale} inEnglish={all.common.inEnglish} className="mt-6" />
+          </div>
 
-        {/* One tap to the task, for anyone who would rather not read first. */}
-        <section className="relative z-10 px-5 pb-16 md:px-10" aria-labelledby="choose">
-          <div className="mx-auto max-w-6xl">
+          {/* One tap to the task, for anyone who would rather not read first. */}
+          <section className="order-2 lg:order-3 lg:col-span-2" aria-labelledby="choose">
             <h2 id="choose" className="font-serif text-2xl text-ink sm:text-3xl">
               {m.chooseTitle}
             </h2>
@@ -177,40 +193,13 @@ export default function LandingView({ locale }: { locale: Locale }) {
                 </li>
               ))}
             </ul>
-            {/* Pages that are in English only so far. */}
+            {/* For someone who does not know which page they need (English only so far). */}
             {locale === "en" ? (
-              <>
-                <h3 className="mt-10 font-serif text-xl text-ink">More to explore</h3>
-                <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-                  {(
-                    [
-                      ["/quiz", "Zakat in ten questions", IconStar],
-                      ["/sadaqah", "Charity without money", IconSmile],
-                      ["/family", "Zakat for my family", IconUsers],
-                      ["/shop", "Zakat on my shop", IconShop],
-                      ["/farm", "Crops and animals", IconWheat],
-                      ["/ramadan", "Ramadan giving", IconYear],
-                    ] as const
-                  ).map(([path, label, Icon]) => (
-                    <li key={path}>
-                      <Link
-                        href={path}
-                        className="card flex h-full flex-col items-center gap-2 px-3 py-4 text-center transition hover:border-brassDeep"
-                      >
-                        <span
-                          className="flex h-12 w-12 items-center justify-center rounded-full border border-brass/50 bg-brass/10 text-brassDeep"
-                          aria-hidden
-                        >
-                          <Icon className="h-6 w-6" />
-                        </span>
-                        <span className="text-sm font-medium leading-snug text-ink">{label}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </>
+              <div className="mt-10">
+                <PlanPicker />
+              </div>
             ) : null}
-          </div>
+          </section>
         </section>
 
         <section

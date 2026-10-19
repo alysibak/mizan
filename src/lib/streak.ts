@@ -47,3 +47,18 @@ export function monthGrid(day: Date): (Date | null)[][] {
   while (cells.length % 7) cells.push(null);
   return Array.from({ length: cells.length / 7 }, (_, w) => cells.slice(w * 7, w * 7 + 7));
 }
+
+/** Where the good-deed days are kept in the browser. */
+export const DEED_DAYS_KEY = "mizan-sadaqah-days-v1";
+
+/** The days kept in this browser, or none if nothing (or nonsense) was. */
+export function parseDays(raw: string | null): Set<string> {
+  try {
+    const v: unknown = raw ? JSON.parse(raw) : [];
+    return new Set(
+      Array.isArray(v) ? v.filter((d): d is string => typeof d === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d)) : [],
+    );
+  } catch {
+    return new Set();
+  }
+}

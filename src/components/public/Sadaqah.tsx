@@ -26,7 +26,7 @@ import ShareButton, { type ShareLabels } from "@/components/public/ShareButton";
 import { STRENGTH } from "@/content/evidence";
 import { DEEDS, deedOfTheDay, type Deed } from "@/content/sadaqah";
 import { setStoredValue, useHydrated, useStoredValue } from "@/lib/client-store";
-import { dayKey, monthCount, monthGrid, streak } from "@/lib/streak";
+import { DEED_DAYS_KEY as DAYS_KEY, dayKey, monthCount, monthGrid, parseDays, streak } from "@/lib/streak";
 
 export const DEED_ICONS: Record<string, typeof IconSmile> = {
   smile: IconSmile,
@@ -111,18 +111,7 @@ export function DeedCards({ deeds = DEEDS }: { deeds?: Deed[] }) {
   );
 }
 
-const DAYS_KEY = "mizan-sadaqah-days-v1";
 const KEEP_DAYS = 400;
-
-/** The days kept in this browser, or none if nothing (or nonsense) was. */
-function parseDays(raw: string | null): Set<string> {
-  try {
-    const v: unknown = raw ? JSON.parse(raw) : [];
-    return new Set(Array.isArray(v) ? v.filter((d): d is string => typeof d === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d)) : []);
-  } catch {
-    return new Set();
-  }
-}
 
 /**
  * A month of good deeds: tap once a day, see the days fill in and the

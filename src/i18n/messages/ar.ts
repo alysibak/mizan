@@ -39,6 +39,15 @@ const ar: Messages = {
     listen: "استمع",
     stopListening: "إيقاف",
     largerText: "تكبير الخط",
+    menu: {
+      open: "القائمة",
+      close: "إغلاق القائمة",
+      work: "احسب زكاتي",
+      give: "أخرج زكاتك",
+      learn: "تعلّم",
+      tools: "أدوات أخرى",
+    },
+    resume: { title: "أكمل من حيث توقفت", continue: "تابع" },
   },
 
   landing: {

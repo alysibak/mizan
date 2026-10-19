@@ -39,6 +39,15 @@ const fr: Messages = {
     listen: "Écouter",
     stopListening: "Arrêter",
     largerText: "Texte plus grand",
+    menu: {
+      open: "Menu",
+      close: "Fermer le menu",
+      work: "Calculer ma zakat",
+      give: "La donner",
+      learn: "Apprendre",
+      tools: "Autres outils",
+    },
+    resume: { title: "Reprendre là où vous en étiez", continue: "Continuer" },
   },
 
   landing: {

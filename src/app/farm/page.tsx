@@ -48,6 +48,10 @@ const copy: ToolPageCopy = {
       ),
     },
   ],
+  next: [
+    { href: "/guide", label: "Work out zakat on your cash and gold", icon: "guide" },
+    { href: "/give", label: "Where to give it", icon: "give" },
+  ],
   faq: [
     {
       q: "Can I give money instead of the crop or the animal?",

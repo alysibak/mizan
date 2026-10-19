@@ -44,6 +44,10 @@ const copy: ToolPageCopy = {
       ),
     },
   ],
+  next: [
+    { href: "/give", label: "Where to give it", icon: "give" },
+    { href: "/family", label: "Zakat for the rest of the family", icon: "family" },
+  ],
   faq: [
     {
       q: "My stock is worth a lot but I have little cash. How do I pay?",

@@ -39,6 +39,15 @@ const bn: Messages = {
     listen: "শুনুন",
     stopListening: "থামান",
     largerText: "বড় লেখা",
+    menu: {
+      open: "মেনু",
+      close: "মেনু বন্ধ করুন",
+      work: "আমার যাকাত হিসাব করুন",
+      give: "যাকাত দিন",
+      learn: "জানুন",
+      tools: "আরও টুল",
+    },
+    resume: { title: "যেখানে থেমেছিলেন সেখান থেকে শুরু করুন", continue: "চালিয়ে যান" },
   },
 
   landing: {

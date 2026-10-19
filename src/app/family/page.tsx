@@ -47,6 +47,10 @@ const copy: ToolPageCopy = {
       ),
     },
   ],
+  next: [
+    { href: "/guide", label: "Work out one person in full, step by step", icon: "guide" },
+    { href: "/give", label: "Where to give it", icon: "give" },
+  ],
   faq: [
     {
       q: "My wife has gold but no money of her own. Who pays?",

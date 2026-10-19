@@ -85,6 +85,17 @@ for (const scheme of ["light", "dark"] as const) {
       expect(found).toEqual([]);
     });
 
+    test("the menu meets WCAG AA", async ({ page }) => {
+      const found: string[] = [];
+      for (const path of ["/", "/ur"]) {
+        await page.goto(path);
+        await page.locator("header button[aria-haspopup=dialog]").click();
+        await expect(page.getByRole("dialog")).toBeVisible();
+        found.push(...(await violations(page, `${path} menu`)));
+      }
+      expect(found).toEqual([]);
+    });
+
     test("the signed-in app meets WCAG AA", async ({ page }) => {
       await registerAndSetUp(page, {
         email: uniqueEmail(`a11y-${scheme}`),

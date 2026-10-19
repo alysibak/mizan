@@ -45,6 +45,17 @@ const en = {
     listen: "Listen",
     stopListening: "Stop",
     largerText: "Larger text",
+    /** The menu at the top of every page, by what people want to do. */
+    menu: {
+      open: "Menu",
+      close: "Close the menu",
+      work: "Work out my zakat",
+      give: "Give it",
+      learn: "Learn",
+      tools: "More tools",
+    },
+    /** For someone coming back to something they started. */
+    resume: { title: "Pick up where you left off", continue: "Continue" },
   },
 
   landing: {

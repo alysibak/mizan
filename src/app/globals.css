@@ -45,6 +45,8 @@
 
   html {
     -webkit-text-size-adjust: 100%;
+    /* Links to a part of a page land below the sticky top bar, not under it. */
+    scroll-padding-top: 5rem;
   }
 
   body {

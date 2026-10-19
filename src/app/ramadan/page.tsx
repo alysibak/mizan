@@ -61,6 +61,10 @@ const copy: ToolPageCopy = {
       ),
     },
   ],
+  next: [
+    { href: "/guide", label: "Work out my zakat", icon: "guide" },
+    { href: "/zakat-al-fitr", label: "Zakat al-Fitr for my family", icon: "fitr" },
+  ],
   faq: [
     {
       q: "Which night is Laylat al-Qadr?",

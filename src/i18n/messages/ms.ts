@@ -39,6 +39,15 @@ const ms: Messages = {
     listen: "Dengar",
     stopListening: "Berhenti",
     largerText: "Teks lebih besar",
+    menu: {
+      open: "Menu",
+      close: "Tutup menu",
+      work: "Kira zakat saya",
+      give: "Salurkan zakat",
+      learn: "Belajar",
+      tools: "Alat lain",
+    },
+    resume: { title: "Sambung dari tempat anda berhenti", continue: "Teruskan" },
   },
 
   landing: {

@@ -27,6 +27,10 @@ const copy: ToolPageCopy = {
       ),
     },
   ],
+  next: [
+    { href: "/who-can-receive", label: "Check a person before giving", icon: "who" },
+    { href: "/sadaqah", label: "Charity without money", icon: "sadaqah" },
+  ],
   faq: [
     {
       q: "Do I have to tell the person it is zakat?",

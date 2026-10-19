@@ -37,6 +37,10 @@ const copy: ToolPageCopy = {
       ),
     },
   ],
+  next: [
+    { href: "/guide", label: "Work out my zakat without the interest", icon: "guide" },
+    { href: "/give", label: "Where to give", icon: "give" },
+  ],
   faq: [
     {
       q: "Can I leave the interest in the bank instead?",

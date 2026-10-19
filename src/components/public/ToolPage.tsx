@@ -6,6 +6,7 @@ import JsonLd from "@/components/JsonLd";
 import { FaqList } from "@/components/public/LandingView";
 import { faqJsonLd, type Faq } from "@/lib/faq";
 import { PUBLIC_TOOLS } from "@/lib/public-tools";
+import { PAGE_ICONS } from "@/components/pageIcons";
 import { SITE_NAME, siteUrl } from "@/lib/site";
 
 export interface ToolPageCopy {
@@ -23,6 +24,11 @@ export interface ToolPageCopy {
   kind?: "tool" | "guide";
   /** YYYY-MM-DD the content was last checked (guides). */
   updated?: string;
+  /**
+   * Where a visitor goes once the tool has answered them, shown straight
+   * under it, so no page is a dead end. Icons are keys of PAGE_ICONS.
+   */
+  next?: { href: string; label: string; icon: string }[];
 }
 
 export function toolMetadata(copy: ToolPageCopy): Metadata {
@@ -69,6 +75,8 @@ export default function ToolPage({
         </header>
 
         <div className="mt-10">{children}</div>
+
+        {copy.next?.length ? <NextSteps steps={copy.next} /> : null}
 
         <div className="mt-16 space-y-10">
           {copy.sections.map((s) => (
@@ -120,6 +128,41 @@ export default function ToolPage({
         }
       />
     </div>
+  );
+}
+
+/** "What next?": the obvious next pages, as big picture buttons. */
+export function NextSteps({ steps }: { steps: { href: string; label: string; icon: string }[] }) {
+  return (
+    <nav className="mt-10" aria-labelledby="next-steps">
+      <h2 id="next-steps" className="font-serif text-2xl text-ink">
+        What next?
+      </h2>
+      <ul className="mt-3 grid gap-3 sm:grid-cols-2">
+        {steps.map((step) => {
+          const Icon = PAGE_ICONS[step.icon];
+          return (
+            <li key={step.href}>
+              <Link
+                href={step.href}
+                className="group flex min-h-[72px] items-center gap-4 border-2 border-pine/30 bg-pine/5 px-4 py-3 transition hover:border-pine"
+              >
+                <span
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-pine text-surface"
+                  aria-hidden
+                >
+                  {Icon ? <Icon className="h-6 w-6" /> : null}
+                </span>
+                <span className="flex-1 text-base font-medium text-ink">{step.label}</span>
+                <span className="text-xl text-pine transition group-hover:translate-x-1" aria-hidden>
+                  →
+                </span>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
   );
 }
 

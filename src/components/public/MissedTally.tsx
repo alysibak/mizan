@@ -3,8 +3,16 @@
 import { setStoredValue, useStoredValue } from "@/lib/client-store";
 import { CurrencySelect, useVisitorCurrency } from "@/components/public/VisitorCurrency";
 import { Choice, GivenTracker, MoneyInput } from "@/components/ZakatCalculator";
-import { decimalMarkFor, parseAmount } from "@/lib/calculator";
-import { MAX_MISSED_YEARS, PLAN_MONTHS, missedZakat } from "@/lib/missed";
+import { decimalMarkFor } from "@/lib/calculator";
+import {
+  MAX_MISSED_YEARS,
+  MISSED_KEY as KEY,
+  PLAN_MONTHS,
+  missedZakat,
+  parseTally,
+  tallyAmounts,
+  type Tally,
+} from "@/lib/missed";
 import { formatMoney } from "@/lib/money";
 import { LOCALE_INFO, fmt, type Locale } from "@/i18n/config";
 import type { Messages } from "@/i18n/messages/en";
@@ -21,38 +29,6 @@ function monthsText(n: number, intl: string): string {
     return new Intl.NumberFormat(intl, { style: "unit", unit: "month", unitDisplay: "long" }).format(n);
   } catch {
     return String(n);
-  }
-}
-
-const KEY = "mizan-missed-v1";
-
-interface Tally {
-  years: string;
-  same: string;
-  different: boolean;
-  each: string[];
-  months: number;
-  given: string;
-}
-
-const EMPTY: Tally = { years: "", same: "", different: false, each: [], months: 1, given: "" };
-
-/** What was kept in this browser, or a fresh tally if nothing (or nonsense) was. */
-function parseTally(raw: string | null): Tally {
-  if (!raw) return EMPTY;
-  try {
-    const v = JSON.parse(raw) as Partial<Record<keyof Tally, unknown>>;
-    const text = (x: unknown) => (typeof x === "string" ? x.slice(0, 40) : "");
-    return {
-      years: text(v.years),
-      same: text(v.same),
-      different: v.different === true,
-      each: Array.isArray(v.each) ? v.each.slice(0, MAX_MISSED_YEARS).map(text) : [],
-      months: (PLAN_MONTHS as readonly unknown[]).includes(v.months) ? (v.months as number) : 1,
-      given: text(v.given),
-    };
-  } catch {
-    return EMPTY;
   }
 }
 
@@ -77,11 +53,8 @@ export default function MissedTally({
   const { years, same, different, each, months, given } = tally;
   const update = (patch: Partial<Tally>) => setStoredValue(KEY, JSON.stringify({ ...tally, ...patch }));
 
-  const count = Number(years);
-  const countOk = Number.isInteger(count) && count >= 1 && count <= MAX_MISSED_YEARS;
-  const amounts = countOk
-    ? Array.from({ length: count }, (_, i) => parseAmount(different ? (each[i] ?? "") : same, decimal))
-    : [];
+  const amounts = tallyAmounts(tally, decimal);
+  const countOk = amounts.length > 0;
   const result = missedZakat(amounts, months);
   const money = (n: number) => formatMoney(n, currency, intl);
 
