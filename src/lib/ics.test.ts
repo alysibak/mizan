@@ -71,4 +71,15 @@ describe("daysCalendar", () => {
     expect(ics).toContain("TRIGGER:PT9H");
     expect(ics).toContain("UID:zakat-day-20280128@mizan.app");
   });
+
+  it("can leave out the week-before reminder, for something every month", async () => {
+    const { daysCalendar } = await import("./ics");
+    const ics = daysCalendar({
+      uid: "zakat-month",
+      weekBefore: false,
+      events: [{ day: "2026-11-20", summary: "Zakat: US$125.00", description: "From your monthly plan." }],
+    });
+    expect(ics).not.toContain("TRIGGER:-P7D");
+    expect(ics).toContain("TRIGGER:PT9H");
+  });
 });

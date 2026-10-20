@@ -198,6 +198,10 @@ work.
   copy can be saved as a file and restored on another phone. Two weeks
   before the zakat day, a line at the top of every page says how many days
   are left and links here (dismissed until the next year).
+  What is left can be spread over the months before the zakat day, in
+  round shares, with a calendar reminder each month; the plan moves on once
+  this month's share is noted. Zakat whose day has passed and is not yet
+  closed is never spread: My zakat asks for it now.
   Opening an account brings it along: the hawl starts on the last zakat
   day, and each noted payment becomes a zakat record in the ledger. Signed
   in, My zakat sends the visitor to their ledger instead of starting again.

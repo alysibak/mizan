@@ -201,3 +201,43 @@ test("someone already signed in adds what they worked out on this phone to the l
   await page.goto("/dashboard");
   await expect(page.getByText("You have figures on this phone")).toHaveCount(0);
 });
+
+test("what is left can be spread over the months before the zakat day, with a reminder each month", async ({ page }) => {
+  await page.goto("/shop");
+  await page.locator("#tool-currency").selectOption("USD");
+  await page.locator("#shop-business").fill("20000");
+  await page.goto("/my");
+  const given = page.getByRole("region", { name: "What you have given" });
+  await expect(given).toContainText("what is left can be spread over the months before it");
+
+  await page.getByRole("button", { name: "1 Ramadan" }).click();
+  const plan = given.getByRole("region", { name: /Too much at once/ });
+  await expect(plan).toContainText("US$125.00 a month");
+  await expect(plan.getByRole("listitem")).toHaveCount(4);
+  await expect(plan.getByRole("listitem").first()).toContainText("Today");
+  const download = page.waitForEvent("download");
+  await plan.getByRole("button", { name: "Remind me each month" }).click();
+  expect((await download).suggestedFilename()).toBe("zakat-each-month.ics");
+
+  // This month's share given: the plan moves on to next month.
+  await page.locator("#my-amount").fill("125");
+  await page.getByRole("button", { name: "Add to what I have given" }).click();
+  await expect(plan.getByRole("listitem")).toHaveCount(3);
+  await expect(plan.getByRole("listitem").first()).toContainText("Nov");
+  await expect(plan).toContainText("US$125.00 a month");
+});
+
+test("zakat whose day has passed is owed now, not spread over months", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2027-02-18T10:00:00"));
+  await page.goto("/shop");
+  await page.locator("#tool-currency").selectOption("USD");
+  await page.locator("#shop-business").fill("20000");
+  await page.evaluate(() => localStorage.setItem("mizan-my-v1", JSON.stringify({ zakatDay: { month: 9, day: 1 } })));
+  await page.goto("/my");
+  await expect(page.getByRole("region", { name: "What to do next" }).getByRole("link").first()).toContainText(
+    "Your zakat day was 10 days ago: give what is left now",
+  );
+  const given = page.getByRole("region", { name: "What you have given" });
+  await expect(given).toContainText("what is left is owed now");
+  await expect(given.getByRole("region", { name: /Too much at once/ })).toHaveCount(0);
+});

@@ -115,6 +115,14 @@ describe("todos", () => {
     expect(keys).toContain("give");
   });
 
+  it("on a monthly plan, asks for this month’s share, and nothing once it is given", () => {
+    const zakat = { due: 500, given: 125, pricesAgeDays: 1 };
+    const now = todos({ ...base, zakatDay: { month: 9, day: 1 }, zakat: { ...zakat, plan: "now" } }, today);
+    expect(now.find((t) => t.key === "give")?.text).toBe("Give this month’s share of your zakat");
+    const later = todos({ ...base, zakatDay: { month: 9, day: 1 }, zakat: { ...zakat, plan: "later" } }, today);
+    expect(later.map((t) => t.key)).not.toContain("give");
+  });
+
   it("asks for fresh prices when they are old, and for interest to be given away", () => {
     const keys = todos(
       { ...base, zakatDay: { month: 9, day: 1 }, zakat: { due: 500, given: 500, pricesAgeDays: 30 }, interestToGive: 12 },
@@ -154,5 +162,74 @@ describe("lastZakatDay", () => {
     const { lastZakatDay } = await import("./my-zakat");
     expect(lastZakatDay({ month: 9, day: 1 }, today).toISOString().slice(0, 10)).toBe("2026-02-18");
     expect(lastZakatDay({ month: 9, day: 1 }, new Date(2027, 1, 8)).toISOString().slice(0, 10)).toBe("2027-02-08");
+  });
+});
+
+describe("monthlyPlan", () => {
+  it("spreads what is left over the months before the zakat day, in whole units", async () => {
+    const { monthlyPlan } = await import("./my-zakat");
+    const due = nextZakatDay({ month: 9, day: 1 }, today); // 8 February 2027
+    expect(monthlyPlan(500, due, today)).toEqual([
+      { day: "2026-10-20", amount: 125 },
+      { day: "2026-11-20", amount: 125 },
+      { day: "2026-12-20", amount: 125 },
+      { day: "2027-01-20", amount: 125 },
+    ]);
+    const odd = monthlyPlan(437.5, due, today);
+    expect(odd.map((p) => p.amount)).toEqual([110, 110, 110, 107.5]);
+  });
+
+  it("uses fewer months for a small amount, and none when the day is close", async () => {
+    const { monthlyPlan } = await import("./my-zakat");
+    const due = nextZakatDay({ month: 9, day: 1 }, today);
+    expect(monthlyPlan(3, due, today).map((p) => p.amount)).toEqual([1, 1, 1]);
+    expect(monthlyPlan(1, due, today)).toEqual([]);
+    expect(monthlyPlan(500, due, new Date(2027, 0, 20))).toEqual([]);
+  });
+
+  it("starts next month once this month’s share is given", async () => {
+    const { monthlyPlan } = await import("./my-zakat");
+    const due = nextZakatDay({ month: 9, day: 1 }, today);
+    expect(monthlyPlan(375, due, today, true)).toEqual([
+      { day: "2026-11-20", amount: 125 },
+      { day: "2026-12-20", amount: 125 },
+      { day: "2027-01-20", amount: 125 },
+    ]);
+  });
+
+  it("keeps to a date every month has", async () => {
+    const { monthlyPlan } = await import("./my-zakat");
+    const plan = monthlyPlan(300, new Date(Date.UTC(2027, 3, 1)), new Date(2027, 0, 31));
+    expect(plan.map((p) => p.day)).toEqual(["2027-01-31", "2027-02-28", "2027-03-28"]);
+  });
+});
+
+describe("overdueDays", () => {
+  it("counts the days since a zakat day that is not closed, for two months", async () => {
+    const { overdueDays } = await import("./my-zakat");
+    const my = { ...EMPTY_MY, zakatDay: { month: 9, day: 1 } };
+    // 1 Ramadan 1448 is 8 February 2027.
+    expect(overdueDays(my, new Date(2027, 1, 18))).toBe(10);
+    expect(overdueDays(my, new Date(2027, 1, 8))).toBe(0);
+    expect(overdueDays(my, new Date(2027, 5, 1))).toBeNull();
+    expect(overdueDays({ ...EMPTY_MY }, new Date(2027, 1, 18))).toBeNull();
+    const closed = { ...my, history: [{ hijriYear: 1448, currency: "USD", due: 1, given: 1, closed: "2027-02-10" }] };
+    expect(overdueDays(closed, new Date(2027, 1, 18))).toBeNull();
+  });
+
+  it("asks for what is left at once when the day has passed", () => {
+    const list = todos(
+      {
+        zakatDay: { month: 9, day: 1 },
+        zakat: { due: 500, given: 0, pricesAgeDays: 1 },
+        missedLeft: 0,
+        interestToGive: 0,
+        farmDue: false,
+        ramadanIn: 100,
+        overdueDays: 10,
+      },
+      new Date(2027, 1, 18),
+    );
+    expect(list[0]).toMatchObject({ key: "give", text: "Your zakat day was 10 days ago: give what is left now" });
   });
 });

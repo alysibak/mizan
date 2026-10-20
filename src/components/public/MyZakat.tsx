@@ -35,7 +35,9 @@ import {
   daysUntil,
   draftAmount,
   hijriYearOf,
+  monthlyPlan,
   nextZakatDay,
+  overdueDays,
   parseMy,
   readBackup,
   removePayment,
@@ -51,6 +53,8 @@ const longDate = (d: Date) =>
   d.toLocaleDateString(INTL, { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 const shortDay = (day: string) =>
   new Date(`${day}T12:00:00Z`).toLocaleDateString(INTL, { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+const monthDay = (day: string) =>
+  new Date(`${day}T12:00:00Z`).toLocaleDateString(INTL, { day: "numeric", month: "short", timeZone: "UTC" });
 const isoToday = () => {
   const t = new Date();
   return new Date(Date.UTC(t.getFullYear(), t.getMonth(), t.getDate())).toISOString().slice(0, 10);
@@ -230,15 +234,25 @@ export default function MyZakatHub() {
     ? Math.floor((today.getTime() - new Date(draft.pricesAsOf).getTime()) / 86_400_000)
     : null;
 
+  // What is left, a share a month until the zakat day, once there is a day.
+  const zakatDue = my.zakatDay ? nextZakatDay(my.zakatDay, today) : null;
+  const lastPaid = my.payments.reduce((latest, p) => (p.day > latest ? p.day : latest), "");
+  const givenThisMonth = lastPaid !== "" && daysUntil(new Date(`${lastPaid}T00:00:00Z`), today) > -28;
+  // Zakat whose day has passed is owed now: no plan then.
+  const overdue = overdueDays(my, today);
+  const plan = zakatDue && left > 0.005 && overdue === null ? monthlyPlan(left, zakatDue, today, givenThisMonth) : [];
   const list = todos(
     {
       zakatDay: my.zakatDay,
-      zakat: started && !needsPrices ? { due, given, pricesAgeDays } : null,
+      zakat: started && !needsPrices
+        ? { due, given, pricesAgeDays, plan: plan.length ? (plan[0].day === isoToday() ? "now" : "later") : undefined }
+        : null,
       missedLeft,
       interestToGive: interest.given ? 0 : interestAmount,
       farmDue: farmOwes.cropKg > 0 || farmOwes.herds.length > 0,
       ramadanIn: ramadan.inRamadan ? 0 : ramadan.daysUntil,
       signedIn,
+      overdueDays: overdue,
     },
     today,
   );
@@ -259,6 +273,15 @@ export default function MyZakatHub() {
     save(removePayment(my, id));
     update({ given: draftAmount(Math.max(0, given - p.amount), draft.decimal) });
   }
+  function remindMonthly() {
+    const events = plan.map((p) => ({
+      day: p.day,
+      summary: `Zakat: give or put aside ${money(p.amount)}`,
+      description: "This month’s share of your zakat, from your plan in Mizan. When you give it, note it in My zakat.",
+    }));
+    download("zakat-each-month.ics", daysCalendar({ events, uid: "zakat-month", weekBefore: false }), "text/calendar;charset=utf-8");
+  }
+
   function close() {
     save(closeYear(my, { hijriYear: hijriYearOf(today), currency, due, given }, today));
     update({ given: "" });
@@ -430,6 +453,40 @@ export default function MyZakatHub() {
           <p className="mt-2 text-base font-medium text-ink nums" aria-live="polite">
             {money(given)} of {money(due)} · {left > 0.005 ? `${money(left)} left` : "all given"}
           </p>
+
+          {plan.length ? (
+            <section className="mt-4 border border-brass/50 bg-brass/5 p-4" aria-labelledby="plan-title">
+              <h3 id="plan-title" className="text-base font-medium text-ink nums">
+                Too much at once? {money(plan[0].amount)} a month
+              </h3>
+              <p className="mt-1 text-sm text-sage">
+                Give it, or put it aside, a little each month, and it is all done by your zakat day.
+              </p>
+              <ol className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {plan.map((p) => (
+                  <li key={p.day} className="border border-mist bg-surface px-2 py-2 text-center">
+                    <span className="block text-xs text-sage">{p.day === isoToday() ? "Today" : monthDay(p.day)}</span>
+                    <span className="block text-sm font-medium text-ink nums">{money(p.amount)}</span>
+                  </li>
+                ))}
+              </ol>
+              <button type="button" className="btn-ghost mt-3 px-4 print:hidden" onClick={remindMonthly}>
+                Remind me each month
+              </button>
+            </section>
+          ) : left > 0.005 && overdue !== null && overdue > 0 ? (
+            <p className="mt-3 border-s-2 border-brass ps-3 text-sm text-ink">
+              Your zakat day was {overdue} {overdue === 1 ? "day" : "days"} ago, so what is left is owed now. Give it as
+              soon as you can.
+            </p>
+          ) : left > 0.005 && !my.zakatDay ? (
+            <p className="mt-3 text-sm text-sage">
+              <Link href="#zakat-day" className="font-medium text-pine hover:underline">
+                Choose your zakat day
+              </Link>{" "}
+              and what is left can be spread over the months before it.
+            </p>
+          ) : null}
 
           <form className="mt-4 grid gap-3 border-t border-mist pt-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] print:hidden" onSubmit={addGiven}>
             <MoneyInput id="my-amount" label="I gave" currency={currency} value={amount} onChange={setAmount} intl={INTL} decimal={draft.decimal ?? decimal} />

@@ -173,7 +173,13 @@ export function closeYear(
 export interface Snapshot {
   zakatDay: ZakatDay | null;
   /** This year's zakat from the calculator or guide; null if not worked out. */
-  zakat: { due: number; given: number; pricesAgeDays: number | null } | null;
+  zakat: {
+    due: number;
+    given: number;
+    pricesAgeDays: number | null;
+    /** On a monthly plan: a share is due now, or this month's is given. */
+    plan?: "now" | "later";
+  } | null;
   missedLeft: number;
   interestToGive: number;
   farmDue: boolean;
@@ -181,6 +187,8 @@ export interface Snapshot {
   ramadanIn: number;
   /** Signed in: their ledger keeps this year's zakat. */
   signedIn?: boolean;
+  /** Days since a zakat day that is not yet closed (see overdueDays). */
+  overdueDays?: number | null;
 }
 
 export interface Todo {
@@ -203,7 +211,18 @@ export function todos(s: Snapshot, today: Date): Todo[] {
     if (s.zakat.pricesAgeDays !== null && s.zakat.pricesAgeDays > 14) {
       list.push({ key: "prices", text: "Gold and silver prices have moved: check your figures", href: "/calculator", rank: 2 });
     }
-    if (left > 0.005) list.push({ key: "give", text: "Give what is left of this year’s zakat", href: "#given", rank: 3 });
+    const overdue = s.overdueDays ?? 0;
+    if (left > 0.005 && overdue > 0) {
+      list.push({
+        key: "give",
+        text: `Your zakat day was ${overdue} ${overdue === 1 ? "day" : "days"} ago: give what is left now`,
+        href: "#given",
+        rank: 0,
+      });
+    } else if (left > 0.005 && s.zakat.plan !== "later") {
+      const text = s.zakat.plan === "now" ? "Give this month’s share of your zakat" : "Give what is left of this year’s zakat";
+      list.push({ key: "give", text, href: "#given", rank: 3 });
+    }
   }
   if (s.interestToGive > 0) {
     list.push({ key: "interest", text: "Give away the bank interest you set aside", href: "/interest", rank: 4 });
@@ -269,4 +288,50 @@ export function lastZakatDay(zd: ZakatDay, today: Date): Date {
   if (daysUntil(next, today) === 0) return next;
   const h = gregorianToHijri(next, CALENDAR);
   return hijriToGregorian({ year: h.year - 1, month: zd.month, day: zd.day }, CALENDAR);
+}
+
+/**
+ * What is left, spread over the months before the zakat day: a share today
+ * (or next month, if this month's is given) and on the same date each month, in whole units so it is easy to
+ * remember, with the last share taking the difference. Empty when there is
+ * less than two months to go: then it is simply given.
+ */
+export function monthlyPlan(
+  left: number,
+  due: Date,
+  today: Date,
+  /** This month's share is already given: start next month. */
+  givenThisMonth = false,
+): { day: string; amount: number }[] {
+  const t = utcDay(today);
+  const days: Date[] = [];
+  for (let k = givenThisMonth ? 1 : 0; k < 13; k++) {
+    const day = k === 0 ? t.getUTCDate() : Math.min(t.getUTCDate(), 28);
+    const d = new Date(Date.UTC(t.getUTCFullYear(), t.getUTCMonth() + k, day));
+    if (d.getTime() >= due.getTime()) break;
+    days.push(d);
+  }
+  if (days.length < 2 || !(left > 0)) return [];
+  const per = Math.ceil(left / days.length);
+  const n = Math.min(days.length, Math.ceil(left / per));
+  if (n < 2) return [];
+  return days.slice(0, n).map((d, i) => ({
+    day: d.toISOString().slice(0, 10),
+    amount: i < n - 1 ? per : toCents(left - per * (n - 1)),
+  }));
+}
+
+/**
+ * Days since the zakat day passed with the year not yet closed: zakat due
+ * then is owed now, not something to spread over months. Null once the year
+ * is closed, with no zakat day, or long after it (by then the figures are
+ * for the next one).
+ */
+export function overdueDays(my: MyZakat, today: Date, window = 60): number | null {
+  if (!my.zakatDay) return null;
+  const last = lastZakatDay(my.zakatDay, today);
+  const since = Math.abs(daysUntil(last, today));
+  if (since > window) return null;
+  const lastDay = last.toISOString().slice(0, 10);
+  return my.history.some((h) => h.closed >= lastDay) ? null : since;
 }
