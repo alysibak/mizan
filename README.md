@@ -205,6 +205,14 @@ work.
   Once a zakat day is chosen, My zakat offers a place on the home screen
   (the browser's install button, or the steps for Safari), the same hint
   the dashboard shows; dismissing one dismisses both.
+- **Move to a new phone, without an account.** My zakat (or the Menu) makes
+  an eight-character code and a picture to scan. The browser seals every
+  `mizan-*` key with AES-GCM under a key derived from the code, and sends
+  only the sealed copy, filed under a hash of the code (`/api/move`). The
+  new phone scans the picture (`/my?move=CODE`) or types the code, collects
+  the copy once (`/api/move/claim`, a POST so no preview can use it up), and
+  opens it locally. Copies are deleted when collected or after 30 minutes;
+  both ends are rate limited per hashed network address.
   Opening an account brings it along: the hawl starts on the last zakat
   day, and each noted payment becomes a zakat record in the ledger. Signed
   in, My zakat sends the visitor to their ledger instead of starting again.

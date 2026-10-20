@@ -15,6 +15,7 @@ import {
   IconMirath,
   IconMoon,
   IconOpenHand,
+  IconPhone,
   IconQuestion,
   IconReceipt,
   IconShop,
@@ -29,6 +30,7 @@ import {
 /** A picture for each public page, by its key in the site directory. */
 export const PAGE_ICONS: Record<string, ComponentType<{ className?: string }>> = {
   my: IconLedger,
+  move: IconPhone,
   start: IconCheckCircle,
   guide: IconCoins,
   calculator: IconStatement,

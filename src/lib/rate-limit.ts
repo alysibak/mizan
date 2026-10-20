@@ -21,6 +21,10 @@ export const LIMITS = {
   emailLink: { scope: "email-link", limit: 5, windowSeconds: 60 * 60 },
   // Its own bucket: demo clicks must not use up anyone's sign-in attempts.
   demo: { scope: "demo", limit: 30, windowSeconds: 15 * 60 },
+  // Moving to a new phone: a few copies an hour, and few enough guesses at a
+  // code that finding someone else's is hopeless.
+  moveSend: { scope: "move-send", limit: 10, windowSeconds: 60 * 60 },
+  moveFetch: { scope: "move-fetch", limit: 20, windowSeconds: 15 * 60 },
 } satisfies Record<string, LimitRule>;
 
 /**

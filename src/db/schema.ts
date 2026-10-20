@@ -208,6 +208,22 @@ export const authAttempts = sqliteTable("auth_attempts", {
   count: integer("count").notNull(),
 });
 
+/**
+ * A phone's kept figures on their way to a new phone: sealed in the browser
+ * with a key made from a short code the server never sees, found by a hash of
+ * that code, read once, and gone after half an hour.
+ */
+export const phoneMoves = sqliteTable(
+  "phone_moves",
+  {
+    id: text("id").primaryKey(), // hash of the code, not the code
+    sealed: text("sealed").notNull(),
+    expiresAt: text("expires_at").notNull(),
+    createdAt: now(),
+  },
+  (t) => [index("phone_moves_expires_idx").on(t.expiresAt)],
+);
+
 export type User = typeof users.$inferSelect;
 export type Asset = typeof assets.$inferSelect;
 export type NewAsset = typeof assets.$inferInsert;

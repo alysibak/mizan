@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import { useSignedIn } from "@/components/useSignedIn";
 import InstallHint from "@/components/InstallHint";
+import MovePhone, { MoveFromLink } from "@/components/public/MovePhone";
 import {
   IconBank,
   IconBowl,
@@ -204,6 +205,7 @@ export default function MyZakatHub() {
   const [restored, setRestored] = useState<string | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const signedIn = useSignedIn();
+  const [moving, setMoving] = useState(false);
 
   if (!hydrated) return <div className="card min-h-[24rem]" aria-busy="true" />;
 
@@ -351,6 +353,9 @@ export default function MyZakatHub() {
 
   return (
     <div className="space-y-6">
+      {/* Arriving from the old phone's code or picture. */}
+      <MoveFromLink asked={moving} />
+
       {list.length ? (
         <section className="border-2 border-pine/40 bg-pine/5 p-5 print:hidden" aria-labelledby="todo-title">
           <h2 id="todo-title" className="font-serif text-2xl text-ink">
@@ -380,6 +385,16 @@ export default function MyZakatHub() {
           <IconCheckCircle className="h-6 w-6" /> Nothing to do for now. May Allah accept it from you.
         </p>
       )}
+
+      {/* Someone new here may have it all on another phone already. */}
+      {!moving && !my.zakatDay && !started && !my.payments.length && !my.history.length ? (
+        <p className="text-base text-sage print:hidden">
+          Moving from another phone?{" "}
+          <button type="button" className="font-medium text-pine hover:underline" onClick={() => setMoving(true)}>
+            Bring everything over with a code
+          </button>
+        </p>
+      ) : null}
 
       <ZakatDayCard my={my} save={save} />
 
@@ -611,7 +626,7 @@ export default function MyZakatHub() {
       <Card id="keep" title="Keep it safe" className="print:hidden">
         <p className="mt-2 text-base text-sage">
           All of this stays on this phone, and nowhere else. Clearing the browser deletes it, so save a copy now and
-          then.
+          then, and move it with a code when you change phones.
         </p>
         <div className="mt-4 flex flex-wrap gap-3">
           <button
@@ -645,6 +660,7 @@ export default function MyZakatHub() {
             {restored}
           </p>
         ) : null}
+        <MovePhone />
         {signedIn ? null : (
           <p className="mt-4 text-sm text-sage">
             Want it on every device?{" "}

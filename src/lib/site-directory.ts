@@ -78,6 +78,7 @@ export function siteDirectory(locale: Locale): DirectoryGroup[] {
         { href: "/qurbani", label: footer.qurbani + inEnglish, icon: "qurbani" },
         { href: to("/poster"), label: all.poster.nav, icon: "poster" },
         { href: to("/worksheet"), label: all.worksheet.nav, icon: "worksheet" },
+        ...only([{ href: "/my#move", label: "Move to a new phone", icon: "move" }]),
       ],
     },
   ];

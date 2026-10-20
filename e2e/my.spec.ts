@@ -254,3 +254,53 @@ test("once there is a zakat day, My zakat offers a place on the home screen", as
   await expect(page.getByRole("region", { name: "Your zakat day" })).toBeVisible();
   await expect(page.getByRole("region", { name: "On your home screen" })).toHaveCount(0);
 });
+
+test("everything moves to a new phone with a code, once, without an account", async ({ page, browser }) => {
+  await page.goto("/shop");
+  await page.locator("#tool-currency").selectOption("USD");
+  await page.locator("#shop-business").fill("20000");
+  await page.goto("/my");
+  await page.getByRole("button", { name: "1 Ramadan" }).click();
+  await page.locator("#my-amount").fill("125");
+  await page.locator("#my-to").fill("Masjid al-Noor");
+  await page.getByRole("button", { name: "Add to what I have given" }).click();
+
+  // The old phone: a code and a picture to scan.
+  const move = page.getByRole("region", { name: "Getting a new phone?" });
+  await move.getByRole("button", { name: "Move to a new phone" }).click();
+  const shown = move.getByRole("status");
+  await expect(shown).toContainText("Works once");
+  const code = (await shown.locator(".font-mono").innerText()).trim();
+  expect(code).toMatch(/^[2-9A-HJ-NP-Z]{4}-[2-9A-HJ-NP-Z]{4}$/);
+  await expect(shown.getByRole("img", { name: /A picture to scan/ })).toBeVisible();
+
+  // The new phone, scanning the picture: one tap brings it all.
+  const fresh = await browser.newContext();
+  const other = await fresh.newPage();
+  await other.goto(new URL(`/my?move=${code.replace("-", "")}`, page.url()).toString());
+  const arrive = other.getByRole("region", { name: "From your old phone" });
+  await arrive.getByRole("button", { name: "Bring it here" }).click();
+  await expect(other.getByText("Brought over. Everything from your old phone is here.")).toBeVisible();
+  await expect(other.getByRole("region", { name: "Your zakat day" })).toContainText("1 Ramadan");
+  await expect(other.getByRole("region", { name: "What you have given" })).toContainText("Masjid al-Noor");
+  expect(new URL(other.url()).search).toBe("");
+  await fresh.close();
+
+  // A third phone typing the same code: it has been used.
+  const third = await browser.newContext();
+  const late = await third.newPage();
+  await late.goto(new URL("/my", page.url()).toString());
+  await late.getByRole("button", { name: "Bring everything over with a code" }).click();
+  await late.getByLabel("The code from your old phone").fill(code.toLowerCase());
+  await late.getByRole("button", { name: "Bring it here" }).click();
+  await expect(late.getByRole("region", { name: "From your old phone" }).getByRole("alert")).toContainText("already used");
+  await third.close();
+});
+
+test("the Menu leads to moving phones", async ({ page }) => {
+  await page.goto("/my");
+  await page.getByRole("button", { name: "Menu" }).click();
+  await page.getByRole("dialog", { name: "Menu" }).getByRole("link", { name: "Move to a new phone" }).click();
+  await page.waitForURL("**/my#move");
+  await expect(page.getByRole("region", { name: "Getting a new phone?" })).toBeInViewport();
+});

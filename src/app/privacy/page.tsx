@@ -107,13 +107,30 @@ export default function PrivacyPage() {
           instead of “Sign in”. There are no advertising or tracking cookies.
         </p>
         <p>
-          Your browser’s local storage keeps small conveniences on your device
-          only: the calculator draft, the missed-years tally, the language, currency, and text size
-          you picked, which setup step you reached, and notices you
+          Your browser’s local storage keeps what you work out without an
+          account on your device only: the calculator draft; My zakat (your
+          zakat day, the payments you note, and past years); the missed-years
+          tally; your family, farm, bank-interest and Zakat al-Fitr figures;
+          the days you ticked a good deed; the language, currency, and text
+          size you picked; which setup step you reached; and notices you
           dismissed. The browser also keeps copies of the public pages you
-          have opened (the beginner’s pages, the calculator, nisab today), so
-          they open without a signal; pages inside your account are never
-          kept. Clearing your browser data removes all of it.
+          have opened (the beginner’s pages, the calculator, My zakat, nisab
+          today and the other tools), so they open without a signal; pages
+          inside your account are never kept. Clearing your browser data
+          removes all of it.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="Moving to a new phone">
+        <p>
+          Only if you choose “Move to a new phone”: your browser seals a copy
+          of what it keeps with a key made from the code it shows you, and
+          sends Mizan only that sealed copy. Mizan cannot open it. The code
+          itself never leaves your phone; the server receives a one-way hash
+          of it, used only to find the copy. The copy is deleted as soon as
+          your new phone collects it, or after 30 minutes, whichever comes
+          first. Attempts are limited per network address, stored as a
+          one-way hash.
         </p>
       </LegalSection>
 

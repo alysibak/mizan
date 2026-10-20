@@ -113,7 +113,15 @@ for (const scheme of ["light", "dark"] as const) {
       });
       await page.reload();
       await expect(page.getByRole("region", { name: "Your record" })).toBeVisible();
+      // The monthly plan, the code for a new phone, and the code form.
+      await page.getByRole("button", { name: "Move to a new phone" }).click();
+      await expect(page.getByText("Works once")).toBeVisible();
+      await page.getByRole("button", { name: "I have a code" }).click();
       expect(await violations(page, "/my in use")).toEqual([]);
+
+      await page.goto("/my?move=K7P4QX2M");
+      await expect(page.getByRole("region", { name: "From your old phone" })).toBeVisible();
+      expect(await violations(page, "/my arriving with a code")).toEqual([]);
     });
 
     test("the menu meets WCAG AA", async ({ page }) => {
