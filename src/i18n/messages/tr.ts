@@ -242,6 +242,10 @@ const tr: Messages = {
     share: "Hesaplayıcıyı paylaş",
     shareText: "Bugünkü altın ve gümüş fiyatlarıyla ücretsiz ve gizli zekât hesaplayıcı. Kayıt gerekmez.",
     keepCta: "Ücretsiz defter oluşturun",
+    keepMineTitle: "Bunları defterinize ekleyin",
+    keepMineBody:
+      "Giriş yaptınız. Defteriniz bu rakamları içindekilerin üstünde gösterir; neyi ekleyeceğinizi siz seçersiniz.",
+    keepMineCta: "Defterime ekle",
     barDue: "Ödenecek zekât",
     barBelow: "Nisabın altında",
     byValue: "Bunun yerine tutar girin",

@@ -40,6 +40,7 @@ import { track } from "@/lib/analytics";
 import { CurrencyOptions } from "@/components/public/VisitorCurrency";
 import { LOCALE_INFO, fmt, type Locale } from "@/i18n/config";
 import type { Messages } from "@/i18n/messages/en";
+import { useSignedIn } from "@/components/useSignedIn";
 
 export type CalcMessages = Messages["calc"];
 type Explanations = Messages["guide"]["steps"];
@@ -160,6 +161,7 @@ function Calculator({
 }) {
   const intl = LOCALE_INFO[locale].intl;
   const explain = useContext(ExplainContext);
+  const signedIn = useSignedIn();
   const [draft, setDraft] = useState<CalcDraft>(initial);
   // Live prices are fetched afresh on every visit, so a draft from last week
   // is weighed against today's nisab. Prices the visitor typed are left alone.
@@ -686,14 +688,25 @@ function Calculator({
           </div>
         </div>
 
-        <div className="mt-6 border border-mist bg-paper/60 p-5 print:hidden">
-          <p className="font-serif text-lg text-ink">{m.keepTitle}</p>
-          <p className="mt-1 text-sm text-sage">{m.keepBody}</p>
-          {m.keepNote ? <p className="mt-2 text-xs text-sage">{m.keepNote}</p> : null}
-          <Link href="/register?from=calculator" className="btn-primary mt-4 w-full">
-            {m.keepCta}
-          </Link>
-        </div>
+        {/* Signed in already: the figures go into the ledger they have. */}
+        {signedIn ? (
+          <div className="mt-6 border border-mist bg-paper/60 p-5 print:hidden">
+            <p className="font-serif text-lg text-ink">{m.keepMineTitle}</p>
+            <p className="mt-1 text-sm text-sage">{m.keepMineBody}</p>
+            <Link href="/assets#from-phone" className="btn-primary mt-4 w-full">
+              {m.keepMineCta}
+            </Link>
+          </div>
+        ) : (
+          <div className="mt-6 border border-mist bg-paper/60 p-5 print:hidden">
+            <p className="font-serif text-lg text-ink">{m.keepTitle}</p>
+            <p className="mt-1 text-sm text-sage">{m.keepBody}</p>
+            {m.keepNote ? <p className="mt-2 text-xs text-sage">{m.keepNote}</p> : null}
+            <Link href="/register?from=calculator" className="btn-primary mt-4 w-full">
+              {m.keepCta}
+            </Link>
+          </div>
+        )}
       </aside>
 
       {/* Phone: the answer stays in view while typing. */}

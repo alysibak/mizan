@@ -244,6 +244,10 @@ const fr: Messages = {
     share: "Partager le calculateur",
     shareText: "Un calculateur de zakat gratuit et confidentiel, avec les cours de l’or et de l’argent du jour. Sans inscription.",
     keepCta: "Créer un registre gratuit",
+    keepMineTitle: "Ajoutez-les à votre registre",
+    keepMineBody:
+      "Votre session est ouverte. Votre registre affiche ces montants au-dessus de ce qu’il contient déjà : vous choisissez quoi ajouter.",
+    keepMineCta: "Ajouter à mon registre",
     barDue: "Zakat due",
     barBelow: "Sous le nisab",
     byValue: "Saisir une valeur à la place",

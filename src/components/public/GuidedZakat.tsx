@@ -49,6 +49,7 @@ import {
 } from "@/components/ZakatCalculator";
 import { LOCALE_INFO, fmt, localePath, type Locale } from "@/i18n/config";
 import type { Messages } from "@/i18n/messages/en";
+import { useSignedIn } from "@/components/useSignedIn";
 
 type GuideMessages = Messages["guide"];
 
@@ -790,6 +791,7 @@ function Result({
   onGiven: (v: string) => void;
   share: ShareLabels;
 }) {
+  const signedIn = useSignedIn();
   const intl = LOCALE_INFO[locale].intl;
   const { result } = outcome;
   const rate = formatPercent(result.rate, draft.basis === "solar" ? 3 : 1, intl);
@@ -941,10 +943,21 @@ function Result({
           </p>
         </div>
         <div className="border border-mist bg-paper/60 p-4">
-          <Link href="/register?from=calculator" className="btn-primary w-full">
-            {m.result.ledger}
-          </Link>
-          <p className="mt-2 text-xs text-sage">{m.result.ledgerHint}</p>
+          {signedIn ? (
+            <>
+              <Link href="/assets#from-phone" className="btn-primary w-full">
+                {calc.keepMineCta}
+              </Link>
+              <p className="mt-2 text-xs text-sage">{calc.keepMineBody}</p>
+            </>
+          ) : (
+            <>
+              <Link href="/register?from=calculator" className="btn-primary w-full">
+                {m.result.ledger}
+              </Link>
+              <p className="mt-2 text-xs text-sage">{m.result.ledgerHint}</p>
+            </>
+          )}
         </div>
       </div>
 

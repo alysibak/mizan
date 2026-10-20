@@ -243,6 +243,10 @@ const id: Messages = {
     share: "Bagikan kalkulator",
     shareText: "Kalkulator zakat gratis dan privat dengan harga emas dan perak hari ini. Tanpa daftar.",
     keepCta: "Buat pembukuan gratis",
+    keepMineTitle: "Tambahkan ke pembukuan Anda",
+    keepMineBody:
+      "Anda sudah masuk. Pembukuan Anda menampilkan angka ini di atas isinya sekarang, jadi Anda memilih apa yang ditambahkan.",
+    keepMineCta: "Tambahkan ke pembukuan saya",
     barDue: "Zakat wajib",
     barBelow: "Di bawah nisab",
     byValue: "Masukkan nilai saja",

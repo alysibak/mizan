@@ -2,9 +2,11 @@ import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { assets, liabilities } from "@/db/schema";
 import { getCurrentUser, getUserSettings } from "@/lib/session";
+import { isDemoUser } from "@/lib/demo";
 import { parseMadhhab } from "@/lib/madhhab";
 import { CATEGORIES } from "@/lib/categories";
 import AssetManager from "@/components/AssetManager";
+import FromThisPhone from "@/components/FromThisPhone";
 
 export default async function AssetsPage({
   searchParams,
@@ -35,6 +37,8 @@ export default async function AssetsPage({
           trade inventory. Values are today’s; update them before you reckon.
         </p>
       </header>
+
+      {isDemoUser(user) ? null : <FromThisPhone currency={settings.currency} />}
 
       <AssetManager
         key={`${initialCategory ?? "default"}-${initialLabel ?? ""}`}

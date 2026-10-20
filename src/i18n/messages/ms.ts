@@ -243,6 +243,10 @@ const ms: Messages = {
     share: "Kongsi kalkulator",
     shareText: "Kalkulator zakat percuma dan peribadi dengan harga emas dan perak hari ini. Tanpa pendaftaran.",
     keepCta: "Cipta lejar percuma",
+    keepMineTitle: "Tambah ke lejar anda",
+    keepMineBody:
+      "Anda telah log masuk. Lejar anda menunjukkan angka ini di atas apa yang sudah ada, jadi anda pilih apa yang hendak ditambah.",
+    keepMineCta: "Tambah ke lejar saya",
     barDue: "Zakat wajib",
     barBelow: "Di bawah nisab",
     byValue: "Masukkan nilai sahaja",

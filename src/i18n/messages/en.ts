@@ -254,6 +254,10 @@ const en = {
     share: "Share the calculator",
     shareText: "A free, private zakat calculator with today’s gold and silver prices. No sign-up.",
     keepCta: "Create a free ledger",
+    keepMineTitle: "Add these to your ledger",
+    keepMineBody:
+      "You are signed in. Your ledger shows these figures above what it already holds, so you choose what to add.",
+    keepMineCta: "Add to my ledger",
     barDue: "Zakat due",
     barBelow: "Below nisab",
     byValue: "Enter a value instead",

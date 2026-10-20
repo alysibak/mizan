@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { PASSWORD, asNewVisitor, uniqueEmail } from "./helpers";
+import { PASSWORD, asNewVisitor, registerAndSetUp, uniqueEmail } from "./helpers";
 
 // My zakat: one person's zakat year, fed by every page and kept on the phone.
 
@@ -163,4 +163,41 @@ test("opening an account brings My zakat along: the year starts on the zakat day
   await expect(page.getByRole("link", { name: "Open a free account" })).toHaveCount(0);
   await page.getByRole("link", { name: "Open my ledger" }).click();
   await page.waitForURL(/\/dashboard/);
+});
+
+test("someone already signed in adds what they worked out on this phone to the ledger they have", async ({ page }) => {
+  await registerAndSetUp(page, { email: uniqueEmail("phone"), hawlStart: "2026-01-01", amount: "1000" });
+  await expect(page.getByText("You have figures on this phone")).toHaveCount(0);
+
+  await page.goto("/calculator");
+  await page.selectOption("#calc-currency", "CAD");
+  await page.fill("#calc-cash", "2000");
+  await page.fill("#calc-bank", "1000");
+  await page.goto("/my");
+  await page.locator("#my-amount").fill("25");
+  await page.locator("#my-to").fill("Food bank");
+  await page.getByRole("button", { name: "Add to what I have given" }).click();
+
+  // The dashboard says they are waiting; the calculator offers the ledger, not a new account.
+  await page.goto("/dashboard");
+  await expect(page.getByText("You have figures on this phone")).toBeVisible();
+  await page.goto("/calculator");
+  await expect(page.getByRole("link", { name: "Create a free ledger" })).toHaveCount(0);
+  await page.getByRole("link", { name: "Add to my ledger" }).click();
+  await page.waitForURL("**/assets#from-phone");
+
+  const card = page.getByRole("region", { name: "From this phone" });
+  await expect(card.getByRole("checkbox")).toHaveCount(3);
+  // The bank balance is already in the ledger as "Chequing": leave it out.
+  await card.getByRole("checkbox", { name: /Bank balances/ }).uncheck();
+  await card.getByRole("button", { name: "Add the 2 ticked" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Added" })).toBeVisible();
+  await expect(page.locator("li", { hasText: "Cash in hand" })).toContainText("2,000.00");
+  // Only the one bank account the ledger already had.
+  await expect(page.getByRole("button", { name: /^Edit / })).toHaveCount(2);
+
+  await page.goto("/giving");
+  await expect(page.getByText("Food bank").first()).toBeVisible();
+  await page.goto("/dashboard");
+  await expect(page.getByText("You have figures on this phone")).toHaveCount(0);
 });

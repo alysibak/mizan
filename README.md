@@ -201,6 +201,11 @@ work.
   Opening an account brings it along: the hawl starts on the last zakat
   day, and each noted payment becomes a zakat record in the ledger. Signed
   in, My zakat sends the visitor to their ledger instead of starting again.
+- **From this phone.** Someone already signed in who works out their zakat
+  on the calculator or the guide is offered "Add to my ledger" instead of a
+  new account. The holdings page lists those figures, and the payments
+  noted in My zakat, above what the ledger holds, each with a tick to leave
+  out what is already there; the dashboard says when some are waiting.
 - **Search from anywhere.** The Menu opens with a search box, in the page's
   language, that goes straight to the answers for that word.
 - **One set of figures for one person.** The calculator, the guide, the shop

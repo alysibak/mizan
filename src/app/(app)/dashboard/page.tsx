@@ -12,6 +12,7 @@ import HawlCalendarLink from "@/components/HawlCalendarLink";
 import CycleActions from "@/components/CycleActions";
 import LastLetterCard from "@/components/LastLetterCard";
 import { emailEnabled } from "@/lib/email";
+import { FromThisPhoneNotice } from "@/components/FromThisPhone";
 
 export default async function DashboardPage({
   searchParams,
@@ -89,6 +90,9 @@ export default async function DashboardPage({
           {user.name.split(" ")[0]}
         </h1>
       </header>
+
+      {/* The shared demo cannot be added to. */}
+      {isDemoUser(user) ? null : <FromThisPhoneNotice />}
 
       {assetRows.length === 0 && (
         <div className="border border-dashed border-mist px-6 py-8 text-center">
