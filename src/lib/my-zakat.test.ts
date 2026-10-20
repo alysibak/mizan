@@ -102,6 +102,10 @@ describe("todos", () => {
     expect(todos(base, today).map((t) => t.key)).toEqual(["work", "day"]);
   });
 
+  it("sends someone signed in to their ledger instead of starting again", () => {
+    expect(todos({ ...base, signedIn: true }, today).map((t) => t.key)).toEqual(["ledger", "day"]);
+  });
+
   it("puts a near zakat day first, then what is left to give", () => {
     const keys = todos(
       { ...base, zakatDay: { month: 9, day: 1 }, zakat: { due: 500, given: 200, pricesAgeDays: 1 } },
@@ -142,5 +146,13 @@ describe("draftAmount", () => {
     expect(parseAmount(draftAmount(1500.5, ","), ",")).toBe(1500.5);
     expect(parseAmount(draftAmount(1500.5, "."), ".")).toBe(1500.5);
     expect(draftAmount(0.1 + 0.2, null)).toBe("0.3");
+  });
+});
+
+describe("lastZakatDay", () => {
+  it("is the zakat day this year began on", async () => {
+    const { lastZakatDay } = await import("./my-zakat");
+    expect(lastZakatDay({ month: 9, day: 1 }, today).toISOString().slice(0, 10)).toBe("2026-02-18");
+    expect(lastZakatDay({ month: 9, day: 1 }, new Date(2027, 1, 8)).toISOString().slice(0, 10)).toBe("2027-02-08");
   });
 });

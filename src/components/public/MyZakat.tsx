@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
+import { useSignedIn } from "@/components/useSignedIn";
 import {
   IconBank,
   IconBowl,
@@ -197,6 +198,7 @@ export default function MyZakatHub() {
   const [when, setWhen] = useState("");
   const [restored, setRestored] = useState<string | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
+  const signedIn = useSignedIn();
 
   if (!hydrated) return <div className="card min-h-[24rem]" aria-busy="true" />;
 
@@ -236,6 +238,7 @@ export default function MyZakatHub() {
       interestToGive: interest.given ? 0 : interestAmount,
       farmDue: farmOwes.cropKg > 0 || farmOwes.herds.length > 0,
       ramadanIn: ramadan.inRamadan ? 0 : ramadan.daysUntil,
+      signedIn,
     },
     today,
   );
@@ -383,25 +386,40 @@ export default function MyZakatHub() {
             </div>
             <BalanceScale net={result.netZakatable} nisab={result.nisab} money={money} labels={{ you: "Yours", nisab: "Nisab" }} />
           </div>
+        ) : signedIn && !started ? (
+          <p className="mt-2 text-base text-sage">
+            Your ledger keeps this year’s zakat, worked out from everything you have put in it, and what you have given.
+          </p>
         ) : (
           <p className="mt-2 text-base text-sage">
             {started ? "Today’s gold and silver prices are needed to finish. " : "Nothing worked out yet. "}
             It takes a few minutes, step by step.
           </p>
         )}
-        <div className="mt-4 flex flex-wrap gap-3 print:hidden">
-          <Link href="/guide" className={(started ? "btn-ghost" : "btn-primary") + " px-5 py-3 text-base"}>
-            {started ? "Go through it step by step" : "Work it out, step by step"}
-          </Link>
-          {started ? (
-            <Link href="/calculator" className="btn-primary px-5 py-3 text-base">
-              Change my figures
+        {signedIn && !started ? (
+          <div className="mt-4 flex flex-wrap gap-3 print:hidden">
+            <Link href="/dashboard" className="btn-primary px-5 py-3 text-base">
+              Open my ledger
             </Link>
-          ) : null}
-          <Link href="/shop" className="btn-ghost px-5 py-3 text-base">
-            I have a shop
-          </Link>
-        </div>
+            <Link href="/giving?type=zakat" className="btn-ghost px-5 py-3 text-base">
+              Note zakat I gave
+            </Link>
+          </div>
+        ) : (
+          <div className="mt-4 flex flex-wrap gap-3 print:hidden">
+            <Link href="/guide" className={(started ? "btn-ghost" : "btn-primary") + " px-5 py-3 text-base"}>
+              {started ? "Go through it step by step" : "Work it out, step by step"}
+            </Link>
+            {started ? (
+              <Link href="/calculator" className="btn-primary px-5 py-3 text-base">
+                Change my figures
+              </Link>
+            ) : null}
+            <Link href="/shop" className="btn-ghost px-5 py-3 text-base">
+              I have a shop
+            </Link>
+          </div>
+        )}
       </Card>
 
       {due > 0 ? (
@@ -564,13 +582,15 @@ export default function MyZakatHub() {
             {restored}
           </p>
         ) : null}
-        <p className="mt-4 text-sm text-sage">
-          Want it on every device?{" "}
-          <Link href="/register" className="font-medium text-pine hover:underline">
-            Open a free account
-          </Link>{" "}
-          and your figures come with you.
-        </p>
+        {signedIn ? null : (
+          <p className="mt-4 text-sm text-sage">
+            Want it on every device?{" "}
+            <Link href={started ? "/register?from=calculator" : "/register"} className="font-medium text-pine hover:underline">
+              Open a free account
+            </Link>{" "}
+            and your figures, zakat day and payments come with you.
+          </p>
+        )}
       </Card>
     </div>
   );

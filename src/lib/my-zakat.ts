@@ -179,6 +179,8 @@ export interface Snapshot {
   farmDue: boolean;
   /** Days until Ramadan, or 0 during it. */
   ramadanIn: number;
+  /** Signed in: their ledger keeps this year's zakat. */
+  signedIn?: boolean;
 }
 
 export interface Todo {
@@ -192,7 +194,9 @@ export interface Todo {
 /** What to do next, most pressing first. Words are English for now. */
 export function todos(s: Snapshot, today: Date): Todo[] {
   const list: Todo[] = [];
-  if (!s.zakat) {
+  if (!s.zakat && s.signedIn) {
+    list.push({ key: "ledger", text: "See this year’s zakat in your ledger", href: "/dashboard", rank: 1 });
+  } else if (!s.zakat) {
     list.push({ key: "work", text: "Work out this year’s zakat", href: "/guide", rank: 1 });
   } else {
     const left = s.zakat.due - s.zakat.given;
@@ -257,4 +261,12 @@ export function readBackup(file: string): Record<string, string> | null {
 export function draftAmount(n: number, decimal: "." | "," | null): string {
   const s = String(toCents(n));
   return decimal === "," ? s.replace(".", ",") : s;
+}
+
+/** The most recent zakat day, today included: when the current year began. */
+export function lastZakatDay(zd: ZakatDay, today: Date): Date {
+  const next = nextZakatDay(zd, today);
+  if (daysUntil(next, today) === 0) return next;
+  const h = gregorianToHijri(next, CALENDAR);
+  return hijriToGregorian({ year: h.year - 1, month: zd.month, day: zd.day }, CALENDAR);
 }

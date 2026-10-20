@@ -1,12 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useSyncExternalStore } from "react";
-import { SIGNED_IN_HINT } from "@/lib/constants";
-
-function signedIn(): boolean {
-  return document.cookie.split("; ").some((c) => c === `${SIGNED_IN_HINT}=1`);
-}
+import { useSignedIn } from "@/components/useSignedIn";
 
 /**
  * The header's account links. Public pages are the same static file for
@@ -22,12 +17,7 @@ export default function AccountLinks({
   openLedger: string;
   yourLedger: string;
 }) {
-  const isSignedIn = useSyncExternalStore(
-    () => () => {},
-    signedIn,
-    () => false,
-  );
-  if (isSignedIn) {
+  if (useSignedIn()) {
     return (
       <Link href="/dashboard" className="btn-primary whitespace-nowrap px-3 sm:px-4">
         {yourLedger}

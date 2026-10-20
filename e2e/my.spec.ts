@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { PASSWORD, asNewVisitor, uniqueEmail } from "./helpers";
 
 // My zakat: one person's zakat year, fed by every page and kept on the phone.
 
@@ -94,4 +95,72 @@ test("bank interest set aside on its page is a to-do until it is given away", as
   await page.goto("/my");
   await expect(page.getByRole("region", { name: "What to do next" })).not.toContainText("bank interest");
   await expect(page.getByText("US$300.00 given away")).toBeVisible();
+});
+
+test("opening an account brings My zakat along: the year starts on the zakat day, and what was given is in the ledger", async ({ page }) => {
+  await page.goto("/my");
+  await page.evaluate(() => {
+    localStorage.setItem(
+      "mizan-calculator-v1",
+      JSON.stringify({
+        v: 1,
+        currency: "USD",
+        decimal: ".",
+        goldPrice: "100",
+        silverPrice: "1.2",
+        pricesAsOf: "2026-10-19T10:00:00.000Z",
+        amounts: { cash: "20000" },
+        byWeight: {},
+        grams: {},
+        purity: {},
+        portions: {},
+        debts: "",
+        standard: "silver",
+        basis: "lunar",
+        jewelleryCounted: false,
+        given: "150",
+      }),
+    );
+    localStorage.setItem(
+      "mizan-my-v1",
+      JSON.stringify({
+        zakatDay: { month: 9, day: 1 },
+        payments: [{ id: "a", day: "2026-10-01", amount: 150, to: "Masjid al-Noor" }],
+        history: [],
+      }),
+    );
+  });
+  await asNewVisitor(page);
+  await page.goto("/register?from=calculator");
+  await page.fill("#name", "Hub Test");
+  await page.fill("#email", uniqueEmail("hub"));
+  await page.fill("#password", PASSWORD);
+  await page.click("button[type=submit]");
+  await page.waitForURL("**/begin");
+
+  await page.click("text=I understand — continue");
+  await page.click("button:has-text('Continue')");
+  await page.click("button:has-text('Continue')");
+  // 1 Ramadan 1447 fell on 18 February 2026: that is when this year began.
+  await expect(page.locator("#hawl")).toHaveValue("2026-02-18");
+  await expect(page.getByText("From My zakat: your zakat day, 1 Ramadan")).toBeVisible();
+  await page.click("button:has-text('Continue')");
+  await expect(page.getByText("Zakat already given (1 payment)")).toBeVisible();
+  await page.click("text=Bring these in and finish");
+  await page.waitForURL(/\/dashboard/);
+
+  await page.goto("/giving");
+  await expect(page.getByText("Masjid al-Noor").first()).toBeVisible();
+  // The payment now lives in the ledger, so it is not kept twice on the phone.
+  const kept = await page.evaluate(() => JSON.parse(localStorage.getItem("mizan-my-v1") ?? "{}"));
+  expect(kept.payments).toEqual([]);
+  expect(kept.zakatDay).toEqual({ month: 9, day: 1 });
+
+  // Signed in, My zakat points to the ledger rather than starting again.
+  await page.goto("/my");
+  const todo = page.getByRole("region", { name: "What to do next" });
+  await expect(todo.getByRole("link").first()).toContainText("See this year’s zakat in your ledger");
+  await expect(page.getByRole("link", { name: "Open a free account" })).toHaveCount(0);
+  await page.getByRole("link", { name: "Open my ledger" }).click();
+  await page.waitForURL(/\/dashboard/);
 });

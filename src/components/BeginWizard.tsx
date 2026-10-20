@@ -27,6 +27,8 @@ import {
   type CalcDraft,
   type LedgerCarryOver,
 } from "@/lib/calculator";
+import { MY_KEY, lastZakatDay, parseMy, paymentsTotal } from "@/lib/my-zakat";
+import { HIJRI_MONTHS } from "@/lib/hijri";
 
 const STEPS = ["Trust", "Preferences", "Prices", "Hawl", "Holding"] as const;
 const STEP_KEY = "mizan-begin-step";
@@ -81,7 +83,11 @@ function Wizard({
   const [silver, setSilver] = useState(
     starter ? (carry?.ledger.prices.silverPricePerGram ?? 0) : settings.silverPricePerGram,
   );
-  const [hawlStartDate, setHawlStartDate] = useState(settings.hawlStartDate ?? "");
+  // What the visitor kept in My zakat: their zakat day starts the hawl, and
+  // what they noted giving comes along as zakat records.
+  const [mine] = useState(() => parseMy(readStoredValue(MY_KEY)));
+  const zakatDayStart = mine.zakatDay ? lastZakatDay(mine.zakatDay, new Date()).toISOString().slice(0, 10) : "";
+  const [hawlStartDate, setHawlStartDate] = useState(settings.hawlStartDate ?? zakatDayStart);
   const [trustedAckAt, setTrustedAckAt] = useState(settings.trustedAckAt);
   const [lookingUp, setLookingUp] = useState(false);
   const [priceHint, setPriceHint] = useState<string | null>(null);
@@ -100,6 +106,7 @@ function Wizard({
   const [assetSaved, setAssetSaved] = useState(false);
   const [carriedAssets, setCarriedAssets] = useState(false);
   const [carriedDebts, setCarriedDebts] = useState(0);
+  const [carriedPayments, setCarriedPayments] = useState(0);
 
   async function saveSettings(patch: Record<string, unknown>) {
     const body = {
@@ -219,6 +226,21 @@ function Wizard({
           const res = await sendJson("/api/liabilities", "POST", debt, "Could not add your debts");
           if (!res.ok) throw new Error(res.error);
           setCarriedDebts(i + 1);
+        }
+        for (const [i, p] of mine.payments.entries()) {
+          if (i < carriedPayments) continue;
+          const res = await sendJson(
+            "/api/giving",
+            "POST",
+            { amount: p.amount, type: "zakat", recipient: p.to || null, date: p.day },
+            "Could not bring in what you have given",
+          );
+          if (!res.ok) throw new Error(res.error);
+          setCarriedPayments(i + 1);
+        }
+        // They live in the ledger now; the zakat day and the record stay on the phone.
+        if (mine.payments.length) {
+          setStoredValue(MY_KEY, JSON.stringify({ ...parseMy(readStoredValue(MY_KEY)), payments: [] }));
         }
         setAssetSaved(true);
         setStoredValue(CALC_STORAGE_KEY, null);
@@ -505,6 +527,12 @@ function Wizard({
             The day your wealth last crossed nisab. You can set this later.
             Payment day should still follow local moon-sighting.
           </p>
+          {mine.zakatDay && hawlStartDate === zakatDayStart ? (
+            <p className="border-s-2 border-pine/50 ps-3 text-sm text-ink">
+              From My zakat: your zakat day, {mine.zakatDay.day} {HIJRI_MONTHS[mine.zakatDay.month - 1]}, when this
+              year began.
+            </p>
+          ) : null}
           <div className="max-w-xs">
             <label className="label mb-1.5" htmlFor="hawl">
               Date (optional)
@@ -567,6 +595,16 @@ function Wizard({
                     </span>
                   </li>
                 ))}
+                {mine.payments.length ? (
+                  <li className="flex justify-between gap-3 border-t border-pine/20 pt-1">
+                    <span className="text-sage">
+                      Zakat already given ({mine.payments.length} {mine.payments.length === 1 ? "payment" : "payments"})
+                    </span>
+                    <span className="text-pine nums">
+                      {formatMoney(paymentsTotal(mine.payments), carry.ledger.currency)}
+                    </span>
+                  </li>
+                ) : null}
               </ul>
               {carry.ledger.currency !== currency ? (
                 <p className="mt-2 text-xs text-warn">

@@ -198,6 +198,9 @@ work.
   copy can be saved as a file and restored on another phone. Two weeks
   before the zakat day, a line at the top of every page says how many days
   are left and links here (dismissed until the next year).
+  Opening an account brings it along: the hawl starts on the last zakat
+  day, and each noted payment becomes a zakat record in the ledger. Signed
+  in, My zakat sends the visitor to their ledger instead of starting again.
 - **Search from anywhere.** The Menu opens with a search box, in the page's
   language, that goes straight to the answers for that word.
 - **One set of figures for one person.** The calculator, the guide, the shop
