@@ -195,7 +195,11 @@ work.
   away, the family, Zakat al-Fitr, the good-deed streak and Ramadan all
   show with a link back, and a short "What to do next" list puts the most
   pressing first (a zakat day two weeks away, what is left to give). A
-  copy can be saved as a file and restored on another phone.
+  copy can be saved as a file and restored on another phone. Two weeks
+  before the zakat day, a line at the top of every page says how many days
+  are left and links here (dismissed until the next year).
+- **Search from anywhere.** The Menu opens with a search box, in the page's
+  language, that goes straight to the answers for that word.
 - **One set of figures for one person.** The calculator, the guide, the shop
   page, the family page's "Me" card and My zakat all read and write the
   same figures, so nothing is typed twice or counted twice. The farm,

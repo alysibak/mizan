@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { IconMenu, IconQuestion } from "@/components/icons";
+import { IconMenu, IconQuestion, IconSearch } from "@/components/icons";
 import { PAGE_ICONS as ICONS } from "@/components/pageIcons";
 import type { DirectoryGroup } from "@/lib/site-directory";
 
@@ -16,9 +16,12 @@ import type { DirectoryGroup } from "@/lib/site-directory";
 export default function SiteMenu({
   labels,
   groups,
+  search,
 }: {
   labels: { open: string; close: string };
   groups: DirectoryGroup[];
+  /** The answer search, in the page's language: where it is and its words. */
+  search: { action: string; label: string; placeholder: string; button: string };
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const pathname = usePathname();
@@ -63,6 +66,26 @@ export default function SiteMenu({
           </button>
         </div>
         <div className="space-y-6 px-5 pb-8 pt-5">
+          {/* Type a word, see every answer about it. */}
+          <form action={search.action} method="get" role="search">
+            <label className="label mb-1.5 block" htmlFor="menu-q">
+              {search.label}
+            </label>
+            <div className="flex gap-2">
+              <input
+                id="menu-q"
+                name="q"
+                type="search"
+                enterKeyHint="search"
+                autoComplete="off"
+                placeholder={search.placeholder}
+                className="field min-w-0 flex-1 text-base"
+              />
+              <button type="submit" className="btn-primary min-h-[48px] shrink-0 px-4" aria-label={search.button}>
+                <IconSearch className="h-5 w-5" />
+              </button>
+            </div>
+          </form>
           {groups.map((g) => (
             <section key={g.key} aria-labelledby={`menu-${g.key}`}>
               <h3 id={`menu-${g.key}`} className="label text-brassDeep">

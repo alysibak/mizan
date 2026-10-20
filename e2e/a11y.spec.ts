@@ -65,6 +65,7 @@ for (const scheme of ["light", "dark"] as const) {
         "/shop",
         "/give",
         "/interest",
+        "/my",
         "/inheritance",
         "/zakat-al-fitr",
         "/halal-stocks",
@@ -83,6 +84,36 @@ for (const scheme of ["light", "dark"] as const) {
         found.push(...(await violations(page, path)));
       }
       expect(found).toEqual([]);
+    });
+
+    test("My zakat in use meets WCAG AA", async ({ page }) => {
+      await page.route("**/api/metals?*", (route) =>
+        route.fulfill({ json: { currency: "USD", goldPricePerGram: 100, silverPricePerGram: 1.2, source: "test" } }),
+      );
+      await page.goto("/my");
+      await page.evaluate(() => {
+        localStorage.setItem("mizan-visitor-currency", "USD");
+        localStorage.setItem(
+          "mizan-calculator-v1",
+          JSON.stringify({
+            v: 1, currency: "USD", decimal: ".", goldPrice: "", silverPrice: "", pricesAsOf: null,
+            amounts: { cash: "20000" }, byWeight: {}, grams: {}, purity: {}, portions: {}, debts: "",
+            standard: "silver", basis: "lunar", jewelleryCounted: false, given: "100", weightUnit: null,
+          }),
+        );
+        localStorage.setItem(
+          "mizan-my-v1",
+          JSON.stringify({
+            zakatDay: { month: 9, day: 1 },
+            payments: [{ id: "a", day: "2026-10-01", amount: 100, to: "My brother" }],
+            history: [{ hijriYear: 1447, currency: "USD", due: 400, given: 400, closed: "2026-02-20" }],
+          }),
+        );
+        localStorage.setItem("mizan-interest-v1", JSON.stringify({ balance: "1000", interest: "20", given: false }));
+      });
+      await page.reload();
+      await expect(page.getByRole("region", { name: "Your record" })).toBeVisible();
+      expect(await violations(page, "/my in use")).toEqual([]);
     });
 
     test("the menu meets WCAG AA", async ({ page }) => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import AnswerList, { type AnswerItem } from "@/components/public/AnswerList";
 import type { ShareLabels } from "@/components/public/ShareButton";
 import { searchEntries } from "@/lib/search";
@@ -28,7 +28,14 @@ export default function AskSearch({
   share: { label: string; labels: ShareLabels; path: string };
   evidenceSuffix?: string;
 }) {
-  const [query, setQuery] = useState("");
+  // A search started elsewhere (the menu) arrives as ?q=; typing takes over from it.
+  const fromUrl = useSyncExternalStore(
+    () => () => {},
+    () => (new URLSearchParams(window.location.search).get("q") ?? "").slice(0, 80),
+    () => "",
+  );
+  const [typed, setQuery] = useState<string | null>(null);
+  const query = typed ?? fromUrl;
   const searching = query.trim().length > 1;
   const found = searching
     ? searchEntries(

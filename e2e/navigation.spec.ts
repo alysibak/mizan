@@ -98,3 +98,31 @@ test("a tool ends with where to go next, straight under it", async ({ page }) =>
   await next.getByRole("link", { name: /Where to give it/ }).click();
   await page.waitForURL("**/give");
 });
+
+test("the menu's search box leads straight to the answers", async ({ page }) => {
+  await page.goto("/farm");
+  await page.getByRole("button", { name: "Menu" }).click();
+  const menu = page.getByRole("dialog", { name: "Menu" });
+  await menu.getByLabel("What do you want to know?").fill("gold");
+  await menu.getByLabel("What do you want to know?").press("Enter");
+  await page.waitForURL("**/ask?q=gold");
+  await expect(page.locator("#ask-q")).toHaveValue("gold");
+  await expect(page.getByRole("heading", { name: "Answers" })).toBeVisible();
+});
+
+test("a near zakat day is announced on every page until dismissed", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2027-02-01T10:00:00"));
+  await page.goto("/start");
+  await expect(page.getByText("Your zakat day is in")).toHaveCount(0);
+  await page.evaluate(() => localStorage.setItem("mizan-my-v1", JSON.stringify({ zakatDay: { month: 9, day: 1 } })));
+  await page.reload();
+  await expect(page.getByText("Your zakat day is in 7 days.")).toBeVisible();
+  await page.getByRole("link", { name: "Open My zakat" }).click();
+  await page.waitForURL("**/my");
+  await expect(page.getByText("Your zakat day is in 7 days.")).toHaveCount(0);
+  await page.goto("/start");
+  await page.getByRole("button", { name: "Hide until next year" }).click();
+  await expect(page.getByText("Your zakat day is in")).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByText("Your zakat day is in")).toHaveCount(0);
+});

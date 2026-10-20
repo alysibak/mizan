@@ -640,3 +640,10 @@ export const IconMoon = ({ className = "h-6 w-6" }: P) => (
     <path d="M18 6.5l.5 1.2 1.2.5-1.2.5-.5 1.2-.5-1.2-1.2-.5 1.2-.5.5-1.2Z" />
   </Glyph>
 );
+
+export const IconSearch = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <circle cx="11" cy="11" r="6.5" />
+    <path d="m16 16 4.5 4.5" />
+  </Glyph>
+);

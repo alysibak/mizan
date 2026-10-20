@@ -78,7 +78,7 @@ export default function ToolPage({
 
         {copy.next?.length ? <NextSteps steps={copy.next} /> : null}
 
-        <div className="mt-16 space-y-10">
+        <div className="mt-16 space-y-10 print:hidden">
           {copy.sections.map((s) => (
             <section key={s.heading} className="space-y-3">
               <h2 className="font-serif text-2xl text-ink">{s.heading}</h2>
@@ -89,7 +89,7 @@ export default function ToolPage({
           ))}
         </div>
 
-        <section className="mt-16" aria-labelledby="faq-title">
+        <section className="mt-16 print:hidden" aria-labelledby="faq-title">
           <h2 id="faq-title" className="font-serif text-3xl text-ink">
             Questions
           </h2>
@@ -134,7 +134,7 @@ export default function ToolPage({
 /** "What next?": the obvious next pages, as big picture buttons. */
 export function NextSteps({ steps }: { steps: { href: string; label: string; icon: string }[] }) {
   return (
-    <nav className="mt-10" aria-labelledby="next-steps">
+    <nav className="mt-10 print:hidden" aria-labelledby="next-steps">
       <h2 id="next-steps" className="font-serif text-2xl text-ink">
         What next?
       </h2>
@@ -169,7 +169,7 @@ export function NextSteps({ steps }: { steps: { href: string; label: string; ico
 export function MoreTools({ except }: { except?: string }) {
   const tools = PUBLIC_TOOLS.filter((t) => t.path !== except);
   return (
-    <nav className="mt-16" aria-labelledby="more-tools">
+    <nav className="mt-16 print:hidden" aria-labelledby="more-tools">
       <h2 id="more-tools" className="font-serif text-2xl text-ink">
         More free tools
       </h2>

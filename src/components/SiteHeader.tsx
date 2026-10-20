@@ -4,6 +4,7 @@ import LanguageMenu from "@/components/LanguageMenu";
 import TextSizeToggle from "@/components/TextSizeToggle";
 import LanguageSuggestion, { type SuggestionTexts } from "@/components/LanguageSuggestion";
 import SiteMenu from "@/components/SiteMenu";
+import ZakatDayNotice from "@/components/ZakatDayNotice";
 import { siteDirectory } from "@/lib/site-directory";
 import { LOCALES, localePath, type Locale } from "@/i18n/config";
 import { messagesFor } from "@/i18n/messages";
@@ -23,7 +24,8 @@ function suggestionTexts(): SuggestionTexts {
  * language menu sits beside the account links on every screen size.
  */
 export default function SiteHeader({ locale = "en" }: { locale?: Locale }) {
-  const { nav, language, largerText, menu } = messagesFor(locale).common;
+  const all = messagesFor(locale);
+  const { nav, language, largerText, menu } = all.common;
   const links = [
     // The visitor's own zakat year, in English only so far.
     ...(locale === "en" ? [{ href: "/my", label: "My zakat" }] : []),
@@ -34,6 +36,7 @@ export default function SiteHeader({ locale = "en" }: { locale?: Locale }) {
   return (
     <>
       <LanguageSuggestion locale={locale} texts={suggestionTexts()} />
+      {locale === "en" ? <ZakatDayNotice /> : null}
       {/* The top bar stays in view while reading, so the menu is always one tap away. */}
       <header className="sticky top-0 z-30 border-b border-mist/70 bg-porcelain/90 backdrop-blur print:hidden">
         <div className="flex items-center justify-between gap-3 px-5 py-3 md:px-10 md:py-4">
@@ -52,7 +55,16 @@ export default function SiteHeader({ locale = "en" }: { locale?: Locale }) {
           </nav>
           <div className="flex min-w-0 items-center gap-3 text-sm sm:gap-5">
             {/* Everything Mizan does, one tap away on every page. */}
-            <SiteMenu labels={{ open: menu.open, close: menu.close }} groups={siteDirectory(locale)} />
+            <SiteMenu
+              labels={{ open: menu.open, close: menu.close }}
+              groups={siteDirectory(locale)}
+              search={{
+                action: localePath(locale, "/ask"),
+                label: all.ask.searchLabel,
+                placeholder: all.ask.placeholder,
+                button: all.ask.nav,
+              }}
+            />
             <TextSizeToggle label={largerText} className="hidden md:inline-flex" />
             <LanguageMenu locale={locale} label={language} />
             <AccountLinks
