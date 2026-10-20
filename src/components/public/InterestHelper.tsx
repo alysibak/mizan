@@ -1,22 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
 import { CurrencySelect, useVisitorCurrency } from "@/components/public/VisitorCurrency";
 import { MoneyInput } from "@/components/ZakatCalculator";
 import { parseAmount } from "@/lib/calculator";
 import { formatMoney } from "@/lib/money";
+import { useStoredState } from "@/lib/client-store";
+import { INTEREST_KEY, parseInterest } from "@/lib/interest";
 
 const INTL = "en-CA";
 
 /**
  * Interest a bank paid you, separated from your own money: the savings stay
  * yours and count for zakat; the interest is given away, and is neither
- * zakat nor counted in it. Nothing is stored or sent.
+ * zakat nor counted in it. Kept in this browser, so My zakat can remind the
+ * visitor until it has been given; never sent.
  */
 export default function InterestHelper() {
   const [currency, setCurrency] = useVisitorCurrency();
-  const [balance, setBalance] = useState("");
-  const [interest, setInterest] = useState("");
+  const [kept, save] = useStoredState(INTEREST_KEY, parseInterest);
+  const { balance, interest, given } = kept;
+  const setBalance = (v: string) => save({ ...kept, balance: v });
+  const setInterest = (v: string) => save({ ...kept, interest: v, given: false });
   const money = (n: number) => formatMoney(n, currency, INTL);
   const total = parseAmount(balance, ".");
   const paid = Math.min(parseAmount(interest, "."), total || Infinity);
@@ -108,6 +113,29 @@ export default function InterestHelper() {
               </li>
             ) : null}
           </ol>
+          <label
+            className={
+              "flex min-h-[52px] cursor-pointer items-center gap-3 border-2 px-3 py-2 transition " +
+              (given ? "border-pine bg-pine/5" : "border-mist hover:border-sage")
+            }
+          >
+            <input
+              type="checkbox"
+              className="h-5 w-5 shrink-0 accent-[rgb(var(--c-pine))]"
+              checked={given}
+              onChange={(e) => save({ ...kept, given: e.target.checked })}
+            />
+            <span className="text-base font-medium text-ink">
+              I have given away <span className="nums">{money(paid)}</span>
+            </span>
+          </label>
+          <p className="text-sm text-sage">
+            {given ? "Done. " : "Until you tick it, "}
+            <Link href="/my" className="font-medium text-pine hover:underline">
+              My zakat
+            </Link>{" "}
+            {given ? "will not remind you about it." : "will remind you to give it away."}
+          </p>
         </div>
       ) : null}
     </section>

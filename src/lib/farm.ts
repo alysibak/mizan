@@ -134,3 +134,52 @@ export const HERD_STEPS: Record<Herd, { from: number; to: number | null; dues: D
 export function herdStep(herd: Herd, n: number): number {
   return HERD_STEPS[herd].findIndex((s) => n >= s.from && (s.to === null || n <= s.to));
 }
+
+/** Where the farm page keeps its figures in the browser. */
+export const FARM_KEY = "mizan-farm-v1";
+
+export interface FarmState {
+  harvest: string;
+  unit: "kg" | "maund";
+  watering: Watering;
+  counts: Record<Herd, string>;
+  grazing: boolean;
+}
+
+export const EMPTY_FARM: FarmState = {
+  harvest: "",
+  unit: "kg",
+  watering: "rain",
+  counts: { sheep: "", cattle: "", camels: "" },
+  grazing: true,
+};
+
+/** What the farm page kept, or an empty farm if nothing (or nonsense) was. */
+export function parseFarm(raw: string | null): FarmState {
+  if (!raw) return EMPTY_FARM;
+  try {
+    const v = JSON.parse(raw) as Partial<FarmState> & { counts?: Partial<Record<Herd, unknown>> };
+    const text = (x: unknown) => (typeof x === "string" ? x.slice(0, 20) : "");
+    return {
+      harvest: text(v.harvest),
+      unit: v.unit === "maund" ? "maund" : "kg",
+      watering: v.watering === "irrigated" || v.watering === "both" ? v.watering : "rain",
+      counts: { sheep: text(v.counts?.sheep), cattle: text(v.counts?.cattle), camels: text(v.counts?.camels) },
+      grazing: v.grazing !== false,
+    };
+  } catch {
+    return EMPTY_FARM;
+  }
+}
+
+/** Crops and herds that owe something, for My zakat. */
+export function farmDues(state: FarmState, parse: (raw: string) => number): { cropKg: number; herds: { herd: Herd; dues: Due[] }[] } {
+  const kg = parse(state.harvest) * (state.unit === "maund" ? MAUND_KG : 1);
+  const crop = cropZakat(kg, state.watering);
+  const herds = state.grazing
+    ? (["sheep", "cattle", "camels"] as const)
+        .map((herd) => ({ herd, dues: herdZakat(herd, Math.floor(parse(state.counts[herd]))) }))
+        .filter((h) => h.dues.length > 0)
+    : [];
+  return { cropKg: crop.due ? crop.kg : 0, herds };
+}

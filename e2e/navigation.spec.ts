@@ -70,7 +70,7 @@ test("someone coming back is offered what they started", async ({ page }) => {
   await expect(back.getByText("Still to give: US$300.00")).toBeVisible();
   await expect(back.getByText("Your good deeds")).toBeVisible();
   await back.getByRole("link", { name: /Your zakat is/ }).click();
-  await page.waitForURL("**/calculator");
+  await page.waitForURL("**/my");
 });
 
 test("a visitor who does not know where to start gets their own plan, in order", async ({ page }) => {
@@ -81,11 +81,12 @@ test("a visitor who does not know where to start gets their own plan, in order",
   await picker.getByRole("button", { name: "Years I did not pay" }).click();
   await expect(picker.getByRole("button", { name: "A shop or business" })).toHaveAttribute("aria-pressed", "true");
   const steps = picker.getByRole("list").last().getByRole("link");
-  await expect(steps).toHaveCount(4);
+  await expect(steps).toHaveCount(5);
   await expect(steps.nth(0)).toContainText("Set the bank interest aside first");
   await expect(steps.nth(1)).toContainText("Work out your shop with your savings");
   await expect(steps.nth(2)).toContainText("Then catch up on past years");
   await expect(steps.nth(3)).toContainText("Give it");
+  await expect(steps.nth(4)).toContainText("Keep track in My zakat");
   await steps.nth(1).click();
   await page.waitForURL("**/shop");
 });

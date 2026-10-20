@@ -900,9 +900,14 @@ function Result({
             </ol>
             {/* The giving guide is in English only so far. */}
             {locale === "en" ? (
-              <Link href="/give" className="mt-3 inline-block text-base font-medium text-pine hover:underline">
-                Where to give it, and how to choose a charity →
-              </Link>
+              <div className="mt-3 flex flex-col gap-1.5">
+                <Link href="/my" className="text-base font-medium text-pine hover:underline">
+                  Saved in My zakat: note what you give, and get a reminder every year →
+                </Link>
+                <Link href="/give" className="text-base font-medium text-pine hover:underline">
+                  Where to give it, and how to choose a charity →
+                </Link>
+              </div>
             ) : null}
             <GivenTracker
               id="guide-given"

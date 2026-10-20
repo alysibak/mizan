@@ -1,24 +1,27 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId } from "react";
 import Link from "next/link";
 import { IconCamel, IconCow, IconGoat, IconPump, IconRain, IconSack } from "@/components/icons";
 import { AmountWords } from "@/components/ZakatCalculator";
 import { parseAmount } from "@/lib/calculator";
 import {
   CROP_NISAB_KG,
+  FARM_KEY,
   HERD_NISAB,
   HERD_STEPS,
   MAUND_KG,
   cropZakat,
   herdStep,
   herdZakat,
+  parseFarm,
   type Due,
   type Given,
   type Herd,
   type Watering,
 } from "@/lib/farm";
 import { amountInWords } from "@/lib/number-words";
+import { useStoredState } from "@/lib/client-store";
 
 const INTL = "en-CA";
 const number = (n: number) => n.toLocaleString(INTL, { maximumFractionDigits: 1 });
@@ -97,14 +100,17 @@ function SackRow({ rate }: { rate: number }) {
 /**
  * Zakat on a farm: the harvest by weight and how it was watered, and each
  * kind of grazing animal by count, each answer drawn as pictures. English
- * only; nothing is stored or sent.
+ * only; kept in this browser for My zakat, never sent.
  */
 export default function FarmPlanner() {
-  const [harvest, setHarvest] = useState("");
-  const [unit, setUnit] = useState<"kg" | "maund">("kg");
-  const [watering, setWatering] = useState<Watering>("rain");
-  const [counts, setCounts] = useState<Record<Herd, string>>({ sheep: "", cattle: "", camels: "" });
-  const [grazing, setGrazing] = useState(true);
+  // Kept in this browser, so My zakat can show what the farm owes.
+  const [farm, saveFarm] = useStoredState(FARM_KEY, parseFarm);
+  const { harvest, unit, watering, counts, grazing } = farm;
+  const setHarvest = (v: string) => saveFarm({ ...farm, harvest: v });
+  const setUnit = (v: "kg" | "maund") => saveFarm({ ...farm, unit: v });
+  const setWatering = (v: Watering) => saveFarm({ ...farm, watering: v });
+  const setGrazing = (v: boolean) => saveFarm({ ...farm, grazing: v });
+  const setCount = (herd: Herd, v: string) => saveFarm({ ...farm, counts: { ...counts, [herd]: v } });
 
   const kg = parseAmount(harvest, ".") * (unit === "maund" ? MAUND_KG : 1);
   const crop = cropZakat(kg, watering);
@@ -243,7 +249,7 @@ export default function FarmPlanner() {
                 placeholder="0"
                 className="field mt-2 nums"
                 value={counts[key]}
-                onChange={(e) => setCounts((c) => ({ ...c, [key]: e.target.value }))}
+                onChange={(e) => setCount(key, e.target.value)}
               />
             </div>
           ))}

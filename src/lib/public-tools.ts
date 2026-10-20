@@ -9,6 +9,11 @@ export interface PublicTool {
 
 export const PUBLIC_TOOLS: PublicTool[] = [
   {
+    path: "/my",
+    name: "My zakat",
+    blurb: "Your zakat day, what you have given, and what to do next.",
+  },
+  {
     path: "/calculator",
     name: "Zakat calculator",
     blurb: "What you owe this year, against today’s nisab.",
@@ -86,4 +91,4 @@ export const PUBLIC_TOOLS: PublicTool[] = [
 ];
 
 /** The English-only tool pages (the calculator, nisab, and Zakat al-Fitr pages are translated). */
-export const ENGLISH_TOOL_PATHS = ["/ramadan", "/give", "/interest", "/sadaqah", "/quiz", "/family", "/shop", "/farm", "/inheritance", "/halal-stocks", "/qurbani"];
+export const ENGLISH_TOOL_PATHS = ["/my", "/ramadan", "/give", "/interest", "/sadaqah", "/quiz", "/family", "/shop", "/farm", "/inheritance", "/halal-stocks", "/qurbani"];

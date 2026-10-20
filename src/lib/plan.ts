@@ -31,8 +31,8 @@ export function buildPlan(have: ReadonlySet<Situation>): PlanStep[] {
       href: "/shop",
       title: "Work out your shop with your savings",
       why: have.has("gold")
-        ? "Stock, the till, and money owed to you, with your own savings. Add your gold’s value to your savings."
-        : "Stock, the till, and money owed to you, with your own savings.",
+        ? "Stock, the till, your bank, and money owed to you. Add your gold in the calculator: it is counted in the same answer."
+        : "Stock, the till, your bank, and money owed to you, all in one answer.",
     });
   } else if (have.has("family")) {
     steps.push({
@@ -60,6 +60,12 @@ export function buildPlan(have: ReadonlySet<Situation>): PlanStep[] {
   const owes = ["money", "gold", "shop", "farm", "family", "missed"].some((s) => have.has(s as Situation));
   if (owes) {
     steps.push({ key: "give", href: "/give", title: "Give it", why: "Who to give to first, and how to choose a charity." });
+    steps.push({
+      key: "my",
+      href: "/my",
+      title: "Keep track in My zakat",
+      why: "Your zakat day with a reminder each year, and what you have given.",
+    });
   }
   return steps;
 }

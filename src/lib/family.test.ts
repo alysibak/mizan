@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { familyZakat, personZakat } from "./family";
+import { familyOf, familyZakat, personFromNet, personZakat } from "./family";
 
 const GOLD = 100; // per gram of pure gold
 const NISAB = 714; // 595 g of silver at 1.2
@@ -51,5 +51,15 @@ describe("familyZakat", () => {
     expect(r.total).toBe(0);
     expect(r.pooled).toBe(900);
     expect(r.poolingMisleads).toBe(true);
+  });
+});
+
+describe("personFromNet", () => {
+  it("weighs figures worked out in the calculator against the family's nisab", () => {
+    const me = personFromNet(2500, 2000, NISAB);
+    expect(me).toEqual({ owns: 2500, net: 2000, due: true, zakat: 50 });
+    const family = familyOf([me, personZakat({ cash: 400, goldGrams: 0, goldPurity: 1, debts: 0 }, GOLD, NISAB)], NISAB);
+    expect(family.total).toBe(50);
+    expect(family.poolingMisleads).toBe(true);
   });
 });

@@ -175,6 +175,14 @@ test("family: each person weighed alone, and a warning when pooling misleads", a
   // Kept in this browser.
   await page.reload();
   await expect(page.getByRole("listitem", { name: "Wife or husband", exact: true }).getByLabel("Cash and savings")).toHaveValue("400");
+
+  // Your own card uses what you worked out in the calculator, rather than asking again.
+  await page.goto("/calculator");
+  await page.locator("#calc-cash").fill("2000");
+  await page.goto("/family");
+  const mine = page.getByRole("listitem", { name: "Me", exact: true });
+  await expect(mine.getByText("From your own figures")).toBeVisible();
+  await expect(mine.getByText("US$50.00")).toBeVisible();
 });
 
 test("quiz: ten picture questions, each answered at once, and a score", async ({ page }) => {
@@ -219,23 +227,30 @@ test("sadaqah: one deed for today, and every deed with its source", async ({ pag
   await expect(page.getByRole("button", { name: "✓ Done today" })).toBeVisible();
 });
 
-test("shop: stock, till, and money owed counted; suppliers taken off", async ({ page }) => {
+test("shop: counted with everything else you own, in the same figures as the calculator", async ({ page }) => {
   await page.route("**/api/metals?*", (route) =>
     route.fulfill({ json: { currency: "USD", goldPricePerGram: 100, silverPricePerGram: 1.2, source: "test" } }),
   );
   await page.goto("/shop");
   await expect(page.getByRole("list", { name: "Not counted" }).getByRole("listitem")).toHaveCount(5);
   await page.locator("#tool-currency").selectOption("USD");
-  await page.locator("#shop-stock").fill("30000");
+  await page.locator("#shop-business").fill("30000");
   await page.locator("#shop-cash").fill("5000");
-  await page.locator("#shop-owedToYou").fill("2000");
-  await page.locator("#shop-owedBySuppliers").fill("7000");
+  await page.locator("#shop-receivables").fill("2000");
+  await page.locator("#shop-debts").fill("7000");
   // 30,000 + 5,000 + 2,000 − 7,000 = 30,000; 2.5% is 750.
   await expect(page.getByRole("heading", { name: "Your zakat: US$750.00" })).toBeVisible();
-  await page.locator("#shop-stock").fill("500");
+
+  // The same figures are the calculator's: nothing typed twice, nothing counted twice.
+  await page.goto("/calculator");
+  await expect(page.locator("#calc-cash")).toHaveValue("5000");
+  await expect(page.getByText("US$750.00").first()).toBeVisible();
+
+  await page.goto("/shop");
+  await page.locator("#shop-business").fill("500");
   await page.locator("#shop-cash").fill("0");
-  await page.locator("#shop-owedToYou").fill("0");
-  await page.locator("#shop-owedBySuppliers").fill("0");
+  await page.locator("#shop-receivables").fill("0");
+  await page.locator("#shop-debts").fill("0");
   await expect(page.getByRole("heading", { name: "Below the nisab: no zakat this year" })).toBeVisible();
 });
 

@@ -1,0 +1,260 @@
+/**
+ * "My zakat": one person's zakat year, kept in their own browser. The figures
+ * themselves live where they were entered (the calculator draft, the farm,
+ * the catch-up tally, …); this keeps what ties them together: the zakat day,
+ * the payments made, and a record of past years. Pure, so it is unit-tested.
+ */
+import { gregorianToHijri, hijriToGregorian, type HijriCalendar } from "./hijri";
+import { toCents } from "./money";
+
+export const MY_KEY = "mizan-my-v1";
+const CALENDAR: HijriCalendar = "umalqura";
+
+/** Every key Mizan keeps in a visitor's browser, for backing up and restoring. */
+export const BACKUP_KEYS = [
+  "mizan-calculator-v1",
+  "mizan-visitor-currency",
+  MY_KEY,
+  "mizan-missed-v1",
+  "mizan-family-v1",
+  "mizan-farm-v1",
+  "mizan-interest-v1",
+  "mizan-fitr-v1",
+  "mizan-sadaqah-days-v1",
+] as const;
+
+export interface ZakatDay {
+  /** Hijri month, 1 (Muharram) to 12 (Dhul-Hijjah). */
+  month: number;
+  /** 1 to 29, so the day exists in every month. */
+  day: number;
+}
+
+export interface Payment {
+  id: string;
+  /** YYYY-MM-DD it was given. */
+  day: string;
+  amount: number;
+  /** Who or where, if the visitor wants to note it. */
+  to: string;
+}
+
+export interface YearRecord {
+  /** The Hijri year the zakat day fell in. */
+  hijriYear: number;
+  currency: string;
+  due: number;
+  given: number;
+  /** YYYY-MM-DD the year was closed. */
+  closed: string;
+}
+
+export interface MyZakat {
+  zakatDay: ZakatDay | null;
+  payments: Payment[];
+  history: YearRecord[];
+}
+
+export const EMPTY_MY: MyZakat = { zakatDay: null, payments: [], history: [] };
+
+const MAX_PAYMENTS = 200;
+const MAX_HISTORY = 100;
+const DAY = /^\d{4}-\d{2}-\d{2}$/;
+
+function num(v: unknown): number {
+  return typeof v === "number" && Number.isFinite(v) && v >= 0 ? v : 0;
+}
+function text(v: unknown, max = 60): string {
+  return typeof v === "string" ? v.slice(0, max) : "";
+}
+
+/** What this browser kept, checked piece by piece; anything unreadable is dropped. */
+export function parseMy(raw: string | null): MyZakat {
+  if (!raw) return EMPTY_MY;
+  let v: Record<string, unknown>;
+  try {
+    v = JSON.parse(raw);
+  } catch {
+    return EMPTY_MY;
+  }
+  if (!v || typeof v !== "object") return EMPTY_MY;
+  const zd = v.zakatDay as Record<string, unknown> | null | undefined;
+  const month = Number(zd?.month);
+  const day = Number(zd?.day);
+  const zakatDay =
+    Number.isInteger(month) && month >= 1 && month <= 12 && Number.isInteger(day) && day >= 1 && day <= 29
+      ? { month, day }
+      : null;
+  const payments = (Array.isArray(v.payments) ? v.payments : [])
+    .slice(-MAX_PAYMENTS)
+    .map((p: Record<string, unknown>) => ({
+      id: text(p?.id, 40),
+      day: DAY.test(text(p?.day)) ? text(p?.day) : "",
+      amount: num(p?.amount),
+      to: text(p?.to),
+    }))
+    .filter((p: Payment) => p.id && p.day && p.amount > 0);
+  const history = (Array.isArray(v.history) ? v.history : [])
+    .slice(-MAX_HISTORY)
+    .map((h: Record<string, unknown>) => ({
+      hijriYear: Number.isInteger(h?.hijriYear) ? (h.hijriYear as number) : 0,
+      currency: /^[A-Z]{3}$/.test(text(h?.currency, 3)) ? text(h?.currency, 3) : "USD",
+      due: num(h?.due),
+      given: num(h?.given),
+      closed: DAY.test(text(h?.closed)) ? text(h?.closed) : "",
+    }))
+    .filter((h: YearRecord) => h.hijriYear > 0 && h.closed);
+  return { zakatDay, payments, history };
+}
+
+function utcDay(d: Date): Date {
+  return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+}
+
+/** The next time the zakat day comes round, today included, as a UTC date. */
+export function nextZakatDay(zd: ZakatDay, today: Date): Date {
+  const t = utcDay(today);
+  const h = gregorianToHijri(t, CALENDAR);
+  const thisYear = hijriToGregorian({ year: h.year, month: zd.month, day: zd.day }, CALENDAR);
+  return thisYear.getTime() >= t.getTime()
+    ? thisYear
+    : hijriToGregorian({ year: h.year + 1, month: zd.month, day: zd.day }, CALENDAR);
+}
+
+/** The zakat day's next few occurrences, for calendar reminders. */
+export function zakatDays(zd: ZakatDay, today: Date, years = 5): Date[] {
+  const first = nextZakatDay(zd, today);
+  const h = gregorianToHijri(first, CALENDAR);
+  return Array.from({ length: years }, (_, i) =>
+    hijriToGregorian({ year: h.year + i, month: zd.month, day: zd.day }, CALENDAR),
+  );
+}
+
+/** Days from today to a UTC date. */
+export function daysUntil(date: Date, today: Date): number {
+  return Math.round((date.getTime() - utcDay(today).getTime()) / 86_400_000);
+}
+
+/** The Hijri year a date falls in. */
+export function hijriYearOf(date: Date): number {
+  return gregorianToHijri(utcDay(date), CALENDAR).year;
+}
+
+export function paymentsTotal(payments: Payment[]): number {
+  return toCents(payments.reduce((sum, p) => sum + p.amount, 0));
+}
+
+/** A payment added to the list, with an id that will not clash. */
+export function addPayment(my: MyZakat, p: Omit<Payment, "id">, now = Date.now()): MyZakat {
+  const id = `p${now.toString(36)}${my.payments.length}`;
+  return { ...my, payments: [...my.payments, { ...p, amount: toCents(p.amount), id }].slice(-MAX_PAYMENTS) };
+}
+
+export function removePayment(my: MyZakat, id: string): MyZakat {
+  return { ...my, payments: my.payments.filter((p) => p.id !== id) };
+}
+
+/** This year written into the record, ready for the next one. */
+export function closeYear(
+  my: MyZakat,
+  year: { hijriYear: number; currency: string; due: number; given: number },
+  today: Date,
+): MyZakat {
+  const closed = utcDay(today).toISOString().slice(0, 10);
+  const record = { ...year, due: toCents(year.due), given: toCents(year.given), closed };
+  return {
+    ...my,
+    payments: [],
+    history: [...my.history.filter((h) => h.hijriYear !== year.hijriYear), record].slice(-MAX_HISTORY),
+  };
+}
+
+/** A snapshot of everything kept, for the to-do list. */
+export interface Snapshot {
+  zakatDay: ZakatDay | null;
+  /** This year's zakat from the calculator or guide; null if not worked out. */
+  zakat: { due: number; given: number; pricesAgeDays: number | null } | null;
+  missedLeft: number;
+  interestToGive: number;
+  farmDue: boolean;
+  /** Days until Ramadan, or 0 during it. */
+  ramadanIn: number;
+}
+
+export interface Todo {
+  key: string;
+  text: string;
+  href: string;
+  /** Lower comes first. */
+  rank: number;
+}
+
+/** What to do next, most pressing first. Words are English for now. */
+export function todos(s: Snapshot, today: Date): Todo[] {
+  const list: Todo[] = [];
+  if (!s.zakat) {
+    list.push({ key: "work", text: "Work out this year’s zakat", href: "/guide", rank: 1 });
+  } else {
+    const left = s.zakat.due - s.zakat.given;
+    if (s.zakat.pricesAgeDays !== null && s.zakat.pricesAgeDays > 14) {
+      list.push({ key: "prices", text: "Gold and silver prices have moved: check your figures", href: "/calculator", rank: 2 });
+    }
+    if (left > 0.005) list.push({ key: "give", text: "Give what is left of this year’s zakat", href: "#given", rank: 3 });
+  }
+  if (s.interestToGive > 0) {
+    list.push({ key: "interest", text: "Give away the bank interest you set aside", href: "/interest", rank: 4 });
+  }
+  if (!s.zakatDay) {
+    list.push({ key: "day", text: "Choose your zakat day, so it comes round each year", href: "#zakat-day", rank: 5 });
+  } else {
+    const days = daysUntil(nextZakatDay(s.zakatDay, today), today);
+    if (days <= 14) {
+      list.push({
+        key: "soon",
+        text: days === 0 ? "Today is your zakat day: update your figures" : `Your zakat day is in ${days} ${days === 1 ? "day" : "days"}: update your figures`,
+        href: "/calculator",
+        rank: 0,
+      });
+    }
+  }
+  if (s.missedLeft > 0.005) list.push({ key: "missed", text: "Keep paying off past years", href: "/missed-years", rank: 6 });
+  if (s.farmDue) list.push({ key: "farm", text: "Give the share of your harvest or herd", href: "/farm", rank: 7 });
+  if (s.ramadanIn === 0) {
+    list.push({ key: "fitr", text: "Give Zakat al-Fitr before the Eid prayer", href: "/zakat-al-fitr", rank: 1 });
+  } else if (s.ramadanIn <= 30) {
+    list.push({ key: "ramadan", text: `Ramadan is in ${s.ramadanIn} days: plan your giving`, href: "/ramadan", rank: 5 });
+  }
+  return list.sort((a, b) => a.rank - b.rank);
+}
+
+/** Everything kept, as one file to save. */
+export function backupFile(read: (key: string) => string | null, now: Date): string {
+  const data: Record<string, string> = {};
+  for (const key of BACKUP_KEYS) {
+    const v = read(key);
+    if (v !== null) data[key] = v;
+  }
+  return JSON.stringify({ mizan: 1, saved: now.toISOString(), data }, null, 1);
+}
+
+/** The keys and values in a backup file, or null if it is not one. Only Mizan's own keys are accepted. */
+export function readBackup(file: string): Record<string, string> | null {
+  try {
+    const v = JSON.parse(file) as { mizan?: unknown; data?: Record<string, unknown> };
+    if (v?.mizan !== 1 || !v.data || typeof v.data !== "object") return null;
+    const out: Record<string, string> = {};
+    for (const key of BACKUP_KEYS) {
+      const value = v.data[key];
+      if (typeof value === "string" && value.length <= 200_000) out[key] = value;
+    }
+    return Object.keys(out).length ? out : null;
+  } catch {
+    return null;
+  }
+}
+
+/** A number written the way the figures were typed, so it reads back the same. */
+export function draftAmount(n: number, decimal: "." | "," | null): string {
+  const s = String(toCents(n));
+  return decimal === "," ? s.replace(".", ",") : s;
+}

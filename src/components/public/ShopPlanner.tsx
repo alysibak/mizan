@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
 import {
   IconBalance,
+  IconBank,
   IconBox,
   IconCar,
   IconCash,
   IconFridge,
-  IconJar,
   IconOwed,
   IconReceipt,
   IconShelf,
@@ -16,10 +16,9 @@ import {
 import { CurrencySelect, useVisitorCurrency } from "@/components/public/VisitorCurrency";
 import { useMetalPrices } from "@/components/public/useMetalPrices";
 import { BalanceScale } from "@/components/public/Visuals";
+import { useMyDraft } from "@/components/public/useMyDraft";
 import { MoneyInput } from "@/components/ZakatCalculator";
-import { parseAmount } from "@/lib/calculator";
 import { formatMoney } from "@/lib/money";
-import { shopZakat, type ShopFigures } from "@/lib/shop";
 
 const INTL = "en-CA";
 
@@ -36,29 +35,27 @@ const NOT_COUNTED = [
   { label: "Your van or bike", Icon: IconCar },
 ];
 
-const FIELDS: { key: keyof ShopFigures; label: string; hint: string; Icon: typeof IconBox; minus?: boolean }[] = [
+/** The shop's figures are the visitor's own figures: the same ones the calculator keeps. */
+type ShopField = "business" | "cash" | "bank" | "receivables" | "debts";
+
+const FIELDS: { key: ShopField; label: string; hint: string; Icon: typeof IconBox; minus?: boolean }[] = [
   {
-    key: "stock",
+    key: "business",
     label: "Goods on the shelves and in storage",
     hint: "What they would sell for today. Count once, on the same day each year.",
     Icon: IconBox,
   },
-  { key: "cash", label: "Cash in the till and the shop’s bank account", hint: "", Icon: IconCash },
+  { key: "cash", label: "Cash: in the till and at home", hint: "", Icon: IconCash },
+  { key: "bank", label: "Bank: the shop’s account and your own", hint: "Leave out any interest the bank paid.", Icon: IconBank },
   {
-    key: "owedToYou",
+    key: "receivables",
     label: "Money customers owe you",
     hint: "Only what you expect to be paid. Leave out debts you may never get back.",
     Icon: IconOwed,
   },
   {
-    key: "personal",
-    label: "Your own savings outside the shop",
-    hint: "The nisab is for you, not the shop, so your savings count with it.",
-    Icon: IconJar,
-  },
-  {
-    key: "owedBySuppliers",
-    label: "What you owe suppliers, due now",
+    key: "debts",
+    label: "What you owe now: suppliers and other debts due",
     hint: "Taken off.",
     Icon: IconReceipt,
     minus: true,
@@ -90,26 +87,25 @@ function Tile({ label, Icon, counted }: { label: string; Icon: typeof IconBox; c
 }
 
 /**
- * Zakat for a small shop, in pictures: what counts and what does not, the
- * figures, and a scale against the nisab. Nothing is stored or sent.
+ * Zakat for a small shop, in pictures: what counts and what does not, then
+ * the figures. They are the visitor's own figures, shared with the
+ * calculator and My zakat, so the answer is their whole zakat, shop
+ * included, and nothing is counted twice.
  */
 export default function ShopPlanner() {
-  const [currency, setCurrency] = useVisitorCurrency();
-  const [values, setValues] = useState<Record<keyof ShopFigures, string>>({
-    stock: "",
-    cash: "",
-    owedToYou: "",
-    personal: "",
-    owedBySuppliers: "",
-  });
-  const [standard, setStandard] = useState<"silver" | "gold">("silver");
+  const [visitorCurrency, setVisitorCurrency] = useVisitorCurrency();
+  const { draft, outcome, started, update } = useMyDraft(visitorCurrency);
+  const currency = draft.currency;
   const prices = useMetalPrices(currency);
-  const nisab = prices.nisab[standard];
   const money = (n: number) => formatMoney(n, currency, INTL);
-  const figures = Object.fromEntries(
-    Object.entries(values).map(([k, v]) => [k, parseAmount(v, ".")]),
-  ) as unknown as ShopFigures;
-  const result = shopZakat(figures, nisab);
+  const { result, needsPrices } = outcome;
+  const nisab = result.nisab;
+  const value = (key: ShopField) => (key === "debts" ? draft.debts : (draft.amounts[key] ?? ""));
+  const set = (key: ShopField, v: string) =>
+    update(key === "debts" ? { debts: v } : { amounts: { ...draft.amounts, [key]: v } });
+  // Other things already entered elsewhere (gold, shares…), counted in the same answer.
+  const SHOP = new Set<string>(["business_inventory", "cash", "bank", "receivables"]);
+  const others = outcome.lines.filter((l) => !SHOP.has(l.category));
 
   return (
     <div className="space-y-6">
@@ -137,7 +133,15 @@ export default function ShopPlanner() {
           Your shop’s figures
         </h2>
         <div className="sm:max-w-xs">
-          <CurrencySelect value={currency} onChange={setCurrency} label="Currency" />
+          <CurrencySelect
+            value={currency}
+            onChange={(c) => {
+              setVisitorCurrency(c);
+              // Another currency's prices would be wrong: today's are fetched for the new one.
+              update({ currency: c, goldPrice: "", silverPrice: "", pricesAsOf: null });
+            }}
+            label="Currency"
+          />
         </div>
         <div className="space-y-4">
           {FIELDS.map(({ key, label, hint, Icon, minus }) => (
@@ -156,16 +160,32 @@ export default function ShopPlanner() {
                   id={`shop-${key}`}
                   label={label}
                   currency={currency}
-                  value={values[key]}
-                  onChange={(v) => setValues((old) => ({ ...old, [key]: v }))}
+                  value={value(key)}
+                  onChange={(v) => set(key, v)}
                   intl={INTL}
-                  decimal="."
+                  decimal={draft.decimal ?? "."}
                 />
                 {hint ? <p className="mt-1 text-xs leading-relaxed text-sage">{hint}</p> : null}
               </div>
             </div>
           ))}
         </div>
+        {others.length ? (
+          <div className="border-s-2 border-brass ps-3 text-sm">
+            <p className="font-medium text-ink">Also counted, from your other answers</p>
+            <ul className="mt-1 space-y-0.5 text-sage">
+              {others.map((l) => (
+                <li key={l.key} className="flex justify-between gap-3">
+                  <span>{l.label}</span>
+                  <span className="nums">{money(l.amount * l.zakatablePortion)}</span>
+                </li>
+              ))}
+            </ul>
+            <Link href="/calculator" className="mt-1 inline-block font-medium text-pine hover:underline">
+              Change these in the calculator
+            </Link>
+          </div>
+        ) : null}
         <fieldset>
           <legend className="label mb-1.5">Nisab</legend>
           <div className="grid gap-2 sm:grid-cols-2">
@@ -174,14 +194,14 @@ export default function ShopPlanner() {
                 key={s}
                 className={
                   "flex cursor-pointer gap-3 border px-3 py-2.5 transition " +
-                  (standard === s ? "border-pine bg-pine/5" : "border-mist hover:border-sage")
+                  (draft.standard === s ? "border-pine bg-pine/5" : "border-mist hover:border-sage")
                 }
               >
                 <input
                   type="radio"
                   name="shop-nisab"
-                  checked={standard === s}
-                  onChange={() => setStandard(s)}
+                  checked={draft.standard === s}
+                  onChange={() => update({ standard: s })}
                   className="mt-1 accent-[rgb(var(--c-pine))]"
                 />
                 <span>
@@ -200,22 +220,32 @@ export default function ShopPlanner() {
         </fieldset>
       </section>
 
-      {result.counted > 0 && nisab > 0 ? (
+      {started && !needsPrices ? (
         <section className="card p-5 sm:p-6" aria-labelledby="shop-result" aria-live="polite">
-          <BalanceScale net={result.net} nisab={nisab} money={money} labels={{ you: "Your shop, less debts", nisab: "Nisab" }} />
+          <BalanceScale
+            net={result.netZakatable}
+            nisab={nisab}
+            money={money}
+            labels={{ you: "All you own, less debts", nisab: "Nisab" }}
+          />
           <h2 id="shop-result" className="mt-4 text-center font-serif text-3xl text-ink">
-            {result.due ? (
+            {result.isDue ? (
               <>
-                Your zakat: <span className="text-pine nums">{money(result.zakat)}</span>
+                Your zakat: <span className="text-pine nums">{money(result.zakatDue)}</span>
               </>
             ) : (
               "Below the nisab: no zakat this year"
             )}
           </h2>
           <p className="mt-2 text-center text-sm text-sage">
-            {result.due
-              ? "2.5% of what is counted, less what you owe suppliers. Most scholars ask for it in money; the Hanafi school also allows giving goods from the shop at their value."
+            {result.isDue
+              ? "This is all your zakat, your shop included. Most scholars ask for it in money; the Hanafi school also allows giving goods from the shop at their value."
               : "Count again on the same day next Islamic year."}
+          </p>
+          <p className="mt-4 text-center">
+            <Link href="/my" className="font-medium text-pine hover:underline">
+              Saved in My zakat: track what you give →
+            </Link>
           </p>
         </section>
       ) : null}

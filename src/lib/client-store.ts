@@ -62,3 +62,12 @@ export function setStoredValue(key: string, value: string | null): void {
 export function readStoredValue(key: string): string | null {
   return readStored(key);
 }
+
+/**
+ * A JSON value kept in this browser, read through `parse` (which must accept
+ * null and nonsense), with a setter that keeps every reader in step.
+ */
+export function useStoredState<T>(key: string, parse: (raw: string | null) => T): [T, (next: T) => void] {
+  const value = parse(useStoredValue(key));
+  return [value, (next: T) => setStoredValue(key, JSON.stringify(next))];
+}

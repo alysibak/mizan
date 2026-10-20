@@ -52,3 +52,23 @@ describe("eveningsCalendar", () => {
   });
 });
 
+
+describe("daysCalendar", () => {
+  it("makes one whole-day event per date, each reminded a week before and on the morning", async () => {
+    const { daysCalendar } = await import("./ics");
+    const ics = daysCalendar({
+      uid: "zakat-day",
+      now: new Date("2026-10-20T12:00:00Z"),
+      events: [
+        { day: "2027-02-08", summary: "Zakat day", description: "Work out and give your zakat." },
+        { day: "2028-01-28", summary: "Zakat day", description: "Work out and give your zakat." },
+      ],
+    });
+    expect(ics.split("\r\n").filter((l) => l === "BEGIN:VEVENT")).toHaveLength(2);
+    expect(ics).toContain("DTSTART;VALUE=DATE:20270208");
+    expect(ics).toContain("DTEND;VALUE=DATE:20270209");
+    expect(ics).toContain("TRIGGER:-P7D");
+    expect(ics).toContain("TRIGGER:PT9H");
+    expect(ics).toContain("UID:zakat-day-20280128@mizan.app");
+  });
+});

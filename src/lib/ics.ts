@@ -107,3 +107,42 @@ export function eveningsCalendar(opts: {
   lines.push("END:VCALENDAR");
   return `${lines.join("\r\n")}\r\n`;
 }
+
+/**
+ * Whole-day events, each with a reminder a week before and another on the
+ * morning of the day: for a zakat day that falls on a different Gregorian
+ * date each year, so it cannot be a simple yearly repeat.
+ */
+export function daysCalendar(opts: {
+  events: { day: string; summary: string; description: string }[];
+  uid: string;
+  now?: Date;
+}): string {
+  const stamp = (opts.now ?? new Date()).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Mizan//Zakat day//EN", "CALSCALE:GREGORIAN", "METHOD:PUBLISH"];
+  for (const e of opts.events) {
+    lines.push(
+      "BEGIN:VEVENT",
+      `UID:${opts.uid}-${icsDay(e.day)}@mizan.app`,
+      `DTSTAMP:${stamp}`,
+      `DTSTART;VALUE=DATE:${icsDay(e.day)}`,
+      `DTEND;VALUE=DATE:${icsDay(nextDay(e.day))}`,
+      `SUMMARY:${icsText(e.summary)}`,
+      `DESCRIPTION:${icsText(e.description)}`,
+      "TRANSP:TRANSPARENT",
+      "BEGIN:VALARM",
+      "ACTION:DISPLAY",
+      `DESCRIPTION:${icsText(`${e.summary}: in a week`)}`,
+      "TRIGGER:-P7D",
+      "END:VALARM",
+      "BEGIN:VALARM",
+      "ACTION:DISPLAY",
+      `DESCRIPTION:${icsText(e.summary)}`,
+      "TRIGGER:PT9H",
+      "END:VALARM",
+      "END:VEVENT",
+    );
+  }
+  lines.push("END:VCALENDAR");
+  return `${lines.join("\r\n")}\r\n`;
+}

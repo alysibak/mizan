@@ -66,7 +66,8 @@ export default function ResumeCard({ locale, labels }: { locale: Locale; labels:
         Icon: IconCoins,
         title: fmt(labels.zakatIs, { amount: money(result.zakatDue) }),
         status: left(result.zakatDue, parseAmount(draft.given, draft.decimal), money),
-        href: localePath(locale, "/calculator"),
+        // In English, My zakat holds the whole year; elsewhere, the calculator.
+        href: locale === "en" ? "/my" : localePath(locale, "/calculator"),
       });
     }
   }
@@ -148,6 +149,11 @@ export default function ResumeCard({ locale, labels }: { locale: Locale; labels:
           </li>
         ))}
       </ul>
+      {locale === "en" ? (
+        <Link href="/my" className="mt-3 inline-block text-base font-medium text-pine hover:underline">
+          See all of it in My zakat →
+        </Link>
+      ) : null}
     </section>
   );
 }

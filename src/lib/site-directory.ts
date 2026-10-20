@@ -32,6 +32,7 @@ export function siteDirectory(locale: Locale): DirectoryGroup[] {
       key: "work",
       title: menu.work,
       items: [
+        ...only([{ href: "/my", label: "My zakat: my year in one place", icon: "my" }]),
         { href: to("/start"), label: choose.start, icon: "start" },
         { href: to("/guide"), label: choose.guide, icon: "guide" },
         { href: to("/calculator"), label: nav.calculator, icon: "calculator" },

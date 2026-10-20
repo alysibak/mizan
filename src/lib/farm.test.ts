@@ -84,3 +84,17 @@ describe("herdStep", () => {
     expect(herdStep("camels", 500)).toBe(7);
   });
 });
+
+describe("the farm as kept in the browser", () => {
+  it("reads back what was kept, and shrugs off nonsense", async () => {
+    const { parseFarm, farmDues, EMPTY_FARM } = await import("./farm");
+    expect(parseFarm("{oops")).toEqual(EMPTY_FARM);
+    const farm = parseFarm(
+      JSON.stringify({ harvest: "30", unit: "maund", watering: "irrigated", counts: { sheep: "150" }, grazing: true }),
+    );
+    const dues = farmDues(farm, Number);
+    expect(dues.cropKg).toBe(60);
+    expect(dues.herds).toEqual([{ herd: "sheep", dues: [{ given: "sheep", count: 2 }] }]);
+    expect(farmDues({ ...farm, grazing: false }, Number).herds).toEqual([]);
+  });
+});

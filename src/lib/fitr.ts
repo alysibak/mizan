@@ -36,3 +36,21 @@ export function zakatAlFitr(people: number, perPerson: number): FitrResult {
     message: `${people} ${people === 1 ? "person" : "people"} × the announced amount.`,
   };
 }
+
+/** Where the Zakat al-Fitr page keeps the household in the browser. */
+export const FITR_KEY = "mizan-fitr-v1";
+
+export interface FitrState {
+  people: string;
+  perPerson: string;
+}
+
+export function parseFitr(raw: string | null): FitrState {
+  try {
+    const v = raw ? (JSON.parse(raw) as Partial<Record<keyof FitrState, unknown>>) : {};
+    const text = (x: unknown, fallback: string) => (typeof x === "string" ? x.slice(0, 20) : fallback);
+    return { people: text(v.people, "1"), perPerson: text(v.perPerson, "") };
+  } catch {
+    return { people: "1", perPerson: "" };
+  }
+}

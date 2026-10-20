@@ -47,8 +47,25 @@ export interface FamilyResult {
   poolingMisleads: boolean;
 }
 
+/**
+ * A person whose wealth was worked out elsewhere (the visitor's own figures
+ * in the calculator), weighed against the family page's nisab.
+ */
+export function personFromNet(owns: number, net: number, nisab: number): PersonResult {
+  const n = Number.isFinite(net) && net > 0 ? net : 0;
+  const due = nisab > 0 && n >= nisab;
+  return { owns: Math.max(0, owns), net: n, due, zakat: due ? Math.round(n * ZAKAT_RATE_LUNAR * 100) / 100 : 0 };
+}
+
 export function familyZakat(all: Holdings[], goldPerGram: number, nisab: number): FamilyResult {
-  const people = all.map((h) => personZakat(h, goldPerGram, nisab));
+  return familyOf(
+    all.map((h) => personZakat(h, goldPerGram, nisab)),
+    nisab,
+  );
+}
+
+/** The family's totals from each person's own result. */
+export function familyOf(people: PersonResult[], nisab: number): FamilyResult {
   const total = Math.round(people.reduce((sum, p) => sum + p.zakat, 0) * 100) / 100;
   const pooled = people.reduce((sum, p) => sum + p.net, 0);
   const poolingMisleads = nisab > 0 && pooled >= nisab && people.some((p) => p.net > 0 && !p.due);

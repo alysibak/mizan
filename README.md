@@ -184,6 +184,22 @@ work.
   and what does not (the shop, shelves, fridges, scales, the van). Then the
   figures, with personal savings added because the nisab is the owner's,
   suppliers taken off, and the answer on a balance scale.
+- **My zakat** (`/my`, English): one person's zakat year in one place,
+  fed by every page and kept on the phone. Choose a zakat day (1 Ramadan,
+  today, or any Hijri date) and get a countdown and a calendar file with a
+  reminder a week before and on the morning, for the next five years. This
+  year's zakat comes from the same figures as the calculator, the guide,
+  and the shop page; payments are noted with who and when and add to what
+  has been given; once all is given, the year closes into a record kept
+  year after year. Past years, crops and animals, bank interest to give
+  away, the family, Zakat al-Fitr, the good-deed streak and Ramadan all
+  show with a link back, and a short "What to do next" list puts the most
+  pressing first (a zakat day two weeks away, what is left to give). A
+  copy can be saved as a file and restored on another phone.
+- **One set of figures for one person.** The calculator, the guide, the shop
+  page, the family page's "Me" card and My zakat all read and write the
+  same figures, so nothing is typed twice or counted twice. The farm,
+  interest and Zakat al-Fitr pages remember what was typed.
 - **Built around what a visitor is trying to do**, not around the footer:
   - A **Menu** button in a top bar that stays in view on every page, in
     every language, opens everything as pictures grouped by intent: work

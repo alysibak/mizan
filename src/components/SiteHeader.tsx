@@ -25,6 +25,8 @@ function suggestionTexts(): SuggestionTexts {
 export default function SiteHeader({ locale = "en" }: { locale?: Locale }) {
   const { nav, language, largerText, menu } = messagesFor(locale).common;
   const links = [
+    // The visitor's own zakat year, in English only so far.
+    ...(locale === "en" ? [{ href: "/my", label: "My zakat" }] : []),
     { href: localePath(locale, "/start"), label: nav.start },
     { href: localePath(locale, "/calculator"), label: nav.calculator },
     { href: localePath(locale, "/nisab"), label: nav.nisab },

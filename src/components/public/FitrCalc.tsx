@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { CurrencySelect, useVisitorCurrency } from "@/components/public/VisitorCurrency";
-import { MAX_FITR_PEOPLE, zakatAlFitr } from "@/lib/fitr";
+import { FITR_KEY, MAX_FITR_PEOPLE, parseFitr, zakatAlFitr } from "@/lib/fitr";
+import { useStoredState } from "@/lib/client-store";
 import { formatMoney } from "@/lib/money";
 import { LOCALE_INFO, fmt, type Locale } from "@/i18n/config";
 import type { Messages } from "@/i18n/messages/en";
@@ -20,8 +20,11 @@ export default function FitrCalc({
 }) {
   const intl = LOCALE_INFO[locale].intl;
   const [currency, setCurrency] = useVisitorCurrency();
-  const [people, setPeople] = useState("1");
-  const [perPerson, setPerPerson] = useState("");
+  // Kept in this browser, so the household is there next Ramadan and in My zakat.
+  const [fitr, saveFitr] = useStoredState(FITR_KEY, parseFitr);
+  const { people, perPerson } = fitr;
+  const setPeople = (v: string) => saveFitr({ ...fitr, people: v });
+  const setPerPerson = (v: string) => saveFitr({ ...fitr, perPerson: v });
   const count = parseInt(people, 10) || 0;
   const amount = parseFloat(perPerson) || 0;
   const result = zakatAlFitr(count, amount);

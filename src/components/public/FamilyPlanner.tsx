@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { IconChild, IconUsers } from "@/components/icons";
 import { CurrencySelect, useVisitorCurrency } from "@/components/public/VisitorCurrency";
 import { BalanceScale } from "@/components/public/Visuals";
@@ -7,7 +8,8 @@ import { MoneyInput } from "@/components/ZakatCalculator";
 import { parseAmount } from "@/lib/calculator";
 import { setStoredValue, useStoredValue } from "@/lib/client-store";
 import { useMetalPrices } from "@/components/public/useMetalPrices";
-import { familyZakat } from "@/lib/family";
+import { familyOf, personFromNet, personZakat } from "@/lib/family";
+import { useMyDraft } from "@/components/public/useMyDraft";
 import { KARAT_PURITY, TOLA_GRAMS, usesTola } from "@/lib/metals";
 import { formatMoney } from "@/lib/money";
 
@@ -108,14 +110,25 @@ export default function FamilyPlanner() {
   const money = (n: number) => formatMoney(n, currency, INTL);
   const amount = (s: string) => parseAmount(s, ".");
 
-  const result = familyZakat(
-    family.members.map((m) => ({
-      cash: amount(m.cash),
-      goldGrams: amount(m.gold) * (unit === "tola" ? TOLA_GRAMS : 1),
-      goldPurity: Number(m.purity),
-      debts: amount(m.debts),
-    })),
-    prices.gold ?? 0,
+  // The visitor's own figures, if they worked them out in the calculator or
+  // guide: their card uses those rather than asking again.
+  const mine = useMyDraft(currency);
+  const fromMine = mine.started && !mine.outcome.needsPrices && mine.draft.currency === currency;
+  const result = familyOf(
+    family.members.map((m) =>
+      m.who === "me" && fromMine
+        ? personFromNet(mine.outcome.result.grossZakatable, mine.outcome.result.netZakatable, nisab)
+        : personZakat(
+            {
+              cash: amount(m.cash),
+              goldGrams: amount(m.gold) * (unit === "tola" ? TOLA_GRAMS : 1),
+              goldPurity: Number(m.purity),
+              debts: amount(m.debts),
+            },
+            prices.gold ?? 0,
+            nisab,
+          ),
+    ),
     nisab,
   );
   const nameOf = (m: Member) => m.name.trim() || LABEL[m.who];
@@ -245,6 +258,21 @@ export default function FamilyPlanner() {
                   </button>
                 ) : null}
               </div>
+              {m.who === "me" && fromMine ? (
+                <div className="border-s-2 border-pine/50 ps-3 text-sm">
+                  <p className="font-medium text-ink">From your own figures</p>
+                  <p className="mt-0.5 text-sage nums">
+                    All you own: {money(mine.outcome.result.grossZakatable)}
+                    {mine.outcome.result.deductibleLiabilities > 0
+                      ? `, less debts: ${money(mine.outcome.result.netZakatable)}`
+                      : ""}
+                  </p>
+                  <Link href="/calculator" className="mt-1 inline-block font-medium text-pine hover:underline">
+                    Change them
+                  </Link>
+                </div>
+              ) : (
+              <>
               <MoneyInput
                 id={`${m.id}-cash`}
                 label="Cash and savings"
@@ -297,6 +325,8 @@ export default function FamilyPlanner() {
                 intl={INTL}
                 decimal="."
               />
+              </>
+              )}
               {known && r.owns > 0 ? (
                 <div className="mt-auto flex items-center gap-3 border-t border-mist pt-3" aria-live="polite">
                   <div className="w-28 shrink-0">
