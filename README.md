@@ -202,6 +202,9 @@ work.
   round shares, with a calendar reminder each month; the plan moves on once
   this month's share is noted. Zakat whose day has passed and is not yet
   closed is never spread: My zakat asks for it now.
+  Once a zakat day is chosen, My zakat offers a place on the home screen
+  (the browser's install button, or the steps for Safari), the same hint
+  the dashboard shows; dismissing one dismisses both.
   Opening an account brings it along: the hawl starts on the last zakat
   day, and each noted payment becomes a zakat record in the ledger. Signed
   in, My zakat sends the visitor to their ledger instead of starting again.

@@ -241,3 +241,16 @@ test("zakat whose day has passed is owed now, not spread over months", async ({ 
   await expect(given).toContainText("what is left is owed now");
   await expect(given.getByRole("region", { name: /Too much at once/ })).toHaveCount(0);
 });
+
+test("once there is a zakat day, My zakat offers a place on the home screen", async ({ page }) => {
+  await page.goto("/my");
+  await expect(page.getByRole("region", { name: "On your home screen" })).toHaveCount(0);
+  await page.getByRole("button", { name: "1 Ramadan" }).click();
+  const hint = page.getByRole("region", { name: "On your home screen" });
+  await expect(hint).toContainText("Add to Home Screen");
+  await hint.getByRole("button", { name: "Dismiss" }).click();
+  await expect(hint).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole("region", { name: "Your zakat day" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "On your home screen" })).toHaveCount(0);
+});

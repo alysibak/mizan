@@ -1,30 +1,12 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { setStoredValue, useHydrated, useStoredValue } from "@/lib/client-store";
 import { sendJson } from "@/lib/client-fetch";
-import {
-  getInstallPrompt,
-  promptInstall,
-  subscribeInstallPrompt,
-} from "@/lib/install-prompt";
+import InstallHint, { useInstallHint } from "@/components/InstallHint";
 
-function isStandalone(): boolean {
-  return (
-    window.matchMedia("(display-mode: standalone)").matches ||
-    Boolean((navigator as Navigator & { standalone?: boolean }).standalone)
-  );
-}
-
-function isIos(): boolean {
-  const ua = navigator.userAgent;
-  // iPadOS reports itself as a Mac with touch.
-  return /iphone|ipad|ipod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
-}
-
-const INSTALL_KEY = "mizan-install-dismissed";
 const CHECKLIST_KEY = "mizan-checklist-dismissed";
 
 type Item = { done: boolean; label: string; href: string };
@@ -55,14 +37,8 @@ export default function DashboardNotices({
   const router = useRouter();
   const hydrated = useHydrated();
   const [metalsHidden, setMetalsHidden] = useState(false);
-  const installDismissed = useStoredValue(INSTALL_KEY) === "1";
   const checklistDismissed = useStoredValue(CHECKLIST_KEY) === "1";
-  const installEvent = useSyncExternalStore(
-    subscribeInstallPrompt,
-    getInstallPrompt,
-    () => null,
-  );
-  const [installedNow, setInstalledNow] = useState(false);
+  const install = useInstallHint().show;
   const [updating, setUpdating] = useState(false);
   const [priceError, setPriceError] = useState<string | null>(null);
 
@@ -98,9 +74,6 @@ export default function DashboardNotices({
     router.refresh();
   }
 
-  // Browser-only facts: shown after hydration so server and client agree.
-  const ios = hydrated && isIos();
-  const install = hydrated && !installDismissed && !installedNow && !isStandalone();
   const checklistHidden = !hydrated || checklistDismissed;
 
   function dismissWelcome() {
@@ -228,51 +201,8 @@ export default function DashboardNotices({
         </section>
       ) : null}
 
-      {bottom && install ? (
-        <section className="border border-dashed border-mist px-5 py-4">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="label text-brassDeep">On your home screen</p>
-              {installEvent ? (
-                <>
-                  <p className="mt-1 text-sm text-sage">
-                    Install Mizan for a ledger that opens from your home screen
-                    like a notebook — no app store.
-                  </p>
-                  <button
-                    type="button"
-                    className="btn-primary mt-3"
-                    onClick={async () => {
-                      if (await promptInstall()) setInstalledNow(true);
-                    }}
-                  >
-                    Install Mizan
-                  </button>
-                </>
-              ) : ios ? (
-                <p className="mt-1 text-sm text-sage">
-                  In Safari, tap <span className="text-ink">Share</span>, then{" "}
-                  <span className="text-ink">Add to Home Screen</span>. Mizan
-                  opens full-screen like an app — no app store.
-                </p>
-              ) : (
-                <p className="mt-1 text-sm text-sage">
-                  Mizan is a web app. In your browser menu, choose{" "}
-                  <span className="text-ink">Install</span> or{" "}
-                  <span className="text-ink">Add to Home Screen</span> for a
-                  ledger that opens like a notebook — no app store.
-                </p>
-              )}
-            </div>
-            <button
-              type="button"
-              className="shrink-0 text-xs text-sage hover:text-ink"
-              onClick={() => setStoredValue(INSTALL_KEY, "1")}
-            >
-              Dismiss
-            </button>
-          </div>
-        </section>
+      {bottom ? (
+        <InstallHint pitch="Install Mizan for a ledger that opens from your home screen like a notebook — no app store." />
       ) : null}
     </div>
   );

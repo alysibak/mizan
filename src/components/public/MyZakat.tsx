@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { useSignedIn } from "@/components/useSignedIn";
+import InstallHint from "@/components/InstallHint";
 import {
   IconBank,
   IconBowl,
@@ -381,6 +382,11 @@ export default function MyZakatHub() {
       )}
 
       <ZakatDayCard my={my} save={save} />
+
+      {/* Once there is a day to come back for, keep the way back one tap away. */}
+      {my.zakatDay ? (
+        <InstallHint pitch="Keep My zakat one tap away: your zakat day, what is left, and what to do next open from your home screen like an app. No app store, and it works without the internet." />
+      ) : null}
 
       <Card id="this-year" title="This year’s zakat">
         {started && !needsPrices ? (
