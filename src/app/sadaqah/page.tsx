@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { DeedCards, DeedDays, TodaysDeed } from "@/components/public/Sadaqah";
+import { DeedCards, TodaysDeed } from "@/components/public/Sadaqah";
 import { EvidenceKey } from "@/components/public/Evidence";
 import ToolPage, { toolMetadata, type ToolPageCopy } from "@/components/public/ToolPage";
 import { messagesFor } from "@/i18n/messages";
@@ -53,7 +53,12 @@ export default function SadaqahPage() {
     <ToolPage copy={copy}>
       <div className="space-y-8">
         <TodaysDeed share={en.common.share} />
-        <DeedDays />
+        {/* Sadaqah is given and forgotten: nothing here counts or keeps it. */}
+        <p className="border-s-2 border-brass ps-4 text-base leading-relaxed text-ink">
+          Do it, and let it go: there is nothing to write down or count. The Prophet ﷺ said, “Do not count what you
+          give, lest Allah count what He gives you.”
+          <span className="block text-sm text-sage">Sahih al-Bukhari and Sahih Muslim, from Asma’ bint Abi Bakr</span>
+        </p>
         <div>
           <h2 className="font-serif text-2xl text-ink">All of them</h2>
           <p className="mt-1 text-sm text-sage">Tap one to see where it comes from.</p>

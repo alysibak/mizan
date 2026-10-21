@@ -109,8 +109,8 @@ const en = {
         body: "Cash, gold and silver by weight and karat, shares, crypto, business stock, money owed to you, and holdings in other currencies.",
       },
       {
-        title: "Every gift in one place",
-        body: "Zakat, sadaqah, Zakat al-Fitr, and purification, with the eight asnaf. See what is paid and what is still owed this cycle.",
+        title: "What you have given",
+        body: "Zakat, Zakat al-Fitr, and interest given away, with the eight asnaf. See what is paid and what is still owed this cycle.",
       },
       {
         title: "Close the year with care",

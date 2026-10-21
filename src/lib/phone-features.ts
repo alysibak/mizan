@@ -11,7 +11,6 @@ import { FASTS_KEY, fastsKept, fastsOwed, parseFasts } from "./fasts";
 import { FITR_KEY, parseFitr, zakatAlFitr } from "./fitr";
 import { INTEREST_KEY, parseInterest } from "./interest";
 import { MISSED_KEY, missedZakat, parseTally, tallyAmounts } from "./missed";
-import { DEED_DAYS_KEY, parseDays, streak } from "./streak";
 
 export const FAMILY_KEY = "mizan-family-v1";
 
@@ -173,22 +172,6 @@ export const PHONE_FEATURES: readonly PhoneFeature[] = [
       const s = parseFasts(raw);
       const owed = fastsOwed(s, parseAmount(s.perDay, "."));
       return { fastsLeft: owed.left, fastsToGive: owed.toGive };
-    },
-  },
-  {
-    key: "deeds",
-    storageKey: DEED_DAYS_KEY,
-    line(raw, ctx) {
-      const days = parseDays(raw);
-      if (!days.size) return null;
-      const run = streak(days, ctx.today);
-      return {
-        key: "deeds",
-        icon: "sadaqah",
-        title: "Good deeds",
-        status: run ? `${run} ${run === 1 ? "day" : "days"} in a row` : "Start a new run today",
-        href: "/sadaqah",
-      };
     },
   },
 ];

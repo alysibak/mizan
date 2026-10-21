@@ -22,15 +22,13 @@ describe("the phone registry", () => {
       "mizan-interest-v1": JSON.stringify({ balance: "1000", interest: "20", given: false }),
       "mizan-family-v1": JSON.stringify({ members: [{}, {}, {}] }),
       "mizan-fitr-v1": JSON.stringify({ people: "4", perPerson: "10" }),
-      "mizan-sadaqah-days-v1": JSON.stringify(["2026-10-19", "2026-10-20"]),
     };
     const lines = phoneLines(reader(store), ctx);
-    expect(lines.map((l) => l.key)).toEqual(["missed", "interest", "family", "fitr", "deeds"]);
+    expect(lines.map((l) => l.key)).toEqual(["missed", "interest", "family", "fitr"]);
     expect(lines[0]).toMatchObject({ title: "Past years", status: "US$400.00 still to give", href: "/missed-years" });
     expect(lines[1].status).toBe("US$20.00 to give away");
     expect(lines[2].status).toBe("3 people, each weighed on their own");
     expect(lines[3].status).toBe("US$40.00 for 4 people, before the Eid prayer");
-    expect(lines[4].status).toBe("2 days in a row");
     expect(phoneDues(reader(store), ctx)).toEqual({
       missedLeft: 400,
       interestToGive: 20,

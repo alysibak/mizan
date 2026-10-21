@@ -15,8 +15,12 @@ test("a full zakat year on a phone", async ({ page }) => {
   const errors = watchConsole(page);
   page.on("dialog", (d) => d.accept());
   const email = uniqueEmail("year");
+  // Today's prices, as the price sources would give them.
+  await page.route("**/api/metals?*", (route) =>
+    route.fulfill({ json: { currency: "CAD", goldPricePerGram: 120, silverPricePerGram: 1.5, source: "test" } }),
+  );
 
-  await test.step("setup refuses the starter metal prices", async () => {
+  await test.step("setup looks up today's prices, and refuses the starter ones", async () => {
     await asNewVisitor(page);
     await page.goto("/register");
     await page.fill("#name", "Gate Test");
@@ -25,8 +29,11 @@ test("a full zakat year on a phone", async ({ page }) => {
     await page.click("button[type=submit]");
     await page.waitForURL("**/begin");
     await page.click("text=I understand — continue");
+    await page.selectOption("#currency", "CAD");
     await page.click("button:has-text('Continue')");
-    await expect(page.locator("#gold")).toHaveValue("");
+    // Nobody is asked a price they cannot know: it is filled in.
+    await expect(page.locator("#gold")).toHaveValue("120");
+    await expect(page.locator("#silver")).toHaveValue("1.5");
     await page.fill("#gold", "90");
     await page.fill("#silver", "1.05");
     await page.click("button:has-text('Continue')");

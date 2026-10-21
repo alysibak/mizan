@@ -4,7 +4,6 @@ import { loadReckoning } from "@/lib/reckoning";
 import { formatMoney, sumCents, toCents } from "@/lib/money";
 import { parseGivingType } from "@/lib/giving";
 import GivingManager from "@/components/GivingManager";
-import RoundUpTool from "@/components/RoundUpTool";
 import { parseAsnaf } from "@/lib/asnaf";
 
 function parseAmount(value?: string): number | undefined {
@@ -20,7 +19,7 @@ export default async function GivingPage({
 }) {
   const user = (await getCurrentUser())!;
   const params = await searchParams;
-  const defaultType = parseGivingType(params.type) ?? "sadaqah";
+  const defaultType = parseGivingType(params.type) ?? "zakat";
   const defaultAmount = parseAmount(params.amount);
   const defaultAsnaf = parseAsnaf(params.asnaf);
 
@@ -36,7 +35,6 @@ export default async function GivingPage({
 
   const totalOf = (type: string) =>
     sumCents(rows.filter((r) => r.type === type).map((r) => r.amount));
-  const totalSadaqah = totalOf("sadaqah");
   const totalZakat = totalOf("zakat");
   const totalPurification = totalOf("purification");
   const totalFitr = totalOf("fitr");
@@ -44,12 +42,11 @@ export default async function GivingPage({
   return (
     <div className="space-y-6">
       <header>
-        <p className="label text-brassDeep">Sadaqah and zakat</p>
-        <h1 className="mt-1 font-serif text-3xl text-ink">Your giving</h1>
+        <p className="label text-brassDeep">Give</p>
+        <h1 className="mt-1 font-serif text-3xl text-ink">What you have given</h1>
         <p className="mt-2 text-sm text-sage">
-          Keep a record of what you give. Only zakat entries in{" "}
-          {window.label.toLowerCase()} count toward outstanding. Purification of
-          interest and Zakat al-Fitr are logged separately.
+          Note the zakat you give, so you know what is still owed in{" "}
+          {window.label.toLowerCase()}. There is no need to note sadaqah: give it, and let it go.
         </p>
       </header>
 
@@ -71,19 +68,15 @@ export default async function GivingPage({
             {formatMoney(totalZakat, settings.currency)}
           </p>
         </div>
-        <div className="card p-4">
-          <p className="label">All-time sadaqah</p>
-          <p className="mt-1 font-serif text-2xl text-brassDeep nums">
-            {formatMoney(totalSadaqah, settings.currency)}
-          </p>
-        </div>
-        <div className="card p-4">
-          <p className="label">Purification</p>
-          <p className="mt-1 font-serif text-2xl text-sage nums">
-            {formatMoney(totalPurification, settings.currency)}
-          </p>
-          <p className="mt-1 text-xs text-sage">Not counted as zakat</p>
-        </div>
+        {totalPurification > 0 && (
+          <div className="card p-4">
+            <p className="label">Interest given away</p>
+            <p className="mt-1 font-serif text-2xl text-sage nums">
+              {formatMoney(totalPurification, settings.currency)}
+            </p>
+            <p className="mt-1 text-xs text-sage">Not counted as zakat</p>
+          </div>
+        )}
         {totalFitr > 0 && (
           <div className="card p-4">
             <p className="label">Zakat al-Fitr</p>
@@ -104,8 +97,6 @@ export default async function GivingPage({
           Zakat al-Fitr calculator
         </Link>
       </div>
-
-      <RoundUpTool currency={settings.currency} />
 
       <GivingManager
         key={`${defaultType}-${defaultAmount ?? ""}-${defaultAsnaf ?? ""}`}

@@ -1,12 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
-import { amountParam, formatMoney } from "@/lib/money";
+import { formatMoney } from "@/lib/money";
 import { calculateUdhiyah, type UdhiyahAnimal } from "@/lib/udhiyah";
 import {
   CurrencySelect,
-  KeepRecordNudge,
   useVisitorCurrency,
 } from "@/components/public/VisitorCurrency";
 
@@ -145,15 +143,7 @@ export default function UdhiyahTool({
           )}
         </div>
 
-        {result.valid && guest ? <KeepRecordNudge what="it" /> : null}
-        {result.valid && !guest && (
-          <Link
-            href={`/giving?type=sadaqah&amount=${amountParam(result.totalWithExtras)}`}
-            className="btn-primary"
-          >
-            Record as sadaqah on Give
-          </Link>
-        )}
+
       </section>
 
       <p className="text-xs text-sage">

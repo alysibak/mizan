@@ -237,10 +237,13 @@ export default async function StatementPage() {
             <dt className="text-sage">Still outstanding</dt>
             <dd className="nums font-medium">{formatMoney(outstanding, c)}</dd>
           </div>
-          <div className="flex justify-between gap-4">
-            <dt className="text-sage">Sadaqah · {window.label}</dt>
-            <dd className="nums">{formatMoney(sadaqahPaid, c)}</dd>
-          </div>
+          {/* Only shown for someone who chose to note sadaqah; nothing asks for it. */}
+          {sadaqahPaid > 0 && (
+            <div className="flex justify-between gap-4">
+              <dt className="text-sage">Sadaqah · {window.label}</dt>
+              <dd className="nums">{formatMoney(sadaqahPaid, c)}</dd>
+            </div>
+          )}
           <div className="flex justify-between gap-4">
             <dt className="text-sage">Purification · {window.label}</dt>
             <dd className="nums">{formatMoney(purificationPaid, c)}</dd>

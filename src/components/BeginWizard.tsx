@@ -15,11 +15,13 @@ import {
 import { NISAB_GOLD_GRAMS, NISAB_SILVER_GRAMS } from "@/lib/nisab";
 import { formatMoney } from "@/lib/money";
 import { metalsLookLikeDefaults } from "@/lib/giving-window";
-import { COMMON_CURRENCIES } from "@/lib/currencies";
+import { CurrencySelect } from "@/components/public/VisitorCurrency";
 import { sendJson } from "@/lib/client-fetch";
 import { readStoredValue, setStoredValue, useHydrated } from "@/lib/client-store";
 import {
   CALC_STORAGE_KEY,
+  VISITOR_CURRENCY_KEY,
+  currencyForLocale,
   decimalMarkFor,
   draftIsEmpty,
   draftToLedger,
@@ -30,7 +32,7 @@ import {
 import { MY_KEY, lastZakatDay, parseMy, paymentsTotal } from "@/lib/my-zakat";
 import { HIJRI_MONTHS } from "@/lib/hijri";
 
-const STEPS = ["Trust", "Preferences", "Prices", "Hawl", "Holding"] as const;
+const STEPS = ["Before we start", "Your money", "Prices", "Zakat day", "What you have"] as const;
 const STEP_KEY = "mizan-begin-step";
 
 /** What this visitor entered in the public calculator, if anything. */
@@ -73,7 +75,13 @@ function Wizard({
   const starter = metalsLookLikeDefaults(settings.goldPricePerGram, settings.silverPricePerGram);
   const [carry] = useState(calculatorDraft);
   const fromCalc = starter ? carry?.draft : undefined;
-  const [currency, setCurrency] = useState(fromCalc?.currency || settings.currency || "CAD");
+  // A new ledger starts in the visitor's own money: what they chose on the
+  // public pages, or their browser's region, never a fixed default.
+  const [currency, setCurrency] = useState(
+    fromCalc?.currency ||
+      (starter ? readStoredValue(VISITOR_CURRENCY_KEY) || currencyForLocale(navigator.language) : settings.currency) ||
+      "USD",
+  );
   const [nisabStandard, setNisabStandard] = useState(fromCalc?.standard ?? settings.nisabStandard);
   const [calendarBasis, setCalendarBasis] = useState(fromCalc?.basis ?? settings.calendarBasis);
   const [madhhab, setMadhhab] = useState<Madhhab>(parseMadhhab(settings.madhhab));
@@ -138,9 +146,10 @@ function Wizard({
       setPriceHint(data.error || "Enter prices by hand");
       return;
     }
-    setGold(data.goldPricePerGram);
-    setSilver(data.silverPricePerGram);
-    setPriceHint(`Suggested from ${data.source}. Review before continuing.`);
+    // Fill only what is still empty, so a price typed meanwhile is kept.
+    setGold((g) => (g > 0 ? g : data.goldPricePerGram));
+    setSilver((v) => (v > 0 ? v : data.silverPricePerGram));
+    setPriceHint(`Today’s prices, from ${data.source}. Change them if your jeweller says otherwise.`);
   }
 
   async function nextFromTrust() {
@@ -163,6 +172,8 @@ function Wizard({
     try {
       await saveSettings({});
       go(2);
+      // Nobody knows the price of a gram of gold: look it up as the step opens.
+      if (!(gold > 0) && !(silver > 0)) void suggestPrices();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not save");
     }
@@ -284,10 +295,10 @@ function Wizard({
       <header>
         <p className="label text-brassDeep">Begin</p>
         <h1 className="mt-1 font-serif text-3xl text-ink">
-          {name}, set your ledger
+          {name}, let’s set up your ledger
         </h1>
         <p className="mt-2 text-sm text-sage">
-          A few steps so the first reckoning is yours — not blind defaults.
+          Five short steps. You can change any of it later.
         </p>
       </header>
 
@@ -321,11 +332,11 @@ function Wizard({
 
       {step === 0 && (
         <section className="space-y-5">
-          <h2 className="font-serif text-xl text-ink">Before numbers</h2>
-          <p className="text-sm leading-relaxed text-sage">
-            Mizan verifies arithmetic from figures you enter. It is an estimate,
-            not a fatwa. Disputed items (jewellery, equities, pensions) stay
-            editable. For a real obligation, ask a qualified person of knowledge.
+          <h2 className="font-serif text-xl text-ink">Before we start</h2>
+          <p className="text-base leading-relaxed text-sage">
+            Mizan adds up the figures you give it. It is a help, not a fatwa. Where scholars differ, such as on
+            jewellery you wear, you choose, and you can change it later. For your own situation, ask someone of
+            knowledge you trust.
           </p>
           <p className="text-sm leading-relaxed text-sage">
             Read{" "}
@@ -347,82 +358,65 @@ function Wizard({
 
       {step === 1 && (
         <section className="space-y-5">
-          <h2 className="font-serif text-xl text-ink">Preferences</h2>
-          <div>
-            <label className="label mb-1.5" htmlFor="currency">
-              Currency
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {COMMON_CURRENCIES.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  className={
-                    "btn-ghost px-3 py-1.5 text-sm " +
-                    (currency === c ? "border-pine text-pine" : "")
-                  }
-                  onClick={() => setCurrency(c)}
-                >
-                  {c}
-                </button>
-              ))}
+          <h2 className="font-serif text-xl text-ink">Your money</h2>
+          <div className="max-w-xs">
+            <CurrencySelect value={currency} onChange={setCurrency} id="currency" label="The money you count in" />
+          </div>
+          {/* Set to what most people use; open only to follow a different view. */}
+          <details className="card p-4">
+            <summary className="cursor-pointer text-base font-medium text-ink">
+              How zakat is counted
+              <span className="block text-sm font-normal text-sage">Most people leave these as they are.</span>
+            </summary>
+            <div className="mt-4 space-y-5">
+            <div>
+              <label className="label mb-1.5" htmlFor="nisab">
+                Nisab standard
+              </label>
+              <select
+                id="nisab"
+                className="field"
+                value={nisabStandard}
+                onChange={(e) => setNisabStandard(e.target.value)}
+              >
+                <option value="silver">Silver (595g) — lower threshold</option>
+                <option value="gold">Gold (85g) — higher threshold</option>
+              </select>
             </div>
-            <input
-              id="currency"
-              autoCapitalize="characters"
-              autoComplete="off"
-              className="field mt-2 max-w-[8rem] uppercase"
-              maxLength={3}
-              value={currency}
-              onChange={(e) => setCurrency(e.target.value.toUpperCase())}
-            />
-          </div>
-          <div>
-            <label className="label mb-1.5" htmlFor="nisab">
-              Nisab standard
-            </label>
-            <select
-              id="nisab"
-              className="field"
-              value={nisabStandard}
-              onChange={(e) => setNisabStandard(e.target.value)}
-            >
-              <option value="silver">Silver (595g) — lower threshold</option>
-              <option value="gold">Gold (85g) — higher threshold</option>
-            </select>
-          </div>
-          <div>
-            <label className="label mb-1.5" htmlFor="calendar">
-              Calendar
-            </label>
-            <select
-              id="calendar"
-              className="field"
-              value={calendarBasis}
-              onChange={(e) => setCalendarBasis(e.target.value)}
-            >
-              <option value="lunar">Lunar — 2.5%</option>
-              <option value="solar">Solar — ~2.577% (adjustment)</option>
-            </select>
-          </div>
-          <div>
-            <label className="label mb-1.5" htmlFor="madhhab">
-              School (jewellery defaults)
-            </label>
-            <select
-              id="madhhab"
-              className="field"
-              value={madhhab}
-              onChange={(e) => setMadhhab(parseMadhhab(e.target.value))}
-            >
-              {MADHHABS.map((m) => (
-                <option key={m} value={m}>
-                  {MADHHAB_LABELS[m]}
-                </option>
-              ))}
-            </select>
-            <p className="mt-1.5 text-xs text-sage">{madhhabSummary(madhhab)}</p>
-          </div>
+            <div>
+              <label className="label mb-1.5" htmlFor="calendar">
+                Calendar
+              </label>
+              <select
+                id="calendar"
+                className="field"
+                value={calendarBasis}
+                onChange={(e) => setCalendarBasis(e.target.value)}
+              >
+                <option value="lunar">Lunar — 2.5%</option>
+                <option value="solar">Solar — ~2.577% (adjustment)</option>
+              </select>
+            </div>
+            <div>
+              <label className="label mb-1.5" htmlFor="madhhab">
+                School (jewellery defaults)
+              </label>
+              <select
+                id="madhhab"
+                className="field"
+                value={madhhab}
+                onChange={(e) => setMadhhab(parseMadhhab(e.target.value))}
+              >
+                {MADHHABS.map((m) => (
+                  <option key={m} value={m}>
+                    {MADHHAB_LABELS[m]}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-1.5 text-xs text-sage">{madhhabSummary(madhhab)}</p>
+            </div>
+            </div>
+          </details>
           <div className="flex gap-3">
             <button type="button" className="btn-ghost" onClick={() => go(0)}>
               Back
@@ -441,11 +435,10 @@ function Wizard({
 
       {step === 2 && (
         <section className="space-y-5">
-          <h2 className="font-serif text-xl text-ink">Metal prices</h2>
-          <p className="text-sm text-sage">
-            Nisab is a weight of gold or silver, so Mizan needs today&apos;s price
-            per gram in {currency}. Ask a jeweller or bank, or tap Suggest for a
-            free market figure you can check. Nothing saves until you continue.
+          <h2 className="font-serif text-xl text-ink">Gold and silver prices</h2>
+          <p className="text-base text-sage">
+            The nisab is a weight of gold or silver, so Mizan needs today’s price of a gram in {currency}. They are
+            filled in for you; change them only if your jeweller says otherwise.
           </p>
           <button
             type="button"
@@ -453,7 +446,7 @@ function Wizard({
             disabled={lookingUp || currency.length !== 3}
             onClick={suggestPrices}
           >
-            {lookingUp ? "Looking up…" : `Suggest prices in ${currency}`}
+            {lookingUp ? "Looking up…" : `Look up today’s prices in ${currency}`}
           </button>
           {priceHint && <p className="text-xs text-sage">{priceHint}</p>}
           <div className="grid gap-4 sm:grid-cols-2">
@@ -522,10 +515,10 @@ function Wizard({
 
       {step === 3 && (
         <section className="space-y-5">
-          <h2 className="font-serif text-xl text-ink">Hawl start</h2>
-          <p className="text-sm text-sage">
-            The day your wealth last crossed nisab. You can set this later.
-            Payment day should still follow local moon-sighting.
+          <h2 className="font-serif text-xl text-ink">When did your year start?</h2>
+          <p className="text-base text-sage">
+            The day your savings last reached the nisab: your zakat is due one Islamic year after it. Not sure? Tap
+            “Set later”, or pick a day you will keep each year, such as 1 Ramadan.
           </p>
           {mine.zakatDay && hawlStartDate === zakatDayStart ? (
             <p className="border-s-2 border-pine/50 ps-3 text-sm text-ink">
@@ -574,7 +567,7 @@ function Wizard({
 
       {step === 4 && (
         <section className="space-y-5">
-          <h2 className="font-serif text-xl text-ink">First holding</h2>
+          <h2 className="font-serif text-xl text-ink">What you have</h2>
           {carry && !assetSaved ? (
             <div className="border border-pine/40 bg-pine/5 px-4 py-4">
               <p className="text-sm font-medium text-ink">From your calculator</p>
@@ -622,9 +615,9 @@ function Wizard({
               </button>
             </div>
           ) : null}
-          <p className="text-sm text-sage">
-            {carry && !assetSaved ? "Or add" : "Optional. Add"} one balance now, or open an
-            empty ledger and fill it on the Ledger page.
+          <p className="text-base text-sage">
+            {carry && !assetSaved ? "Or add" : "Add"} your savings now, or skip and add them later. You can add
+            everything else, such as gold, on the Ledger page.
           </p>
           <div className="grid gap-4">
             <div>
@@ -652,14 +645,14 @@ function Wizard({
             </div>
             <div>
               <label className="label mb-1.5" htmlFor="alabel">
-                Description
+                What it is
               </label>
               <input
                 id="alabel"
                 className="field"
                 value={assetLabel}
                 onChange={(e) => setAssetLabel(e.target.value)}
-                placeholder="e.g. Chequing"
+                placeholder="e.g. My savings account"
               />
             </div>
             <div>
@@ -689,7 +682,7 @@ function Wizard({
               disabled={busy}
               onClick={() => finish(false)}
             >
-              Skip — open ledger
+              Skip for now
             </button>
             <button
               type="button"

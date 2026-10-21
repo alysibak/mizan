@@ -102,8 +102,8 @@ const tr: Messages = {
         body: "Nakit, gram ve ayarıyla altın ve gümüş, hisse senetleri, kripto, ticari mallar, alacaklarınız ve başka para birimlerindeki varlıklar.",
       },
       {
-        title: "Her bağış tek yerde",
-        body: "Zekât, sadaka, fitre ve arındırma, zekâtın sekiz sınıfıyla birlikte. Bu dönemde neyin ödendiğini ve neyin kaldığını görün.",
+        title: "Verdikleriniz",
+        body: "Zekât, fitre ve elden çıkarılan faiz, zekâtın sekiz sınıfıyla birlikte. Bu dönemde neyin ödendiğini ve neyin kaldığını görün.",
       },
       {
         title: "Yılı özenle kapatın",

@@ -21,7 +21,7 @@ const TYPE_TONE: Record<string, string> = {
 export default function GivingManager({
   records,
   currency,
-  defaultType = "sadaqah",
+  defaultType = "zakat",
   defaultAmount,
   defaultAsnaf,
   cycleOutstanding = 0,
@@ -92,7 +92,7 @@ export default function GivingManager({
     // The page remounts this form when the prefilled amount leaves the URL,
     // so the "cycle cleared" note travels in the URL too.
     const params = new URLSearchParams();
-    if (defaultType !== "sadaqah") params.set("type", defaultType);
+    if (defaultType !== "zakat") params.set("type", defaultType);
     if (clearedCycle) params.set("cleared", "1");
     const q = params.size ? `/giving?${params}` : "/giving";
     setJustCleared(clearedCycle);
@@ -190,10 +190,11 @@ export default function GivingManager({
                 value={type}
                 onChange={(e) => setType(e.target.value as GivingType)}
               >
-                <option value="sadaqah">Sadaqah (voluntary)</option>
                 <option value="zakat">Zakat (obligatory, on wealth)</option>
                 <option value="fitr">Zakat al-Fitr (end of Ramadan)</option>
-                <option value="purification">Purification / interest</option>
+                <option value="purification">Interest given away</option>
+                {/* Never needed: kept for anyone who still wants to note it. */}
+                <option value="sadaqah">Sadaqah (no need to note it)</option>
               </select>
             </div>
             <div>
@@ -233,7 +234,7 @@ export default function GivingManager({
               <p className="mt-1.5 text-xs text-sage">
                 The eight asnaf from the Qur’an — for your record, not a ruling
                 on who qualifies.{" "}
-                <Link href="/tools/asnaf" className="text-pine hover:underline">
+                <Link href="/tools/asnaf" className="text-pine underline">
                   Read the list
                 </Link>
                 .

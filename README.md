@@ -163,10 +163,9 @@ work.
   planting, spending on your family, giving a debtor more time), each a
   picture card that opens to its source with a strength tag. One is "today's
   sadaqah", the same for everyone each day, with another a tap away and a
-  WhatsApp share. "I did a good deed today" fills in that day on a month
-  calendar and counts the days in a row, under the hadith that the deeds
-  Allah loves most are the regular ones, even if small; it stays on the
-  device.
+  WhatsApp share. Nothing is counted or kept: sadaqah is given and let go,
+  under the hadith "Do not count what you give, lest Allah count what He
+  gives you" (Bukhari and Muslim, from Asma').
 - **Zakat quiz** (`/quiz`, English): ten picture questions, one at a time
   ("Do I pay zakat on… the home you live in?", "Can I give zakat to… my
   brother or sister?"). Tap Yes or No and see at once whether it was right
@@ -192,7 +191,7 @@ work.
   and the shop page; payments are noted with who and when and add to what
   has been given; once all is given, the year closes into a record kept
   year after year. Past years, crops and animals, bank interest to give
-  away, the family, Zakat al-Fitr, the good-deed streak and Ramadan all
+  away, the family, Zakat al-Fitr, missed fasts and Ramadan all
   show with a link back, and a short "What to do next" list puts the most
   pressing first (a zakat day two weeks away, what is left to give). A
   copy can be saved as a file and restored on another phone. Two weeks
@@ -245,7 +244,7 @@ work.
     out my zakat, give it, learn, more tools.
   - **Pick up where you left off**: a returning visitor sees, at the top of
     the home page, the zakat they worked out and what is still to give,
-    their catch-up plan, their good-deed streak, and their family's cards,
+    their catch-up plan, their missed fasts, and their family's cards,
     each with one Continue button. Read from the browser only.
   - **What do you have?** (English home page): tap what is true (cash, gold,
     a shop, crops or animals, family money, bank interest, missed years,
@@ -272,6 +271,13 @@ work.
     shows the Gregorian date beside each zakat day choice, and offers
     nothing to keep safe until something is kept. The fasts page asks only
     what the chosen reason needs.
+  - **Opening an account in plain words.** The setup steps are "Before we
+    start, Your money, Prices, Zakat day, What you have". The currency is the
+    visitor's own (what they chose on the public pages, or their browser's
+    region), picked by name; today's gold and silver prices are looked up as
+    the step opens, so nobody is asked a price they cannot know; the nisab,
+    calendar and school choices are folded under "How zakat is counted",
+    already set to what most people use.
   - The English "Ask a question" search finds the English-only pages too
     ("goats", "interest", "my shop", "my wife's gold").
 - **Crops and animals** (`/farm`, English): zakat for farmers. The harvest
@@ -341,12 +347,14 @@ work.
 - **The yearly sitting.** Setup wizard, reckoning night (forgotten wealth,
   what-if nisab, envelopes, pay), frozen snapshots with a letter to next year,
   rolling the hawl, and a printable statement.
-- **Giving log.** Zakat, sadaqah, purification, and Zakat al-Fitr, with
-  optional asnaf tags and a round-up helper. Only zakat clears what is owed for
+- **Giving log.** The zakat given, Zakat al-Fitr, and interest given away,
+  with optional asnaf tags. Nothing asks for sadaqah to be noted (it can be,
+  for anyone who wants to). Only zakat clears what is owed for
   the cycle, and a payment after the hawl falls due counts toward that cycle
   only. CSV export for receipts season.
 - **Tools.** Screening (manual, AAOIFI-style), mirath sketch, udhiyah shares,
-  reverse zakat, forgiving a debt, and more.
+  reverse zakat, forgiving a debt (it comes off what you are owed, so it is
+  no longer counted; nothing is written down as charity), and more.
 - **Your account.** Change password (signs out other devices), one-time
   recovery codes, two-step sign-in with any authenticator app, sign out
   everywhere, download or restore a full backup, and delete the account with
@@ -489,7 +497,7 @@ src/
     move.ts            codes and sealing for moving to a new phone
     client-store.ts    browser storage as React state, kept in step
     nisab.ts · hijri.ts · giving-window.ts · madhhab.ts · screening.ts
-    farm.ts · family.ts · fitr.ts · missed.ts · interest.ts · streak.ts
+    farm.ts · family.ts · fitr.ts · missed.ts · interest.ts · fasts.ts
     price-sources.ts   parsing and sanity checks for free price feeds (pure)
     reckoning.ts       one loader for every reckoning screen
     api.ts             route guards: signed in, writable, password re-check,

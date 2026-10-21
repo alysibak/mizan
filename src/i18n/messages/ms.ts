@@ -102,8 +102,8 @@ const ms: Messages = {
         body: "Tunai, emas dan perak mengikut berat dan karat, saham, kripto, barang perniagaan, wang yang dihutang kepada anda, dan harta dalam mata wang lain.",
       },
       {
-        title: "Semua pemberian di satu tempat",
-        body: "Zakat, sedekah, zakat fitrah, dan penyucian harta, dengan lapan asnaf. Lihat apa yang telah dibayar dan apa yang masih perlu dibayar dalam kitaran ini.",
+        title: "Apa yang telah anda berikan",
+        body: "Zakat, zakat fitrah, dan faedah bank yang telah dilepaskan, dengan lapan asnaf. Lihat apa yang telah dibayar dan apa yang masih perlu dibayar dalam kitaran ini.",
       },
       {
         title: "Tutup tahun dengan teliti",

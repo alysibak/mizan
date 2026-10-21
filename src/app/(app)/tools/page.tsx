@@ -76,7 +76,7 @@ export default function ToolsPage() {
             <Link href="/tools/forgive" className="block py-5 hover:bg-mist/20">
               <p className="font-serif text-lg text-ink">Forgive a debt</p>
               <p className="mt-1 text-sm text-sage">
-                Record releasing what someone owed you
+                Let go of what someone owed you, so it is no longer counted
               </p>
             </Link>
           </li>

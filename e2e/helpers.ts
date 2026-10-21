@@ -70,6 +70,9 @@ export async function registerAndSetUp(
   await page.waitForURL("**/begin");
 
   await page.click("text=I understand — continue");
+  // A new ledger starts in the browser's own currency; these accounts count in
+  // Canadian dollars, as a visitor in Canada would see it.
+  await page.selectOption("#currency", "CAD");
   await page.click("button:has-text('Continue')");
   await page.waitForSelector("#gold");
   await page.fill("#gold", opts.gold ?? "120");

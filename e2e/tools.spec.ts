@@ -220,12 +220,9 @@ test("sadaqah: one deed for today, and every deed with its source", async ({ pag
   await cards.getByText("Plant a tree or a seed").click();
   await expect(cards.getByText("Sahih al-Bukhari and Sahih Muslim, from Anas ibn Malik")).toBeVisible();
 
-  // A good deed marked today fills in the day and starts a streak, kept on the device.
-  await page.getByRole("button", { name: "I did a good deed today" }).click();
-  await expect(page.getByRole("button", { name: "✓ Done today" })).toHaveAttribute("aria-pressed", "true");
-  await expect(page.getByRole("table", { name: "October 2026" }).getByText("11 (done)")).toBeAttached();
-  await page.reload();
-  await expect(page.getByRole("button", { name: "✓ Done today" })).toBeVisible();
+  // Nothing is counted or kept: sadaqah is given and let go.
+  await expect(page.getByText("there is nothing to write down or count")).toBeVisible();
+  await expect(page.getByRole("button", { name: /good deed today/ })).toHaveCount(0);
 });
 
 test("shop: counted with everything else you own, in the same figures as the calculator", async ({ page }) => {

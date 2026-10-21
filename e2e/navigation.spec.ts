@@ -62,14 +62,14 @@ test("someone coming back is offered what they started", async ({ page }) => {
         given: "200",
       }),
     );
-    localStorage.setItem("mizan-sadaqah-days-v1", JSON.stringify(["2026-01-01"]));
+    localStorage.setItem("mizan-fasts-v1", JSON.stringify({ owed: "4", madeUp: 1 }));
   });
   await page.reload();
   const back = page.getByRole("region", { name: "Pick up where you left off" });
   await expect(back.getByText("Your zakat is US$500.00")).toBeVisible();
   await expect(back.getByText("Still to give: US$300.00")).toBeVisible();
   // The same words as My zakat, from the one list of what the phone keeps.
-  await expect(back.getByText("Good deeds")).toBeVisible();
+  await expect(back.getByText("3 fasts to make up")).toBeVisible();
   await back.getByRole("link", { name: /Your zakat is/ }).click();
   await page.waitForURL("**/my");
 });

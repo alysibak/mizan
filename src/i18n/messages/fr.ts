@@ -102,8 +102,8 @@ const fr: Messages = {
         body: "Espèces, or et argent au poids et au carat, actions, cryptomonnaies, stock commercial, créances et avoirs dans d’autres monnaies.",
       },
       {
-        title: "Tous vos dons au même endroit",
-        body: "Zakat, sadaqa, zakat al-fitr et purification, avec les huit catégories de bénéficiaires. Voyez ce qui est payé et ce qui reste dû pour ce cycle.",
+        title: "Ce que vous avez donné",
+        body: "La zakat, la zakat al-fitr et les intérêts dont vous vous êtes défait, avec les huit catégories de bénéficiaires. Voyez ce qui est payé et ce qui reste dû pour ce cycle.",
       },
       {
         title: "Clôturer l’année avec soin",

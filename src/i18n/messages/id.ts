@@ -101,8 +101,8 @@ const id: Messages = {
         body: "Uang tunai, emas dan perak menurut berat dan karat, saham, kripto, barang dagangan, piutang, dan harta dalam mata uang lain.",
       },
       {
-        title: "Semua pemberian di satu tempat",
-        body: "Zakat, sedekah, zakat fitrah, dan pembersihan harta, dengan delapan asnaf. Lihat apa yang sudah dibayar dan yang masih terutang pada siklus ini.",
+        title: "Yang sudah Anda berikan",
+        body: "Zakat, zakat fitrah, dan bunga bank yang sudah dilepaskan, dengan delapan asnaf. Lihat apa yang sudah dibayar dan yang masih terutang pada siklus ini.",
       },
       {
         title: "Tutup tahun dengan cermat",
