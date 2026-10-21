@@ -277,7 +277,7 @@ const fr: Messages = {
       silver: { label: "Argent d’épargne", hint: "Pièces, lingots et argent acheté comme placement." },
       jewellery: {
         label: "Bijoux en or portés",
-        hint: "Comptés ou non selon le choix ci-dessous.",
+        hint: "Comptés ou non selon le choix ci-dessous. Vous hésitez ? Les compter est le choix prudent.",
       },
       trading: {
         label: "Actions et fonds de négoce",
@@ -460,7 +460,7 @@ const fr: Messages = {
       },
       jewellery: {
         title: "Portez-vous des bijoux en or ?",
-        body: "Bagues, bracelets, colliers et autres bijoux en or que vous portez.",
+        body: "Bagues, bracelets, colliers et autres bijoux en or que vous portez. Vous ne savez pas s’ils comptent pour vous ? Les compter est le choix prudent.",
         question: "Sont-ils comptés pour vous ?",
         difference: "Les savants divergent ici. L’école hanafite compte les bijoux portés. Les écoles malikite, chafiite et hanbalite ne comptent pas les bijoux portés normalement. Si vous ne savez pas laquelle vous suivez, les compter est le choix le plus prudent, et vous pouvez demander à votre imam.",
       },
@@ -480,7 +480,7 @@ const fr: Messages = {
       },
       nisab: {
         title: "Quel nisab suivez-vous ?",
-        body: "Le nisab est le seuil. Si votre épargne est en dessous, aucune zakat n’est due.",
+        body: "Le nisab est le seuil. Si votre épargne est en dessous, aucune zakat n’est due. Vous hésitez ? Laissez l’argent : beaucoup de savants le conseillent, car il profite davantage aux pauvres.",
         difference: "Le nisab a été fixé à 595 grammes d’argent ou 85 grammes d’or. Aujourd’hui l’argent est bien moins cher, donc le seuil de l’argent est plus bas : plus de gens versent la zakat et plus de personnes dans le besoin sont aidées. Beaucoup de savants recommandent l’argent pour l’épargne monétaire ; certains retiennent l’or. Si vous hésitez, choisissez l’argent.",
         prices: "Indiquez le prix d’un gramme d’or et d’un gramme d’argent aujourd’hui chez vous.",
       },

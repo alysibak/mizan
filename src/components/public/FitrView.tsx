@@ -7,7 +7,6 @@ import ReadAloud from "@/components/ReadAloud";
 import FitrCalc from "@/components/public/FitrCalc";
 import RamadanCountdown from "@/components/public/RamadanCountdown";
 import { FaqList } from "@/components/public/LandingView";
-import { MoreTools } from "@/components/public/ToolPage";
 import { LOCALE_INFO, languageAlternates, localePath, type Locale } from "@/i18n/config";
 import { messagesFor } from "@/i18n/messages";
 import { faqJsonLd } from "@/lib/faq";
@@ -84,7 +83,6 @@ export default function FitrView({ locale }: { locale: Locale }) {
           <FaqList items={m.faq} />
         </section>
 
-        {locale === "en" ? <MoreTools except={PATH} /> : null}
       </main>
       <SiteFooter locale={locale} path={PATH} />
       <JsonLd data={faqJsonLd(m.faq)} />

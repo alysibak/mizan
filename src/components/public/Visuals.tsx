@@ -202,8 +202,13 @@ export function ResultPicture({
   const rows: { label: string; value: number; bar: string; shown: string }[] = [
     { label: labels.own, value: counted, bar: "bg-sage/50", shown: money(counted) },
   ];
-  if (debts > 0) rows.push({ label: labels.debts, value: debts, bar: "bg-danger/60", shown: `− ${money(debts)}` });
-  rows.push({ label: labels.net, value: net, bar: due ? "bg-pine" : "bg-sage", shown: money(net) });
+  // With no debts, what is left equals what is owned: one bar, not two the same.
+  if (debts > 0) {
+    rows.push({ label: labels.debts, value: debts, bar: "bg-danger/60", shown: `− ${money(debts)}` });
+    rows.push({ label: labels.net, value: net, bar: due ? "bg-pine" : "bg-sage", shown: money(net) });
+  } else {
+    rows[0].bar = due ? "bg-pine" : "bg-sage";
+  }
 
   return (
     <figure role="img" aria-label={summary} className="card p-4 sm:p-5">
@@ -212,7 +217,7 @@ export function ResultPicture({
         net={net}
         nisab={nisab}
         money={money}
-        labels={{ you: labels.net, nisab: labels.nisab }}
+        labels={{ you: debts > 0 ? labels.net : labels.own, nisab: labels.nisab }}
       />
       <div className="relative space-y-4 pt-8" aria-hidden>
         {/* The nisab line runs down through every bar. */}

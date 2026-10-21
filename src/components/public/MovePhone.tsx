@@ -283,6 +283,9 @@ export function MoveFromLink({ asked = false }: { asked?: boolean }) {
             <button type="submit" className="btn-primary min-h-[48px] px-5 text-base" disabled={busy}>
               {busy ? "Bringing it…" : "Bring it here"}
             </button>
+            <button type="button" className="btn-ghost min-h-[48px] px-4 text-base" onClick={leave} disabled={busy}>
+              Not now
+            </button>
           </div>
         </form>
       )}

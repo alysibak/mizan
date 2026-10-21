@@ -19,15 +19,16 @@ const PRICES = {
   source: "test prices",
 };
 
-test("the landing page leads to the calculator", async ({ page }) => {
+test("the landing page leads to the step-by-step guide", async ({ page }) => {
   const errors = watchConsole(page);
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Zakat");
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute("content", /opengraph-image/);
   await expectNoHorizontalScroll(page);
   await expectUniqueIds(page);
+  // One question at a time for someone new; the full calculator is in the header.
   await page.getByRole("link", { name: "Calculate your zakat" }).first().click();
-  await page.waitForURL("**/calculator");
+  await page.waitForURL("**/guide");
   expect(errors).toEqual([]);
 });
 

@@ -5,7 +5,6 @@ import SiteFooter from "@/components/SiteFooter";
 import JsonLd from "@/components/JsonLd";
 import { FaqList } from "@/components/public/LandingView";
 import { faqJsonLd, type Faq } from "@/lib/faq";
-import { PUBLIC_TOOLS } from "@/lib/public-tools";
 import { PAGE_ICONS } from "@/components/pageIcons";
 import { SITE_NAME, siteUrl } from "@/lib/site";
 
@@ -97,7 +96,6 @@ export default function ToolPage({
         </section>
 
         {after}
-        <MoreTools except={copy.path} />
       </main>
       <SiteFooter />
       <JsonLd data={faqJsonLd(copy.faq)} />
@@ -161,31 +159,6 @@ export function NextSteps({ steps }: { steps: { href: string; label: string; ico
             </li>
           );
         })}
-      </ul>
-    </nav>
-  );
-}
-
-export function MoreTools({ except }: { except?: string }) {
-  const tools = PUBLIC_TOOLS.filter((t) => t.path !== except);
-  return (
-    <nav className="mt-16 print:hidden" aria-labelledby="more-tools">
-      <h2 id="more-tools" className="font-serif text-2xl text-ink">
-        More free tools
-      </h2>
-      {/* Names only on a phone, two to a row, so the list stays short. */}
-      <ul className="mt-4 grid grid-cols-2 gap-2 sm:gap-3">
-        {tools.map((t) => (
-          <li key={t.path}>
-            <Link
-              href={t.path}
-              className="card flex h-full min-h-[48px] flex-col justify-center px-3 py-2 transition hover:border-sage sm:px-4 sm:py-3"
-            >
-              <span className="text-sm font-medium text-ink sm:text-base">{t.name}</span>
-              <span className="mt-1 hidden text-sm text-sage sm:block">{t.blurb}</span>
-            </Link>
-          </li>
-        ))}
       </ul>
     </nav>
   );

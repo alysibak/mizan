@@ -324,9 +324,10 @@ test("pages can be shared, and nisab links preview today’s figures", async ({ 
 
 test("missed fasts: the reason says what to do, the count goes down, and My zakat keeps it", async ({ page }) => {
   await page.goto("/fasts");
-  await page.getByRole("button", { name: "I am too old or ill to ever fast" }).click();
-  await expect(page.getByRole("status")).toContainText("feed one poor person for each day");
-
+  // Someone who was ill is asked one thing: how many days.
+  await page.getByRole("button", { name: "I was ill or travelling" }).click();
+  await expect(page.getByRole("status")).toContainText("Make up each day you missed");
+  await expect(page.locator("#fasts-fidya-days")).toHaveCount(0);
   await page.locator("#fasts-owed").fill("5");
   await page.getByRole("button", { name: "I made up a fast" }).click();
   await page.getByRole("button", { name: "I made up a fast" }).click();
@@ -335,12 +336,17 @@ test("missed fasts: the reason says what to do, the count goes down, and My zaka
   await page.getByRole("button", { name: "Remind me on Mondays and Thursdays" }).click();
   expect((await download).suggestedFilename()).toBe("make-up-fasts.ics");
 
+  // Each other reason opens only what it needs.
+  await page.getByRole("button", { name: "I am too old or ill to ever fast" }).click();
+  await expect(page.getByRole("status")).toContainText("feed one poor person for each day");
   await page.locator("#tool-currency").selectOption("USD");
   await page.locator("#fasts-per-day").fill("8");
   await page.locator("#fasts-fidya-days").fill("30");
   await expect(page.getByText("Fidya: US$240.00 (30 meals)")).toBeVisible();
+  await page.getByRole("button", { name: "I broke a fast on purpose" }).click();
   await page.locator("#fasts-kaffarah").fill("1");
   await expect(page.getByText(/Fast 60 days in a row/)).toBeVisible();
+  await page.getByRole("button", { name: "I swore an oath and broke it" }).click();
   await page.locator("#fasts-oaths").fill("1");
   await expect(page.getByText(/Feed or clothe 10 poor people/)).toContainText("US$80.00");
 

@@ -36,7 +36,7 @@ import {
   IconGlobe,
   IconGoldBar,
   IconReceipt,
-  IconRing,
+  IconNecklace,
 } from "@/components/icons";
 import {
   Choice,
@@ -73,7 +73,7 @@ const STEP_ICON: Record<Step, (p: { className?: string }) => React.ReactNode> = 
   cash: IconCash,
   bank: IconBank,
   gold: IconGoldBar,
-  jewellery: IconRing,
+  jewellery: IconNecklace,
   silver: IconCoins,
   more: IconChart,
   debts: IconReceipt,
@@ -176,6 +176,7 @@ function Guide({
   );
   const requested = useRef<string | null>(null);
   const heading = useRef<HTMLHeadingElement>(null);
+  const card = useRef<HTMLElement>(null);
   const moved = useRef(false);
   const outcome = useMemo(() => computeDraft(draft), [draft]);
   const step: Step = STEPS[index];
@@ -237,9 +238,13 @@ function Guide({
     }
   }, [draft, live]);
 
-  // Each new step is announced by moving focus to its question.
+  // Each new step is announced by moving focus to its question, and brought
+  // to the top of the screen so the question and its buttons are in view
+  // rather than the page's introduction.
   useEffect(() => {
-    if (moved.current) heading.current?.focus();
+    if (!moved.current) return;
+    heading.current?.focus({ preventScroll: true });
+    card.current?.scrollIntoView({ block: "start" });
   }, [index]);
 
   const reached = useRef(false);
@@ -610,7 +615,7 @@ function Guide({
       : [title, typeof body === "string" ? body : ""].filter(Boolean).join(". ");
 
   return (
-    <section aria-labelledby="guide-step" className="card p-5 sm:p-8">
+    <section ref={card} aria-labelledby="guide-step" className="card scroll-mt-20 p-5 sm:p-8">
       {step !== "result" ? (
         <div>
           <p className="label text-brassDeep">{fmt(m.stepOf, { n: index + 1, total })}</p>
@@ -653,31 +658,29 @@ function Guide({
 
       {fields}
 
-      <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-mist pt-5">
-        {index > 0 ? (
-          <button type="button" className="btn-ghost px-5" onClick={() => go(index - 1)}>
-            {m.back}
-          </button>
-        ) : null}
-        {step === "result" ? null : (
-          <button
-            type="button"
-            className="btn-primary px-6 py-3 text-base"
-            onClick={() => go(index + 1)}
-          >
+      {/* The answer has its own "Change my answers"; a Back under it as well
+          would be one more button that does nearly the same thing. */}
+      {step === "result" ? null : (
+        <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-mist pt-5">
+          {index > 0 ? (
+            <button type="button" className="btn-ghost px-5" onClick={() => go(index - 1)}>
+              {m.back}
+            </button>
+          ) : null}
+          <button type="button" className="btn-primary px-6 py-3 text-base" onClick={() => go(index + 1)}>
             {step === "nisab" ? m.seeResult : m.next}
           </button>
-        )}
-        {skippable ? (
-          <button
-            type="button"
-            className="text-sm text-pine underline-offset-2 hover:underline"
-            onClick={skip}
-          >
-            {m.skip}
-          </button>
-        ) : null}
-      </div>
+          {skippable ? (
+            <button
+              type="button"
+              className="text-sm text-pine underline-offset-2 hover:underline"
+              onClick={skip}
+            >
+              {m.skip}
+            </button>
+          ) : null}
+        </div>
+      )}
     </section>
   );
 }

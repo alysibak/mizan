@@ -81,10 +81,13 @@ export const IconGoldBar = ({ className = "h-6 w-6" }: P) => (
   </Glyph>
 );
 
+// A band seen at a slant, wider than tall, under a cut stone: so it reads as
+// a ring and never as the figure 8.
 export const IconRing = ({ className = "h-6 w-6" }: P) => (
   <Glyph className={className}>
-    <circle cx="12" cy="14.5" r="5.5" />
-    <path d="M9.5 9.5 8 6.5l2-2.5h4l2 2.5-1.5 3" />
+    <ellipse cx="12" cy="15.5" rx="7.5" ry="4.5" />
+    <path d="M9.5 3.5h5L16.5 6 12 11 7.5 6z" />
+    <path d="M7.5 6h9" />
   </Glyph>
 );
 

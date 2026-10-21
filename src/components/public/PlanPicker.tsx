@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   IconBank,
@@ -33,6 +33,18 @@ const CHOICES: { key: Situation; label: string; Icon: typeof IconCash }[] = [
 export default function PlanPicker() {
   const [have, setHave] = useState<Set<Situation>>(new Set());
   const steps = buildPlan(have);
+  const hasPlan = steps.length > 0;
+  // On a phone the plan grows below eight tiles, out of sight: a bar at the
+  // bottom says it is there until it scrolls into view.
+  const plan = useRef<HTMLDivElement>(null);
+  const [planInView, setPlanInView] = useState(false);
+  useEffect(() => {
+    const el = plan.current;
+    if (!hasPlan || !el) return;
+    const watch = new IntersectionObserver(([e]) => setPlanInView(e.isIntersecting), { threshold: 0.15 });
+    watch.observe(el);
+    return () => watch.disconnect();
+  }, [hasPlan]);
 
   function toggle(key: Situation) {
     setHave((old) => {
@@ -77,8 +89,8 @@ export default function PlanPicker() {
       </ul>
 
       <div aria-live="polite">
-        {steps.length ? (
-          <div className="mt-6 border-t border-mist pt-5">
+        {hasPlan ? (
+          <div ref={plan} className="mt-6 scroll-mt-20 border-t border-mist pt-5">
             <h3 className="font-serif text-xl text-ink">Your plan</h3>
             <ol className="mt-3 space-y-2">
               {steps.map((step, i) => (
@@ -107,6 +119,19 @@ export default function PlanPicker() {
           </div>
         ) : null}
       </div>
+      {hasPlan && !planInView ? (
+        <button
+          type="button"
+          onClick={() => plan.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+          className="fixed inset-x-0 bottom-0 z-30 flex items-center justify-between gap-3 bg-pine px-5 py-3 text-base font-medium text-surface shadow-lg sm:hidden"
+          style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
+        >
+          <span>
+            Your plan is ready: {steps.length} {steps.length === 1 ? "step" : "steps"}
+          </span>
+          <span aria-hidden>↓</span>
+        </button>
+      ) : null}
     </section>
   );
 }

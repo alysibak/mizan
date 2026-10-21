@@ -281,7 +281,7 @@ const tr: Messages = {
       },
       jewellery: {
         label: "Taktığınız altın ziynet eşyası",
-        hint: "Aşağıdaki seçime göre sayılır veya sayılmaz.",
+        hint: "Aşağıdaki seçime göre sayılır veya sayılmaz. Emin değil misiniz? Saymak daha ihtiyatlıdır.",
       },
       trading: {
         label: "Alım satım için hisse ve fonlar",
@@ -464,7 +464,7 @@ const tr: Messages = {
       },
       jewellery: {
         title: "Altın ziynet eşyası takıyor musunuz?",
-        body: "Yüzük, bilezik, kolye ve taktığınız diğer altın takılar.",
+        body: "Yüzük, bilezik, kolye ve taktığınız diğer altın takılar. Sizin için sayılıp sayılmadığından emin değil misiniz? Saymak daha ihtiyatlıdır.",
         question: "Sizin için sayılıyor mu?",
         difference: "Âlimler burada farklı görüştedir. Hanefi mezhebi takılan ziyneti sayar. Maliki, Şafii ve Hanbeli mezhepleri normal şekilde takılan ziyneti saymaz. Hangisini izlediğinizden emin değilseniz saymak daha ihtiyatlıdır; imamınıza da sorabilirsiniz.",
       },
@@ -484,7 +484,7 @@ const tr: Messages = {
       },
       nisab: {
         title: "Hangi nisabı izliyorsunuz?",
-        body: "Nisap bir sınırdır. Birikiminiz bunun altındaysa zekât gerekmez.",
+        body: "Nisap bir sınırdır. Birikiminiz bunun altındaysa zekât gerekmez. Emin değil misiniz? Gümüşte bırakın: fakirlerin daha çok yararına olduğu için birçok âlim bunu tavsiye eder.",
         difference: "Nisap 595 gram gümüş veya 85 gram altın olarak belirlenmiştir. Bugün gümüş çok daha ucuzdur; bu yüzden gümüş sınırı daha düşüktür, daha çok kişi zekât verir ve daha çok ihtiyaç sahibine yardım ulaşır. Pek çok âlim nakit birikim için gümüşü önerir; bazıları altını esas alır. Emin değilseniz gümüşü seçin.",
         prices: "Bulunduğunuz yerde bugün bir gram altının ve bir gram gümüşün fiyatını girin.",
       },

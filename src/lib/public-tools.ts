@@ -1,99 +1,20 @@
-// The free tools anyone can use without an account. One list feeds the
-// footer, the landing page, the sitemap, and the analytics allow-list.
-
-export interface PublicTool {
-  path: string;
-  name: string;
-  blurb: string;
-}
-
-export const PUBLIC_TOOLS: PublicTool[] = [
-  {
-    path: "/my",
-    name: "My zakat",
-    blurb: "Your zakat day, what you have given, and what to do next.",
-  },
-  {
-    path: "/calculator",
-    name: "Zakat calculator",
-    blurb: "What you owe this year, against today’s nisab.",
-  },
-  {
-    path: "/nisab",
-    name: "Nisab today",
-    blurb: "The silver and gold thresholds in 59 currencies, updated hourly.",
-  },
-  {
-    path: "/inheritance",
-    name: "Inheritance calculator",
-    blurb: "Quranic shares of an estate, in exact fractions.",
-  },
-  {
-    path: "/zakat-al-fitr",
-    name: "Zakat al-Fitr",
-    blurb: "What your household gives before the Eid prayer.",
-  },
-  {
-    path: "/ramadan",
-    name: "Ramadan giving",
-    blurb: "Zakat, fitrana, and a gift spread over the last ten nights.",
-  },
-  {
-    path: "/fasts",
-    name: "Missed fasts",
-    blurb: "Make them up, or pay fidya or kaffarah, and count what is left.",
-  },
-  {
-    path: "/give",
-    name: "Where to give",
-    blurb: "Who first, six questions for a charity, and giving well.",
-  },
-  {
-    path: "/interest",
-    name: "Bank interest",
-    blurb: "Interest your bank paid you: what to do with it.",
-  },
-  {
-    path: "/sadaqah",
-    name: "Sadaqah without money",
-    blurb: "A smile, a kind word, water: charity anyone can give today.",
-  },
-  {
-    path: "/quiz",
-    name: "Zakat quiz",
-    blurb: "Ten picture questions to learn the basics in two minutes.",
-  },
-  {
-    path: "/family",
-    name: "Family zakat",
-    blurb: "Each person’s own zakat: who owes, and how much.",
-  },
-  {
-    path: "/shop",
-    name: "Shop zakat",
-    blurb: "Stock, till, and money owed to you, in pictures.",
-  },
-  {
-    path: "/farm",
-    name: "Crops and animals",
-    blurb: "A tenth of the harvest, and what a herd owes each year.",
-  },
-  {
-    path: "/missed-years",
-    name: "Missed years",
-    blurb: "What you owe for past years, and a plan to pay it.",
-  },
-  {
-    path: "/halal-stocks",
-    name: "Halal stock screen",
-    blurb: "Business and ratio checks, and dividend purification.",
-  },
-  {
-    path: "/qurbani",
-    name: "Qurbani shares",
-    blurb: "Split the cost of a cow or camel among up to seven.",
-  },
+/**
+ * The English-only tool pages (the calculator, nisab, and Zakat al-Fitr pages
+ * are translated), for the sitemap and the analytics allow-list. The Menu and
+ * the footer list every tool for visitors.
+ */
+export const ENGLISH_TOOL_PATHS = [
+  "/my",
+  "/ramadan",
+  "/fasts",
+  "/give",
+  "/interest",
+  "/sadaqah",
+  "/quiz",
+  "/family",
+  "/shop",
+  "/farm",
+  "/inheritance",
+  "/halal-stocks",
+  "/qurbani",
 ];
-
-/** The English-only tool pages (the calculator, nisab, and Zakat al-Fitr pages are translated). */
-export const ENGLISH_TOOL_PATHS = ["/my", "/ramadan", "/give", "/interest", "/sadaqah", "/quiz", "/family", "/shop", "/farm", "/inheritance", "/halal-stocks", "/qurbani"];

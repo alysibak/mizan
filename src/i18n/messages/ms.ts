@@ -279,7 +279,7 @@ const ms: Messages = {
       },
       jewellery: {
         label: "Barang kemas emas yang dipakai",
-        hint: "Dikira atau tidak mengikut pilihan di bawah.",
+        hint: "Dikira atau tidak mengikut pilihan di bawah. Tidak pasti? Mengiranya lebih berhati-hati.",
       },
       trading: {
         label: "Saham dan dana untuk didagangkan",
@@ -462,7 +462,7 @@ const ms: Messages = {
       },
       jewellery: {
         title: "Adakah anda memakai barang kemas emas?",
-        body: "Cincin, gelang, rantai, dan barang kemas emas lain yang anda pakai.",
+        body: "Cincin, gelang, rantai, dan barang kemas emas lain yang anda pakai. Tidak pasti sama ada dikira? Mengiranya ialah pilihan yang lebih berhati-hati.",
         question: "Adakah ia dikira bagi anda?",
         difference: "Ulama berbeza pendapat di sini. Mazhab Hanafi mengira barang kemas yang dipakai. Mazhab Maliki, Syafie, dan Hanbali tidak mengira barang kemas yang dipakai secara biasa. Jika anda tidak pasti mengikut yang mana, mengiranya ialah pilihan yang lebih berhati-hati, dan anda boleh bertanya kepada imam anda.",
       },
@@ -482,7 +482,7 @@ const ms: Messages = {
       },
       nisab: {
         title: "Nisab mana yang anda ikut?",
-        body: "Nisab ialah hadnya. Jika simpanan anda di bawahnya, tiada zakat.",
+        body: "Nisab ialah hadnya. Jika simpanan anda di bawahnya, tiada zakat. Tidak pasti? Kekalkan perak: ramai ulama menasihatkannya kerana lebih bermanfaat untuk orang miskin.",
         difference: "Nisab ditetapkan 595 gram perak atau 85 gram emas. Kini perak jauh lebih murah, jadi had perak lebih rendah dan lebih ramai orang berzakat, sekali gus membantu lebih ramai yang memerlukan. Ramai ulama mencadangkan perak untuk simpanan wang; sesetengahnya menggunakan emas. Jika anda tidak pasti, pilih perak.",
         prices: "Masukkan harga satu gram emas dan satu gram perak hari ini di tempat anda.",
       },

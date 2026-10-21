@@ -258,7 +258,20 @@ work.
     the ledger's features are a short list on a phone, and the wall of tool
     buttons is gone: the Menu and the footer list every tool.
   - Every new tool ends with **What next?** picture buttons straight under
-    the tool, so no page is a dead end.
+    the tool, so no page is a dead end. Tool pages no longer end in a wall
+    of every other tool; the Menu and the footer list them.
+  - **Made for someone unsure**, from walking each journey on a phone: the
+    home page's main button opens the one-question-at-a-time guide (the
+    full calculator is in the header); each guide step comes to the top of
+    the screen with its Next button in view; the nisab and jewellery
+    questions say what to do when not sure; the result shows one bar, not
+    two the same, and no Back beside "Change my answers". Tapping a tile in
+    "What do you have?" shows a "Your plan is ready" bar on phones. My zakat
+    follows its own to-do list (this year's zakat, then what is given, then
+    the zakat day), has one main button per card with the rest as links,
+    shows the Gregorian date beside each zakat day choice, and offers
+    nothing to keep safe until something is kept. The fasts page asks only
+    what the chosen reason needs.
   - The English "Ask a question" search finds the English-only pages too
     ("goats", "interest", "my shop", "my wife's gold").
 - **Crops and animals** (`/farm`, English): zakat for farmers. The harvest

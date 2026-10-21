@@ -48,6 +48,10 @@ export default function LandingView({ locale }: { locale: Locale }) {
   const intl = LOCALE_INFO[locale].intl;
   const money = (n: number) => formatMoney(n, "USD", intl);
   const calculator = localePath(locale, "/calculator");
+  // The main button opens the one-question-at-a-time guide: someone new is
+  // asked one thing at a time instead of meeting every field at once. The
+  // full calculator is a tap away in the header and from the guide.
+  const guide = localePath(locale, "/guide");
 
   const rows: [string, string, boolean][] = [
     [m.sample.cash, money(18400), false],
@@ -139,7 +143,7 @@ export default function LandingView({ locale }: { locale: Locale }) {
               className="animate-fade-up mt-6 flex flex-wrap items-center gap-3"
               style={{ animationDelay: "140ms" }}
             >
-              <Link href={calculator} className="btn-primary px-6 py-3 text-base">
+              <Link href={guide} className="btn-primary px-6 py-3 text-base">
                 {m.ctaCalculate}
               </Link>
               <Link href="/register" className="btn-ghost px-6 py-3 text-base">
@@ -301,7 +305,7 @@ export default function LandingView({ locale }: { locale: Locale }) {
         <section className="relative z-10 px-5 py-24 text-center md:px-10">
           <h2 className="mx-auto max-w-2xl font-serif text-4xl text-ink">{m.finalTitle}</h2>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link href={calculator} className="btn-primary px-6 py-3 text-base">
+            <Link href={guide} className="btn-primary px-6 py-3 text-base">
               {m.ctaCalculate}
             </Link>
             <Link href="/register" className="btn-ghost px-6 py-3 text-base">

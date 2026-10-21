@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
-import { MoreTools } from "@/components/public/ToolPage";
 import { GUIDES } from "@/content/guides";
 
 export const metadata: Metadata = {
@@ -37,7 +36,6 @@ export default function GuidesIndex() {
             </li>
           ))}
         </ul>
-        <MoreTools />
       </main>
       <SiteFooter />
     </div>

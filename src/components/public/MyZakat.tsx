@@ -74,44 +74,21 @@ function Card({ id, title, children, className = "" }: { id: string; title: stri
 
 /**
  * Send this year's figures to someone who can check them: the phone's own
- * share sheet, or WhatsApp and a copy elsewhere. Only on the visitor's tap.
+ * share sheet, or WhatsApp elsewhere. Only on the visitor's tap.
  */
 function SendSummary({ text }: { text: string }) {
-  const [copied, setCopied] = useState(false);
+  const link = "text-base font-medium text-pine hover:underline";
   if (typeof navigator.share === "function") {
     return (
-      <button
-        type="button"
-        className="btn-ghost px-5 py-3 text-base"
-        onClick={() => navigator.share({ title: "My zakat", text }).catch(() => undefined)}
-      >
+      <button type="button" className={link} onClick={() => navigator.share({ title: "My zakat", text }).catch(() => undefined)}>
         Send to family or the imam
       </button>
     );
   }
   return (
-    <>
-      <a
-        className="btn-ghost px-5 py-3 text-base"
-        href={`https://wa.me/?text=${encodeURIComponent(text)}`}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Send on WhatsApp
-      </a>
-      <button
-        type="button"
-        className="btn-ghost px-5 py-3 text-base"
-        onClick={() =>
-          navigator.clipboard
-            ?.writeText(text)
-            .then(() => setCopied(true))
-            .catch(() => undefined)
-        }
-      >
-        <span aria-live="polite">{copied ? "Copied" : "Copy the summary"}</span>
-      </button>
-    </>
+    <a className={link} href={`https://wa.me/?text=${encodeURIComponent(text)}`} target="_blank" rel="noopener noreferrer">
+      Send to family or the imam
+    </a>
   );
 }
 
@@ -172,8 +149,9 @@ function ZakatDayCard({ my, save }: { my: MyZakat; save: (next: MyZakat) => void
         when your savings first reached the nisab, any day you keep to is fine. Many choose 1 Ramadan.
       </p>
       <div className="mt-4 grid gap-2 sm:grid-cols-2">
-        <button type="button" className="btn-primary min-h-[52px] px-4 text-base" onClick={() => choose({ month: 9, day: 1 })}>
+        <button type="button" className="btn-primary min-h-[52px] flex-col px-4 text-base" onClick={() => choose({ month: 9, day: 1 })}>
           1 Ramadan
+          <span className="block text-xs font-normal opacity-90">next on {shortDay(nextZakatDay({ month: 9, day: 1 }, today).toISOString().slice(0, 10))}</span>
         </button>
         <button
           type="button"
@@ -210,6 +188,9 @@ function ZakatDayCard({ my, save }: { my: MyZakat; save: (next: MyZakat) => void
             Use this day
           </button>
         </div>
+        <p className="mt-1.5 text-xs text-sage nums">
+          {day} {HIJRI_MONTHS[month - 1]} is next on {longDate(nextZakatDay({ month, day }, today))}.
+        </p>
       </fieldset>
     </Card>
   );
@@ -248,6 +229,10 @@ export default function MyZakatHub() {
 
   const decimal = decimalMarkFor(INTL);
   const phoneCtx = { today, money: visitorMoney, decimal, intl: INTL };
+  // Whether this phone keeps anything yet: until it does, there is nothing to
+  // save, move or print, and the page says so less.
+  const keepsAnything =
+    Boolean(my.zakatDay) || started || my.payments.length > 0 || my.history.length > 0 || phoneLines(phone, phoneCtx).length > 0;
   const dues = phoneDues(phone, phoneCtx);
   const ramadan = ramadanStatus(new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate())));
   const pricesAgeDays = draft.pricesAsOf
@@ -347,7 +332,9 @@ export default function MyZakatHub() {
   return (
     <div className="space-y-6">
       {/* Arriving from the old phone's code or picture. */}
-      <MoveFromLink asked={moving} />
+      {/* The Menu's "Move to a new phone" lands here: on a phone with nothing
+          kept yet, that means bringing it over, so the code form opens. */}
+      <MoveFromLink asked={moving || (!keepsAnything && window.location.hash === "#move")} />
 
       {list.length ? (
         <section className="border-2 border-pine/40 bg-pine/5 p-5 print:hidden" aria-labelledby="todo-title">
@@ -380,20 +367,23 @@ export default function MyZakatHub() {
       )}
 
       {/* Someone new here may have it all on another phone already. */}
-      {!moving && !my.zakatDay && !started && !my.payments.length && !my.history.length ? (
+      {!moving && !keepsAnything ? (
         <p className="text-base text-sage print:hidden">
-          Moving from another phone?{" "}
+          Used Mizan on another phone?{" "}
           <button type="button" className="font-medium text-pine hover:underline" onClick={() => setMoving(true)}>
             Bring everything over with a code
+          </button>{" "}
+          or{" "}
+          <button type="button" className="font-medium text-pine hover:underline" onClick={() => fileInput.current?.click()}>
+            restore a saved copy
           </button>
+          .
         </p>
       ) : null}
-
-      <ZakatDayCard my={my} save={save} />
-
-      {/* Once there is a day to come back for, keep the way back one tap away. */}
-      {my.zakatDay ? (
-        <InstallHint pitch="Keep My zakat one tap away: your zakat day, what is left, and what to do next open from your home screen like an app. No app store, and it works without the internet." />
+      {restored && !keepsAnything ? (
+        <p className="text-sm font-medium text-danger" role="alert">
+          {restored}
+        </p>
       ) : null}
 
       <Card id="this-year" title="This year’s zakat">
@@ -443,17 +433,24 @@ export default function MyZakatHub() {
             </Link>
           </div>
         ) : (
-          <div className="mt-4 flex flex-wrap gap-3 print:hidden">
-            <Link href="/guide" className={(started ? "btn-ghost" : "btn-primary") + " px-5 py-3 text-base"}>
-              {started ? "Go through it step by step" : "Work it out, step by step"}
-            </Link>
+          // One clear button; everything else as a quiet link beside it.
+          <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-3 print:hidden">
             {started ? (
               <Link href="/calculator" className="btn-primary px-5 py-3 text-base">
                 Change my figures
               </Link>
+            ) : (
+              <Link href="/guide" className="btn-primary px-5 py-3 text-base">
+                Work it out, step by step
+              </Link>
+            )}
+            {started ? (
+              <Link href="/guide" className="text-base font-medium text-pine hover:underline">
+                Go through it step by step
+              </Link>
             ) : null}
             {started && !needsPrices ? <SendSummary text={summary} /> : null}
-            <Link href="/shop" className="btn-ghost px-5 py-3 text-base">
+            <Link href="/shop" className="text-base font-medium text-pine hover:underline">
               I have a shop
             </Link>
           </div>
@@ -577,6 +574,9 @@ export default function MyZakatHub() {
         </Card>
       ) : null}
 
+      {/* After the zakat itself, as the to-do list puts it: work it out first. */}
+      <ZakatDayCard my={my} save={save} />
+
       <section aria-labelledby="also-title">
         <h2 id="also-title" className="font-serif text-2xl text-ink">
           Everything else
@@ -601,6 +601,11 @@ export default function MyZakatHub() {
         </ul>
       </section>
 
+      {/* Once there is a day to come back for, keep the way back one tap away. */}
+      {my.zakatDay ? (
+        <InstallHint pitch="Keep My zakat one tap away: your zakat day, what is left, and what to do next open from your home screen like an app. No app store, and it works without the internet." />
+      ) : null}
+
       {my.history.length ? (
         <Card id="record" title="Your record">
           <ul className="mt-3 divide-y divide-mist border-y border-mist">
@@ -617,54 +622,58 @@ export default function MyZakatHub() {
         </Card>
       ) : null}
 
-      <Card id="keep" title="Keep it safe" className="print:hidden">
-        <p className="mt-2 text-base text-sage">
-          All of this stays on this phone, and nowhere else. Clearing the browser deletes it, so save a copy now and
-          then, and move it with a code when you change phones.
-        </p>
-        <div className="mt-4 flex flex-wrap gap-3">
-          <button
-            type="button"
-            className="btn-primary px-5 py-3 text-base"
-            onClick={() => download(`mizan-${isoToday()}.json`, backupFile(readStoredValue, new Date()), "application/json")}
-          >
-            Save a copy
-          </button>
-          <button type="button" className="btn-ghost px-5 py-3 text-base" onClick={() => fileInput.current?.click()}>
-            Restore a copy
-          </button>
-          <input
-            ref={fileInput}
-            type="file"
-            accept="application/json,.json"
-            className="hidden"
-            aria-label="Choose a Mizan copy to restore"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) restore(file);
-              e.target.value = "";
-            }}
-          />
-          <button type="button" className="btn-ghost px-5 py-3 text-base" onClick={() => window.print()}>
-            Print
-          </button>
-        </div>
-        {restored ? (
-          <p className="mt-3 text-sm font-medium text-pine" role="status">
-            {restored}
+      {/* The one way in for a copy, whether or not anything is kept yet. */}
+      <input
+        ref={fileInput}
+        type="file"
+        accept="application/json,.json"
+        className="hidden"
+        aria-label="Choose a Mizan copy to restore"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) restore(file);
+          e.target.value = "";
+        }}
+      />
+
+      {/* Nothing to keep safe until something is kept. */}
+      {keepsAnything ? (
+        <Card id="keep" title="Keep it safe" className="print:hidden">
+          <p className="mt-2 text-base text-sage">
+            All of this stays on this phone, and nowhere else. Clearing the browser deletes it.
           </p>
-        ) : null}
-        <MovePhone />
-        {signedIn ? null : (
-          <p className="mt-4 text-sm text-sage">
-            Want it on every device?{" "}
-            <Link href={started ? "/register?from=calculator" : "/register"} className="font-medium text-pine hover:underline">
-              Open a free account
-            </Link>{" "}
-            and your figures, zakat day and payments come with you.
+          <MovePhone />
+          <p className="mt-4 flex flex-wrap gap-x-5 gap-y-2 border-t border-mist pt-4 text-sm">
+            <button
+              type="button"
+              className="font-medium text-pine hover:underline"
+              onClick={() => download(`mizan-${isoToday()}.json`, backupFile(readStoredValue, new Date()), "application/json")}
+            >
+              Save a copy as a file
+            </button>
+            <button type="button" className="font-medium text-pine hover:underline" onClick={() => fileInput.current?.click()}>
+              Restore a copy
+            </button>
+            <button type="button" className="font-medium text-pine hover:underline" onClick={() => window.print()}>
+              Print
+            </button>
           </p>
-        )}
-      </Card>
+          {restored ? (
+            <p className="mt-3 text-sm font-medium text-pine" role="status">
+              {restored}
+            </p>
+          ) : null}
+          {signedIn ? null : (
+            <p className="mt-4 text-sm text-sage">
+              Want it on every device?{" "}
+              <Link href={started ? "/register?from=calculator" : "/register"} className="font-medium text-pine hover:underline">
+                Open a free account
+              </Link>{" "}
+              and your figures, zakat day and payments come with you.
+            </p>
+          )}
+        </Card>
+      ) : null}
     </div>
   );
 }

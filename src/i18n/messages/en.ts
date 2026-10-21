@@ -293,7 +293,7 @@ const en = {
       },
       jewellery: {
         label: "Gold jewellery you wear",
-        hint: "Counted or not according to the choice below.",
+        hint: "Counted or not according to the choice below. Not sure? Counting it is the cautious choice.",
       },
       trading: {
         label: "Shares and funds you trade",
@@ -497,7 +497,7 @@ const en = {
       },
       jewellery: {
         title: "Do you wear gold jewellery?",
-        body: "Rings, bangles, necklaces, and other gold jewellery you wear.",
+        body: "Rings, bangles, necklaces, and other gold jewellery you wear. Not sure whether yours counts? Counting it is the cautious choice.",
         question: "Is it counted for you?",
         difference:
           "Scholars differ here. The Hanafi school counts jewellery you wear. The Maliki, Shafi‘i, and Hanbali schools do not count jewellery worn in the normal way. If you are not sure which you follow, counting it is the cautious choice, and you can ask your imam.",
@@ -520,7 +520,7 @@ const en = {
       },
       nisab: {
         title: "Which nisab do you follow?",
-        body: "Nisab is the line. If your savings are below it, no zakat is due.",
+        body: "Nisab is the line. If your savings are below it, no zakat is due. Not sure which? Leave it on silver: many scholars advise it, as it is better for the poor.",
         difference:
           "Nisab was set as 595 grams of silver or 85 grams of gold. Today silver is far cheaper, so the silver line is lower and more people pay zakat, which helps more people in need. Many scholars recommend silver for savings in money; some use gold. If you are not sure, choose silver.",
         prices: "Enter today’s price of one gram of gold and of silver where you live.",

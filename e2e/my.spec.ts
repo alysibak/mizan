@@ -297,12 +297,31 @@ test("everything moves to a new phone with a code, once, without an account", as
   await third.close();
 });
 
-test("the Menu leads to moving phones", async ({ page }) => {
-  await page.goto("/my");
+test("the Menu leads to moving phones: bringing it over on a new phone, sending it from an old one", async ({ page }) => {
+  await page.goto("/sadaqah");
+  await page.getByRole("button", { name: "Menu" }).click();
+  await page.getByRole("dialog", { name: "Menu" }).getByRole("link", { name: "Move to a new phone" }).click();
+  await page.waitForURL("**/my#move");
+  // Nothing kept here yet: this is the new phone.
+  await expect(page.getByRole("region", { name: "From your old phone" }).getByLabel("The code from your old phone")).toBeVisible();
+
+  await page.evaluate(() => localStorage.setItem("mizan-my-v1", JSON.stringify({ zakatDay: { month: 9, day: 1 } })));
+  await page.goto("/sadaqah");
   await page.getByRole("button", { name: "Menu" }).click();
   await page.getByRole("dialog", { name: "Menu" }).getByRole("link", { name: "Move to a new phone" }).click();
   await page.waitForURL("**/my#move");
   await expect(page.getByRole("region", { name: "Getting a new phone?" })).toBeInViewport();
+});
+
+test("a phone with nothing kept is not asked to keep it safe", async ({ page }) => {
+  await page.goto("/my");
+  await expect(page.getByRole("heading", { name: "Choose your zakat day" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Keep it safe" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "restore a saved copy" })).toBeVisible();
+  // The zakat itself comes before the day, as the to-do list says.
+  const year = await page.getByRole("region", { name: "This year’s zakat" }).boundingBox();
+  const day = await page.getByRole("region", { name: "Choose your zakat day" }).boundingBox();
+  expect(year!.y).toBeLessThan(day!.y);
 });
 
 test("this year's figures can be sent to family or the imam to check", async ({ page }) => {
@@ -312,7 +331,7 @@ test("this year's figures can be sent to family or the imam to check", async ({ 
   await page.goto("/my");
   await page.getByRole("button", { name: "1 Ramadan" }).click();
   const year = page.getByRole("region", { name: "This year’s zakat" });
-  const send = year.getByRole("link", { name: "Send on WhatsApp" });
+  const send = year.getByRole("link", { name: "Send to family or the imam" });
   const text = new URL((await send.getAttribute("href"))!).searchParams.get("text")!;
   expect(text).toContain("My zakat for 1448 AH");
   expect(text).toContain("Zakat day: 1 Ramadan");
