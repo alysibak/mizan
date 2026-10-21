@@ -45,25 +45,26 @@ export default async function GivingPage({
         <p className="label text-brassDeep">Give</p>
         <h1 className="mt-1 font-serif text-3xl text-ink">What you have given</h1>
         <p className="mt-2 text-sm text-sage">
-          Note the zakat you give, so you know what is still owed in{" "}
-          {window.label.toLowerCase()}. There is no need to note sadaqah: give it, and let it go.
+          Note the zakat you give, so you know what is still to give{" "}
+          {window.label.toLowerCase()}. There is no need to note sadaqah: give
+          it, and let it go.
         </p>
       </header>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="card p-4">
-          <p className="label">Zakat · {window.label}</p>
+          <p className="label">Zakat given · {window.label}</p>
           <p className="mt-1 font-serif text-2xl text-pine nums">
             {formatMoney(zakatCycle, settings.currency)}
           </p>
           <p className="mt-1 text-xs text-sage">
             {outstanding > 0 && result.isDue
-              ? `${formatMoney(outstanding, settings.currency)} outstanding`
-              : "Toward this cycle"}
+              ? `${formatMoney(outstanding, settings.currency)} still to give`
+              : "Toward this year’s zakat"}
           </p>
         </div>
         <div className="card p-4">
-          <p className="label">All-time zakat</p>
+          <p className="label">Zakat given, all years</p>
           <p className="mt-1 font-serif text-2xl text-ink nums">
             {formatMoney(totalZakat, settings.currency)}
           </p>
@@ -83,18 +84,22 @@ export default async function GivingPage({
             <p className="mt-1 font-serif text-2xl text-ink nums">
               {formatMoney(totalFitr, settings.currency)}
             </p>
-            <p className="mt-1 text-xs text-sage">All time · separate from zakat on wealth</p>
+            <p className="mt-1 text-xs text-sage">All years · separate from your yearly zakat</p>
           </div>
         )}
       </div>
 
       <div className="flex flex-wrap gap-3 text-sm">
-        <a href="/api/export/giving" className="text-pine hover:underline" download>
-          Download giving as CSV
-        </a>
-        <span className="text-sage">·</span>
+        {rows.length > 0 ? (
+          <>
+            <a href="/api/export/giving" className="text-pine hover:underline" download>
+              Download this list
+            </a>
+            <span className="text-sage">·</span>
+          </>
+        ) : null}
         <Link href="/tools/fitr" className="text-pine hover:underline">
-          Zakat al-Fitr calculator
+          Work out Zakat al-Fitr
         </Link>
       </div>
 

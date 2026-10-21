@@ -72,7 +72,7 @@ export default function EmailPanel({ email, state }: { email: string; state: Ema
               onChange={(e) => void toggle(e.target.checked)}
             />
             <span>
-              Email me a week before my hawl day, and on the day.
+              Email me a week before my zakat day, and on the day.
               <span className="block text-xs text-sage">
                 Reminders carry the date and a link, never amounts.
               </span>
@@ -83,7 +83,7 @@ export default function EmailPanel({ email, state }: { email: string; state: Ema
         <>
           <p className="text-sm text-sage">
             Confirm {email} to reset your password by email if you forget it, and to
-            get hawl reminders if you want them.
+            get zakat day reminders if you want them.
           </p>
           {sent ? (
             <p className="text-sm text-ink" role="status">

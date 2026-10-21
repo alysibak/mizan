@@ -115,19 +115,16 @@ export default function GivingManager({
     <div className="space-y-8">
       {justCleared && (
         <section className="border border-pine/40 bg-pine/5 px-5 py-5">
-          <p className="label text-pine">Cycle cleared</p>
+          <p className="label text-pine">All given</p>
           <p className="mt-1 font-serif text-xl text-ink">
-            That payment covers this cycle’s outstanding zakat.
+            That covers all of this year’s zakat. May Allah accept it from you.
           </p>
           <p className="mt-1 text-sm text-sage">
-            Next: freeze → roll the ledger hawl → print statement.
+            Now keep a copy of this year, then start counting the next one.
           </p>
-          <div className="mt-4 flex flex-wrap gap-3">
+          <div className="mt-4 flex flex-wrap items-center gap-3">
             <Link href="/year#freeze-year" className="btn-primary">
-              Freeze on The year
-            </Link>
-            <Link href="/statement" className="btn-ghost">
-              Print statement
+              Keep a copy of this year
             </Link>
             <button
               type="button"
@@ -147,19 +144,13 @@ export default function GivingManager({
             <span className="nums text-ink">
               {formatMoney(cycleOutstanding, currency)}
             </span>{" "}
-            zakat outstanding this cycle. After you pay, freeze on The year.
+            of this year’s zakat still to give.
           </p>
-          <Link
-            href="/year#freeze-year"
-            className="mt-2 inline-block text-sm text-pine hover:underline"
-          >
-            Open freeze step
-          </Link>
         </section>
       )}
 
       <section className="card p-5">
-        <h2 className="font-serif text-lg text-ink">Record a gift</h2>
+        <h2 className="font-serif text-lg text-ink">Note what you gave</h2>
         <form onSubmit={addRecord} className="mt-4 space-y-4">
           <div className="grid gap-4 sm:grid-cols-3">
             <div>
@@ -181,7 +172,7 @@ export default function GivingManager({
             </div>
             <div>
               <label className="label mb-1.5" htmlFor="type">
-                Type
+                What it was
               </label>
               <select
                 id="type"
@@ -190,8 +181,8 @@ export default function GivingManager({
                 value={type}
                 onChange={(e) => setType(e.target.value as GivingType)}
               >
-                <option value="zakat">Zakat (obligatory, on wealth)</option>
-                <option value="fitr">Zakat al-Fitr (end of Ramadan)</option>
+                <option value="zakat">Zakat (the yearly 2.5%)</option>
+                <option value="fitr">Zakat al-Fitr (before Eid)</option>
                 <option value="purification">Interest given away</option>
                 {/* Never needed: kept for anyone who still wants to note it. */}
                 <option value="sadaqah">Sadaqah (no need to note it)</option>
@@ -213,39 +204,10 @@ export default function GivingManager({
             </div>
           </div>
 
-          {type === "zakat" && (
-            <div>
-              <label className="label mb-1.5" htmlFor="asnaf">
-                Recipient category (optional)
-              </label>
-              <select
-                id="asnaf"
-                name="asnaf"
-                className="field"
-                defaultValue={defaultAsnaf ?? ""}
-              >
-                <option value="">Not specified</option>
-                {ASNAF.map((a) => (
-                  <option key={a.key} value={a.key}>
-                    {a.label}
-                  </option>
-                ))}
-              </select>
-              <p className="mt-1.5 text-xs text-sage">
-                The eight asnaf from the Qur’an — for your record, not a ruling
-                on who qualifies.{" "}
-                <Link href="/tools/asnaf" className="text-pine underline">
-                  Read the list
-                </Link>
-                .
-              </p>
-            </div>
-          )}
-
           {type === "fitr" && (
             <p className="text-xs text-sage">
-              Zakat al-Fitr is its own obligation. It does not count toward zakat
-              on wealth for this cycle.{" "}
+              Zakat al-Fitr is separate. It does not count toward this year’s
+              zakat.{" "}
               <Link href="/tools/fitr" className="text-pine hover:underline">
                 Work out the amount
               </Link>
@@ -253,40 +215,74 @@ export default function GivingManager({
             </p>
           )}
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label className="label mb-1.5" htmlFor="recipient">
-                Recipient (optional)
-              </label>
-              <input
-                id="recipient"
-                name="recipient"
-                className="field"
-                placeholder="e.g. local food bank"
-                list="past-recipients"
-                maxLength={120}
-              />
-              {recipients.length > 0 && (
-                <datalist id="past-recipients">
-                  {recipients.map((name) => (
-                    <option key={name} value={name} />
-                  ))}
-                </datalist>
+          <details open={defaultAsnaf ? true : undefined}>
+            <summary className="cursor-pointer text-sm text-pine hover:underline">
+              Add who it went to, or a note (optional)
+            </summary>
+            <div className="mt-3 space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="label mb-1.5" htmlFor="recipient">
+                    Who it went to
+                  </label>
+                  <input
+                    id="recipient"
+                    name="recipient"
+                    className="field"
+                    placeholder="e.g. Local mosque"
+                    list="past-recipients"
+                    maxLength={120}
+                  />
+                  {recipients.length > 0 && (
+                    <datalist id="past-recipients">
+                      {recipients.map((name) => (
+                        <option key={name} value={name} />
+                      ))}
+                    </datalist>
+                  )}
+                </div>
+                <div>
+                  <label className="label mb-1.5" htmlFor="note">
+                    Note
+                  </label>
+                  <input
+                    id="note"
+                    name="note"
+                    className="field"
+                    placeholder="e.g. Ramadan"
+                    maxLength={400}
+                  />
+                </div>
+              </div>
+              {type === "zakat" && (
+                <div>
+                  <label className="label mb-1.5" htmlFor="asnaf">
+                    Which group it went to
+                  </label>
+                  <select
+                    id="asnaf"
+                    name="asnaf"
+                    className="field"
+                    defaultValue={defaultAsnaf ?? ""}
+                  >
+                    <option value="">Not saying</option>
+                    {ASNAF.map((a) => (
+                      <option key={a.key} value={a.key}>
+                        {a.label}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="mt-1.5 text-xs text-sage">
+                    The eight groups the Quran names, for your own record.{" "}
+                    <Link href="/tools/asnaf" className="text-pine underline">
+                      See the groups
+                    </Link>
+                    .
+                  </p>
+                </div>
               )}
             </div>
-            <div>
-              <label className="label mb-1.5" htmlFor="note">
-                Note (optional)
-              </label>
-              <input
-                id="note"
-                name="note"
-                className="field"
-                placeholder="e.g. Ramadan"
-                maxLength={400}
-              />
-            </div>
-          </div>
+          </details>
 
           {error && (
             <p className="text-sm text-danger" role="alert">
@@ -295,7 +291,7 @@ export default function GivingManager({
           )}
 
           <button type="submit" disabled={busy} className="btn-primary">
-            {busy ? "Recording…" : "Record gift"}
+            {busy ? "Saving…" : "Save it"}
           </button>
         </form>
       </section>
@@ -307,7 +303,7 @@ export default function GivingManager({
         </h2>
         {records.length === 0 ? (
           <p className="card p-5 text-sm text-sage">
-            Nothing recorded yet. Your giving will appear here, newest first.
+            Nothing noted yet. What you note shows here, newest first.
           </p>
         ) : (
           <ul className="divide-y divide-mist overflow-hidden card">

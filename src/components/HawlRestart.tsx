@@ -27,12 +27,12 @@ export default function HawlRestart({
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!window.confirm(`Restart the hawl from ${date}? The year will count again from that day.`)) {
+    if (!window.confirm(`Start your zakat year again from ${date}? The year will count from that day.`)) {
       return;
     }
     setBusy(true);
     setError(null);
-    const res = await sendJson("/api/settings/hawl-restart", "POST", { date }, "Could not restart the hawl");
+    const res = await sendJson("/api/settings/hawl-restart", "POST", { date }, "Could not start the year again");
     setBusy(false);
     if (!res.ok) {
       setError(res.error);
@@ -50,24 +50,24 @@ export default function HawlRestart({
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
       >
-        Did your wealth fall below nisab during this hawl?
+        Did you drop below the minimum (nisab) during this year?
       </button>
       {open && (
         <div className="mt-3 space-y-3 text-sm text-sage">
           <p>
-            Schools differ here. In the Hanafi school only the start and end of
-            the year matter, so a dip in between does not restart the hawl. In
-            the Maliki, Shafi&apos;i, and Hanbali schools the hawl breaks and
-            starts again from the day wealth is back at nisab.
+            The madhhabs differ here. In the Hanafi madhhab only the start and
+            end of the year matter, so a dip in between changes nothing. In the
+            Maliki, Shafi&apos;i and Hanbali madhhabs the year starts again from
+            the day you are back above the minimum.
             {madhhab === "hanafi"
-              ? " Your profile is Hanafi, so you would normally leave the hawl as it is."
+              ? " You follow the Hanafi madhhab, so you would normally leave it as it is."
               : ""}{" "}
             Ask someone you trust if unsure.
           </p>
           <form onSubmit={submit} className="flex flex-wrap items-end gap-3">
             <div>
               <label className="label mb-1.5" htmlFor="hawl-restart">
-                Day wealth was back at nisab
+                The day you were back above the minimum
               </label>
               <input
                 id="hawl-restart"
@@ -81,7 +81,7 @@ export default function HawlRestart({
               />
             </div>
             <button type="submit" className="btn-ghost" disabled={busy || !date}>
-              {busy ? "Saving…" : "Restart hawl from this day"}
+              {busy ? "Saving…" : "Start the year again from this day"}
             </button>
           </form>
           {error && (

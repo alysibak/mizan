@@ -30,7 +30,7 @@ export default function FreezeYearButton({
         label: label.trim() || defaultLabel,
         letterToNextYear: letter.trim() || null,
       },
-      "Could not freeze this year",
+      "Could not keep a copy of this year",
     );
     setBusy(false);
     if (!res.ok) {
@@ -52,11 +52,11 @@ export default function FreezeYearButton({
           className={emphasize ? "btn-primary" : "btn-ghost"}
           onClick={() => setOpen(true)}
         >
-          Freeze this year’s reckoning
+          Keep a copy of this year
         </button>
         <p className="mt-2 text-xs text-sage">
-          Saves today’s figures — and optionally a sealed note for next year’s
-          you.
+          Saves today’s figures, with a note to yourself for next year if you
+          like.
         </p>
       </div>
     );
@@ -64,17 +64,17 @@ export default function FreezeYearButton({
 
   return (
     <form onSubmit={freeze} className="space-y-3 border border-pine/30 bg-pine/5 p-4">
-      <p className="font-serif text-lg text-ink">Name this freeze</p>
+      <p className="font-serif text-lg text-ink">Name this copy</p>
       <input
         className="field"
         value={label}
         onChange={(e) => setLabel(e.target.value)}
         maxLength={80}
-        aria-label="Snapshot label"
+        aria-label="Name of this copy"
       />
       <div>
         <label className="label mb-1.5" htmlFor="letter">
-          Letter to next year (optional)
+          A note to yourself for next year (optional)
         </label>
         <textarea
           id="letter"
@@ -82,17 +82,16 @@ export default function FreezeYearButton({
           maxLength={2000}
           value={letter}
           onChange={(e) => setLetter(e.target.value)}
-          placeholder="What should next year’s you remember about this reckoning?"
+          placeholder="What should you remember next year?"
         />
         <p className="mt-1 text-xs text-sage">
-          Sealed inside the freeze. You will only see it when you open this
-          snapshot.
+          Kept with this copy, and shown on your Home page until you put it away.
         </p>
       </div>
       {error && <p className="text-sm text-danger">{error}</p>}
       <div className="flex flex-wrap gap-2">
         <button type="submit" className="btn-primary" disabled={busy}>
-          {busy ? "Freezing…" : "Freeze"}
+          {busy ? "Saving…" : "Keep the copy"}
         </button>
         {!emphasize && (
           <button

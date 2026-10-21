@@ -17,7 +17,7 @@ export default function RollHawlButton({
   async function roll() {
     if (
       !window.confirm(
-        `Start the next hawl on ${nextStart}? (tabular due day of the cycle you just closed)`,
+        `Start counting next year from ${nextStart}, the zakat day of the year you just closed?`,
       )
     ) {
       return;
@@ -30,7 +30,7 @@ export default function RollHawlButton({
     setBusy(false);
     if (!res?.ok) {
       const data = await res?.json().catch(() => ({}));
-      setError(data?.error || "Could not roll hawl");
+      setError(data?.error || "Could not start next year’s count");
       return;
     }
     // This snapshot stops being the current cycle's once rolled, so the
@@ -47,12 +47,12 @@ export default function RollHawlButton({
         disabled={busy}
         onClick={roll}
       >
-        {busy ? "Saving…" : `Roll hawl to ${nextStart}`}
+        {busy ? "Saving…" : `Start next year’s count on ${nextStart}`}
       </button>
       {error && <p className="mt-2 text-sm text-danger">{error}</p>}
       <p className="mt-2 text-xs text-sage">
-        Sets the ledger hawl start to this cycle’s tabular due day so the next
-        year begins counting.
+        Your next zakat year starts on this year’s zakat day, so the next one
+        falls a lunar year later.
       </p>
     </div>
   );

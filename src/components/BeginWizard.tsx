@@ -632,15 +632,15 @@ function Wizard({
               >
                 <option value="bank">Bank balances</option>
                 <option value="cash">Cash on hand</option>
-                <option value="gold">Gold (investment)</option>
-                <option value="silver">Silver</option>
+                <option value="gold">Gold coins and bars</option>
+                <option value="silver">Silver coins and bars</option>
                 <option value="receivables">Money owed to you</option>
-                <option value="business_inventory">Business inventory</option>
-                <option value="stocks_longterm">Stocks (long-term)</option>
-                <option value="stocks_trading">Stocks (trading)</option>
+                <option value="business_inventory">Goods for sale</option>
+                <option value="stocks_longterm">Shares you keep</option>
+                <option value="stocks_trading">Shares you trade</option>
                 <option value="crypto">Cryptocurrency</option>
-                <option value="pension">Pension / retirement</option>
-                <option value="other">Other</option>
+                <option value="pension">Pension</option>
+                <option value="other">Something else</option>
               </select>
             </div>
             <div>

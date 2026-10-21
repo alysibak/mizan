@@ -30,11 +30,11 @@ export default async function AssetsPage({
   return (
     <div className="space-y-6">
       <header>
-        <p className="label text-brassDeep">Ledger</p>
-        <h1 className="mt-1 font-serif text-3xl text-ink">What you hold</h1>
-        <p className="mt-2 text-sm text-sage">
-          Assets and debts — including metals by weight, money owed to you, and
-          trade inventory. Values are today’s; update them before you reckon.
+        <p className="label text-brassDeep">What I own</p>
+        <h1 className="mt-1 font-serif text-3xl text-ink">What you own</h1>
+        <p className="mt-2 text-base text-sage">
+          Your savings, cash, gold and anything else zakat is paid on, and the
+          debts you owe. Use today’s amounts, and change them when they change.
         </p>
       </header>
 

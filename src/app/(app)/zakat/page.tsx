@@ -59,17 +59,14 @@ export default async function ZakatPage() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="label text-brassDeep">The reckoning</p>
-        <h1 className="mt-1 font-serif text-3xl text-ink">Your zakat breakdown</h1>
+        <p className="label text-brassDeep">Zakat</p>
+        <h1 className="mt-1 font-serif text-3xl text-ink">How your zakat is worked out</h1>
         <p className="mt-2 text-sm text-sage">
-          Calculated on the {settings.nisabStandard} nisab and the{" "}
-          {settings.calendarBasis} year. Change either in{" "}
-          <Link href="/settings" className="text-pine hover:underline">
-            settings
-          </Link>
-          .{" "}
-          <Link href="/statement" className="text-pine hover:underline">
-            Yearly statement
+          The minimum (nisab) is set by {settings.nisabStandard}, and the year is
+          counted by the {settings.calendarBasis === "solar" ? "solar" : "lunar"} calendar. You can change
+          both in{" "}
+          <Link href="/settings#how-counted" className="text-pine hover:underline">
+            Settings
           </Link>
           .
         </p>
@@ -79,16 +76,16 @@ export default async function ZakatPage() {
 
       {assetRows.length === 0 ? (
         <div className="card border-dashed p-6 text-center">
-          <p className="text-sm text-sage">Add assets first to see your breakdown.</p>
+          <p className="text-sm text-sage">Add what you own first, and the working shows here.</p>
           <Link href="/assets" className="btn-primary mt-3">
-            Go to assets
+            Add what I own
           </Link>
         </div>
       ) : (
         <>
           {/* Asset lines */}
           <section className="card p-5">
-            <h2 className="font-serif text-lg text-ink">Zakatable assets</h2>
+            <h2 className="font-serif text-lg text-ink">1. What counts for zakat</h2>
             <div className="mt-2 divide-y divide-mist">
               {r.lines.map((line, i) => (
                 <Row
@@ -105,21 +102,21 @@ export default async function ZakatPage() {
               ))}
             </div>
             <div className="mt-2 border-t border-ink/10 pt-2">
-              <Row label="Gross zakatable" value={formatMoney(r.grossZakatable, c)} />
+              <Row label="All that counts" value={formatMoney(r.grossZakatable, c)} />
             </div>
           </section>
 
           {/* Deductions and net */}
           <section className="card p-5">
-            <h2 className="font-serif text-lg text-ink">Deductions and net</h2>
+            <h2 className="font-serif text-lg text-ink">2. Take off debts you owe</h2>
             <div className="mt-2 divide-y divide-mist">
               <Row
-                label="Deductible liabilities"
+                label="Debts taken off"
                 value={"-" + formatMoney(r.deductibleLiabilities, c)}
                 accent="danger"
               />
               <Row
-                label="Net zakatable wealth"
+                label="What counts, after debts"
                 value={formatMoney(r.netZakatable, c)}
               />
             </div>
@@ -127,19 +124,19 @@ export default async function ZakatPage() {
 
           {/* Nisab comparison */}
           <section className="card p-5">
-            <h2 className="font-serif text-lg text-ink">Nisab</h2>
+            <h2 className="font-serif text-lg text-ink">3. Is it more than the minimum (nisab)?</h2>
             <div className="mt-2 divide-y divide-mist">
               <Row
-                label="Gold nisab (85g)"
+                label="Minimum by gold (85 g)"
                 value={formatMoney(r.goldNisab, c)}
                 accent={settings.nisabStandard === "gold" ? "brass" : undefined}
-                sub={settings.nisabStandard === "gold" ? "Your chosen standard" : undefined}
+                sub={settings.nisabStandard === "gold" ? "The one you use" : undefined}
               />
               <Row
-                label="Silver nisab (595g)"
+                label="Minimum by silver (595 g)"
                 value={formatMoney(r.silverNisab, c)}
                 accent={settings.nisabStandard === "silver" ? "brass" : undefined}
-                sub={settings.nisabStandard === "silver" ? "Your chosen standard" : undefined}
+                sub={settings.nisabStandard === "silver" ? "The one you use" : undefined}
               />
             </div>
           </section>
@@ -154,7 +151,7 @@ export default async function ZakatPage() {
             {r.isDue ? (
               <>
                 <p className="label text-pine">
-                  {phase === "payable" ? "Zakat payable" : "Indicative zakat"}
+                  {phase === "payable" ? "4. Zakat due" : "4. Your zakat, so far"}
                 </p>
                 <p className="mt-1 font-serif text-4xl text-pine nums">
                   {formatMoney(r.zakatDue, c)}
@@ -162,13 +159,13 @@ export default async function ZakatPage() {
                 <p className="mt-2 text-sm text-sage">
                   {formatMoney(r.netZakatable, c)} ×{" "}
                   {formatPercent(r.rate, r.basis === "solar" ? 3 : 1)} (
-                  {r.basis} year).{" "}
+                  {r.basis === "solar" ? "solar" : "lunar"} year).{" "}
                   {duePhaseLabel(phase, Boolean(settings.hawlStartDate))}.
                   {phase === "indicative" && hawl
-                    ? ` About ${hawl.remainingDays} days of hawl remain.`
+                    ? ` Your zakat day is ${hawl.remainingDays} days away.`
                     : ""}
                   {phase === "payable" && outstanding > 0
-                    ? ` ${formatMoney(outstanding, c)} still outstanding this cycle.`
+                    ? ` ${formatMoney(outstanding, c)} still to give this year.`
                     : ""}
                 </p>
                 <CycleActions
@@ -183,12 +180,12 @@ export default async function ZakatPage() {
               <>
                 <p className="label text-sage">No zakat due</p>
                 <p className="mt-1 font-serif text-2xl text-ink">
-                  Below the nisab threshold
+                  Below the minimum (nisab)
                 </p>
                 <p className="mt-2 text-sm text-sage">
-                  Your net zakatable wealth is{" "}
-                  {formatMoney(Math.abs(r.marginToNisab), c)} under the{" "}
-                  {settings.nisabStandard} nisab.
+                  What counts is{" "}
+                  {formatMoney(Math.abs(r.marginToNisab), c)} short of the
+                  minimum by {settings.nisabStandard}.
                 </p>
               </>
             )}

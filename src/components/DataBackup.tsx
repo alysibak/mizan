@@ -49,8 +49,8 @@ export default function DataBackup() {
     }
     const d = res.data;
     setMessage(
-      `Restored ${d.assets} assets, ${d.liabilities} debts, ${d.giving} gifts${
-        d.snapshots != null ? `, ${d.snapshots} snapshots` : ""
+      `Restored ${d.assets} things you own, ${d.liabilities} debts, ${d.giving} gifts${
+        d.snapshots != null ? `, ${d.snapshots} kept years` : ""
       }.`,
     );
     router.refresh();
@@ -60,9 +60,9 @@ export default function DataBackup() {
     <section className="card p-5">
       <h2 className="font-serif text-lg text-ink">Take this ledger with you</h2>
       <p className="mt-1 text-sm text-sage">
-        A JSON file of your settings, assets, debts, giving, and frozen years.
-        Keep a copy on a drive you control. Nothing here depends on this website
-        staying up.
+        One file with everything: what you own, your debts, what you gave, the
+        years you kept, and your settings. Keep it somewhere safe; it does not
+        need this website to stay up.
       </p>
       <div className="mt-4 flex flex-wrap gap-3">
         <a href="/api/export" className="btn-primary" download>

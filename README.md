@@ -344,9 +344,16 @@ work.
 - **Hawl on the Hijri calendar.** Tabular or Umm al-Qura. Restart after a dip
   below nisab, and a private calendar feed so your own calendar app reminds you
   of the reckoning day.
-- **The yearly sitting.** Setup wizard, reckoning night (forgotten wealth,
-  what-if nisab, envelopes, pay), frozen snapshots with a letter to next year,
-  rolling the hawl, and a printable statement.
+- **Closing the year, step by step.** Setup wizard, then three steps on the
+  zakat day (anything forgotten, give your zakat with an optional split across
+  the eight groups, keep a copy of the year), a note to next year, starting
+  next year's count, and a printable statement.
+- **Plain words in the account.** The tabs are Home, What I own, Zakat, Give
+  and Tools. Home opens with one sentence: whether zakat is owed, about how
+  much, and when. The account pages say "your zakat day", "what counts",
+  "keep a copy" and "debts you owe" where they used to say hawl, reckoning,
+  freeze and deductible liabilities. Rare fields (reminder dates, notes, who a gift went to)
+  stay folded away until asked for.
 - **Giving log.** The zakat given, Zakat al-Fitr, and interest given away,
   with optional asnaf tags. Nothing asks for sadaqah to be noted (it can be,
   for anyone who wants to). Only zakat clears what is owed for

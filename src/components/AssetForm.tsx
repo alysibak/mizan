@@ -16,11 +16,11 @@ import { sendJson } from "@/lib/client-fetch";
 import type { Asset } from "@/db/schema";
 
 const GROUPS: { key: CategoryMeta["group"]; label: string }[] = [
-  { key: "liquid", label: "Liquid" },
-  { key: "metals", label: "Metals" },
-  { key: "investments", label: "Investments" },
+  { key: "liquid", label: "Money" },
+  { key: "metals", label: "Gold and silver" },
+  { key: "investments", label: "Shares and savings plans" },
   { key: "business", label: "Business" },
-  { key: "other", label: "Other" },
+  { key: "other", label: "Something else" },
 ];
 
 export type AssetPrices = { goldPricePerGram: number; silverPricePerGram: number };
@@ -166,8 +166,8 @@ export default function AssetForm({
       fxRate: foreign ? fxRate : null,
     };
     const res = asset
-      ? await sendJson(`/api/assets/${asset.id}`, "PATCH", body, "Could not save this holding")
-      : await sendJson("/api/assets", "POST", body, "Could not add this holding");
+      ? await sendJson(`/api/assets/${asset.id}`, "PATCH", body, "Could not save this")
+      : await sendJson("/api/assets", "POST", body, "Could not add this");
     setBusy(false);
     if (!res.ok) {
       setError(res.error);
@@ -182,7 +182,7 @@ export default function AssetForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label className="label mb-1.5" htmlFor={`${idPrefix}-category`}>
-            Category
+            What kind
           </label>
           <select
             id={`${idPrefix}-category`}
@@ -203,12 +203,12 @@ export default function AssetForm({
         </div>
         <div>
           <label className="label mb-1.5" htmlFor={`${idPrefix}-label`}>
-            Description
+            Name it
           </label>
           <input
             id={`${idPrefix}-label`}
             className="field"
-            placeholder="e.g. TFSA savings"
+            placeholder="e.g. My savings account"
             value={label}
             maxLength={120}
             onChange={(e) => setLabel(e.target.value)}
@@ -226,7 +226,7 @@ export default function AssetForm({
               checked={byWeight}
               onChange={(e) => setByWeight(e.target.checked)}
             />
-            Value by weight — follows the {activeMetal} price in settings
+            Value by weight, at today’s {activeMetal} price
           </label>
           {byWeight && (
             <div className="mt-3 grid gap-3 sm:grid-cols-3">
@@ -248,7 +248,7 @@ export default function AssetForm({
               </div>
               <div>
                 <label className="label mb-1" htmlFor={`${idPrefix}-purity`}>
-                  Purity (0–1)
+                  Purity (22 carat is 0.916)
                 </label>
                 <input
                   id={`${idPrefix}-purity`}
@@ -289,8 +289,8 @@ export default function AssetForm({
               ) : null}
               <p className="text-xs text-sage sm:col-span-3">
                 {perGram > 0
-                  ? `${formatMoney(perGram, currency)}/g from settings → ${formatMoney(weightValue, currency)}. Updates when you save new metal prices.`
-                  : `Set a ${activeMetal} price in settings first.`}
+                  ? `${formatMoney(perGram, currency)} a gram → ${formatMoney(weightValue, currency)}. It changes when you update prices in Settings.`
+                  : `Set a ${activeMetal} price in Settings first.`}
               </p>
             </div>
           )}
@@ -364,13 +364,13 @@ export default function AssetForm({
                   onClick={() => void suggestRate()}
                   disabled={foreignCurrency.length !== 3}
                 >
-                  Suggest rate
+                  Look up the rate
                 </button>
                 <p className="text-xs text-sage">
                   {foreignValue > 0
                     ? `Counts as ${formatMoney(foreignValue, currency)}. `
                     : ""}
-                  {rateHint ?? "Use the rate you would actually get; update it at reckoning time."}
+                  {rateHint ?? "Use the rate you would really get, and update it on your zakat day."}
                 </p>
               </div>
             </div>
@@ -381,8 +381,8 @@ export default function AssetForm({
       {(category === "receivables" || category === "business_inventory") && (
         <p className="text-xs text-sage">
           {category === "receivables"
-            ? "Lower the zakatable portion if recovery is doubtful — many defer until received."
-            : "Use current resale value of goods held for sale, not what you paid."}
+            ? "Not sure you will be paid back? Lower the part that counts: many count it only once it is paid."
+            : "Use what the goods would sell for today, not what you paid."}
         </p>
       )}
 
@@ -390,7 +390,7 @@ export default function AssetForm({
         {!weighed && !foreign && (
           <div>
             <label className="label mb-1.5" htmlFor={`${idPrefix}-amount`}>
-              Value ({currency})
+              Amount ({currency})
             </label>
             <input
               id={`${idPrefix}-amount`}
@@ -409,7 +409,7 @@ export default function AssetForm({
         {meta.portionEditable && (
           <div>
             <label className="label mb-1.5" htmlFor={`${idPrefix}-portion`}>
-              Zakatable portion (0 to 1)
+              Part that counts (1 = all, 0.5 = half)
             </label>
             <input
               id={`${idPrefix}-portion`}
@@ -425,36 +425,44 @@ export default function AssetForm({
             />
           </div>
         )}
-        <div>
-          <label className="label mb-1.5" htmlFor={`${idPrefix}-hawl`}>
-            Hawl start (optional)
-          </label>
-          <input
-            id={`${idPrefix}-hawl`}
-            type="date"
-            className="field"
-            value={hawlStartDate}
-            onChange={(e) => setHawlStartDate(e.target.value)}
-          />
-          <p className="mt-1 text-xs text-sage">
-            Reminder only — does not change payable zakat. Leave blank to follow
-            the ledger hawl in settings.
-          </p>
-        </div>
-        <div>
-          <label className="label mb-1.5" htmlFor={`${idPrefix}-note`}>
-            Note (optional)
-          </label>
-          <input
-            id={`${idPrefix}-note`}
-            className="field"
-            placeholder="e.g. inherited"
-            value={note}
-            maxLength={400}
-            onChange={(e) => setNote(e.target.value)}
-          />
-        </div>
       </div>
+
+      <details open={Boolean(asset?.hawlStartDate || asset?.note) || undefined}>
+        <summary className="cursor-pointer text-sm text-pine hover:underline">
+          Add a note or a reminder date (optional)
+        </summary>
+        <div className="mt-3 grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="label mb-1.5" htmlFor={`${idPrefix}-hawl`}>
+              Reminder date
+            </label>
+            <input
+              id={`${idPrefix}-hawl`}
+              type="date"
+              className="field"
+              value={hawlStartDate}
+              onChange={(e) => setHawlStartDate(e.target.value)}
+            />
+            <p className="mt-1 text-xs text-sage">
+              Only a reminder, such as for money that came in later. Your zakat is
+              still worked out on your zakat day.
+            </p>
+          </div>
+          <div>
+            <label className="label mb-1.5" htmlFor={`${idPrefix}-note`}>
+              Note
+            </label>
+            <input
+              id={`${idPrefix}-note`}
+              className="field"
+              placeholder="e.g. inherited"
+              value={note}
+              maxLength={400}
+              onChange={(e) => setNote(e.target.value)}
+            />
+          </div>
+        </div>
+      </details>
 
       <p className="rounded-card bg-porcelain px-3 py-2 text-xs leading-relaxed text-sage">
         {meta.note}
@@ -468,7 +476,7 @@ export default function AssetForm({
 
       <div className="flex flex-wrap gap-2">
         <button type="submit" disabled={busy} className="btn-primary">
-          {busy ? "Saving…" : editing ? "Save" : "Add asset"}
+          {busy ? "Saving…" : editing ? "Save" : "Add it"}
         </button>
         {onCancel && (
           <button type="button" className="btn-ghost" onClick={onCancel} disabled={busy}>

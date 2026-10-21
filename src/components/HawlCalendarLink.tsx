@@ -24,7 +24,7 @@ export default function HawlCalendarLink({
 
   return (
     <button type="button" className="btn-ghost text-sm" onClick={download}>
-      Add reckoning day to calendar
+      Add my zakat day to my calendar
     </button>
   );
 }

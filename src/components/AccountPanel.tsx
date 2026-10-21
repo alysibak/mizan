@@ -163,8 +163,8 @@ function DeleteAccount() {
       <div className="space-y-2">
         <h3 className="font-serif text-base text-ink">Delete account</h3>
         <p className="text-sm text-sage">
-          Removes your ledger, giving, frozen years, and settings from this
-          server for good. Download a backup first if you may want it later.
+          Removes everything for good: what you own, what you gave, the years
+          you kept, and your settings. Download a backup first if you may want it later.
         </p>
         <button type="button" className="btn-danger" onClick={() => setOpen(true)}>
           Delete my account…

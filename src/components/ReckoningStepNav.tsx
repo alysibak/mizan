@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { reckoningStep, type ReckoningStepId } from "@/lib/reckoning-path";
 
-/** Sticky path chrome so sitting tools feel like one flow. */
+/** Where you are in closing the year, with the way back and forward. */
 export default function ReckoningStepNav({
   current,
 }: {
@@ -12,17 +12,17 @@ export default function ReckoningStepNav({
   return (
     <nav
       className="border border-mist bg-paper px-4 py-3"
-      aria-label="Reckoning night steps"
+      aria-label="Close the year, step by step"
     >
       <div className="flex items-center justify-between gap-3">
         <Link
           href="/tools/reckoning-night"
           className="label text-brassDeep hover:text-pine"
         >
-          Reckoning night
+          Close the year
         </Link>
         <p className="text-xs text-sage nums">
-          {String(index + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+          Step {index + 1} of {total}
         </p>
       </div>
       <p className="mt-1 font-serif text-lg text-ink">{step.title}</p>
@@ -33,23 +33,14 @@ export default function ReckoningStepNav({
           </Link>
         ) : (
           <Link href="/tools/reckoning-night" className="btn-ghost text-sm">
-            ← Overview
+            ← All steps
           </Link>
         )}
         {next ? (
           <Link href={next.href} className="btn-primary text-sm">
-            {step.nextLabel ?? next.title} →
+            Next: {step.nextLabel ?? next.title} →
           </Link>
-        ) : (
-          <>
-            <Link href="/giving?type=zakat" className="btn-primary text-sm">
-              Record zakat →
-            </Link>
-            <Link href="/year#freeze-year" className="btn-ghost text-sm">
-              Freeze → roll → statement
-            </Link>
-          </>
-        )}
+        ) : null}
       </div>
     </nav>
   );

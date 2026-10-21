@@ -22,17 +22,17 @@ export default function SnapshotCompare({ freezes }: { freezes: Freeze[] }) {
   const c = a.settings.currency;
   const rows = [
     {
-      label: "Net zakatable",
+      label: "What counted",
       next: a.result.netZakatable,
       prev: b.result.netZakatable,
     },
     {
-      label: "Zakat at freeze",
+      label: "Zakat that year",
       next: a.result.zakatDue,
       prev: b.result.zakatDue,
     },
     {
-      label: "Zakat recorded",
+      label: "Zakat given",
       next: a.givingYtd.zakat,
       prev: b.givingYtd.zakat,
     },
@@ -40,7 +40,7 @@ export default function SnapshotCompare({ freezes }: { freezes: Freeze[] }) {
 
   return (
     <section className="panel">
-      <h2 className="font-serif text-xl text-ink">Compare last two freezes</h2>
+      <h2 className="font-serif text-xl text-ink">Your last two copies</h2>
       <p className="mt-1 text-sm text-sage">
         {older.label} ({older.takenAt}) → {newer.label} ({newer.takenAt})
       </p>

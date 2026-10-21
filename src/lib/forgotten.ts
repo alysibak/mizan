@@ -14,14 +14,14 @@ export interface ForgottenPrompt {
 export const FORGOTTEN_PROMPTS: ForgottenPrompt[] = [
   {
     id: "wedding_gold",
-    label: "Wedding or heirloom gold at home",
-    hint: "Even if rarely worn — weigh and decide the portion with your school profile.",
+    label: "Wedding or family gold at home",
+    hint: "Even if you rarely wear it. Your madhhab decides how much of it counts.",
     categoryHint: "jewellery",
   },
   {
     id: "kids_accounts",
     label: "Children’s accounts in your name",
-    hint: "If you control the funds, many count them on your ledger.",
+    hint: "If you control the money, many count it as yours.",
     categoryHint: "bank",
   },
   {
@@ -32,44 +32,44 @@ export const FORGOTTEN_PROMPTS: ForgottenPrompt[] = [
   },
   {
     id: "gift_cards",
-    label: "Store credit / gift cards",
-    hint: "Spendable balances are wealth in another pocket.",
+    label: "Store credit and gift cards",
+    hint: "Money you can spend is still yours, even in another pocket.",
     categoryHint: "other",
   },
   {
     id: "crypto_dust",
     label: "Small crypto or exchange leftovers",
-    hint: "Dust across wallets adds up at market value.",
+    hint: "Small amounts in old wallets add up.",
     categoryHint: "crypto",
   },
   {
     id: "employer_shares",
-    label: "Vested shares or ESPP not in your brokerage app",
-    hint: "Check the benefits portal, not only the bank.",
+    label: "Shares from work",
+    hint: "Check your work benefits, not only your bank.",
     categoryHint: "stocks_longterm",
   },
   {
     id: "loans_out",
     label: "Money friends or family still owe you",
-    hint: "Expected recovery is often zakatable; doubtful debts may wait.",
+    hint: "Money you expect back usually counts; money you may never get can wait.",
     categoryHint: "receivables",
   },
   {
     id: "business_float",
-    label: "Till cash or inventory you “don’t count as personal”",
-    hint: "Trade goods and float are still on the scale for many.",
+    label: "Shop cash or stock you keep apart from your own money",
+    hint: "Goods for sale and cash in the till still count.",
     categoryHint: "business_inventory",
   },
   {
     id: "foreign_account",
     label: "An account abroad or in another currency",
-    hint: "Convert at a rate you trust; note the source in the holding.",
+    hint: "Use a rate you trust, and note where it came from.",
     categoryHint: "bank",
   },
   {
     id: "refunds_pending",
     label: "Tax refunds or insurance payouts already approved",
-    hint: "If the amount is certain and yours, it may belong on the ledger.",
+    hint: "If the amount is certain and yours, add it to what you own.",
     categoryHint: "receivables",
   },
 ];

@@ -62,7 +62,7 @@ export function verifyEmailMessage(opts: { to: string; name: string; link: strin
     subject: "Confirm your email for Mizan",
     text:
       `Assalamu alaikum ${firstName(opts.name)},\n\n` +
-      `Confirm this address to receive password-reset links and, if you turn them on, hawl reminders:\n\n` +
+      `Confirm this address to receive password-reset links and, if you turn them on, zakat day reminders:\n\n` +
       `${opts.link}\n\n` +
       `The link works once, for ${VERIFY_LINK_HOURS} hours. If you did not ask for it, ignore this message.` +
       SIGN_OFF,
@@ -98,19 +98,18 @@ export function reminderEmailMessage(opts: {
       : daysLeft === 1
         ? "Your zakat year closes tomorrow"
         : `Your zakat year closes in ${daysLeft} days`;
-  const hawl = "Your hawl, the year your wealth has been held above nisab,";
   const lead =
     kind === "week"
-      ? `${hawl} completes on ${when}.`
+      ? `Your zakat day is ${when}: your zakat year completes then.`
       : daysLeft === 0
-        ? `${hawl} completes today, ${when}.`
-        : `${hawl} completed on ${when}.`;
+        ? `Your zakat day is today, ${when}: your zakat year completes today.`
+        : `Your zakat day was ${when}: your zakat year completed then.`;
   return {
     to: opts.to,
     subject,
     text:
       `Assalamu alaikum ${firstName(opts.name)},\n\n` +
-      `${lead} That is the day to weigh what you hold and work out the zakat due. ` +
+      `${lead} That is the day to check what you own and work out your zakat. ` +
       `Confirm the date with your local moon-sighting if you follow one.\n\n` +
       `Open your year in Mizan:\n${opts.link}\n\n` +
       `To stop these reminders, turn them off in Settings.` +

@@ -9,7 +9,7 @@ import {
   watchConsole,
 } from "./helpers";
 
-// One account walks the whole year: setup, pay, weigh metal, freeze, roll,
+// One account walks the whole year: setup, give, weigh metal, keep a copy, start next year,
 // back up, and close the account. Steps share state, so they run in order.
 test("a full zakat year on a phone", async ({ page }) => {
   const errors = watchConsole(page);
@@ -48,17 +48,17 @@ test("a full zakat year on a phone", async ({ page }) => {
   });
 
   await test.step("the pay button prefills an amount the form accepts", async () => {
-    const cta = page.locator("a", { hasText: /Record .*zakat/ }).first();
+    const cta = page.locator("a", { hasText: /I gave .*zakat/ }).first();
     await expect(cta).toContainText("308.64");
     await cta.click();
     await page.waitForURL("**/giving?**");
     await expect(page.locator("#amount")).toHaveValue("308.64");
     await expect(page.locator("#date")).toHaveValue(/^\d{4}-\d{2}-\d{2}$/);
     expect(await page.$eval("form", (f) => (f as HTMLFormElement).checkValidity())).toBe(true);
-    await page.click("button:has-text('Record gift')");
-    await expect(page.getByText("Cycle cleared")).toBeVisible();
+    await page.click("button:has-text('Save it')");
+    await expect(page.getByText("That covers all of this year’s zakat")).toBeVisible();
     await page.goto("/dashboard");
-    await expect(page.getByText("Cycle met")).toBeVisible();
+    await expect(page.getByText("You have given all of this year’s zakat.")).toBeVisible();
   });
 
   await test.step("metal by weight follows the gold price", async () => {
@@ -68,7 +68,7 @@ test("a full zakat year on a phone", async ({ page }) => {
     await page.check("text=Value by weight");
     await page.fill("#asset-new-grams", "10");
     await page.fill("#asset-new-purity", "0.916");
-    await page.click("button:has-text('Add asset')");
+    await page.click("button:has-text('Add it')");
     await expect(page.locator("li", { hasText: "Bangles" })).toContainText("1,099.20");
     await expectNoHorizontalScroll(page);
 
@@ -87,7 +87,7 @@ test("a full zakat year on a phone", async ({ page }) => {
     await page.fill("#asset-new-fcur", "USD");
     await page.fill("#asset-new-famount", "1000");
     await page.fill("#asset-new-rate", "1.3725");
-    await page.click("button:has-text('Add asset')");
+    await page.click("button:has-text('Add it')");
     const row = page.locator("li", { hasText: "US account" });
     await expect(row).toContainText("1,372.50");
     await expect(row).toContainText("@ 1.3725");
@@ -100,20 +100,20 @@ test("a full zakat year on a phone", async ({ page }) => {
     await page.click("button:has-text('Cancel')");
   });
 
-  await test.step("freeze, roll, and the next cycle starts at zero", async () => {
+  await test.step("keep a copy, start next year, and the next year starts at zero", async () => {
     await page.goto("/year");
-    await page.click("button:has-text('Freeze this year')");
-    await page.click("button:has-text('Freeze')");
+    await page.click("button:has-text('Keep a copy of this year')");
+    await page.click("button:has-text('Keep the copy')");
     await page.waitForURL("**/year/snapshots/**");
     const snapshot = page.url();
-    await page.click("button:has-text('Roll hawl to')");
+    await page.click("button:has-text('Start next year’s count on')");
     await page.waitForURL("**/year?rolled=**");
-    await expect(page.getByText("Next hawl starts")).toBeVisible();
+    await expect(page.getByText("Your next zakat year starts")).toBeVisible();
 
-    await expect(page.locator(".ledger-row", { hasText: "Paid ·" })).toContainText("$0.00");
+    await expect(page.locator(".ledger-row", { hasText: "Given ·" })).toContainText("$0.00");
 
     await page.goto(snapshot);
-    await expect(page.locator("button:has-text('Roll hawl to')")).toHaveCount(0);
+    await expect(page.locator("button:has-text('Start next year’s count on')")).toHaveCount(0);
     const status = await page.evaluate(
       async () => (await fetch("/api/settings/roll-hawl", { method: "POST" })).status,
     );

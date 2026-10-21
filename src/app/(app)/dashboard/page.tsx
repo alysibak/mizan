@@ -51,41 +51,61 @@ export default async function DashboardPage({
   const checklist = [
     {
       done: Boolean(settings.hawlStartDate),
-      label: "Set your ledger hawl start",
-      href: "/settings",
+      label: "Set your zakat day",
+      href: "/settings#zakat-day",
     },
     {
       done: assetRows.length > 0,
-      label: "Add at least one holding",
+      label: "Add what you own",
       href: "/assets",
     },
     {
       done: !metalsStale,
       label:
         metals.reason === "aged"
-          ? "Reconfirm metal prices"
-          : "Replace starter metal prices",
-      href: "/settings",
+          ? "Check gold and silver prices again"
+          : "Check today’s gold and silver prices",
+      href: "/settings#metal-prices",
     },
     {
       // Either is a way back in after a forgotten password.
       done: Boolean(user.recoveryCodeHash) || (emailEnabled() && Boolean(user.emailVerifiedAt)),
       label: emailEnabled()
-        ? "Confirm your email or save a recovery code"
-        : "Save a recovery code (this server sends no email)",
+        ? "Confirm your email, or save a code in case you forget your password"
+        : "Save a code in case you forget your password",
       href: "/settings#account",
     },
     {
       done: settings.madhhab !== "general",
-      label: "Pick a school profile (optional)",
-      href: "/settings",
+      label: "Choose your madhhab (optional)",
+      href: "/settings#how-counted",
     },
   ];
+
+  const c = settings.currency;
+  const dueDay = hawl ? formatHijri(hawl.dueDate, calendar) : null;
+  // One plain sentence first: do I owe zakat, how much, and when.
+  const answer =
+    phase === "unverified" || assetRows.length === 0
+      ? null
+      : phase === "below_nisab"
+        ? {
+            title: "No zakat to pay right now.",
+            body: `What counts for zakat, ${formatMoney(result.netZakatable, c)}, is below the minimum (nisab) of ${formatMoney(result.nisab, c)}.`,
+          }
+        : phase === "payable"
+          ? null
+          : {
+              title: `Your zakat would be about ${formatMoney(result.zakatDue, c)}.`,
+              body: hawl
+                ? `It is due on your zakat day, ${dueDay}: ${hawl.remainingDays} ${hawl.remainingDays === 1 ? "day" : "days"} from now. You may give some of it early.`
+                : "It is due once a full lunar year has passed since you first had the minimum (nisab). Set that day, and Mizan will tell you when.",
+            };
 
   return (
     <div className="space-y-10">
       <header>
-        <p className="label text-brassDeep">Balance</p>
+        <p className="label text-brassDeep">Your zakat</p>
         <h1 className="mt-1 font-serif text-3xl text-ink">
           {user.name.split(" ")[0]}
         </h1>
@@ -96,9 +116,12 @@ export default async function DashboardPage({
 
       {assetRows.length === 0 && (
         <div className="border border-dashed border-mist px-6 py-8 text-center">
-          <p className="text-sm text-sage">No holdings yet.</p>
+          <p className="text-base text-ink">Nothing added yet.</p>
+          <p className="mt-1 text-sm text-sage">
+            Add your savings, cash and gold, and Mizan works out your zakat.
+          </p>
           <Link href="/assets" className="btn-primary mt-4">
-            Open the ledger
+            Add what I own
           </Link>
         </div>
       )}
@@ -113,17 +136,29 @@ export default async function DashboardPage({
         currency={settings.currency}
       />
 
+      {answer ? (
+        <section className="border border-pine/40 bg-pine/5 px-5 py-5">
+          <p className="font-serif text-2xl text-ink nums">{answer.title}</p>
+          <p className="mt-2 text-base text-sage">{answer.body}</p>
+          {!hawl && phase !== "below_nisab" ? (
+            <Link href="/settings#zakat-day" className="btn-primary mt-4">
+              Set my zakat day
+            </Link>
+          ) : null}
+        </section>
+      ) : null}
+
       {dueNow && (
         <section className="border border-pine bg-pine/5 px-5 py-5">
-          <p className="label text-pine">Payable now</p>
-          <p className="mt-1 font-serif text-2xl text-ink nums">
-            {formatMoney(zakatOutstanding, settings.currency)}
+          <p className="label text-pine">Zakat to give now</p>
+          <p className="mt-1 font-serif text-3xl text-ink nums">
+            {formatMoney(zakatOutstanding, c)}
           </p>
-          <p className="mt-1 text-sm text-sage">
-            Ledger hawl is complete and wealth is at or above nisab.
+          <p className="mt-1 text-base text-sage">
+            Your zakat day has come, and you have more than the minimum (nisab).
           </p>
           <CycleActions
-            currency={settings.currency}
+            currency={c}
             outstanding={zakatOutstanding}
             phase={phase}
             latestSnapshotId={latestSnapshotId}
@@ -134,12 +169,15 @@ export default async function DashboardPage({
 
       {phase === "payable" && zakatOutstanding === 0 && result.isDue && (
         <section className="border border-pine/40 bg-pine/5 px-5 py-5">
-          <p className="label text-pine">Cycle met</p>
+          <p className="label text-pine">All given</p>
+          <p className="mt-1 font-serif text-xl text-ink">
+            You have given all of this year’s zakat.
+          </p>
           <p className="mt-1 text-sm text-sage">
-            Zakat for this cycle is recorded. Freeze, roll hawl, then print.
+            Keep a copy of this year, then start counting the next one.
           </p>
           <CycleActions
-            currency={settings.currency}
+            currency={c}
             outstanding={0}
             phase="payable"
             latestSnapshotId={latestSnapshotId}
@@ -151,76 +189,71 @@ export default async function DashboardPage({
       <Scale
         net={result.netZakatable}
         nisab={result.nisab}
-        currency={settings.currency}
+        currency={c}
         standardLabel={settings.nisabStandard}
         variant="panel"
       />
 
       <dl className="grid gap-6 sm:grid-cols-3">
         <div>
-          <dt className="label">
-            {phase === "payable" ? "Zakat payable" : "Indicative zakat"}
-          </dt>
+          <dt className="label">Your zakat</dt>
           <dd className="mt-1 font-serif text-2xl text-pine nums">
-            {result.isDue
-              ? formatMoney(result.zakatDue, settings.currency)
-              : "—"}
+            {result.isDue ? formatMoney(result.zakatDue, c) : "None"}
           </dd>
           <dd className="mt-1 text-xs text-sage">
             {result.isDue
-              ? `${duePhaseLabel(phase, Boolean(settings.hawlStartDate))} · ${formatPercent(result.rate, result.basis === "solar" ? 3 : 1)} (${result.basis})`
-              : "Below nisab"}
+              ? `${formatPercent(result.rate, result.basis === "solar" ? 3 : 1)} of what counts${result.basis === "solar" ? " (solar year)" : ""}${phase === "payable" ? " · due now" : ""}`
+              : duePhaseLabel(phase, Boolean(settings.hawlStartDate))}
           </dd>
         </div>
         <div>
-          <dt className="label">Paid · {window.label}</dt>
+          <dt className="label">Given · {window.label}</dt>
           <dd className="mt-1 font-serif text-2xl text-ink nums">
-            {formatMoney(zakatPaid, settings.currency)}
+            {formatMoney(zakatPaid, c)}
           </dd>
           <dd className="mt-1 text-xs text-sage" title={window.detail}>
             {zakatOutstanding > 0 && result.isDue
-              ? `${formatMoney(zakatOutstanding, settings.currency)} outstanding`
+              ? `${formatMoney(zakatOutstanding, c)} still to give`
               : result.isDue
                 ? phase === "payable"
-                  ? "Obligation met for this cycle"
-                  : "Paid toward this cycle (hawl still open)"
+                  ? "All given for this year"
+                  : "Given early, before your zakat day"
                 : "Nothing due"}
           </dd>
         </div>
         <div>
-          <dt className="label">Margin to nisab</dt>
+          <dt className="label">
+            {result.marginToNisab >= 0 ? "Above the minimum by" : "Short of the minimum by"}
+          </dt>
           <dd
             className={
               "mt-1 font-serif text-2xl nums " +
               (result.marginToNisab >= 0 ? "text-gain" : "text-sage")
             }
           >
-            {result.marginToNisab >= 0 ? "+" : ""}
-            {formatMoney(result.marginToNisab, settings.currency)}
+            {formatMoney(Math.abs(result.marginToNisab), c)}
           </dd>
           <dd className="mt-1 text-xs text-sage">
-            {settings.nisabStandard} standard
+            The minimum (nisab) is set by {settings.nisabStandard}
           </dd>
         </div>
       </dl>
 
       <section className="panel">
         <div className="flex items-center justify-between">
-          <h2 className="font-serif text-lg text-ink">Hawl</h2>
-          <Link href="/year" className="text-sm text-pine hover:underline">
-            Open year
+          <h2 className="font-serif text-lg text-ink">Your zakat day</h2>
+          <Link href={hawl ? "/year" : "/settings#zakat-day"} className="text-sm text-pine hover:underline">
+            {hawl ? "See this year" : "Set it"}
           </Link>
         </div>
         {hawl ? (
           <div className="mt-4">
-            <div className="flex items-baseline justify-between text-sm">
-              <span className="text-sage">
-                Started {formatHijri(hawl.startDate, calendar)}
-              </span>
+            <div className="flex items-baseline justify-between gap-3 text-sm">
+              <span className="text-sage">{dueDay}</span>
               <span className="font-medium text-ink">
                 {hawl.isComplete
-                  ? "Complete"
-                  : `${hawl.remainingDays} days left`}
+                  ? "It has come"
+                  : `${hawl.remainingDays} ${hawl.remainingDays === 1 ? "day" : "days"} left`}
               </span>
             </div>
             <div className="mt-2 h-1.5 overflow-hidden bg-mist">
@@ -229,14 +262,18 @@ export default async function DashboardPage({
                 style={{ width: `${Math.round(hawl.progress * 100)}%` }}
               />
             </div>
+            <p className="mt-2 text-xs text-sage">
+              Your zakat year began {formatHijri(hawl.startDate, calendar)}.
+            </p>
             <div className="mt-3">
               <HawlCalendarLink dueDate={hawl.dueDate.toISOString().slice(0, 10)} />
             </div>
           </div>
         ) : (
           <p className="mt-3 text-sm text-sage">
-            Set a start date in settings to count the lunar year. Until then,
-            paid totals use the calendar year.
+            Not set yet. It is one lunar year after the day you first had the
+            minimum (nisab). Not sure of that day? Pick one you will remember,
+            such as 1 Ramadan, and keep to it every year.
           </p>
         )}
       </section>
@@ -260,19 +297,19 @@ export default async function DashboardPage({
 
       {assetRows.length > 0 && (
         <section className="border border-mist px-5 py-5">
-          <p className="label text-brassDeep">Close the year</p>
-          <p className="mt-1 font-serif text-xl text-ink">Reckoning night</p>
+          <p className="label text-brassDeep">When your zakat day comes</p>
+          <p className="mt-1 font-serif text-xl text-ink">Close the year, step by step</p>
           <p className="mt-1 text-sm text-sage">
-            Remember forgotten wealth, watch nisab, sketch envelopes, then pay →
-            freeze → roll hawl → statement.
+            Check for anything you forgot, give your zakat, then keep a copy of
+            the year.
           </p>
           <div className="mt-4 flex flex-wrap gap-3">
             <Link href="/tools/reckoning-night" className="btn-primary">
-              Open the sitting
+              Start
             </Link>
             {phase === "payable" ? (
               <Link href="/year#freeze-year" className="btn-ghost">
-                Jump to close path
+                Go to the last step
               </Link>
             ) : null}
           </div>

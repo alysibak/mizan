@@ -60,8 +60,8 @@ export default function MethodPage() {
           you choose it in settings, the Umm al-Qura tables. Payable status
           uses one ledger hawl start (your settings date): new money joins the
           year already running rather than starting its own, so per-holding
-          dates are reminders only. If wealth fell below nisab mid-year, The
-          year page lets you restart the hawl — the schools differ on whether
+          dates are reminders only. If wealth fell below nisab mid-year, the
+          Zakat page lets you restart the hawl — the schools differ on whether
           that is needed. Either calendar can differ from moon-sighting by a
           day or two; for payment day, follow your local sighting.
         </p>

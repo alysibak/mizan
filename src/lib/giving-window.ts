@@ -51,15 +51,15 @@ export function paymentWindow(
     }
     const carried =
       start !== cycleStart
-        ? ` Payments through ${addDays(start, -1)} were counted toward the cycle you froze before this one.`
+        ? ` Zakat noted up to ${addDays(start, -1)} was counted toward the year you saved before this one.`
         : "";
     return {
       kind: "hawl",
       cycleStart,
       start,
       end,
-      label: "This hawl cycle",
-      detail: `Zakat payments from ${start} through ${end}. ${calendar === "umalqura" ? "Umm al-Qura" : "Tabular"} due day ${isoDay(status.dueDate)}; confirm the payment day with local moon-sighting.${carried}`,
+      label: "This zakat year",
+      detail: `Counts the zakat you noted from ${start} to ${end}. Your due day is ${isoDay(status.dueDate)} by the ${calendar === "umalqura" ? "Umm al-Qura" : "standard Hijri"} calendar; the moon where you live may move it by a day.${carried}`,
     };
   }
 
@@ -69,9 +69,9 @@ export function paymentWindow(
     cycleStart: `${y}-01-01`,
     start: `${y}-01-01`,
     end: `${y}-12-31`,
-    label: "Calendar year (Jan–Dec)",
+    label: "This calendar year",
     detail:
-      "No hawl start is set, so paid totals use the Gregorian calendar year — not the lunar holding year.",
+      "Your zakat day is not set yet, so the zakat you noted is counted from January to December.",
   };
 }
 
@@ -168,11 +168,11 @@ export function duePhase(opts: {
 }
 
 export function duePhaseLabel(phase: DuePhase, hasHawlStart = true): string {
-  if (phase === "unverified") return "Unverified — set today’s metal prices";
-  if (phase === "below_nisab") return "Below nisab";
-  if (phase === "payable") return "Payable now";
-  if (!hasHawlStart) return "Indicative — no hawl start set";
-  return "Indicative — hawl not complete";
+  if (phase === "unverified") return "Check today’s gold and silver prices first";
+  if (phase === "below_nisab") return "Below the minimum (nisab)";
+  if (phase === "payable") return "Due now";
+  if (!hasHawlStart) return "An estimate: set your zakat day to know when it is due";
+  return "An estimate: not due until your zakat day";
 }
 
 /** Seed defaults from schema / DEFAULT_SETTINGS — treat as unverified starter prices. */

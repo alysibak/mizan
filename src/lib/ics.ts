@@ -46,10 +46,10 @@ export function hawlCalendar(opts: {
       `DTSTAMP:${stamp}`,
       `DTSTART;VALUE=DATE:${icsDay(opts.dueDay)}`,
       `DTEND;VALUE=DATE:${icsDay(nextDay(opts.dueDay))}`,
-      `SUMMARY:${icsText(opts.summary ?? "Mizan — hawl reckoning day")}`,
+      `SUMMARY:${icsText(opts.summary ?? "Mizan — your zakat day")}`,
       `DESCRIPTION:${icsText(
         opts.description ??
-          `One ${opts.calendarLabel} year is complete. Confirm with local moon-sighting before paying. Open Mizan → The year.`,
+          `One ${opts.calendarLabel} year is complete. Confirm with local moon-sighting before paying. Open Mizan → Zakat.`,
       )}`,
       "TRANSP:TRANSPARENT",
     );
@@ -57,7 +57,7 @@ export function hawlCalendar(opts: {
       lines.push(
         "BEGIN:VALARM",
         "ACTION:DISPLAY",
-        "DESCRIPTION:Hawl reckoning tomorrow",
+        "DESCRIPTION:Your zakat day is tomorrow",
         "TRIGGER:-P1D",
         "END:VALARM",
       );

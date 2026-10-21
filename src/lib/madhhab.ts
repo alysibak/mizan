@@ -56,22 +56,22 @@ const JEWELLERY: Record<Madhhab, Override> = {
   hanafi: {
     defaultZakatablePortion: 1,
     portionEditable: true,
-    note: "Hanafi position commonly treats gold and silver jewellery as zakatable when nisab is met, including items in personal use. Confirm for your situation.",
+    note: "The Hanafi madhhab usually counts gold and silver jewellery, even pieces you wear. Check for your own case.",
   },
   maliki: {
     defaultZakatablePortion: 0,
     portionEditable: true,
-    note: "Maliki practice commonly exempts jewellery kept for personal adornment. Count investment gold under Gold (investment).",
+    note: "The Maliki madhhab usually does not count jewellery you wear. Put gold kept as savings under Gold coins and bars.",
   },
   shafii: {
     defaultZakatablePortion: 0,
     portionEditable: true,
-    note: "Shafi'i practice commonly exempts jewellery for personal use. Investment gold belongs under Gold (investment) at full value.",
+    note: "The Shafi'i madhhab usually does not count jewellery you wear. Put gold kept as savings under Gold coins and bars.",
   },
   hanbali: {
     defaultZakatablePortion: 0,
     portionEditable: true,
-    note: "Hanbali practice commonly exempts jewellery for personal adornment. Investment pieces should be entered as Gold (investment).",
+    note: "The Hanbali madhhab usually does not count jewellery you wear. Put gold kept as savings under Gold coins and bars.",
   },
 };
 
@@ -108,12 +108,12 @@ export function defaultPortion(key: string, madhhab: Madhhab = "general"): numbe
 export function madhhabSummary(madhhab: Madhhab): string {
   switch (madhhab) {
     case "hanafi":
-      return "Affects jewellery defaults (often counted). Equity and pension figures stay modern estimates — not classical stock rulings.";
+      return "Jewellery you wear is counted, as the Hanafi madhhab usually holds.";
     case "maliki":
     case "shafii":
     case "hanbali":
-      return "Affects jewellery defaults (personal use often exempt). Equity and pension figures stay modern estimates — not classical stock rulings.";
+      return "Jewellery you wear is not counted, as this madhhab usually holds.";
     default:
-      return "Jewellery left unset by default. Equity/pension use modern estimates. Confirm disputed items with someone of knowledge.";
+      return "Jewellery you wear is not counted unless you say so. Ask someone you trust about anything you are unsure of.";
   }
 }

@@ -5,12 +5,12 @@ export default function AsnafPage() {
   return (
     <div className="space-y-8">
       <header>
-        <p className="label text-brassDeep">Zakat recipients</p>
-        <h1 className="mt-1 font-serif text-3xl text-ink">The eight asnaf</h1>
-        <p className="mt-2 max-w-xl text-sm text-sage">
-          Categories mentioned in the Qur’an for zakat. Mizan stores which one
-          you tagged a payment with — it does not certify that a person or
-          organization qualifies. Ask who you trust for that.
+        <p className="label text-brassDeep">Who can receive zakat</p>
+        <h1 className="mt-1 font-serif text-3xl text-ink">The eight groups</h1>
+        <p className="mt-2 max-w-xl text-base text-sage">
+          The Quran names eight groups who may receive zakat (9:60). Mizan
+          cannot tell you whether a person or charity is one of them; ask
+          someone you trust.
         </p>
       </header>
 
@@ -25,11 +25,11 @@ export default function AsnafPage() {
       </ol>
 
       <p className="text-sm text-sage">
-        When you record zakat on{" "}
+        When you note zakat on{" "}
         <Link href="/giving?type=zakat" className="text-pine hover:underline">
           Give
         </Link>
-        , you can optionally tag one of these categories.
+        , you can say which group it went to, if you like.
       </p>
     </div>
   );

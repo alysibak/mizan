@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { formatMoney } from "@/lib/money";
 import { whatIfNisab } from "@/lib/unique-calcs";
 import type { CalendarBasis } from "@/lib/zakat";
-import ReckoningStepNav from "@/components/ReckoningStepNav";
 
 export default function WhatIfNisabTool({
   currency,
@@ -39,19 +38,17 @@ export default function WhatIfNisabTool({
 
   return (
     <div className="space-y-8">
-      <ReckoningStepNav current="what-if" />
-
       <header>
-        <p className="label text-brassDeep">Sensitivity</p>
-        <h1 className="mt-1 font-serif text-3xl text-ink">What if prices move?</h1>
-        <p className="mt-2 max-w-xl text-sm text-sage">
-          Hold your current net zakatable wealth still. Nothing saves until you
-          change settings yourself.
+        <p className="label text-brassDeep">Try it</p>
+        <h1 className="mt-1 font-serif text-3xl text-ink">If gold or silver prices change</h1>
+        <p className="mt-2 max-w-xl text-base text-sage">
+          Slide the prices to see whether you would still be above the minimum
+          (nisab). Nothing here is saved.
         </p>
       </header>
 
       <p className="text-sm text-sage">
-        Your net now:{" "}
+        What counts for zakat now:{" "}
         <span className="nums text-ink">
           {formatMoney(netZakatable, currency)}
         </span>
@@ -60,7 +57,7 @@ export default function WhatIfNisabTool({
       <div className="space-y-6">
         <div>
           <label className="label mb-1.5" htmlFor="gold">
-            Gold / gram ({currency}): {gold.toFixed(2)}
+            Gold, per gram ({currency}): {gold.toFixed(2)}
           </label>
           <input
             id="gold"
@@ -75,7 +72,7 @@ export default function WhatIfNisabTool({
         </div>
         <div>
           <label className="label mb-1.5" htmlFor="silver">
-            Silver / gram ({currency}): {silver.toFixed(4)}
+            Silver, per gram ({currency}): {silver.toFixed(4)}
           </label>
           <input
             id="silver"
@@ -90,7 +87,7 @@ export default function WhatIfNisabTool({
         </div>
         <div>
           <label className="label mb-1.5" htmlFor="std">
-            Standard
+            Minimum set by
           </label>
           <select
             id="std"
@@ -114,20 +111,19 @@ export default function WhatIfNisabTool({
       >
         <p className="label text-brassDeep">
           {result.meetsNisab
-            ? "Above nisab at these prices"
-            : "Below nisab at these prices"}
+            ? "Above the minimum at these prices"
+            : "Below the minimum at these prices"}
         </p>
         <p className="mt-2 font-serif text-3xl text-ink nums">
           {formatMoney(result.chosenNisab, currency)}
         </p>
         <p className="mt-1 text-sm text-sage">
-          Margin{" "}
+          {result.margin >= 0 ? "Above it by " : "Short of it by "}
           <span className="nums text-ink">
-            {result.margin >= 0 ? "+" : ""}
-            {formatMoney(result.margin, currency)}
+            {formatMoney(Math.abs(result.margin), currency)}
           </span>
           {result.meetsNisab
-            ? ` · would-be zakat ${formatMoney(result.zakatIfDue, currency)} (nisab only)`
+            ? ` · zakat would be ${formatMoney(result.zakatIfDue, currency)}`
             : ""}
         </p>
         <div className="mt-4 h-2 overflow-hidden bg-mist">
@@ -140,7 +136,6 @@ export default function WhatIfNisabTool({
         </div>
       </section>
 
-      <ReckoningStepNav current="what-if" />
     </div>
   );
 }

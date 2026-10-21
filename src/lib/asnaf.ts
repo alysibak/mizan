@@ -1,44 +1,44 @@
-/** The eight classical zakat recipient categories (asnaf). Educational labels only. */
+/** The eight groups who may receive zakat (asnaf), Quran 9:60. Educational labels only. */
 export const ASNAF = [
   {
     key: "faqir",
-    label: "Al-fuqara’ (the poor)",
-    note: "Those with little or no wealth relative to need.",
+    label: "The poor (al-fuqara’)",
+    note: "People with little or nothing to live on.",
   },
   {
     key: "miskin",
-    label: "Al-masakin (the needy)",
-    note: "Those whose means fall short of sufficiency.",
+    label: "The needy (al-masakin)",
+    note: "People who have something, but not enough.",
   },
   {
     key: "amil",
-    label: "Al-‘amilin (administrators)",
-    note: "Those appointed to collect and distribute zakat.",
+    label: "Zakat workers (al-‘amilin)",
+    note: "People appointed to collect and hand out zakat.",
   },
   {
     key: "muallaf",
-    label: "Al-mu’allafah qulubuhum",
-    note: "Those whose hearts are to be reconciled — usage is contested today.",
+    label: "Hearts to be brought close (al-mu’allafah qulubuhum)",
+    note: "New Muslims and others whose hearts are being won. Scholars differ on it today.",
   },
   {
     key: "riqab",
-    label: "Fi al-riqab",
-    note: "Historically those in bondage; modern analogies vary by scholar.",
+    label: "Freeing people (fi al-riqab)",
+    note: "Once, freeing slaves. Scholars differ on what it covers today.",
   },
   {
     key: "gharim",
-    label: "Al-gharimin (debtors)",
-    note: "Those burdened by debt who cannot reasonably repay.",
+    label: "People in debt (al-gharimin)",
+    note: "People weighed down by debts they cannot pay.",
   },
   {
     key: "fisabilillah",
-    label: "Fi sabil Allah",
-    note: "In the path of God — scope is disputed; ask who you trust.",
+    label: "In the way of Allah (fi sabil Allah)",
+    note: "Scholars differ on how wide this is. Ask someone you trust.",
   },
   {
     key: "ibn_sabil",
-    label: "Ibn al-sabil (traveller)",
-    note: "The stranded traveller cut off from their wealth.",
+    label: "Stranded travellers (ibn al-sabil)",
+    note: "Travellers cut off from their money, far from home.",
   },
 ] as const;
 

@@ -4,14 +4,15 @@ import { amountParam, formatMoney } from "@/lib/money";
 export type CloseYearStep = "pay" | "freeze" | "roll" | "statement";
 
 const STEPS: { id: CloseYearStep; label: string }[] = [
-  { id: "pay", label: "Pay" },
-  { id: "freeze", label: "Freeze" },
-  { id: "roll", label: "Roll hawl" },
-  { id: "statement", label: "Statement" },
+  { id: "pay", label: "Give" },
+  { id: "freeze", label: "Keep a copy" },
+  { id: "roll", label: "Start next year" },
+  { id: "statement", label: "Print" },
 ];
 
 /**
- * Ordered close path: pay outstanding → freeze snapshot → roll hawl → print.
+ * Closing a year in order: give what is left, keep a copy, start next year's
+ * count, print if wanted.
  */
 export default function CloseYearPath({
   current,
@@ -58,12 +59,12 @@ export default function CloseYearPath({
             href={`/giving?type=zakat&amount=${amountParam(outstanding)}`}
             className="btn-primary"
           >
-            Record {formatMoney(outstanding, currency)} zakat
+            I gave {formatMoney(outstanding, currency)} zakat
           </Link>
         ) : null}
         {current === "pay" && outstanding <= 0 ? (
           <Link href="/year#freeze-year" className="btn-primary">
-            Freeze this reckoning
+            Keep a copy of this year
           </Link>
         ) : null}
         {current === "freeze" ? (
@@ -73,19 +74,15 @@ export default function CloseYearPath({
                 href={`/giving?type=zakat&amount=${amountParam(outstanding)}`}
                 className="btn-primary"
               >
-                Record {formatMoney(outstanding, currency)} zakat
+                I gave {formatMoney(outstanding, currency)} zakat
               </Link>
-            ) : (
-              <a href="#freeze-year" className="btn-primary">
-                Freeze below
-              </a>
-            )}
+            ) : null}
             {latestSnapshotId ? (
               <Link
                 href={`/year/snapshots/${latestSnapshotId}`}
                 className="btn-ghost"
               >
-                Open last freeze
+                Open the last copy
               </Link>
             ) : null}
           </>
@@ -95,22 +92,17 @@ export default function CloseYearPath({
             href={`/year/snapshots/${latestSnapshotId}`}
             className="btn-primary"
           >
-            Roll hawl on snapshot
+            Start next year’s count
           </Link>
         ) : null}
         {current === "roll" && !latestSnapshotId ? (
           <Link href="/year#freeze-year" className="btn-primary">
-            Freeze first
+            Keep a copy first
           </Link>
         ) : null}
         {current === "statement" ? (
           <Link href="/statement" className="btn-primary">
-            Print statement
-          </Link>
-        ) : null}
-        {current !== "statement" ? (
-          <Link href="/statement" className="text-sm text-pine hover:underline">
-            Statement anytime
+            Print this year
           </Link>
         ) : null}
       </div>

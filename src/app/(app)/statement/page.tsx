@@ -40,7 +40,7 @@ export default async function StatementPage() {
   const printed = isoDay(today);
   const title =
     window.kind === "hawl"
-      ? `Hawl ${window.cycleStart} → ${window.end}`
+      ? `Zakat year ${window.cycleStart} → ${window.end}`
       : `${window.cycleStart.slice(0, 4)} · ${hijriYear} AH`;
 
   const asnafTotals = ASNAF.map((a) => ({
@@ -67,7 +67,7 @@ export default async function StatementPage() {
         <div className="flex gap-2 print:hidden">
           <PrintButton />
           <Link href="/zakat" className="btn-ghost">
-            Full breakdown
+            How it is worked out
           </Link>
         </div>
       </header>
@@ -78,35 +78,35 @@ export default async function StatementPage() {
 
       {hawl?.isComplete && r.isDue && outstanding > 0 && (
         <div className="card border-pine/40 bg-pine/5 p-5">
-          <p className="font-serif text-xl text-ink">Hawl is complete.</p>
+          <p className="font-serif text-xl text-ink">Your zakat day has come.</p>
           <p className="mt-1 text-sm text-sage">
-            {formatMoney(outstanding, c)} remains for this cycle after what you
-            have already recorded.
+            {formatMoney(outstanding, c)} is still to give, after what you have
+            noted.
           </p>
           <Link
             href={`/giving?type=zakat&amount=${amountParam(outstanding)}`}
             className="btn-primary mt-4 print:hidden"
           >
-            Record a zakat payment
+            Note zakat I gave
           </Link>
         </div>
       )}
 
       <section className="card p-5">
-        <h2 className="font-serif text-lg text-ink">How this was reckoned</h2>
+        <h2 className="font-serif text-lg text-ink">How it was counted</h2>
         <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
           <div>
-            <dt className="text-sage">School profile</dt>
+            <dt className="text-sage">Madhhab</dt>
             <dd className="text-ink">{MADHHAB_LABELS[madhhab]}</dd>
           </div>
           <div>
-            <dt className="text-sage">Nisab standard</dt>
+            <dt className="text-sage">Minimum (nisab) set by</dt>
             <dd className="text-ink">{settings.nisabStandard}</dd>
           </div>
           <div>
-            <dt className="text-sage">Calendar</dt>
+            <dt className="text-sage">Year counted by</dt>
             <dd className="text-ink">
-              {settings.calendarBasis} ({formatPercent(r.rate, r.basis === "solar" ? 3 : 1)})
+              {settings.calendarBasis === "solar" ? "solar year" : "lunar year"} ({formatPercent(r.rate, r.basis === "solar" ? 3 : 1)})
             </dd>
           </div>
           <div>
@@ -117,11 +117,11 @@ export default async function StatementPage() {
             </dd>
           </div>
           <div>
-            <dt className="text-sage">Hawl</dt>
+            <dt className="text-sage">Zakat year</dt>
             <dd className="text-ink">
               {hawl
                 ? `${formatHijri(hawl.startDate, calendar)} → ${formatHijri(hawl.dueDate, calendar)}${
-                    hawl.isComplete ? " · complete" : ` · ${hawl.remainingDays} days left`
+                    hawl.isComplete ? " · zakat day has come" : ` · ${hawl.remainingDays} days left`
                   }`
                 : "Not set"}
             </dd>
@@ -131,16 +131,16 @@ export default async function StatementPage() {
 
       <section className="card overflow-hidden p-0">
         <h2 className="border-b border-mist px-5 py-4 font-serif text-lg text-ink">
-          Zakatable assets
+          What counts for zakat
         </h2>
         {r.lines.length === 0 ? (
-          <p className="px-5 py-6 text-sm text-sage">No assets recorded.</p>
+          <p className="px-5 py-6 text-sm text-sage">Nothing added.</p>
         ) : (
-          <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Zakatable assets">
+          <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="What counts for zakat">
             <table className="w-full min-w-[30rem] text-left text-sm">
               <thead className="border-b border-mist text-xs uppercase tracking-wide text-sage">
                 <tr>
-                  <th className="px-5 py-2 font-medium">Holding</th>
+                  <th className="px-5 py-2 font-medium">What</th>
                   <th className="px-5 py-2 font-medium">Value</th>
                   <th className="px-5 py-2 font-medium">Counted</th>
                 </tr>
@@ -171,7 +171,7 @@ export default async function StatementPage() {
             <table className="w-full min-w-[30rem] text-left text-sm">
               <thead className="border-b border-mist text-xs uppercase tracking-wide text-sage">
                 <tr>
-                  <th className="px-5 py-2 font-medium">Description</th>
+                  <th className="px-5 py-2 font-medium">What</th>
                   <th className="px-5 py-2 font-medium">Amount</th>
                   <th className="px-5 py-2 font-medium">Counted</th>
                 </tr>
@@ -182,7 +182,7 @@ export default async function StatementPage() {
                     <td className="px-5 py-2 text-ink">{l.label}</td>
                     <td className="px-5 py-2 nums">{formatMoney(l.amount, c)}</td>
                     <td className="px-5 py-2 text-sage">
-                      {l.deductible ? "Deducted from zakatable wealth" : "Not deducted"}
+                      {l.deductible ? "Taken off" : "Not taken off"}
                     </td>
                   </tr>
                 ))}
@@ -196,31 +196,31 @@ export default async function StatementPage() {
         <h2 className="font-serif text-lg text-ink">The sum</h2>
         <dl className="mt-3 space-y-2 text-sm">
           <div className="flex justify-between gap-4">
-            <dt className="text-sage">Gross zakatable</dt>
+            <dt className="text-sage">All that counts</dt>
             <dd className="nums">{formatMoney(r.grossZakatable, c)}</dd>
           </div>
           <div className="flex justify-between gap-4">
-            <dt className="text-sage">Deductible liabilities</dt>
+            <dt className="text-sage">Debts taken off</dt>
             <dd className="nums text-danger">
               −{formatMoney(r.deductibleLiabilities, c)}
             </dd>
           </div>
           <div className="flex justify-between gap-4">
-            <dt className="text-sage">Net zakatable</dt>
+            <dt className="text-sage">What counts, after debts</dt>
             <dd className="nums font-medium">{formatMoney(r.netZakatable, c)}</dd>
           </div>
           <div className="flex justify-between gap-4">
             <dt className="text-sage">
-              Nisab ({settings.nisabStandard})
+              Minimum (nisab, by {settings.nisabStandard})
             </dt>
             <dd className="nums">{formatMoney(r.nisab, c)}</dd>
           </div>
           <div className="flex justify-between gap-4 border-t border-mist pt-2">
             <dt className="text-ink">
-              {phase === "payable" ? "Zakat payable" : "Indicative zakat"}
+              {phase === "payable" ? "Zakat due" : "Zakat, so far"}
             </dt>
             <dd className="font-serif text-xl nums text-pine">
-              {r.isDue ? formatMoney(r.zakatDue, c) : "None — below nisab"}
+              {r.isDue ? formatMoney(r.zakatDue, c) : "None: below the minimum"}
             </dd>
           </div>
           <div className="text-xs">
@@ -230,11 +230,11 @@ export default async function StatementPage() {
             </dd>
           </div>
           <div className="flex justify-between gap-4">
-            <dt className="text-sage">Zakat · {window.label}</dt>
+            <dt className="text-sage">Zakat given · {window.label}</dt>
             <dd className="nums">{formatMoney(zakatPaid, c)}</dd>
           </div>
           <div className="flex justify-between gap-4">
-            <dt className="text-sage">Still outstanding</dt>
+            <dt className="text-sage">Still to give</dt>
             <dd className="nums font-medium">{formatMoney(outstanding, c)}</dd>
           </div>
           {/* Only shown for someone who chose to note sadaqah; nothing asks for it. */}
@@ -244,10 +244,12 @@ export default async function StatementPage() {
               <dd className="nums">{formatMoney(sadaqahPaid, c)}</dd>
             </div>
           )}
-          <div className="flex justify-between gap-4">
-            <dt className="text-sage">Purification · {window.label}</dt>
-            <dd className="nums">{formatMoney(purificationPaid, c)}</dd>
-          </div>
+          {purificationPaid > 0 && (
+            <div className="flex justify-between gap-4">
+              <dt className="text-sage">Interest given away · {window.label}</dt>
+              <dd className="nums">{formatMoney(purificationPaid, c)}</dd>
+            </div>
+          )}
           {fitrPaid > 0 && (
             <div className="flex justify-between gap-4">
               <dt className="text-sage">Zakat al-Fitr · {window.label}</dt>
@@ -256,7 +258,7 @@ export default async function StatementPage() {
           )}
         </dl>
         <p className="mt-3 text-xs text-sage">
-          {window.detail} Purification of interest is not subtracted from zakat.
+          {window.detail} Interest given away is not taken off zakat.
         </p>
         <div className="mt-4 print:hidden">
           <CycleActions
@@ -271,7 +273,7 @@ export default async function StatementPage() {
 
       {asnafTotals.length > 0 && (
         <section className="card p-5">
-          <h2 className="font-serif text-lg text-ink">Zakat by asnaf</h2>
+          <h2 className="font-serif text-lg text-ink">Zakat by group</h2>
           <dl className="mt-3 space-y-2 text-sm">
             {asnafTotals.map((a) => (
               <div key={a.key} className="flex justify-between gap-4">
@@ -286,9 +288,9 @@ export default async function StatementPage() {
       {yearGiving.length > 0 && (
         <section className="card overflow-hidden p-0">
           <h2 className="border-b border-mist px-5 py-4 font-serif text-lg text-ink">
-            Giving · {window.label}
+            What you gave · {window.label}
           </h2>
-          <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Giving this cycle">
+          <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="What you gave this year">
             <table className="w-full min-w-[30rem] text-left text-sm">
               <thead className="border-b border-mist text-xs uppercase tracking-wide text-sage">
                 <tr>

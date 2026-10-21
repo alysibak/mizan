@@ -42,30 +42,62 @@ export default async function SnapshotPage({ params }: Ctx) {
       ? `${payload.givingYtd.windowStart} → ${payload.givingYtd.windowEnd}`
       : String(payload.givingYtd.year);
 
+  const nextYear = (
+    <section className={"print:hidden " + (closesCurrentCycle ? "border border-pine/40 bg-pine/5 px-5 py-5" : "panel")}>
+      <h2 className="font-serif text-lg text-ink">Start next year’s count</h2>
+      <p className="mt-2 text-sm text-sage">
+        Once you have given your zakat and kept this copy, start counting the
+        next zakat year.
+      </p>
+      <div className="mt-4">
+        {!hawl ? (
+          <p className="text-sm text-sage">
+            First{" "}
+            <Link href="/settings#zakat-day" className="text-pine hover:underline">
+              set your zakat day
+            </Link>
+            .
+          </p>
+        ) : !closesCurrentCycle ? (
+          <p className="text-sm text-sage">
+            This copy is from an earlier year. Your current zakat year began{" "}
+            {isoDay(hawl.startDate)}.
+          </p>
+        ) : hawl.isComplete ? (
+          <RollHawlButton nextStart={isoDay(hawl.dueDate)} />
+        ) : (
+          <p className="text-sm text-sage">
+            This zakat year runs until {isoDay(hawl.dueDate)}. You can start the
+            next one on that day.
+          </p>
+        )}
+      </div>
+    </section>
+  );
+
   return (
     <div className="document-print space-y-8">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="font-serif text-2xl text-ink print:text-3xl">Mizan</p>
-          <p className="label mt-3 text-brassDeep">Frozen reckoning</p>
+          <p className="label mt-3 text-brassDeep">A year you kept</p>
           <h1 className="mt-1 font-serif text-3xl text-ink">{row.label}</h1>
-          <p className="mt-2 text-sm text-sage">Taken {row.takenAt}</p>
+          <p className="mt-2 text-sm text-sage">Kept on {row.takenAt}</p>
         </div>
         <div className="flex gap-2 print:hidden">
           <PrintButton />
-          <Link href="/statement" className="btn-ghost">
-            Live statement
-          </Link>
           <Link href="/year" className="btn-ghost">
-            Back to year
+            Back
           </Link>
           <DeleteSnapshotButton id={row.id} />
         </div>
       </header>
 
+      {closesCurrentCycle ? nextYear : null}
+
       {payload.letterToNextYear ? (
         <section className="border border-brass/40 bg-brass/5 px-5 py-6">
-          <p className="label text-brassDeep">Letter from that night</p>
+          <p className="label text-brassDeep">Your note</p>
           <p className="mt-3 whitespace-pre-wrap font-serif text-lg leading-relaxed text-ink">
             {payload.letterToNextYear}
           </p>
@@ -73,35 +105,35 @@ export default async function SnapshotPage({ params }: Ctx) {
       ) : null}
 
       <section className="panel">
-        <h2 className="font-serif text-lg text-ink">The sum</h2>
+        <h2 className="font-serif text-lg text-ink">The figures</h2>
         <dl className="mt-3 space-y-2 text-sm">
           <div className="ledger-row">
-            <dt className="text-sage">Net zakatable</dt>
+            <dt className="text-sage">What counted, after debts</dt>
             <dd className="nums">{formatMoney(r.netZakatable, c)}</dd>
           </div>
           <div className="ledger-row">
-            <dt className="text-sage">Nisab ({payload.settings.nisabStandard})</dt>
+            <dt className="text-sage">The minimum (nisab, by {payload.settings.nisabStandard})</dt>
             <dd className="nums">{formatMoney(r.nisab, c)}</dd>
           </div>
           <div className="ledger-row">
-            <dt className="text-ink">Zakat at freeze</dt>
+            <dt className="text-ink">Zakat</dt>
             <dd className="font-serif text-xl nums text-pine">
-              {r.isDue ? formatMoney(r.zakatDue, c) : "None — below nisab"}
+              {r.isDue ? formatMoney(r.zakatDue, c) : "None: below the minimum"}
             </dd>
           </div>
           <div className="ledger-row">
             <dt className="text-sage">
               Rate ({formatPercent(r.rate, r.basis === "solar" ? 3 : 1)})
             </dt>
-            <dd className="nums text-sage">{r.basis}</dd>
+            <dd className="nums text-sage">{r.basis === "solar" ? "solar year" : "lunar year"}</dd>
           </div>
           <div className="ledger-row">
-            <dt className="text-sage">Zakat recorded ({windowLabel})</dt>
+            <dt className="text-sage">Zakat given ({windowLabel})</dt>
             <dd className="nums">{formatMoney(payload.givingYtd.zakat, c)}</dd>
           </div>
           {payload.givingYtd.fitr ? (
             <div className="ledger-row">
-              <dt className="text-sage">Zakat al-Fitr recorded</dt>
+              <dt className="text-sage">Zakat al-Fitr given</dt>
               <dd className="nums">{formatMoney(payload.givingYtd.fitr, c)}</dd>
             </div>
           ) : null}
@@ -109,9 +141,9 @@ export default async function SnapshotPage({ params }: Ctx) {
       </section>
 
       <section className="panel">
-        <h2 className="font-serif text-lg text-ink">Holdings at freeze</h2>
+        <h2 className="font-serif text-lg text-ink">What you owned then</h2>
         {payload.assets.length === 0 ? (
-          <p className="mt-3 text-sm text-sage">No assets on this snapshot.</p>
+          <p className="mt-3 text-sm text-sage">Nothing was added that year.</p>
         ) : (
           <ul className="mt-3">
             {payload.assets.map((a, i) => (
@@ -127,47 +159,15 @@ export default async function SnapshotPage({ params }: Ctx) {
         )}
       </section>
 
-      <section className="panel print:hidden">
-        <h2 className="font-serif text-lg text-ink">Start the next cycle</h2>
-        <p className="mt-2 text-sm text-sage">
-          After you pay and freeze, roll the ledger hawl forward so the next
-          year begins counting. Then print a statement if you want paper.
-        </p>
-        <div className="mt-4">
-          {!hawl ? (
-            <p className="text-sm text-sage">
-              Set a hawl start in{" "}
-              <Link href="/settings" className="text-pine hover:underline">
-                settings
-              </Link>{" "}
-              before rolling the next cycle.
-            </p>
-          ) : !closesCurrentCycle ? (
-            <p className="text-sm text-sage">
-              This freeze belongs to an earlier cycle. The current hawl started{" "}
-              {isoDay(hawl.startDate)}.
-            </p>
-          ) : hawl.isComplete ? (
-            <RollHawlButton nextStart={isoDay(hawl.dueDate)} />
-          ) : (
-            <p className="text-sm text-sage">
-              This hawl runs until {isoDay(hawl.dueDate)}. Rolling to the next
-              cycle opens on that day.
-            </p>
-          )}
-        </div>
-      </section>
+      {closesCurrentCycle ? null : nextYear}
 
       <p className="text-xs text-sage">
-        This is a historical copy. Changing your live ledger does not alter it.
+        This copy stays as it was. Changing what you own today does not change it.
       </p>
 
       <div className="flex flex-wrap gap-3 print:hidden">
-        <Link href="/statement" className="btn-primary">
-          Open live statement
-        </Link>
         <Link href="/dashboard" className="btn-ghost">
-          Back to Balance
+          Back to Home
         </Link>
       </div>
     </div>

@@ -104,7 +104,7 @@ test("the demo can be explored but not changed", async ({ page }) => {
   await page.goto("/assets");
   await page.fill("#asset-new-label", "Should not save");
   await page.fill("#asset-new-amount", "10");
-  await page.click("button:has-text('Add asset')");
+  await page.click("button:has-text('Add it')");
   await expect(page.getByText("The demo is read-only").first()).toBeVisible();
 
   const refused = await page.evaluate(async () => {
@@ -181,11 +181,11 @@ test("signed in, the about pages open inside the app and public pages offer your
   await page.waitForURL("**/privacy");
   // Privacy reads as part of the ledger: the app's own navigation, no public header.
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Privacy policy");
-  await expect(page.getByRole("link", { name: "Balance" }).first()).toBeVisible();
+  await expect(page.getByRole("link", { name: "Home", exact: true }).first()).toBeVisible();
   await expect(page.getByRole("banner").getByRole("link", { name: "Sign in" })).toHaveCount(0);
   await page.goto("/method");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("The method");
-  await expect(page.getByRole("link", { name: "Balance" }).first()).toBeVisible();
+  await expect(page.getByRole("link", { name: "Home", exact: true }).first()).toBeVisible();
 
   await page.goto("/calculator");
   const header = page.getByRole("banner");
@@ -199,7 +199,7 @@ test("signed in, the about pages open inside the app and public pages offer your
   await page.goto("/privacy");
   await expect(page.getByRole("banner").getByRole("link", { name: "Sign in" })).toBeVisible();
   await expect(page.getByRole("banner").getByRole("link", { name: "Your ledger" })).toHaveCount(0);
-  await expect(page.getByRole("link", { name: "Balance" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Home", exact: true })).toHaveCount(0);
 });
 
 test("a beginner is asked three questions and sent on with today’s nisab", async ({ page }) => {

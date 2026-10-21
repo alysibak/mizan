@@ -34,12 +34,11 @@ export default function CalendarFeed({ enabled }: { enabled: boolean }) {
 
   return (
     <section className="card space-y-3 p-5">
-      <h2 className="font-serif text-lg text-ink">Hawl reminders</h2>
+      <h2 className="font-serif text-lg text-ink">Your zakat day in your calendar</h2>
       <p className="text-sm text-sage">
-        Subscribe in your phone&apos;s calendar and it will show the reckoning
-        day, with a reminder the day before, and follow along when you roll
-        the hawl. The link holds only the date, never amounts — but keep it
-        private.
+        Add it to your phone&apos;s calendar: it shows your zakat day, with a
+        reminder the day before, and moves when you start the next year. The
+        link holds only the date, never amounts, but keep it private.
       </p>
       {url ? (
         <div className="space-y-2 border border-pine/30 bg-pine/5 p-4">

@@ -56,7 +56,7 @@ export default function DashboardNotices({
     if (!res?.ok || !data?.goldPricePerGram || !data.silverPricePerGram) {
       setUpdating(false);
       setPriceError(
-        "Live prices are unavailable right now. Try again shortly, or enter them in settings.",
+        "Today’s prices could not be fetched. Try again shortly, or type them in yourself.",
       );
       return;
     }
@@ -94,17 +94,15 @@ export default function DashboardNotices({
       {top && welcome ? (
         <section className="border border-pine/40 bg-pine/5 px-5 py-5">
           <p className="label text-pine">Ready</p>
-          <p className="mt-1 font-serif text-xl text-ink">Your ledger is open.</p>
-          <p className="mt-1 text-sm text-sage">
-            Add holdings, confirm prices as they move, and watch the year. When
-            you pay, freeze a snapshot under The year.
+          <p className="mt-1 font-serif text-xl text-ink">You are set up.</p>
+          <p className="mt-1 text-base text-sage">
+            Add everything you own on “What I own”: savings, cash, gold. Mizan
+            works out your zakat as you go. When you give zakat, note it on
+            “Give”.
           </p>
-          <div className="mt-4 flex flex-wrap gap-3">
+          <div className="mt-4 flex flex-wrap items-center gap-3">
             <Link href="/assets" className="btn-primary">
-              Open the ledger
-            </Link>
-            <Link href="/tools/reckoning-night" className="btn-ghost">
-              Reckoning night
+              Add what I own
             </Link>
             <button
               type="button"
@@ -123,17 +121,13 @@ export default function DashboardNotices({
             <div>
               <p className="label text-brassDeep">
                 {metalsReason === "aged"
-                  ? "Metal prices may be stale"
-                  : metalsReason === "never"
-                    ? "Confirm metal prices"
-                    : "Starter metal prices"}
+                  ? "Gold and silver prices are old"
+                  : "Check gold and silver prices"}
               </p>
               <p className="mt-1 text-sm text-sage">
                 {metalsReason === "aged"
-                  ? `Gold and silver were last saved ${metalsAgeDays ?? "30+"} days ago. Reconfirm or update before you trust the nisab line.`
-                  : metalsReason === "never"
-                    ? "Prices look custom but have no save date yet. Confirm them in settings."
-                    : "Gold and silver still match the seed defaults. Suggest or enter today’s prices before you trust the nisab line."}
+                  ? `They were saved ${metalsAgeDays ?? "30+"} days ago. Prices move, and the minimum (nisab) moves with them.`
+                  : "The minimum (nisab) is a weight of gold or silver, so Mizan needs today’s prices to know it."}
               </p>
               <div className="mt-3 flex flex-wrap items-center gap-3">
                 <button
@@ -145,7 +139,7 @@ export default function DashboardNotices({
                   {updating ? "Fetching today’s prices…" : "Use today’s prices"}
                 </button>
                 <Link href="/settings" className="text-sm text-pine hover:underline">
-                  Enter them yourself
+                  Type them in myself
                 </Link>
               </div>
               {priceError ? (
@@ -171,7 +165,7 @@ export default function DashboardNotices({
             <div>
               <p className="label text-brassDeep">Getting started</p>
               <p className="mt-1 font-serif text-lg text-ink">
-                {remaining.length} step{remaining.length === 1 ? "" : "s"} left
+                {remaining.length} {remaining.length === 1 ? "thing" : "things"} left to do
               </p>
             </div>
             <button
@@ -202,7 +196,7 @@ export default function DashboardNotices({
       ) : null}
 
       {bottom ? (
-        <InstallHint pitch="Install Mizan for a ledger that opens from your home screen like a notebook — no app store." />
+        <InstallHint pitch="Put Mizan on your home screen, so it opens like an app. No app store needed." />
       ) : null}
     </div>
   );

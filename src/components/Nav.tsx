@@ -15,11 +15,11 @@ import {
 import { signOut } from "./SignOutButton";
 
 const LINKS = [
-  { href: "/dashboard", label: "Balance", Icon: IconBalance, match: ["/dashboard"] },
-  { href: "/assets", label: "Ledger", Icon: IconLedger, match: ["/assets"] },
+  { href: "/dashboard", label: "Home", Icon: IconBalance, match: ["/dashboard"] },
+  { href: "/assets", label: "What I own", Icon: IconLedger, match: ["/assets"] },
   {
     href: "/year",
-    label: "Year",
+    label: "Zakat",
     Icon: IconYear,
     match: ["/year", "/zakat", "/statement"],
   },

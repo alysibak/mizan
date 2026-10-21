@@ -31,19 +31,17 @@ export default function ForgottenWealthTool() {
 
   return (
     <div className="space-y-8">
-      <ReckoningStepNav current="forgotten" />
-
       <header>
-        <p className="label text-brassDeep">Memory aid</p>
-        <h1 className="mt-1 font-serif text-3xl text-ink">Forgotten wealth</h1>
-        <p className="mt-2 max-w-xl text-sm text-sage">
-          Check what you have reviewed. Add anything real on the ledger, then
-          continue the sitting.
+        <p className="label text-brassDeep">Close the year · step 1 of 3</p>
+        <h1 className="mt-1 font-serif text-3xl text-ink">Anything you forgot?</h1>
+        <p className="mt-2 max-w-xl text-base text-sage">
+          People often forget these. Tick each one once you have thought about
+          it, and add anything you own on “What I own”.
         </p>
       </header>
 
       <p className="text-sm text-sage">
-        Reviewed {done} of {FORGOTTEN_PROMPTS.length}
+        {done} of {FORGOTTEN_PROMPTS.length} thought about
       </p>
 
       <ul className="divide-y divide-mist border-y border-mist">
@@ -71,7 +69,7 @@ export default function ForgottenWealthTool() {
                   href={`/assets?category=${encodeURIComponent(p.categoryHint)}&label=${encodeURIComponent(p.label)}`}
                   className="mt-2 inline-block text-sm text-pine hover:underline"
                 >
-                  Add on ledger
+                  Add it to what I own
                 </Link>
               ) : null}
             </div>

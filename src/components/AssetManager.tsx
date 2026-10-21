@@ -68,13 +68,13 @@ function LiabilityForm({
     >
       <div>
         <label className="label mb-1.5" htmlFor={`${idPrefix}-label`}>
-          Description
+          What it is
         </label>
         <input
           id={`${idPrefix}-label`}
           name="label"
           className="field"
-          placeholder="e.g. credit card balance"
+          placeholder="e.g. Credit card bill"
           defaultValue={liability?.label}
           maxLength={120}
           required
@@ -104,7 +104,7 @@ function LiabilityForm({
           defaultChecked={liability?.deductible ?? true}
           className="h-4 w-4 accent-pine"
         />
-        Deductible
+        Take it off
       </label>
       <div className={"flex gap-2 " + (liability ? "sm:col-span-3" : "sm:self-end")}>
         <button
@@ -177,22 +177,22 @@ export default function AssetManager({
       <section>
         <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="font-serif text-lg text-ink">
-            Your assets{" "}
+            Added so far{" "}
             <span className="text-sm font-normal text-sage">({assets.length})</span>
           </h2>
           {assets.length > 0 ? (
             <p className="text-sm text-sage nums">
-              {formatMoney(sumCents(assets.map((a) => a.amount)), currency)} held ·{" "}
+              {formatMoney(sumCents(assets.map((a) => a.amount)), currency)} in all ·{" "}
               <span className="text-ink">
                 {formatMoney(sumCents(assets.map((a) => a.amount * a.zakatablePortion)), currency)}
               </span>{" "}
-              counted
+              counts for zakat
             </p>
           ) : null}
         </div>
         {assets.length === 0 ? (
           <p className="border border-dashed border-mist p-5 text-sm text-sage">
-            No assets yet. Add your first one below to begin your accounting.
+            Nothing added yet. Add your savings, cash or gold below.
           </p>
         ) : (
           <ul className="divide-y divide-mist border-y border-mist">
@@ -226,9 +226,9 @@ export default function AssetManager({
                       {weight && <> · {weight}</>}
                       {foreignNote(a) && <> · {foreignNote(a)}</>}
                       {a.zakatablePortion < 1 && (
-                        <> · {formatPercent(a.zakatablePortion, 0)} zakatable</>
+                        <> · {formatPercent(a.zakatablePortion, 0)} counts</>
                       )}
-                      {a.hawlStartDate && <> · hawl {a.hawlStartDate}</>}
+                      {a.hawlStartDate && <> · reminder {a.hawlStartDate}</>}
                       {a.note && <> · {a.note}</>}
                     </p>
                   </div>
@@ -268,7 +268,7 @@ export default function AssetManager({
       </section>
 
       <section className="card p-5">
-        <h2 className="font-serif text-lg text-ink">Add an asset</h2>
+        <h2 className="font-serif text-lg text-ink">Add something you own</h2>
         <div className="mt-4">
           <AssetForm
             currency={currency}
@@ -282,10 +282,12 @@ export default function AssetManager({
       </section>
 
       <section>
-        <h2 className="mb-1 font-serif text-lg text-ink">Deductible liabilities</h2>
+        <h2 className="mb-1 font-serif text-lg text-ink">Debts you owe</h2>
         <p className="mb-4 text-sm text-sage">
-          Immediate debts can be deducted from your zakatable wealth. Treatment of
-          long-term debt varies, so each entry can be marked deductible or not.
+          Money you must pay back soon, such as a bill or this month’s loan
+          payment, is taken off what counts. Scholars differ on long loans such
+          as a mortgage: untick “Take it off” for those if that is what you
+          follow.
         </p>
 
         <LiabilityForm onSaved={() => router.refresh()} />
@@ -312,7 +314,7 @@ export default function AssetManager({
                   <div className="min-w-0">
                     <p className="truncate font-medium text-ink">{l.label}</p>
                     <p className="text-xs text-sage">
-                      {l.deductible ? "Deductible" : "Not deducted"}
+                      {l.deductible ? "Taken off" : "Not taken off"}
                     </p>
                   </div>
                   <div className="flex items-center gap-3">

@@ -15,7 +15,6 @@ import HawlCalendarLink from "@/components/HawlCalendarLink";
 import HawlRestart from "@/components/HawlRestart";
 import CycleActions from "@/components/CycleActions";
 import CloseYearPath from "@/components/CloseYearPath";
-import ReckoningStepNav from "@/components/ReckoningStepNav";
 
 export default async function YearPage({
   searchParams,
@@ -59,7 +58,7 @@ export default async function YearPage({
     phase === "payable" && result.isDue && outstanding === 0 && zakatPaid > 0;
   const freezeLabel =
     window.kind === "hawl"
-      ? `Hawl ${window.cycleStart}`
+      ? `Zakat year from ${window.cycleStart}`
       : `Zakat ${window.cycleStart.slice(0, 4)}`;
 
   const perAssetHawl = assetRows
@@ -79,25 +78,25 @@ export default async function YearPage({
   return (
     <div className="space-y-10">
       <header>
-        <p className="label text-brassDeep">Hawl and reckoning</p>
-        <h1 className="mt-1 font-serif text-3xl text-ink">The year</h1>
-        <p className="mt-2 max-w-xl text-sm text-sage">
-          Track the holding year, see what is payable, print a statement, and
-          freeze a copy when you pay. School: {MADHHAB_LABELS[madhhab]}.
+        <p className="label text-brassDeep">Zakat</p>
+        <h1 className="mt-1 font-serif text-3xl text-ink">This year’s zakat</h1>
+        <p className="mt-2 max-w-xl text-base text-sage">
+          How much, what you have given, and when it is due. When you have
+          given it all, keep a copy of the year.
         </p>
+        {madhhab !== "general" ? (
+          <p className="mt-1 text-xs text-sage">Counted the {MADHHAB_LABELS[madhhab]} way.</p>
+        ) : null}
       </header>
 
       {rolled && isIsoDay(rolled) && hawl && isoDay(hawl.startDate) === rolled ? (
         <section className="border border-pine/40 bg-pine/5 px-5 py-5" role="status">
-          <p className="label text-pine">Hawl rolled</p>
-          <p className="mt-1 font-serif text-xl text-ink">Next hawl starts {rolled}.</p>
+          <p className="label text-pine">A new year</p>
+          <p className="mt-1 font-serif text-xl text-ink">Your next zakat year starts {rolled}.</p>
           <p className="mt-1 text-sm text-sage">
-            Confirm the real payment day with local moon-sighting. Print last
-            year&apos;s statement from the frozen copy if you want paper.
+            Last year’s copy is kept below, under “Years you kept”. Open it to
+            print it.
           </p>
-          <Link href="/statement" className="btn-ghost mt-3">
-            Open statement
-          </Link>
         </section>
       ) : null}
 
@@ -105,12 +104,12 @@ export default async function YearPage({
 
       {cycleMet && (
         <section className="border border-pine bg-pine/5 px-5 py-6">
-          <p className="label text-pine">Cycle met</p>
+          <p className="label text-pine">All given</p>
           <p className="mt-2 font-serif text-2xl text-ink">
-            Zakat for this cycle is recorded.
+            You have given all of this year’s zakat.
           </p>
           <p className="mt-2 text-sm text-sage">
-            Seal the numbers, roll the ledger hawl, then print if you want paper.
+            Keep a copy of this year, then start counting the next one.
           </p>
           <CycleActions
             currency={c}
@@ -125,13 +124,13 @@ export default async function YearPage({
       {(dueNow || (anyAssetDue && phase === "payable" && outstanding > 0)) && (
         <section className="border border-pine bg-pine/5 px-5 py-6">
           <p className="label text-pine">
-            {dueNow ? "Ledger hawl is complete" : "A holding’s reminder hawl is complete"}
+            {dueNow ? "Your zakat day has come" : "A reminder date on something you own has come"}
           </p>
           <p className="mt-2 font-serif text-3xl text-ink nums">
             {formatMoney(outstanding, c)}
           </p>
           <p className="mt-2 text-sm text-sage">
-            Still outstanding after zakat recorded in {window.label.toLowerCase()}.
+            Still to give, after the zakat you noted {window.label.toLowerCase()}.
           </p>
           <CycleActions
             currency={c}
@@ -145,21 +144,21 @@ export default async function YearPage({
 
       <section className="panel">
         <div className="flex items-center justify-between gap-4">
-          <h2 className="font-serif text-xl text-ink">Ledger hawl</h2>
-          <Link href="/settings" className="text-sm text-pine hover:underline">
-            {hawl ? "Adjust start" : "Set start date"}
+          <h2 className="font-serif text-xl text-ink">Your zakat day</h2>
+          <Link href="/settings#zakat-day" className="text-sm text-pine hover:underline">
+            {hawl ? "Change it" : "Set it"}
           </Link>
         </div>
         {hawl ? (
           <div className="mt-4">
             <div className="flex items-baseline justify-between text-sm">
               <span className="text-sage">
-                Started {formatHijri(hawl.startDate, calendar)}
+                {formatHijri(hawl.dueDate, calendar)}
               </span>
               <span className="font-medium text-ink">
                 {hawl.isComplete
-                  ? "Complete"
-                  : `${hawl.remainingDays} days remaining`}
+                  ? "It has come"
+                  : `${hawl.remainingDays} ${hawl.remainingDays === 1 ? "day" : "days"} left`}
               </span>
             </div>
             <div className="mt-3 h-1.5 overflow-hidden bg-mist">
@@ -169,9 +168,10 @@ export default async function YearPage({
               />
             </div>
             <p className="mt-3 text-xs text-sage">
-              Due on {formatHijri(hawl.dueDate, calendar)} (
-              {hawl.dueDate.toISOString().slice(0, 10)}), if wealth stays at or
-              above nisab. Follow local moon-sighting for the payment day.
+              Your zakat year began {formatHijri(hawl.startDate, calendar)}. It is
+              due on {hawl.dueDate.toISOString().slice(0, 10)}, if you still have
+              more than the minimum (nisab) then. The moon where you live may
+              move it by a day.
             </p>
             <div className="mt-3">
               <HawlCalendarLink dueDate={hawl.dueDate.toISOString().slice(0, 10)} />
@@ -186,18 +186,19 @@ export default async function YearPage({
           </div>
         ) : (
           <p className="mt-3 text-sm text-sage">
-            Set the date wealth first reached nisab. Mizan counts one lunar year
-            from there for payable status across this ledger.
+            Not set yet. It is one lunar year after the day you first had the
+            minimum (nisab). Not sure of that day? Pick one you will remember,
+            such as 1 Ramadan, and keep to it every year.
           </p>
         )}
       </section>
 
       {perAssetHawl.length > 0 && (
         <section className="panel">
-          <h2 className="font-serif text-xl text-ink">Per-holding reminders</h2>
+          <h2 className="font-serif text-xl text-ink">Reminder dates</h2>
           <p className="mt-1 text-sm text-sage">
-            Optional start dates on holdings — useful for new cash or recovered
-            debts. Reminder only; payable zakat still uses the ledger hawl above.
+            Dates you put on some of the things you own. They are reminders only:
+            your zakat is still worked out on your zakat day.
           </p>
           <ul className="mt-4 divide-y divide-mist border-t border-mist">
             {perAssetHawl.map((a) => (
@@ -210,32 +211,32 @@ export default async function YearPage({
                 </div>
                 <p className="text-sm text-ink">
                   {a.status.isComplete
-                    ? "Complete"
-                    : `${a.status.remainingDays}d left`}
+                    ? "Come"
+                    : `${a.status.remainingDays} days left`}
                 </p>
               </li>
             ))}
           </ul>
           <Link href="/assets" className="mt-3 inline-block text-sm text-pine hover:underline">
-            Edit on the ledger
+            Change them on “What I own”
           </Link>
         </section>
       )}
 
       <section className="panel">
-        <h2 className="font-serif text-xl text-ink">This reckoning</h2>
+        <h2 className="font-serif text-xl text-ink">This year’s figures</h2>
         <dl className="mt-4 space-y-3 text-sm">
           <div className="ledger-row">
-            <dt className="text-sage">Net zakatable</dt>
+            <dt className="text-sage">What counts, after debts</dt>
             <dd className="nums font-medium">{formatMoney(result.netZakatable, c)}</dd>
           </div>
           <div className="ledger-row">
-            <dt className="text-sage">Nisab ({settings.nisabStandard})</dt>
+            <dt className="text-sage">The minimum (nisab, by {settings.nisabStandard})</dt>
             <dd className="nums">{formatMoney(result.nisab, c)}</dd>
           </div>
           <div className="ledger-row">
             <dt className="text-sage">
-              {phase === "payable" ? "Zakat payable" : "Indicative zakat"} (
+              {phase === "payable" ? "Zakat due" : "Zakat, so far"} (
               {formatPercent(result.rate, result.basis === "solar" ? 3 : 1)})
             </dt>
             <dd className="nums font-medium text-pine">
@@ -243,21 +244,21 @@ export default async function YearPage({
             </dd>
           </div>
           <div className="ledger-row">
-            <dt className="text-sage">Paid · {window.label}</dt>
+            <dt className="text-sage">Given · {window.label}</dt>
             <dd className="nums">{formatMoney(zakatPaid, c)}</dd>
           </div>
           <div className="ledger-row">
-            <dt className="text-ink">Outstanding</dt>
+            <dt className="text-ink">{phase === "payable" ? "Still to give" : "Not given yet"}</dt>
             <dd className="nums font-medium">{formatMoney(outstanding, c)}</dd>
           </div>
         </dl>
         <p className="mt-3 text-xs text-sage">{window.detail}</p>
         <div className="mt-5 flex flex-wrap gap-3">
           <Link href="/zakat" className="btn-ghost">
-            Full breakdown
+            How it is worked out
           </Link>
           <Link href="/statement" className="btn-ghost">
-            Printable statement
+            Print this year
           </Link>
         </div>
       </section>
@@ -265,12 +266,12 @@ export default async function YearPage({
       <SnapshotCompare freezes={recentFreezes.slice(0, 2)} />
 
       <section id="freeze-year" className="panel space-y-6">
-        <ReckoningStepNav current="freeze" />
         <div>
-          <h2 className="font-serif text-xl text-ink">Freeze a year</h2>
+          <h2 className="font-serif text-xl text-ink">Keep a copy of the year</h2>
           <p className="mt-2 text-sm text-sage">
-            Close path: pay → freeze → roll the ledger hawl → statement. When you
-            pay, keep a frozen copy — and optionally a letter for next year.
+            Once you have given your zakat, keep a copy of this year’s figures,
+            then start counting the next year. You can add a note to read next
+            year.
           </p>
           {phase === "payable" ? (
             <CloseYearPath
@@ -289,7 +290,9 @@ export default async function YearPage({
         </div>
 
         {snaps.length > 0 && (
-          <ul className="mt-8 divide-y divide-mist border-t border-mist">
+          <div className="mt-8">
+          <h3 className="font-serif text-lg text-ink">Years you kept</h3>
+          <ul className="mt-2 divide-y divide-mist border-t border-mist">
             {snaps.map((s) => (
               <li key={s.id}>
                 <Link
@@ -305,6 +308,7 @@ export default async function YearPage({
               </li>
             ))}
           </ul>
+          </div>
         )}
       </section>
     </div>

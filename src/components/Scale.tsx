@@ -38,21 +38,21 @@ export default function Scale({
       </div>
 
       <div className={"mt-2 grid grid-cols-2 gap-4 " + (large ? "mt-4" : "")}>
-        <div className="text-left">
-          <p className="label">Zakatable wealth</p>
+        <div className="min-w-0 text-left">
+          <p className="label">What counts</p>
           <p
             className={
-              "mt-1 font-serif nums text-ink " + (large ? "text-3xl" : "text-2xl")
+              "mt-1 break-words font-serif nums text-ink " + (large ? "text-3xl" : "text-xl sm:text-2xl")
             }
           >
             {formatMoney(net, currency)}
           </p>
         </div>
-        <div className="text-right">
-          <p className="label">Nisab ({standardLabel})</p>
+        <div className="min-w-0 text-right">
+          <p className="label">Minimum (nisab, {standardLabel})</p>
           <p
             className={
-              "mt-1 font-serif nums text-brassDeep " + (large ? "text-3xl" : "text-2xl")
+              "mt-1 break-words font-serif nums text-brassDeep " + (large ? "text-3xl" : "text-xl sm:text-2xl")
             }
           >
             {formatMoney(nisab, currency)}
@@ -68,8 +68,8 @@ export default function Scale({
         }
       >
         {above
-          ? "At or above nisab."
-          : "Below nisab — no zakat due yet."}
+          ? "Above the minimum: zakat is due on your zakat day."
+          : "Below the minimum: no zakat is due."}
       </p>
     </>
   );

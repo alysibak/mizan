@@ -7,12 +7,11 @@ export default async function UdhiyahPage() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="label text-brassDeep">Seasonal</p>
-        <h1 className="mt-1 font-serif text-3xl text-ink">Udhiyah / qurbani</h1>
-        <p className="mt-2 max-w-xl text-sm text-sage">
-          Split the cost of an animal into shares. This does not decide whether
-          you are obligated, which animal qualifies, or local slaughter rules —
-          only the arithmetic of a shared purchase.
+        <p className="label text-brassDeep">Eid al-Adha</p>
+        <h1 className="mt-1 font-serif text-3xl text-ink">Qurbani (udhiyah)</h1>
+        <p className="mt-2 max-w-xl text-base text-sage">
+          Share the cost of an animal. This only does the sums: ask someone you
+          trust whether you must give qurbani and which animal is right.
         </p>
       </header>
       <UdhiyahTool currency={settings.currency} />

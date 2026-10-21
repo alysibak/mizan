@@ -3,7 +3,8 @@ import { amountParam, formatMoney } from "@/lib/money";
 import type { DuePhase } from "@/lib/giving-window";
 
 /**
- * One finish story everywhere: pay → freeze → roll hawl → statement.
+ * One way to finish a year everywhere: give, keep a copy, start the next
+ * year's count, print if wanted.
  */
 export default function CycleActions({
   currency,
@@ -29,7 +30,7 @@ export default function CycleActions({
     return (
       <div className={wrap}>
         <Link href="/settings#metal-prices" className="btn-primary">
-          Set today’s metal prices
+          Set today’s gold and silver prices
         </Link>
       </div>
     );
@@ -39,10 +40,7 @@ export default function CycleActions({
     return (
       <div className={wrap}>
         <Link href="/year" className="btn-primary">
-          Open The year
-        </Link>
-        <Link href="/tools/reckoning-night" className="btn-ghost">
-          Reckoning night
+          See this year’s zakat
         </Link>
       </div>
     );
@@ -55,10 +53,7 @@ export default function CycleActions({
           href={`/giving?type=zakat&amount=${amountParam(outstanding)}`}
           className="btn-primary"
         >
-          Record {formatMoney(outstanding, currency)} zakat
-        </Link>
-        <Link href="/year#freeze-year" className="btn-ghost">
-          Freeze after you pay
+          I gave {formatMoney(outstanding, currency)} zakat
         </Link>
       </div>
     );
@@ -71,10 +66,10 @@ export default function CycleActions({
           href={`/year/snapshots/${latestSnapshotId}`}
           className="btn-primary"
         >
-          Roll hawl → next cycle
+          Start next year’s count
         </Link>
         <Link href="/statement" className="btn-ghost">
-          Print statement
+          Print this year
         </Link>
       </div>
     );
@@ -83,14 +78,13 @@ export default function CycleActions({
   return (
     <div className={wrap}>
       <Link href="/year#freeze-year" className="btn-primary">
-        Freeze this reckoning
+        Keep a copy of this year
       </Link>
       <Link href="/statement" className="btn-ghost">
-        Print statement
+        Print this year
       </Link>
       <p className="basis-full text-xs text-sage">
-        After freeze: roll the ledger hawl on the snapshot, then print if you
-        want paper.
+        Then start next year’s count from the copy.
       </p>
     </div>
   );

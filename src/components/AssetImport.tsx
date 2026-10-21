@@ -72,7 +72,7 @@ export default function AssetImport({
       setErrors([res.error]);
       return;
     }
-    setMessage(`Imported ${res.data.count ?? preview.length} holdings.`);
+    setMessage(`Added ${res.data.count ?? preview.length}.`);
     setPreview(null);
     setText("");
     router.refresh();
@@ -81,14 +81,14 @@ export default function AssetImport({
   return (
     <details className="card group p-5">
       <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
-        <span className="font-serif text-lg text-ink">Import many at once from a CSV</span>
+        <span className="font-serif text-lg text-ink">Add many at once, from a spreadsheet</span>
         <span className="text-sage transition group-open:rotate-45" aria-hidden>
           +
         </span>
       </summary>
       <p className="mt-3 text-sm text-sage">
-        Paste or upload a CSV. Headers optional. Two columns work as description
-        and amount; Mizan will guess the category.
+        Paste rows from a spreadsheet, or choose a CSV file. Two columns are
+        enough, a name and an amount; Mizan guesses what kind each one is.
       </p>
 
       <div className="mt-4 flex flex-wrap items-center gap-3">

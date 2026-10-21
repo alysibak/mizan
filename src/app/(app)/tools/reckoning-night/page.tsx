@@ -5,11 +5,11 @@ export default function ReckoningNightPage() {
   return (
     <div className="space-y-10">
       <header>
-        <p className="label text-brassDeep">A sitting</p>
-        <h1 className="mt-1 font-serif text-4xl text-ink">Reckoning night</h1>
-        <p className="mt-3 max-w-lg text-sm leading-relaxed text-sage">
-          One path for the evening you close the year. Remember, watch nisab,
-          sketch envelopes, then pay → freeze → roll hawl → statement.
+        <p className="label text-brassDeep">When your zakat day comes</p>
+        <h1 className="mt-1 font-serif text-4xl text-ink">Close the year</h1>
+        <p className="mt-3 max-w-lg text-base leading-relaxed text-sage">
+          Three short steps. Check for anything you forgot, give your zakat,
+          then keep a copy of the year and start counting the next.
         </p>
       </header>
 
@@ -21,12 +21,9 @@ export default function ReckoningNightPage() {
               className="block py-8 transition hover:bg-mist/20"
             >
               <p className="text-xs tracking-[0.2em] text-brassDeep">
-                {String(s.n).padStart(2, "0")}
+                Step {s.n}
               </p>
               <p className="mt-2 font-serif text-2xl text-ink">{s.title}</p>
-              <p className="mt-2 text-sm text-pine">
-                {s.nextLabel ? `Continue → ${s.nextLabel}` : "Then roll hawl & statement"}
-              </p>
             </Link>
           </li>
         ))}
@@ -34,10 +31,10 @@ export default function ReckoningNightPage() {
 
       <div className="flex flex-wrap gap-3">
         <Link href={RECKONING_STEPS[0]!.href} className="btn-primary">
-          Begin step 1
+          Start step 1
         </Link>
         <Link href="/dashboard" className="btn-ghost">
-          Back to Balance
+          Back to Home
         </Link>
       </div>
     </div>

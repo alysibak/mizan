@@ -32,7 +32,7 @@ test("confirm an address, get a hawl reminder once, and reset a password by link
   });
 
   await test.step("a reminder goes out once, a week ahead", async () => {
-    const toggle = page.getByRole("checkbox", { name: /Email me a week before my hawl day/ });
+    const toggle = page.getByRole("checkbox", { name: /Email me a week before my zakat day/ });
     await toggle.check();
     await expect(toggle).toBeChecked();
     await expect(toggle).toBeEnabled();
