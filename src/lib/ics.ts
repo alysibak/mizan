@@ -146,3 +146,45 @@ export function daysCalendar(opts: {
   lines.push("END:VCALENDAR");
   return `${lines.join("\r\n")}\r\n`;
 }
+
+/**
+ * A whole-day event on the given weekdays each week, from `start` up to the
+ * day before `until`, reminding the evening before: for making up fasts on
+ * Mondays and Thursdays, the days the Prophet ﷺ liked to fast.
+ */
+export function weeklyCalendar(opts: {
+  start: string;
+  until: string;
+  /** iCalendar weekday codes, e.g. ["MO", "TH"]. */
+  days: string[];
+  summary: string;
+  description: string;
+  uid: string;
+  now?: Date;
+}): string {
+  const stamp = (opts.now ?? new Date()).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  return `${[
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Mizan//Fasts//EN",
+    "CALSCALE:GREGORIAN",
+    "METHOD:PUBLISH",
+    "BEGIN:VEVENT",
+    `UID:${opts.uid}@mizan.app`,
+    `DTSTAMP:${stamp}`,
+    `DTSTART;VALUE=DATE:${icsDay(opts.start)}`,
+    `DTEND;VALUE=DATE:${icsDay(nextDay(opts.start))}`,
+    `RRULE:FREQ=WEEKLY;BYDAY=${opts.days.join(",")};UNTIL=${icsDay(opts.until)}`,
+    `SUMMARY:${icsText(opts.summary)}`,
+    `DESCRIPTION:${icsText(opts.description)}`,
+    "TRANSP:TRANSPARENT",
+    "BEGIN:VALARM",
+    "ACTION:DISPLAY",
+    `DESCRIPTION:${icsText(`Tomorrow: ${opts.summary}`)}`,
+    // The evening before: time to eat suhoor and make the intention.
+    "TRIGGER:-PT4H",
+    "END:VALARM",
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ].join("\r\n")}\r\n`;
+}

@@ -39,6 +39,11 @@ export const PUBLIC_TOOLS: PublicTool[] = [
     blurb: "Zakat, fitrana, and a gift spread over the last ten nights.",
   },
   {
+    path: "/fasts",
+    name: "Missed fasts",
+    blurb: "Make them up, or pay fidya or kaffarah, and count what is left.",
+  },
+  {
     path: "/give",
     name: "Where to give",
     blurb: "Who first, six questions for a charity, and giving well.",

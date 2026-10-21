@@ -83,3 +83,21 @@ describe("daysCalendar", () => {
     expect(ics).toContain("TRIGGER:PT9H");
   });
 });
+
+describe("weeklyCalendar", () => {
+  it("repeats on the chosen weekdays until the day given, reminding the evening before", async () => {
+    const { weeklyCalendar } = await import("./ics");
+    const ics = weeklyCalendar({
+      start: "2026-10-22",
+      until: "2027-02-07",
+      days: ["MO", "TH"],
+      summary: "Make up a fast",
+      description: "From Mizan.",
+      uid: "fasts",
+    });
+    expect(ics).toContain("RRULE:FREQ=WEEKLY;BYDAY=MO,TH;UNTIL=20270207");
+    expect(ics).toContain("DTSTART;VALUE=DATE:20261022");
+    expect(ics).toContain("TRIGGER:-PT4H");
+    expect(ics.split("\r\n").filter((l) => l === "BEGIN:VEVENT")).toHaveLength(1);
+  });
+});

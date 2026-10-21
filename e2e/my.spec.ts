@@ -304,3 +304,19 @@ test("the Menu leads to moving phones", async ({ page }) => {
   await page.waitForURL("**/my#move");
   await expect(page.getByRole("region", { name: "Getting a new phone?" })).toBeInViewport();
 });
+
+test("this year's figures can be sent to family or the imam to check", async ({ page }) => {
+  await page.goto("/shop");
+  await page.locator("#tool-currency").selectOption("USD");
+  await page.locator("#shop-business").fill("20000");
+  await page.goto("/my");
+  await page.getByRole("button", { name: "1 Ramadan" }).click();
+  const year = page.getByRole("region", { name: "This year’s zakat" });
+  const send = year.getByRole("link", { name: "Send on WhatsApp" });
+  const text = new URL((await send.getAttribute("href"))!).searchParams.get("text")!;
+  expect(text).toContain("My zakat for 1448 AH");
+  expect(text).toContain("Zakat day: 1 Ramadan");
+  expect(text).toContain("Zakat: US$500.00");
+  expect(text).toContain("What I counted:");
+  expect(text).toMatch(/\/my$/);
+});

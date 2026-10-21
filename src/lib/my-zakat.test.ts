@@ -131,6 +131,18 @@ describe("todos", () => {
     expect(keys).toEqual(["prices", "interest"]);
   });
 
+  it("asks for missed fasts to be made up, first when Ramadan is close", () => {
+    expect(todos({ ...base, fastsLeft: 3 }, today).find((t) => t.key === "fasts")).toMatchObject({
+      text: "Make up 3 missed fasts before Ramadan",
+      rank: 6,
+    });
+    // Close to Ramadan, straight after working out the zakat.
+    expect(todos({ ...base, fastsLeft: 1, ramadanIn: 20 }, today).map((t) => t.key)).toEqual(["work", "fasts", "day", "ramadan"]);
+    expect(todos({ ...base, fastsToGive: 40 }, today).find((t) => t.key === "fasts")?.text).toBe(
+      "Give the fidya for fasts you cannot make up",
+    );
+  });
+
   it("reminds about Zakat al-Fitr during Ramadan", () => {
     expect(todos({ ...base, ramadanIn: 0 }, today).map((t) => t.key)).toContain("fitr");
   });
@@ -231,5 +243,50 @@ describe("overdueDays", () => {
       new Date(2027, 1, 18),
     );
     expect(list[0]).toMatchObject({ key: "give", text: "Your zakat day was 10 days ago: give what is left now" });
+  });
+});
+
+describe("zakatDayOf and comingZakatDay", () => {
+  it("makes today a zakat day, and the next one comes a Hijri year later", async () => {
+    const { zakatDayOf, comingZakatDay } = await import("./my-zakat");
+    const zd = zakatDayOf(today); // 9 Jumada I 1448
+    expect(zd).toEqual({ month: 5, day: 9 });
+    const next = comingZakatDay(zd, today);
+    const gap = daysUntil(next, today);
+    expect(gap).toBeGreaterThanOrEqual(354);
+    expect(gap).toBeLessThanOrEqual(355);
+    // A zakat day still ahead is simply the next one.
+    expect(comingZakatDay({ month: 9, day: 1 }, today).toISOString().slice(0, 10)).toBe("2027-02-08");
+  });
+});
+
+describe("summaryText", () => {
+  it("puts this year's zakat in words to send, line by line", async () => {
+    const { summaryText } = await import("./my-zakat");
+    const text = summaryText({
+      money: (n) => `US$${n.toFixed(2)}`,
+      hijriYear: 1448,
+      zakatDay: "1 Ramadan (8 February 2027)",
+      isDue: true,
+      zakat: 500,
+      net: 20000,
+      nisab: 714,
+      given: 125,
+      lines: [{ label: "Cash in hand", amount: 20500 }],
+      debts: 500,
+      link: "https://mizan.app/my",
+    });
+    expect(text.split("\n")).toEqual([
+      "My zakat for 1448 AH",
+      "Zakat day: 1 Ramadan (8 February 2027)",
+      "Zakat: US$500.00 (2.5% of US$20000.00, above the nisab of US$714.00)",
+      "Given: US$125.00 · Left: US$375.00",
+      "",
+      "What I counted:",
+      "- Cash in hand: US$20500.00",
+      "- Debts due now: −US$500.00",
+      "",
+      "Worked out with Mizan: https://mizan.app/my",
+    ]);
   });
 });

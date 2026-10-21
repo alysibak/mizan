@@ -6,22 +6,16 @@
  */
 import { gregorianToHijri, hijriToGregorian, type HijriCalendar } from "./hijri";
 import { toCents } from "./money";
+import { PHONE_KEYS } from "./phone-features";
 
 export const MY_KEY = "mizan-my-v1";
 const CALENDAR: HijriCalendar = "umalqura";
 
-/** Every key Mizan keeps in a visitor's browser, for backing up and restoring. */
-export const BACKUP_KEYS = [
-  "mizan-calculator-v1",
-  "mizan-visitor-currency",
-  MY_KEY,
-  "mizan-missed-v1",
-  "mizan-family-v1",
-  "mizan-farm-v1",
-  "mizan-interest-v1",
-  "mizan-fitr-v1",
-  "mizan-sadaqah-days-v1",
-] as const;
+/**
+ * Every key Mizan keeps in a visitor's browser, for backing up, restoring and
+ * moving to a new phone: the figures, My zakat, and each tool in the registry.
+ */
+export const BACKUP_KEYS: readonly string[] = ["mizan-calculator-v1", "mizan-visitor-currency", MY_KEY, ...PHONE_KEYS];
 
 export interface ZakatDay {
   /** Hijri month, 1 (Muharram) to 12 (Dhul-Hijjah). */
@@ -189,6 +183,9 @@ export interface Snapshot {
   signedIn?: boolean;
   /** Days since a zakat day that is not yet closed (see overdueDays). */
   overdueDays?: number | null;
+  /** Missed fasts still to make up, and fidya or oath food still to give. */
+  fastsLeft?: number;
+  fastsToGive?: number;
 }
 
 export interface Todo {
@@ -242,6 +239,18 @@ export function todos(s: Snapshot, today: Date): Todo[] {
   }
   if (s.missedLeft > 0.005) list.push({ key: "missed", text: "Keep paying off past years", href: "/missed-years", rank: 6 });
   if (s.farmDue) list.push({ key: "farm", text: "Give the share of your harvest or herd", href: "/farm", rank: 7 });
+  const fasts = s.fastsLeft ?? 0;
+  if (fasts > 0) {
+    // Fasts are made up before the next Ramadan; close to it, they come first.
+    list.push({
+      key: "fasts",
+      text: `Make up ${fasts} missed ${fasts === 1 ? "fast" : "fasts"} before Ramadan`,
+      href: "/fasts",
+      rank: s.ramadanIn > 0 && s.ramadanIn <= 60 ? 2 : 6,
+    });
+  } else if ((s.fastsToGive ?? 0) > 0.005) {
+    list.push({ key: "fasts", text: "Give the fidya for fasts you cannot make up", href: "/fasts", rank: 6 });
+  }
   if (s.ramadanIn === 0) {
     list.push({ key: "fitr", text: "Give Zakat al-Fitr before the Eid prayer", href: "/zakat-al-fitr", rank: 1 });
   } else if (s.ramadanIn <= 30) {
@@ -334,4 +343,48 @@ export function overdueDays(my: MyZakat, today: Date, window = 60): number | nul
   if (since > window) return null;
   const lastDay = last.toISOString().slice(0, 10);
   return my.history.some((h) => h.closed >= lastDay) ? null : since;
+}
+
+/** A date's Hijri day as a zakat day, the 30th kept to the 29th so every year has it. */
+export function zakatDayOf(date: Date): ZakatDay {
+  const h = gregorianToHijri(utcDay(date), CALENDAR);
+  return { month: h.month, day: Math.min(29, h.day) };
+}
+
+/** The next zakat day after today: a year on if today is the day itself. */
+export function comingZakatDay(zd: ZakatDay, today: Date): Date {
+  const [first, second] = zakatDays(zd, today, 2);
+  return daysUntil(first, today) === 0 ? second : first;
+}
+
+/** This year's zakat as plain text to send to family or an imam, by the visitor's choice. */
+export function summaryText(s: {
+  money: (n: number) => string;
+  hijriYear: number;
+  zakatDay: string | null;
+  isDue: boolean;
+  zakat: number;
+  net: number;
+  nisab: number;
+  given: number;
+  lines: { label: string; amount: number }[];
+  debts: number;
+  link: string;
+}): string {
+  const out = [`My zakat for ${s.hijriYear} AH`];
+  if (s.zakatDay) out.push(`Zakat day: ${s.zakatDay}`);
+  out.push(
+    s.isDue
+      ? `Zakat: ${s.money(s.zakat)} (2.5% of ${s.money(s.net)}, above the nisab of ${s.money(s.nisab)})`
+      : `No zakat due: ${s.money(s.net)} is below the nisab of ${s.money(s.nisab)}`,
+  );
+  if (s.isDue) {
+    const left = Math.max(0, s.zakat - s.given);
+    out.push(`Given: ${s.money(s.given)} · ${left > 0.005 ? `Left: ${s.money(left)}` : "All given"}`);
+  }
+  out.push("", "What I counted:");
+  for (const l of s.lines) out.push(`- ${l.label}: ${s.money(l.amount)}`);
+  if (s.debts > 0) out.push(`- Debts due now: −${s.money(s.debts)}`);
+  out.push("", `Worked out with Mizan: ${s.link}`);
+  return out.join("\n");
 }

@@ -17,8 +17,8 @@ import {
 } from "@/lib/calculator";
 import { NISAB_GOLD_GRAMS, NISAB_SILVER_GRAMS } from "@/lib/nisab";
 import { formatMoney, formatPercent } from "@/lib/money";
-import { setStoredValue, useHydrated } from "@/lib/client-store";
-import { hawlDueDate } from "@/lib/hijri";
+import { readStoredValue, setStoredValue, useHydrated, useStoredValue } from "@/lib/client-store";
+import { MY_KEY, comingZakatDay, parseMy, zakatDayOf } from "@/lib/my-zakat";
 import { hawlCalendar } from "@/lib/ics";
 import { track } from "@/lib/analytics";
 import { CurrencyOptions } from "@/components/public/VisitorCurrency";
@@ -792,13 +792,20 @@ function Result({
   share: ShareLabels;
 }) {
   const signedIn = useSignedIn();
+  const myRaw = useStoredValue(MY_KEY);
   const intl = LOCALE_INFO[locale].intl;
   const { result } = outcome;
   const rate = formatPercent(result.rate, draft.basis === "solar" ? 3 : 1, intl);
-  const nextYear = hawlDueDate(new Date());
+  // The guide's reminder and My zakat keep one zakat day: the one already
+  // chosen, or today, chosen by asking to be reminded.
+  const zakatDay = parseMy(myRaw).zakatDay;
+  const nextYear = comingZakatDay(zakatDay ?? zakatDayOf(new Date()), new Date());
   const nextYearText = nextYear.toLocaleDateString(intl, { dateStyle: "long", timeZone: "UTC" });
 
   function remind() {
+    if (!zakatDay) {
+      setStoredValue(MY_KEY, JSON.stringify({ ...parseMy(readStoredValue(MY_KEY)), zakatDay: zakatDayOf(new Date()) }));
+    }
     const ics = hawlCalendar({
       dueDay: nextYear.toISOString().slice(0, 10),
       calendarLabel: "lunar",
@@ -939,7 +946,7 @@ function Result({
             {m.result.reminder}
           </button>
           <p className="mt-2 text-xs text-sage">
-            {fmt(m.result.reminderHint, { date: nextYearText })}
+            {fmt(zakatDay ? m.result.reminderHintDay : m.result.reminderHint, { date: nextYearText })}
           </p>
         </div>
         <div className="border border-mist bg-paper/60 p-4">

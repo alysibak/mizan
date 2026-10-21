@@ -537,6 +537,7 @@ const en = {
       doTitle: "What you can do now",
       reminder: "Remind me next year",
       reminderHint: "Adds {date} to your calendar: one Islamic year from today.",
+      reminderHintDay: "Adds {date} to your calendar: your zakat day.",
       reminderSummary: "Zakat: time to work it out again",
       reminderBody:
         "One Islamic year has passed since you last worked out your zakat. Check the date with your local moon-sighting.",

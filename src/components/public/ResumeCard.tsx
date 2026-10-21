@@ -1,7 +1,9 @@
 "use client";
 
+import type { ComponentType } from "react";
 import Link from "next/link";
-import { IconCoins, IconSmile, IconUsers, IconYear } from "@/components/icons";
+import { IconCoins, IconQuestion, IconYear } from "@/components/icons";
+import { PAGE_ICONS } from "@/components/pageIcons";
 import { useVisitorCurrency } from "@/components/public/VisitorCurrency";
 import {
   CALC_STORAGE_KEY,
@@ -11,10 +13,10 @@ import {
   parseAmount,
   parseDraft,
 } from "@/lib/calculator";
-import { useHydrated, useStoredValue } from "@/lib/client-store";
+import { useHydrated, useStoredValue, useStoredValues } from "@/lib/client-store";
 import { MISSED_KEY, missedZakat, parseTally, tallyAmounts } from "@/lib/missed";
 import { formatMoney } from "@/lib/money";
-import { DEED_DAYS_KEY, parseDays, streak } from "@/lib/streak";
+import { PHONE_KEYS, phoneLines } from "@/lib/phone-features";
 import { LOCALE_INFO, fmt, localePath, type Locale } from "@/i18n/config";
 
 export interface ResumeLabels {
@@ -30,7 +32,7 @@ export interface ResumeLabels {
 
 interface Row {
   key: string;
-  Icon: typeof IconCoins;
+  Icon: ComponentType<{ className?: string }>;
   title: string;
   status: string;
   href: string;
@@ -46,8 +48,7 @@ export default function ResumeCard({ locale, labels }: { locale: Locale; labels:
   const [currency] = useVisitorCurrency();
   const draftRaw = useStoredValue(CALC_STORAGE_KEY);
   const missedRaw = useStoredValue(MISSED_KEY);
-  const daysRaw = useStoredValue(DEED_DAYS_KEY);
-  const familyRaw = useStoredValue("mizan-family-v1");
+  const phone = useStoredValues(PHONE_KEYS);
   if (!hydrated) return null;
 
   const intl = LOCALE_INFO[locale].intl;
@@ -87,32 +88,13 @@ export default function ResumeCard({ locale, labels }: { locale: Locale; labels:
     });
   }
 
-  // Pages in English only so far.
+  // The other tools that remember something, from the one registry; their
+  // pages are in English only so far.
   if (locale === "en") {
-    const days = parseDays(daysRaw);
-    if (days.size) {
-      const run = streak(days, new Date());
-      rows.push({
-        key: "deeds",
-        Icon: IconSmile,
-        title: "Your good deeds",
-        status: run > 0 ? `${run} ${run === 1 ? "day" : "days"} in a row` : "Start a new run today",
-        href: "/sadaqah",
-      });
-    }
-    try {
-      const people = familyRaw ? (JSON.parse(familyRaw) as { members?: unknown[] }).members : null;
-      if (Array.isArray(people) && people.length > 1) {
-        rows.push({
-          key: "family",
-          Icon: IconUsers,
-          title: "Your family’s zakat",
-          status: `${people.length} people`,
-          href: "/family",
-        });
-      }
-    } catch {
-      /* nothing readable kept */
+    const ctx = { today: new Date(), money: (n: number) => formatMoney(n, currency, intl), decimal, intl };
+    for (const line of phoneLines(phone, ctx)) {
+      if (line.key === "missed") continue; // already above, in the page's words
+      rows.push({ ...line, Icon: PAGE_ICONS[line.icon] ?? IconQuestion });
     }
   }
 

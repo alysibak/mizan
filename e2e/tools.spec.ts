@@ -69,6 +69,7 @@ test("every tool page is linked from the footer and has no horizontal scroll", a
   await page.goto("/");
   for (const name of [
     "Ramadan giving",
+    "Missed fasts",
     "Where to give",
     "Bank interest",
     "Sadaqah without money",
@@ -87,7 +88,7 @@ test("every tool page is linked from the footer and has no horizontal scroll", a
     const res = await page.request.get(href!);
     expect(res.status()).toBe(200);
   }
-  for (const path of ["/ramadan", "/give", "/interest", "/sadaqah", "/quiz", "/family", "/shop", "/farm", "/inheritance", "/zakat-al-fitr", "/halal-stocks", "/qurbani"]) {
+  for (const path of ["/ramadan", "/fasts", "/give", "/interest", "/sadaqah", "/quiz", "/family", "/shop", "/farm", "/inheritance", "/zakat-al-fitr", "/halal-stocks", "/qurbani"]) {
     await page.goto(path);
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -319,4 +320,36 @@ test("pages can be shared, and nisab links preview today’s figures", async ({ 
     "content",
     /\/nisab\/pkr\/opengraph-image/,
   );
+});
+
+test("missed fasts: the reason says what to do, the count goes down, and My zakat keeps it", async ({ page }) => {
+  await page.goto("/fasts");
+  await page.getByRole("button", { name: "I am too old or ill to ever fast" }).click();
+  await expect(page.getByRole("status")).toContainText("feed one poor person for each day");
+
+  await page.locator("#fasts-owed").fill("5");
+  await page.getByRole("button", { name: "I made up a fast" }).click();
+  await page.getByRole("button", { name: "I made up a fast" }).click();
+  await expect(page.getByText("3 fasts left · 2 made up")).toBeVisible();
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Remind me on Mondays and Thursdays" }).click();
+  expect((await download).suggestedFilename()).toBe("make-up-fasts.ics");
+
+  await page.locator("#tool-currency").selectOption("USD");
+  await page.locator("#fasts-per-day").fill("8");
+  await page.locator("#fasts-fidya-days").fill("30");
+  await expect(page.getByText("Fidya: US$240.00 (30 meals)")).toBeVisible();
+  await page.locator("#fasts-kaffarah").fill("1");
+  await expect(page.getByText(/Fast 60 days in a row/)).toBeVisible();
+  await page.locator("#fasts-oaths").fill("1");
+  await expect(page.getByText(/Feed or clothe 10 poor people/)).toContainText("US$80.00");
+
+  // My zakat counts what is left and puts it on the list.
+  await page.goto("/my");
+  await expect(page.getByRole("region", { name: "What to do next" })).toContainText("Make up 3 missed fasts before Ramadan");
+  await expect(page.getByText("3 fasts to make up · US$320.00 to give · 60 days of kaffarah")).toBeVisible();
+
+  // And Ask finds it.
+  await page.goto("/ask?q=fidya");
+  await expect(page.getByRole("region", { name: "Answers" }).getByText("Too old or ill to fast: fidya")).toBeVisible();
 });

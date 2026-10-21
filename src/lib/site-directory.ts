@@ -52,6 +52,7 @@ export function siteDirectory(locale: Locale): DirectoryGroup[] {
         { href: to("/who-can-receive"), label: choose.who, icon: "who" },
         ...only([{ href: "/give", label: "Where to give, and which charity", icon: "give" }]),
         { href: "/ramadan", label: footer.ramadan + inEnglish, icon: "ramadan" },
+        ...only([{ href: "/fasts", label: "Fasts I missed", icon: "fasts" }]),
         ...only([{ href: "/sadaqah", label: "Charity without money", icon: "sadaqah" }]),
       ],
     },

@@ -5,29 +5,16 @@ import Link from "next/link";
 import { useSignedIn } from "@/components/useSignedIn";
 import InstallHint from "@/components/InstallHint";
 import MovePhone, { MoveFromLink } from "@/components/public/MovePhone";
-import {
-  IconBank,
-  IconBowl,
-  IconCheckCircle,
-  IconCoins,
-  IconGoat,
-  IconMoon,
-  IconSmile,
-  IconUsers,
-  IconYear,
-} from "@/components/icons";
+import { IconCheckCircle, IconQuestion } from "@/components/icons";
+import { PAGE_ICONS } from "@/components/pageIcons";
 import { useVisitorCurrency } from "@/components/public/VisitorCurrency";
 import { useMyDraft } from "@/components/public/useMyDraft";
 import { BalanceScale } from "@/components/public/Visuals";
 import { MoneyInput } from "@/components/ZakatCalculator";
 import { decimalMarkFor, parseAmount } from "@/lib/calculator";
-import { readStoredValue, setStoredValue, useHydrated, useStoredState, useStoredValue } from "@/lib/client-store";
-import { FARM_KEY, farmDues, parseFarm } from "@/lib/farm";
-import { FITR_KEY, parseFitr, zakatAlFitr } from "@/lib/fitr";
+import { readStoredValue, setStoredValue, useHydrated, useStoredState, useStoredValues } from "@/lib/client-store";
 import { HIJRI_MONTHS, gregorianToHijri, ramadanStatus } from "@/lib/hijri";
 import { daysCalendar } from "@/lib/ics";
-import { INTEREST_KEY, parseInterest } from "@/lib/interest";
-import { MISSED_KEY, missedZakat, parseTally, tallyAmounts } from "@/lib/missed";
 import { formatMoney } from "@/lib/money";
 import {
   MY_KEY,
@@ -43,12 +30,13 @@ import {
   parseMy,
   readBackup,
   removePayment,
+  summaryText,
   todos,
   zakatDays,
   type MyZakat,
   type ZakatDay,
 } from "@/lib/my-zakat";
-import { DEED_DAYS_KEY, parseDays, streak } from "@/lib/streak";
+import { PHONE_KEYS, phoneDues, phoneLines } from "@/lib/phone-features";
 
 const INTL = "en-CA";
 const longDate = (d: Date) =>
@@ -81,6 +69,49 @@ function Card({ id, title, children, className = "" }: { id: string; title: stri
       </h2>
       {children}
     </section>
+  );
+}
+
+/**
+ * Send this year's figures to someone who can check them: the phone's own
+ * share sheet, or WhatsApp and a copy elsewhere. Only on the visitor's tap.
+ */
+function SendSummary({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  if (typeof navigator.share === "function") {
+    return (
+      <button
+        type="button"
+        className="btn-ghost px-5 py-3 text-base"
+        onClick={() => navigator.share({ title: "My zakat", text }).catch(() => undefined)}
+      >
+        Send to family or the imam
+      </button>
+    );
+  }
+  return (
+    <>
+      <a
+        className="btn-ghost px-5 py-3 text-base"
+        href={`https://wa.me/?text=${encodeURIComponent(text)}`}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Send on WhatsApp
+      </a>
+      <button
+        type="button"
+        className="btn-ghost px-5 py-3 text-base"
+        onClick={() =>
+          navigator.clipboard
+            ?.writeText(text)
+            .then(() => setCopied(true))
+            .catch(() => undefined)
+        }
+      >
+        <span aria-live="polite">{copied ? "Copied" : "Copy the summary"}</span>
+      </button>
+    </>
   );
 }
 
@@ -193,12 +224,8 @@ export default function MyZakatHub() {
   const [visitorCurrency] = useVisitorCurrency();
   const mine = useMyDraft(visitorCurrency);
   const [my, save] = useStoredState(MY_KEY, parseMy);
-  const tally = parseTally(useStoredValue(MISSED_KEY));
-  const farm = parseFarm(useStoredValue(FARM_KEY));
-  const interest = parseInterest(useStoredValue(INTEREST_KEY));
-  const fitr = parseFitr(useStoredValue(FITR_KEY));
-  const days = parseDays(useStoredValue(DEED_DAYS_KEY));
-  const familyRaw = useStoredValue("mizan-family-v1");
+  // Every other tool that remembers something, from the one registry.
+  const phone = useStoredValues(PHONE_KEYS);
   const [amount, setAmount] = useState("");
   const [to, setTo] = useState("");
   const [when, setWhen] = useState("");
@@ -220,19 +247,9 @@ export default function MyZakatHub() {
   const left = Math.max(0, due - given);
 
   const decimal = decimalMarkFor(INTL);
-  const missed = missedZakat(tallyAmounts(tally, decimal), tally.months);
-  const missedLeft = missed.valid ? Math.max(0, missed.total - parseAmount(tally.given, decimal)) : 0;
-  const farmOwes = farmDues(farm, (raw) => parseAmount(raw, "."));
-  const interestAmount = parseAmount(interest.interest, ".");
-  const fitrResult = zakatAlFitr(parseInt(fitr.people, 10) || 0, parseFloat(fitr.perPerson) || 0);
+  const phoneCtx = { today, money: visitorMoney, decimal, intl: INTL };
+  const dues = phoneDues(phone, phoneCtx);
   const ramadan = ramadanStatus(new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate())));
-  let familyCount = 0;
-  try {
-    const members = familyRaw ? (JSON.parse(familyRaw) as { members?: unknown[] }).members : null;
-    familyCount = Array.isArray(members) ? members.length : 0;
-  } catch {
-    /* nothing readable kept */
-  }
   const pricesAgeDays = draft.pricesAsOf
     ? Math.floor((today.getTime() - new Date(draft.pricesAsOf).getTime()) / 86_400_000)
     : null;
@@ -250,9 +267,7 @@ export default function MyZakatHub() {
       zakat: started && !needsPrices
         ? { due, given, pricesAgeDays, plan: plan.length ? (plan[0].day === isoToday() ? "now" : "later") : undefined }
         : null,
-      missedLeft,
-      interestToGive: interest.given ? 0 : interestAmount,
-      farmDue: farmOwes.cropKg > 0 || farmOwes.herds.length > 0,
+      ...dues,
       ramadanIn: ramadan.inRamadan ? 0 : ramadan.daysUntil,
       signedIn,
       overdueDays: overdue,
@@ -285,6 +300,22 @@ export default function MyZakatHub() {
     download("zakat-each-month.ics", daysCalendar({ events, uid: "zakat-month", weekBefore: false }), "text/calendar;charset=utf-8");
   }
 
+  const summary = summaryText({
+    money,
+    hijriYear: hijriYearOf(today),
+    zakatDay: my.zakatDay
+      ? `${my.zakatDay.day} ${HIJRI_MONTHS[my.zakatDay.month - 1]} (${longDate(nextZakatDay(my.zakatDay, today))})`
+      : null,
+    isDue: result.isDue,
+    zakat: result.zakatDue,
+    net: result.netZakatable,
+    nisab: result.nisab,
+    given,
+    lines: outcome.lines.map((l) => ({ label: l.label, amount: l.amount * l.zakatablePortion })),
+    debts: result.deductibleLiabilities,
+    link: `${window.location.origin}/my`,
+  });
+
   function close() {
     save(closeYear(my, { hijriYear: hijriYearOf(today), currency, due, given }, today));
     update({ given: "" });
@@ -301,55 +332,17 @@ export default function MyZakatHub() {
     });
   }
 
-  const also: { key: string; Icon: typeof IconCoins; title: string; status: string; href: string }[] = [];
-  if (missed.valid) {
-    also.push({
-      key: "missed",
-      Icon: IconYear,
-      title: "Past years",
-      status: missedLeft > 0.005 ? `${visitorMoney(missedLeft)} still to give` : "All paid off",
-      href: "/missed-years",
-    });
-  }
-  if (farmOwes.cropKg > 0 || farmOwes.herds.length) {
-    const parts = [
-      farmOwes.cropKg > 0 ? `${farmOwes.cropKg.toLocaleString(INTL)} kg of your harvest` : "",
-      ...farmOwes.herds.map((h) => h.dues.map((d) => `${d.count} from your ${h.herd === "sheep" ? "sheep and goats" : h.herd === "cattle" ? "cattle" : "camels"}`).join(", ")),
-    ].filter(Boolean);
-    also.push({ key: "farm", Icon: IconGoat, title: "Crops and animals", status: `Give ${parts.join("; ")}`, href: "/farm" });
-  }
-  if (interestAmount > 0) {
-    also.push({
-      key: "interest",
-      Icon: IconBank,
-      title: "Bank interest (not zakat)",
-      status: interest.given ? `${visitorMoney(interestAmount)} given away` : `${visitorMoney(interestAmount)} to give away`,
-      href: "/interest",
-    });
-  }
-  if (familyCount > 1) {
-    also.push({ key: "family", Icon: IconUsers, title: "Your family", status: `${familyCount} people, each weighed on their own`, href: "/family" });
-  }
-  if (fitrResult.total > 0) {
-    also.push({
-      key: "fitr",
-      Icon: IconBowl,
-      title: "Zakat al-Fitr",
-      status: `${visitorMoney(fitrResult.total)} for ${fitr.people} ${fitr.people === "1" ? "person" : "people"}, before the Eid prayer`,
-      href: "/zakat-al-fitr",
-    });
-  }
-  if (days.size) {
-    const run = streak(days, today);
-    also.push({ key: "deeds", Icon: IconSmile, title: "Good deeds", status: run ? `${run} ${run === 1 ? "day" : "days"} in a row` : "Start a new run today", href: "/sadaqah" });
-  }
-  also.push({
-    key: "ramadan",
-    Icon: IconMoon,
-    title: "Ramadan",
-    status: ramadan.inRamadan ? `Day ${ramadan.day} of Ramadan` : `In ${ramadan.daysUntil} days`,
-    href: "/ramadan",
-  });
+  // Ramadan always comes round, kept or not.
+  const also = [
+    ...phoneLines(phone, phoneCtx),
+    {
+      key: "ramadan",
+      icon: "ramadan",
+      title: "Ramadan",
+      status: ramadan.inRamadan ? `Day ${ramadan.day} of Ramadan` : `In ${ramadan.daysUntil} days`,
+      href: "/ramadan",
+    },
+  ].map((l) => ({ ...l, Icon: PAGE_ICONS[l.icon] ?? IconQuestion }));
 
   return (
     <div className="space-y-6">
@@ -459,6 +452,7 @@ export default function MyZakatHub() {
                 Change my figures
               </Link>
             ) : null}
+            {started && !needsPrices ? <SendSummary text={summary} /> : null}
             <Link href="/shop" className="btn-ghost px-5 py-3 text-base">
               I have a shop
             </Link>

@@ -282,6 +282,10 @@ test("the step-by-step guide explains each step and ends with things to do", asy
   const download = page.waitForEvent("download");
   await page.getByRole("button", { name: "Remind me next year" }).click();
   expect((await download).suggestedFilename()).toBe("zakat-reminder.ics");
+  // Asking to be reminded makes today the zakat day, the same one My zakat keeps.
+  await expect(page.getByText(/to your calendar: your zakat day\./)).toBeVisible();
+  const kept = await page.evaluate(() => JSON.parse(localStorage.getItem("mizan-my-v1") ?? "{}"));
+  expect(kept.zakatDay).toMatchObject({ month: expect.any(Number), day: expect.any(Number) });
 
   // Giving in parts: what is left, then a word when it is all given.
   await page.fill("#guide-given", "200");

@@ -68,7 +68,8 @@ test("someone coming back is offered what they started", async ({ page }) => {
   const back = page.getByRole("region", { name: "Pick up where you left off" });
   await expect(back.getByText("Your zakat is US$500.00")).toBeVisible();
   await expect(back.getByText("Still to give: US$300.00")).toBeVisible();
-  await expect(back.getByText("Your good deeds")).toBeVisible();
+  // The same words as My zakat, from the one list of what the phone keeps.
+  await expect(back.getByText("Good deeds")).toBeVisible();
   await back.getByRole("link", { name: /Your zakat is/ }).click();
   await page.waitForURL("**/my");
 });

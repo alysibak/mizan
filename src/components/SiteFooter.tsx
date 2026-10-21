@@ -2,7 +2,7 @@ import Link from "next/link";
 import { LOCALES, LOCALE_INFO, localePath, type Locale } from "@/i18n/config";
 import { messagesFor } from "@/i18n/messages";
 
-const LEARN = new Set(["/give", "/interest", "/sadaqah", "/quiz"]);
+const LEARN = new Set(["/give", "/interest", "/sadaqah", "/quiz", "/fasts"]);
 
 /** The free tools, labelled in `locale` (most of them are in English only). */
 export function toolLinks(locale: Locale): { href: string; label: string }[] {
@@ -20,6 +20,7 @@ export function toolLinks(locale: Locale): { href: string; label: string }[] {
     // English pages not yet named in other languages are listed in English only.
     ...(locale === "en"
       ? [
+          { href: "/fasts", label: "Missed fasts" },
           { href: "/give", label: "Where to give" },
           { href: "/interest", label: "Bank interest" },
           { href: "/sadaqah", label: "Sadaqah without money" },

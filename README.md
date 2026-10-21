@@ -202,9 +202,21 @@ work.
   round shares, with a calendar reminder each month; the plan moves on once
   this month's share is noted. Zakat whose day has passed and is not yet
   closed is never spread: My zakat asks for it now.
+  This year's figures can be sent, by the visitor's choice, to family or
+  an imam to check (the phone's share sheet, or WhatsApp and copy). The
+  guide's "Remind me next year" uses the same zakat day, and makes today
+  the zakat day if none is chosen.
   Once a zakat day is chosen, My zakat offers a place on the home screen
   (the browser's install button, or the steps for Safari), the same hint
   the dashboard shows; dismissing one dismisses both.
+- **Fasts I missed** (`/fasts`, English): tap why the fasts were missed
+  (illness or travel, a period or childbirth, pregnancy or breastfeeding,
+  too old or ill to ever fast, broken on purpose, a broken oath) and see
+  what follows, with the evidence and where scholars differ. Count the days
+  to make up and tick each one off, with a calendar reminder on Mondays and
+  Thursdays until Ramadan; fidya and kaffarah are worked out from what
+  feeding one person costs (or the Zakat al-Fitr amount). My zakat lists
+  what is left and puts it on the to-do list, first when Ramadan is near.
 - **Move to a new phone, without an account.** My zakat (or the Menu) makes
   an eight-character code and a picture to scan. The browser seals every
   `mizan-*` key with AES-GCM under a key derived from the code, and sends
@@ -241,7 +253,10 @@ work.
     right: interest set aside first, this year before past years, giving
     last.
   - On a phone, the home page's first screen is things to do; the worked
-    example and the Ramadan box come after the choices.
+    example and the Ramadan box come after the choices. There is one
+    chooser (the picture plan in English, the list of tasks elsewhere),
+    the ledger's features are a short list on a phone, and the wall of tool
+    buttons is gone: the Menu and the footer list every tool.
   - Every new tool ends with **What next?** picture buttons straight under
     the tool, so no page is a dead end.
   - The English "Ask a question" search finds the English-only pages too
@@ -425,48 +440,74 @@ people reach it and more reaches those in need.
 
 ## Project structure
 
+Mizan has two halves that meet in a few deliberate places.
+
+- **The phone side** needs no account. Public pages are static files; what a
+  visitor types stays in their browser's storage, under `mizan-*` keys. One
+  set of figures per person (the calculator draft) is shared by the
+  calculator, the guide, the shop page, the family page and My zakat.
+  Every other tool that remembers something is one entry in
+  `lib/phone-features.ts`: from that entry it appears in My zakat with its
+  status and dues, on the home page for someone coming back, in a saved
+  copy, and in a move to a new phone. A new tool is one entry, not four
+  edits.
+- **The account side** (the ledger) keeps holdings, debts, giving and
+  closed years in a database, and works out the year on the server.
+- **Where they meet:** opening an account brings the phone's figures, zakat
+  day and noted payments along (`/begin`); someone signed in can add what
+  they work out on the phone to the ledger they have ("From this phone" on
+  the holdings page); signed in, My zakat points to the ledger. Moving to a
+  new phone without an account goes through the server only as a sealed
+  copy it cannot open (`/api/move`).
+
 ```
 src/
   proxy.ts             redirects, cross-site write refusal, body-size limit
   instrumentation.ts   one structured log line per server error
   db/                  schema, client, demo seed
   i18n/                languages: config, and one typed message file each
+  content/             answers, evidence, guides and good deeds, as data
   lib/
     zakat.ts           calculation engine (pure)
+    calculator.ts      the shared figures: draft, parsing, lines, ledger rows
+    my-zakat.ts        zakat day, payments, record, to-dos, monthly plan,
+                       backup (pure)
+    phone-features.ts  the registry of tools that remember something (pure)
+    move.ts            codes and sealing for moving to a new phone
+    client-store.ts    browser storage as React state, kept in step
     nisab.ts · hijri.ts · giving-window.ts · madhhab.ts · screening.ts
-    calculator.ts      the public calculator's model (pure)
+    farm.ts · family.ts · fitr.ts · missed.ts · interest.ts · streak.ts
     price-sources.ts   parsing and sanity checks for free price feeds (pure)
     reckoning.ts       one loader for every reckoning screen
     api.ts             route guards: signed in, writable, password re-check,
                        row limits, capped body reads
     auth.ts · session.ts · rate-limit.ts · validation.ts · site.ts
     totp.ts            authenticator codes (RFC 6238, pure)
-    email.ts · email-content.ts · one-time-tokens.ts
+    email.ts · email-content.ts · one-time-tokens.ts · ics.ts
+    site-directory.ts  the Menu: every page, grouped by what a visitor wants
   app/
     page.tsx           landing (static)
-    calculator/        public calculator (static)
-    start/             zakat for beginners, with the "do I have to pay?" check
-    guide/             the calculator one explained question at a time
-    who-can-receive/   "can I give zakat to…?", person by person
-    what-counts/       "do I pay zakat on…?", thing by thing
-    sources/           the verse or hadith behind each rule
-    poster/            a printable A4 poster with a QR code
-    zakat-al-fitr/     fitrana for a household (translated)
-    [locale]/          every page above in Arabic, Urdu, Indonesian, Malay, Turkish, French
-    nisab/             nisab today, per currency (hourly)
+    my/                My zakat: the visitor's whole year, on the phone
+    calculator/ guide/ start/ who-can-receive/ what-counts/ missed-years/
+    ask/ sources/ poster/ worksheet/ zakat-al-fitr/ nisab/
+                       translated public pages; [locale]/ holds the other
+                       seven languages
+    shop/ family/ farm/ interest/ give/ ramadan/ sadaqah/ quiz/
+                       public tools in English
     inheritance/ halal-stocks/ qurbani/   free tools (English)
     guides/            zakat on gold, savings, shares, crypto, pensions, property
     privacy/ terms/ method/ trust/   inside the app's frame when signed in
     (auth)/            sign in, register, forgot
     reset/             new password from an emailed link
-    (setup)/begin/     setup wizard
+    (setup)/begin/     setup wizard, which brings the phone's figures along
     (app)/             balance, ledger, year, give, statement, tools, settings
-    api/               JSON routes, each scoped to the signed-in user
-  components/
-  content/guides.tsx   the guides' text, kept in step with the calculator
-drizzle/               SQL migrations (0000…0012)
+    api/               JSON routes; account routes are scoped to the
+                       signed-in user, move/ and metals/ need no account
+  components/          app components; public/ holds the public pages' parts
+drizzle/               SQL migrations (0000…0013)
 e2e/                   Playwright: yearly cycle, public pages, languages,
-                       tools, email, two-step sign-in, accessibility
+                       tools, navigation, My zakat, email, two-step sign-in,
+                       accessibility
 ```
 
 ## Configuration

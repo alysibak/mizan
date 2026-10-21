@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
-import SiteFooter, { toolLinks } from "@/components/SiteFooter";
+import SiteFooter from "@/components/SiteFooter";
 import JsonLd from "@/components/JsonLd";
 import RamadanCountdown from "@/components/public/RamadanCountdown";
 import ResumeCard from "@/components/public/ResumeCard";
@@ -159,47 +159,63 @@ export default function LandingView({ locale }: { locale: Locale }) {
             <RamadanCountdown m={all.ramadan} locale={locale} inEnglish={all.common.inEnglish} className="mt-6" />
           </div>
 
-          {/* One tap to the task, for anyone who would rather not read first. */}
-          <section className="order-2 lg:order-3 lg:col-span-2" aria-labelledby="choose">
-            <h2 id="choose" className="font-serif text-2xl text-ink sm:text-3xl">
-              {m.chooseTitle}
-            </h2>
-            <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {(
-                [
-                  ["/start", m.choose.start, IconCheckCircle],
-                  ["/guide", m.choose.guide, IconCoins],
-                  ["/what-counts", m.choose.counts, IconGoldBar],
-                  ["/who-can-receive", m.choose.who, IconGiving],
-                  ["/zakat-al-fitr", m.choose.fitr, IconCash],
-                  ["/nisab", m.choose.nisab, IconBalance],
-                  ["/missed-years", m.choose.missed, IconYear],
-                  ["/ask", m.choose.ask, IconQuestion],
-                ] as const
-              ).map(([path, label, Icon]) => (
-                <li key={path}>
-                  <Link
-                    href={localePath(locale, path)}
-                    className="card flex min-h-[72px] items-center gap-4 px-4 py-3 transition hover:border-pine"
-                  >
-                    <span
-                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-pine/30 bg-pine/5 text-pine"
-                      aria-hidden
-                    >
-                      <Icon className="h-6 w-6" />
-                    </span>
-                    <span className="text-base font-medium text-ink">{label}</span>
+          {/* One tap to the task, for anyone who would rather not read first. In
+              English the picture picker builds a plan from what they have,
+              with the commonest questions a tap away under it. */}
+          {locale === "en" ? (
+            <div className="order-2 lg:order-3 lg:col-span-2">
+              <PlanPicker />
+              <nav aria-label="Or go straight to" className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-base">
+                {(
+                  [
+                    ["/who-can-receive", m.choose.who],
+                    ["/zakat-al-fitr", m.choose.fitr],
+                    ["/nisab", m.choose.nisab],
+                    ["/ask", m.choose.ask],
+                  ] as const
+                ).map(([path, label]) => (
+                  <Link key={path} href={path} className="font-medium text-pine hover:underline">
+                    {label}
                   </Link>
-                </li>
-              ))}
-            </ul>
-            {/* For someone who does not know which page they need (English only so far). */}
-            {locale === "en" ? (
-              <div className="mt-10">
-                <PlanPicker />
-              </div>
-            ) : null}
-          </section>
+                ))}
+              </nav>
+            </div>
+          ) : (
+            <section className="order-2 lg:order-3 lg:col-span-2" aria-labelledby="choose">
+              <h2 id="choose" className="font-serif text-2xl text-ink sm:text-3xl">
+                {m.chooseTitle}
+              </h2>
+              <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                {(
+                  [
+                    ["/start", m.choose.start, IconCheckCircle],
+                    ["/guide", m.choose.guide, IconCoins],
+                    ["/what-counts", m.choose.counts, IconGoldBar],
+                    ["/who-can-receive", m.choose.who, IconGiving],
+                    ["/zakat-al-fitr", m.choose.fitr, IconCash],
+                    ["/nisab", m.choose.nisab, IconBalance],
+                    ["/missed-years", m.choose.missed, IconYear],
+                    ["/ask", m.choose.ask, IconQuestion],
+                  ] as const
+                ).map(([path, label, Icon]) => (
+                  <li key={path}>
+                    <Link
+                      href={localePath(locale, path)}
+                      className="card flex min-h-[72px] items-center gap-4 px-4 py-3 transition hover:border-pine"
+                    >
+                      <span
+                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-pine/30 bg-pine/5 text-pine"
+                        aria-hidden
+                      >
+                        <Icon className="h-6 w-6" />
+                      </span>
+                      <span className="text-base font-medium text-ink">{label}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
         </section>
 
         <section
@@ -212,31 +228,21 @@ export default function LandingView({ locale }: { locale: Locale }) {
               {m.featuresTitle}
             </h2>
             <p className="mt-4 max-w-2xl leading-relaxed text-sage">{m.featuresLede}</p>
-            <div className="mt-12 grid gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+            {/* On a phone, a short list of what it does; the explanations from a tablet up. */}
+            <ul className="mt-8 grid gap-x-10 gap-y-3 sm:mt-12 sm:grid-cols-2 sm:gap-y-10 lg:grid-cols-3">
               {m.features.map((f) => (
-                <div key={f.title} className="border-t border-mist pt-5">
-                  <h3 className="font-serif text-xl text-ink">{f.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-sage">{f.body}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="relative z-10 px-5 pt-16 md:px-10" aria-labelledby="free-tools">
-          <div className="mx-auto max-w-6xl">
-            <h2 id="free-tools" className="font-serif text-2xl text-ink">
-              {all.common.footer.toolsHeading}
-            </h2>
-            <ul className="mt-5 flex flex-wrap gap-2">
-              {toolLinks(locale).map((t) => (
-                <li key={t.href}>
-                  <Link href={t.href} className="btn-ghost">
-                    {t.label}
-                  </Link>
+                <li key={f.title} className="flex gap-3 sm:block sm:border-t sm:border-mist sm:pt-5">
+                  <IconCheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-pine sm:hidden" />
+                  <div>
+                    <h3 className="font-serif text-lg text-ink sm:text-xl">{f.title}</h3>
+                    <p className="mt-2 hidden text-sm leading-relaxed text-sage sm:block">{f.body}</p>
+                  </div>
                 </li>
               ))}
             </ul>
+            <Link href="/register" className="btn-primary mt-8 px-6 py-3 text-base sm:mt-10">
+              {m.ctaLedger}
+            </Link>
           </div>
         </section>
 

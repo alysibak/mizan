@@ -6,6 +6,7 @@ import { CurrencySelect, useVisitorCurrency } from "@/components/public/VisitorC
 import { BalanceScale } from "@/components/public/Visuals";
 import { MoneyInput } from "@/components/ZakatCalculator";
 import { parseAmount } from "@/lib/calculator";
+import { FAMILY_KEY } from "@/lib/phone-features";
 import { setStoredValue, useStoredValue } from "@/lib/client-store";
 import { useMetalPrices } from "@/components/public/useMetalPrices";
 import { familyOf, personFromNet, personZakat } from "@/lib/family";
@@ -14,7 +15,6 @@ import { KARAT_PURITY, TOLA_GRAMS, usesTola } from "@/lib/metals";
 import { formatMoney } from "@/lib/money";
 
 const INTL = "en-CA";
-const KEY = "mizan-family-v1";
 const MAX_PEOPLE = 12;
 const GOLD_KARATS = KARAT_PURITY.filter((k) => k.purity !== 0.925);
 
@@ -101,8 +101,8 @@ function parseFamily(raw: string | null): Family {
  */
 export default function FamilyPlanner() {
   const [currency, setCurrency] = useVisitorCurrency();
-  const family = parseFamily(useStoredValue(KEY));
-  const save = (next: Family) => setStoredValue(KEY, JSON.stringify(next));
+  const family = parseFamily(useStoredValue(FAMILY_KEY));
+  const save = (next: Family) => setStoredValue(FAMILY_KEY, JSON.stringify(next));
   const prices = useMetalPrices(currency);
   const known = prices.gold !== null;
   const nisab = prices.nisab[family.standard];

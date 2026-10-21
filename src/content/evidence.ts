@@ -855,4 +855,135 @@ export const EVIDENCE: Record<string, CaseEvidence> = {
       },
     ],
   },
+
+  // Fasts missed in Ramadan, made up day for day.
+  "fasts-make-up": {
+    evidence: [
+      {
+        strength: "quran",
+        text: "“Whoever of you is ill or on a journey, then an equal number of other days… Allah wants ease for you, not hardship.”",
+        ref: "Quran 2:184–185",
+      },
+      {
+        strength: "sahih",
+        text: "‘A’ishah said that when they had their periods, “we were told to make up the fasts, and not told to make up the prayers.”",
+        ref: "Sahih Muslim, from ‘A’ishah",
+      },
+      {
+        strength: "agreed",
+        text: "‘A’ishah said she would have fasts to make up from Ramadan and could only make them up in Sha‘ban, before the next Ramadan.",
+        ref: "Sahih al-Bukhari and Sahih Muslim, from ‘A’ishah",
+      },
+    ],
+    views: [
+      {
+        who: "Hanafi scholars",
+        says: "A pregnant or breastfeeding woman who does not fast makes the days up later, like someone ill, and pays nothing.",
+        evidence: [
+          {
+            strength: "hasan",
+            text: "“Allah has lifted fasting from the traveller, and from the pregnant and the breastfeeding woman.”",
+            ref: "Sunan Abi Dawud and Sunan al-Tirmidhi, from Anas ibn Malik al-Ka‘bi",
+          },
+        ],
+      },
+      {
+        who: "Shafi‘i and Hanbali scholars",
+        says: "She makes the days up; and if she feared only for the baby, she also feeds a poor person for each day.",
+        evidence: [
+          {
+            strength: "companions",
+            text: "Ibn ‘Abbas read the fidya verse as covering a pregnant or nursing woman who fears for her child.",
+            ref: "Sunan Abi Dawud, from Ibn ‘Abbas",
+          },
+        ],
+      },
+    ],
+  },
+
+  // Fidya: feeding instead of fasting, for someone who never can.
+  fidya: {
+    evidence: [
+      {
+        strength: "quran",
+        text: "“And for those who can fast only with great hardship, a ransom: feeding a poor person.”",
+        ref: "Quran 2:184",
+      },
+      {
+        strength: "companions",
+        text: "Ibn ‘Abbas said the verse is for the old man and the old woman who cannot fast: they feed a poor person for each day.",
+        ref: "Sahih al-Bukhari, from Ibn ‘Abbas",
+      },
+    ],
+    views: [
+      {
+        who: "Hanafi scholars",
+        says: "Each day is half a sa‘ of wheat or a sa‘ of dates or barley, the same as Zakat al-Fitr for one person, or its value.",
+        evidence: [
+          {
+            strength: "reasoning",
+            text: "Fidya is measured like Zakat al-Fitr, the other payment counted in meals for one person.",
+            ref: "Hanafi books of law",
+          },
+        ],
+      },
+      {
+        who: "Most other scholars",
+        says: "Each day is one mudd of the local staple food (a quarter of a sa‘), given as food.",
+        evidence: [
+          {
+            strength: "companions",
+            text: "When Anas grew too old to fast, he fed thirty poor people bread and meat, one for each day.",
+            ref: "Sahih al-Bukhari, mentioned without a chain; connected by al-Daraqutni",
+          },
+        ],
+      },
+    ],
+  },
+
+  // Kaffarah for a Ramadan fast broken on purpose.
+  kaffarah: {
+    evidence: [
+      {
+        strength: "agreed",
+        text: "A man came saying he was ruined: he had been with his wife in a day of Ramadan. The Prophet ﷺ asked whether he could free a slave, then whether he could fast two months in a row, then whether he could feed sixty poor people.",
+        ref: "Sahih al-Bukhari and Sahih Muslim, from Abu Hurayrah",
+      },
+    ],
+    views: [
+      {
+        who: "Hanafi and Maliki scholars",
+        says: "Eating or drinking on purpose in a day of Ramadan also brings kaffarah, as it breaks the fast just as deliberately.",
+        evidence: [
+          {
+            strength: "reasoning",
+            text: "The kaffarah is for breaking the fast of Ramadan on purpose; the act in the hadith is one way of doing so.",
+            ref: "Hanafi and Maliki books of law",
+          },
+        ],
+      },
+      {
+        who: "Shafi‘i and Hanbali scholars",
+        says: "Kaffarah is only for intercourse, the act in the hadith. Eating on purpose is made up and repented of, without kaffarah.",
+        evidence: [
+          {
+            strength: "reasoning",
+            text: "Kaffarah is fixed by the text and not extended by analogy to other acts.",
+            ref: "Shafi‘i and Hanbali books of law",
+          },
+        ],
+      },
+    ],
+  },
+
+  // Kaffarah for a broken oath.
+  oath: {
+    evidence: [
+      {
+        strength: "quran",
+        text: "“Its expiation is feeding ten poor people from the average of what you feed your own families, or clothing them, or freeing a slave. Whoever cannot find this, then fasting three days.”",
+        ref: "Quran 5:89",
+      },
+    ],
+  },
 };

@@ -496,6 +496,7 @@ const fr: Messages = {
       doTitle: "Ce que vous pouvez faire maintenant",
       reminder: "Me le rappeler l’an prochain",
       reminderHint: "Ajoute le {date} à votre agenda : une année hégirienne après aujourd’hui.",
+      reminderHintDay: "Ajoute le {date} à votre agenda : votre jour de zakat.",
       reminderSummary: "Zakat : il est temps de refaire le calcul",
       reminderBody: "Une année hégirienne s’est écoulée depuis votre dernier calcul de zakat. Vérifiez la date avec l’observation du croissant chez vous.",
       print: "Imprimer ou enregistrer",

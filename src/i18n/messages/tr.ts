@@ -500,6 +500,7 @@ const tr: Messages = {
       doTitle: "Şimdi neler yapabilirsiniz",
       reminder: "Gelecek yıl bana hatırlat",
       reminderHint: "Takviminize {date} tarihini ekler: bugünden bir hicri yıl sonrası.",
+      reminderHintDay: "Takviminize {date} tarihini ekler: zekât gününüz.",
       reminderSummary: "Zekât: yeniden hesaplama zamanı",
       reminderBody: "Zekâtınızı son hesapladığınızdan bu yana bir hicri yıl geçti. Tarihi bölgenizdeki hilal gözlemiyle kontrol edin.",
       print: "Yazdır veya kaydet",

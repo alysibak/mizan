@@ -75,6 +75,41 @@ export const ENGLISH_ANSWERS: EnglishAnswer[] = [
     page: "Sadaqah without money",
   },
   {
+    key: "missedFasts",
+    label: "I missed fasts in Ramadan",
+    answer:
+      "Make up each day you missed, one for one, before the next Ramadan if you can: after illness, travel, a period, or childbirth. Count what is left and tick each off as you fast it.",
+    href: "/fasts",
+    page: "Fasts I missed",
+    evidence: "fasts-make-up",
+  },
+  {
+    key: "fidya",
+    label: "Too old or ill to fast: fidya",
+    answer:
+      "Someone who cannot fast and is not expected to be able to does not make the days up: they feed one poor person for each day instead. Many mosques announce the amount each Ramadan.",
+    href: "/fasts",
+    page: "Fasts I missed",
+    evidence: "fidya",
+  },
+  {
+    key: "kaffarah",
+    label: "I broke a fast on purpose: kaffarah",
+    answer:
+      "Make the day up, repent, and fast sixty days in a row; only if you truly cannot, feed sixty poor people. Scholars differ on whether eating on purpose needs this, or only intercourse.",
+    href: "/fasts",
+    page: "Fasts I missed",
+    evidence: "kaffarah",
+  },
+  {
+    key: "oath",
+    label: "I swore an oath and broke it",
+    answer: "Feed or clothe ten poor people; only if you cannot, fast three days (Quran 5:89).",
+    href: "/fasts",
+    page: "Fasts I missed",
+    evidence: "oath",
+  },
+  {
     key: "quiz",
     label: "Learn the basics of zakat quickly",
     answer: "Ten picture questions, each answered at once with the reason. It takes two minutes.",

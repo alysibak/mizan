@@ -64,6 +64,7 @@ const copy: ToolPageCopy = {
   next: [
     { href: "/guide", label: "Work out my zakat", icon: "guide" },
     { href: "/zakat-al-fitr", label: "Zakat al-Fitr for my family", icon: "fitr" },
+    { href: "/fasts", label: "Fasts I missed last year", icon: "fasts" },
   ],
   faq: [
     {

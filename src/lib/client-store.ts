@@ -71,3 +71,29 @@ export function useStoredState<T>(key: string, parse: (raw: string | null) => T)
   const value = parse(useStoredValue(key));
   return [value, (next: T) => setStoredValue(key, JSON.stringify(next))];
 }
+
+/**
+ * Several stored values at once, as a reader for them: for lists of keys that
+ * do not change, such as every tool in the phone registry.
+ */
+export function useStoredValues(keys: readonly string[]): (key: string) => string | null {
+  // One string for all of them, so React can tell when any changed.
+  const joined = useSyncExternalStore(
+    (onChange) => {
+      const handler = (e: Event) => {
+        const changed = e instanceof StorageEvent ? e.key : (e as CustomEvent).detail;
+        if (changed === null || keys.includes(changed)) onChange();
+      };
+      window.addEventListener("storage", handler);
+      window.addEventListener(STORE_EVENT, handler);
+      return () => {
+        window.removeEventListener("storage", handler);
+        window.removeEventListener(STORE_EVENT, handler);
+      };
+    },
+    () => JSON.stringify(keys.map(readStored)),
+    () => "[]",
+  );
+  const values = JSON.parse(joined) as (string | null)[];
+  return (key) => values[keys.indexOf(key)] ?? null;
+}

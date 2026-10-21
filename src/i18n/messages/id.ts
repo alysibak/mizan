@@ -498,6 +498,7 @@ const id: Messages = {
       doTitle: "Yang bisa Anda lakukan sekarang",
       reminder: "Ingatkan saya tahun depan",
       reminderHint: "Menambahkan {date} ke kalender Anda: satu tahun Hijriah dari hari ini.",
+      reminderHintDay: "Menambahkan {date} ke kalender Anda: hari zakat Anda.",
       reminderSummary: "Zakat: saatnya menghitung lagi",
       reminderBody: "Satu tahun Hijriah telah berlalu sejak terakhir kali Anda menghitung zakat. Cocokkan tanggalnya dengan rukyat hilal setempat.",
       print: "Cetak atau simpan",
