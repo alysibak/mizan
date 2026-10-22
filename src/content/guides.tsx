@@ -246,11 +246,8 @@ export const GUIDES: Guide[] = [
         body: (
           <p>
             Zakat is separate from whether a share is permissible to hold, and from giving
-            away the impermissible part of its dividends. The{" "}
-            <Link href="/halal-stocks" className="text-pine hover:underline">
-              halal stock screen
-            </Link>{" "}
-            covers both. {calc("The calculator")} handles the zakat.
+            away the impermissible part of its dividends: ask someone of knowledge about
+            those. {calc("The calculator")} handles the zakat.
           </p>
         ),
       },

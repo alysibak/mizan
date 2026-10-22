@@ -14,7 +14,4 @@ export const ENGLISH_TOOL_PATHS = [
   "/family",
   "/shop",
   "/farm",
-  "/inheritance",
-  "/halal-stocks",
-  "/qurbani",
 ];

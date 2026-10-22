@@ -339,8 +339,8 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
           <p className="mt-1 text-xs text-sage">
             It does not change shares or pensions. Things you already added keep
             their part that counts until you change them.{" "}
-            <Link href="/trust" className="text-pine underline underline-offset-2">
-              What is verified
+            <Link href="/method" className="text-pine underline underline-offset-2">
+              How it works
             </Link>
           </p>
         </div>

@@ -25,8 +25,7 @@ const copy: ToolPageCopy = {
     },
   ],
   next: [
-    { href: "/start", label: "Find out if I have to pay", icon: "start" },
-    { href: "/guide", label: "Work out my zakat, step by step", icon: "guide" },
+    { href: "/guide", label: "Find out if I have to pay", icon: "start" },
   ],
   faq: [
     {

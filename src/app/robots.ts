@@ -10,9 +10,9 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: ["/", "/calculator", "/method", "/trust", "/privacy", "/terms"],
+        allow: ["/", "/calculator", "/method", "/privacy", "/terms"],
         // Private ledgers and the API are never search results.
-        disallow: ["/api/", "/dashboard", "/assets", "/year", "/giving", "/tools", "/settings", "/admin", "/begin", "/zakat", "/statement", "/screening", "/mirath"],
+        disallow: ["/api/", "/dashboard", "/assets", "/year", "/giving", "/tools", "/settings", "/admin", "/begin", "/zakat", "/statement"],
       },
     ],
     sitemap: new URL("/sitemap.xml", siteUrl()).toString(),

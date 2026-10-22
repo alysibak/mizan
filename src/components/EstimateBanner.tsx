@@ -12,8 +12,8 @@ export default function EstimateBanner() {
       <span className="font-medium text-ink">Estimate, not a ruling. </span>
       Mizan verifies the arithmetic you enter. It does not replace a qualified
       person of knowledge.{" "}
-      <Link href="/trust" className="text-pine hover:underline">
-        What is verified
+      <Link href="/method" className="text-pine hover:underline">
+        How it works
       </Link>
     </aside>
   );

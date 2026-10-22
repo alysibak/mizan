@@ -82,7 +82,7 @@ export default async function YearPage({
         <h1 className="mt-1 font-serif text-3xl text-ink">This year’s zakat</h1>
         <p className="mt-2 max-w-xl text-base text-sage">
           How much, what you have given, and when it is due. When you have
-          given it all, keep a copy of the year.
+          given it all, close the year.
         </p>
         {madhhab !== "general" ? (
           <p className="mt-1 text-xs text-sage">Counted the {MADHHAB_LABELS[madhhab]} way.</p>
@@ -109,7 +109,7 @@ export default async function YearPage({
             You have given all of this year’s zakat.
           </p>
           <p className="mt-2 text-sm text-sage">
-            Keep a copy of this year, then start counting the next one.
+            Close the year: Mizan keeps a copy and starts counting the next one.
           </p>
           <CycleActions
             currency={c}
@@ -267,11 +267,14 @@ export default async function YearPage({
 
       <section id="freeze-year" className="panel space-y-6">
         <div>
-          <h2 className="font-serif text-xl text-ink">Keep a copy of the year</h2>
+          <h2 className="font-serif text-xl text-ink">Close the year</h2>
           <p className="mt-2 text-sm text-sage">
-            Once you have given your zakat, keep a copy of this year’s figures,
-            then start counting the next year. You can add a note to read next
-            year.
+            Once you have given your zakat, close the year: Mizan keeps a copy
+            of this year’s figures and starts counting the next. You can add a
+            note to read next year.{" "}
+            <Link href="/tools/reckoning-night" className="text-pine hover:underline">
+              Do it step by step
+            </Link>
           </p>
           {phase === "payable" ? (
             <CloseYearPath
@@ -285,6 +288,7 @@ export default async function YearPage({
             <FreezeYearButton
               defaultLabel={freezeLabel}
               emphasize={cycleMet}
+              nextStart={hawl?.isComplete && !frozenThisCycle ? isoDay(hawl.dueDate) : null}
             />
           </div>
         </div>

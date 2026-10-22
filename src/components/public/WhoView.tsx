@@ -67,9 +67,6 @@ export default function WhoView({ locale }: { locale: Locale }) {
           <Link href={localePath(locale, "/guide")} className="btn-primary px-5 py-3 text-base">
             {all.start.ctaGuide}
           </Link>
-          <Link href={localePath(locale, "/start")} className="text-sm text-pine hover:underline">
-            {all.landing.newHere}
-          </Link>
         </div>
       </main>
       <SiteFooter locale={locale} path="/who-can-receive" />

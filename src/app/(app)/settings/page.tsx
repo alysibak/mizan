@@ -25,8 +25,8 @@ export default async function SettingsPage({
 
       <SettingsForm settings={{ ...settings, calendarTokenHash: null }} />
       <p className="text-sm text-sage">
-        <Link href="/trust" className="text-pine hover:underline">
-          How the numbers are made
+        <Link href="/method" className="text-pine hover:underline">
+          How it works
         </Link>
         {settings.trustedAckAt ? (
           <span className="text-sage">

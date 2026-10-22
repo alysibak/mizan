@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { categoryForMadhhab, type Madhhab } from "@/lib/madhhab";
 import { formatMoney, formatPercent, sumCents } from "@/lib/money";
@@ -266,6 +267,16 @@ export default function AssetManager({
           </ul>
         )}
       </section>
+
+      {assets.some((a) => a.category === "receivables") ? (
+        <p className="text-sm text-sage">
+          Someone cannot pay you back?{" "}
+          <Link href="/tools/forgive" className="text-pine underline underline-offset-2">
+            Forgive the debt
+          </Link>
+          , and it stops counting for zakat.
+        </p>
+      ) : null}
 
       <section className="card p-5">
         <h2 className="font-serif text-lg text-ink">Add something you own</h2>

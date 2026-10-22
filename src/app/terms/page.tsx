@@ -37,8 +37,8 @@ export default function TermsPage() {
           Treat every figure as an estimate to help you plan, check it, and ask a
           qualified person of knowledge about anything consequential. You are
           responsible for what you pay, to whom, and when.{" "}
-          <Link href="/trust" className="text-pine hover:underline">
-            What is verified
+          <Link href="/method" className="text-pine hover:underline">
+            How it works
           </Link>{" "}
           sets out what the code checks and what it does not.
         </p>

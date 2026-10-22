@@ -143,17 +143,3 @@ export function calculateZakat(input: ZakatInput): ZakatResult {
     lines,
   };
 }
-
-// Purification of impermissible income.
-//
-// When a holding produces a small amount of non-permissible income (for example
-// incidental interest inside an otherwise acceptable company), that portion is
-// not lawful to keep and is given away separately from zakat. This is distinct
-// from zakat and is not netted against it.
-export function purificationAmount(
-  income: number,
-  impermissibleFraction: number,
-): number {
-  const frac = clampPortion(impermissibleFraction);
-  return Math.max(0, income || 0) * frac;
-}

@@ -9,7 +9,7 @@ import {
   watchConsole,
 } from "./helpers";
 
-// One account walks the whole year: setup, give, weigh metal, keep a copy, start next year,
+// One account walks the whole year: setup, give, weigh metal, close the year,
 // back up, and close the account. Steps share state, so they run in order.
 test("a full zakat year on a phone", async ({ page }) => {
   const errors = watchConsole(page);
@@ -100,19 +100,18 @@ test("a full zakat year on a phone", async ({ page }) => {
     await page.click("button:has-text('Cancel')");
   });
 
-  await test.step("keep a copy, start next year, and the next year starts at zero", async () => {
+  await test.step("closing the year keeps a copy and starts the next year at zero", async () => {
     await page.goto("/year");
-    await page.click("button:has-text('Keep a copy of this year')");
-    await page.click("button:has-text('Keep the copy')");
-    await page.waitForURL("**/year/snapshots/**");
-    const snapshot = page.url();
-    await page.click("button:has-text('Start next year’s count on')");
+    await page.click("button:has-text('Close this year')");
+    await page.click("button:has-text('Close the year')");
     await page.waitForURL("**/year?rolled=**");
     await expect(page.getByText("Your next zakat year starts")).toBeVisible();
 
     await expect(page.locator(".ledger-row", { hasText: "Given ·" })).toContainText("$0.00");
 
-    await page.goto(snapshot);
+    // The copy is kept, and the year it closed cannot be closed twice.
+    const snapshot = await page.locator('a[href^="/year/snapshots/"]').first().getAttribute("href");
+    await page.goto(snapshot!);
     await expect(page.locator("button:has-text('Start next year’s count on')")).toHaveCount(0);
     const status = await page.evaluate(
       async () => (await fetch("/api/settings/roll-hawl", { method: "POST" })).status,
@@ -206,12 +205,8 @@ test("a full zakat year on a phone", async ({ page }) => {
     expect(page.url()).not.toContain("example.com");
   });
 
-  await test.step("Zakat al-Fitr records as its own type", async () => {
-    await page.goto("/tools/fitr");
-    await page.fill("#people", "4");
-    await page.fill("#perPerson", "15");
-    await page.click("text=Record on Give");
-    await page.waitForURL("**/giving?**");
+  await test.step("Zakat al-Fitr is noted as its own type", async () => {
+    await page.goto("/giving?type=fitr&amount=60");
     await expect(page.locator("#type")).toHaveValue("fitr");
     expect(Number(await page.inputValue("#amount"))).toBe(60);
   });

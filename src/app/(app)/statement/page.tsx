@@ -323,8 +323,8 @@ export default async function StatementPage() {
         This statement is a personal estimate from figures you entered. It is not
         a fatwa. Scholars differ on long-term equities, pensions, jewellery, and
         debt.{" "}
-        <Link href="/trust" className="text-pine hover:underline print:hidden">
-          What is verified
+        <Link href="/method" className="text-pine hover:underline print:hidden">
+          How it works
         </Link>
         . For anything consequential, consult a qualified person of knowledge.
       </p>

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import GuidedZakat from "@/components/public/GuidedZakat";
@@ -44,11 +43,6 @@ export default function GuideView({ locale }: { locale: Locale }) {
             locale={locale}
           />
         </div>
-        <p className="mt-6 text-sm text-sage">
-          <Link href={localePath(locale, "/start")} className="text-pine hover:underline">
-            {all.landing.newHere}
-          </Link>
-        </p>
       </main>
       <SiteFooter locale={locale} path="/guide" />
     </div>

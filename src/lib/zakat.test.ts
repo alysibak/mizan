@@ -4,11 +4,9 @@ import {
   zakatRate,
   ZAKAT_RATE_LUNAR,
   ZAKAT_RATE_SOLAR,
-  purificationAmount,
 } from "./zakat";
 import { nisabValue, goldNisabValue, silverNisabValue } from "./nisab";
 import { hawlStatus, gregorianToHijri, hijriToGregorian, hawlDueDate } from "./hijri";
-import { screenEquity } from "./screening";
 
 const prices = { goldPricePerGram: 90, silverPricePerGram: 1.05 };
 
@@ -125,13 +123,6 @@ describe("calculateZakat", () => {
   });
 });
 
-describe("purification", () => {
-  it("takes the impermissible fraction of income", () => {
-    expect(purificationAmount(1000, 0.04)).toBeCloseTo(40);
-    expect(purificationAmount(1000, 0)).toBe(0);
-  });
-});
-
 describe("hawl", () => {
   it("converts Gregorian to the expected Hijri year", () => {
     const h = gregorianToHijri("2024-07-08");
@@ -151,118 +142,6 @@ describe("hawl", () => {
     expect(s.progress).toBeGreaterThan(0.45);
     expect(s.progress).toBeLessThan(0.55);
     expect(s.isComplete).toBe(false);
-  });
-});
-
-describe("screening", () => {
-  it("fails a company in an impermissible business", () => {
-    const r = screenEquity(
-      {
-        alcohol: true,
-        gambling: false,
-        conventionalFinance: false,
-        porkAndNonHalalFood: false,
-        adultEntertainment: false,
-        tobacco: false,
-        weapons: false,
-      },
-      {
-        marketCap: 1000,
-        totalAssets: 1000,
-        interestBearingDebt: 100,
-        cashAndInterestSecurities: 100,
-        totalRevenue: 1000,
-        impermissibleRevenue: 0,
-      },
-    );
-    expect(r.businessPass).toBe(false);
-    expect(r.compliant).toBe(false);
-  });
-
-  it("passes a clean company within the ratio limits", () => {
-    const r = screenEquity(
-      {
-        alcohol: false,
-        gambling: false,
-        conventionalFinance: false,
-        porkAndNonHalalFood: false,
-        adultEntertainment: false,
-        tobacco: false,
-        weapons: false,
-      },
-      {
-        marketCap: 1000,
-        totalAssets: 1000,
-        interestBearingDebt: 200, // 20% < 30%
-        cashAndInterestSecurities: 200, // 20% < 30%
-        totalRevenue: 1000,
-        impermissibleRevenue: 10, // 1% < 5%
-      },
-    );
-    expect(r.businessPass).toBe(true);
-    expect(r.ratiosPass).toBe(true);
-    expect(r.compliant).toBe(true);
-  });
-
-  it("fails when debt exceeds the threshold", () => {
-    const r = screenEquity(
-      {
-        alcohol: false,
-        gambling: false,
-        conventionalFinance: false,
-        porkAndNonHalalFood: false,
-        adultEntertainment: false,
-        tobacco: false,
-        weapons: false,
-      },
-      {
-        marketCap: 1000,
-        totalAssets: 1000,
-        interestBearingDebt: 400, // 40% > 30%
-        cashAndInterestSecurities: 100,
-        totalRevenue: 1000,
-        impermissibleRevenue: 0,
-      },
-    );
-    expect(r.ratiosPass).toBe(false);
-    expect(r.compliant).toBe(false);
-  });
-});
-
-describe("screening edge cases", () => {
-  const clean = {
-    alcohol: false,
-    gambling: false,
-    conventionalFinance: false,
-    porkAndNonHalalFood: false,
-    adultEntertainment: false,
-    tobacco: false,
-    weapons: false,
-  };
-
-  it("does not fail a pre-revenue company on the income screen", () => {
-    const r = screenEquity(clean, {
-      marketCap: 1000,
-      totalAssets: 1000,
-      interestBearingDebt: 0,
-      cashAndInterestSecurities: 0,
-      totalRevenue: 0,
-      impermissibleRevenue: 0,
-    });
-    expect(r.ratios[2].pass).toBe(true);
-    expect(r.compliant).toBe(true);
-  });
-
-  it("still fails when the balance-sheet denominator is missing", () => {
-    const r = screenEquity(clean, {
-      marketCap: 0,
-      totalAssets: 0,
-      interestBearingDebt: 0,
-      cashAndInterestSecurities: 0,
-      totalRevenue: 100,
-      impermissibleRevenue: 0,
-    });
-    expect(r.ratiosPass).toBe(false);
   });
 });
 

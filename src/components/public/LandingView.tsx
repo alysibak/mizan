@@ -5,18 +5,7 @@ import SiteFooter from "@/components/SiteFooter";
 import JsonLd from "@/components/JsonLd";
 import RamadanCountdown from "@/components/public/RamadanCountdown";
 import ResumeCard from "@/components/public/ResumeCard";
-import PlanPicker from "@/components/public/PlanPicker";
 import { BalanceScale } from "@/components/public/Visuals";
-import {
-  IconBalance,
-  IconCash,
-  IconCheckCircle,
-  IconCoins,
-  IconGiving,
-  IconGoldBar,
-  IconQuestion,
-  IconYear,
-} from "@/components/icons";
 import { LOCALE_INFO, fmt, languageAlternates, localePath, type Locale } from "@/i18n/config";
 import { messagesFor } from "@/i18n/messages";
 import { formatMoney } from "@/lib/money";
@@ -44,10 +33,8 @@ export function landingMetadata(locale: Locale): Metadata {
 export default function LandingView({ locale }: { locale: Locale }) {
   const all = messagesFor(locale);
   const m = all.landing;
-  const inEnglish = all.common.inEnglish;
   const intl = LOCALE_INFO[locale].intl;
   const money = (n: number) => formatMoney(n, "USD", intl);
-  const calculator = localePath(locale, "/calculator");
   // The main button opens the one-question-at-a-time guide: someone new is
   // asked one thing at a time instead of meeting every field at once. The
   // full calculator is a tap away in the header and from the guide.
@@ -60,8 +47,7 @@ export default function LandingView({ locale }: { locale: Locale }) {
     [m.sample.debts, `−${money(1800)}`, true],
   ];
 
-  // A worked example: beside the title on a wide screen, after the choices
-  // on a phone, so a phone's first screen is all things to do.
+  // A worked example, on a wide screen beside the question.
   const sample = (
     <figure
                 className="animate-fade-up card relative z-10 p-6"
@@ -95,9 +81,10 @@ export default function LandingView({ locale }: { locale: Locale }) {
       <div className="pointer-events-none absolute inset-0 bg-grain opacity-80" aria-hidden />
       <SiteHeader locale={locale} />
 
+      {/* One question and one button. Everything else is in the Menu. */}
       <main>
-        <section className="relative z-10 mx-auto grid max-w-6xl items-center gap-12 px-5 pb-16 pt-10 md:px-10 lg:grid-cols-[minmax(0,1fr)_26rem] lg:pt-16">
-          <div className="order-1">
+        <section className="relative z-10 mx-auto grid max-w-6xl items-center gap-12 px-5 pb-20 pt-10 md:px-10 lg:grid-cols-[minmax(0,1fr)_26rem] lg:pt-16">
+          <div>
             <p className="animate-fade-up font-serif text-sm tracking-[0.2em] text-brassDeep">
               {m.eyebrow}
             </p>
@@ -117,201 +104,37 @@ export default function LandingView({ locale }: { locale: Locale }) {
                 }}
               />
             </div>
-            <p
-              className="animate-fade-up mt-6 hidden max-w-xl text-lg leading-relaxed text-sage sm:block"
+            <Link
+              href={guide}
+              className="animate-fade-up btn-primary mt-8 w-full max-w-xl justify-between px-6 py-4 text-lg sm:w-auto"
               style={{ animationDelay: "80ms" }}
             >
-              {m.lede}
-            </p>
-            <Link
-              href={localePath(locale, "/start")}
-              className="animate-fade-up group mt-8 flex max-w-xl items-center justify-between gap-4 border border-brass/60 bg-paper/80 px-5 py-4 transition hover:border-brassDeep"
-              style={{ animationDelay: "110ms" }}
-            >
-              <span>
-                <span className="block font-serif text-xl text-ink">{m.newHere}</span>
-                <span className="mt-0.5 block text-sm text-sage">{m.newHereHint}</span>
-              </span>
-              <span
-                className="text-2xl text-brassDeep transition group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1"
-                aria-hidden
-              >
-                →
-              </span>
+              <span>{m.choose.start}</span>
+              <span aria-hidden className="ms-4 rtl:rotate-180">→</span>
             </Link>
-            <div
-              className="animate-fade-up mt-6 flex flex-wrap items-center gap-3"
+            <p className="mt-3 text-sm text-sage">{m.trustLine}</p>
+            <nav
+              aria-label={m.chooseTitle}
+              className="animate-fade-up mt-8 flex flex-wrap gap-x-6 gap-y-3 text-base"
               style={{ animationDelay: "140ms" }}
             >
-              <Link href={guide} className="btn-primary px-6 py-3 text-base">
-                {m.ctaCalculate}
-              </Link>
-              <Link href="/register" className="btn-ghost px-6 py-3 text-base">
-                {m.ctaLedger}
-              </Link>
-            </div>
-            <p
-              className="animate-fade-up mt-6 text-sm text-sage"
-              style={{ animationDelay: "200ms" }}
-            >
-              {m.trustLine}
-            </p>
-          </div>
-
-          <div className="order-3 lg:order-2">
-            {sample}
-            <RamadanCountdown m={all.ramadan} locale={locale} inEnglish={all.common.inEnglish} className="mt-6" />
-          </div>
-
-          {/* One tap to the task, for anyone who would rather not read first. In
-              English the picture picker builds a plan from what they have,
-              with the commonest questions a tap away under it. */}
-          {locale === "en" ? (
-            <div className="order-2 lg:order-3 lg:col-span-2">
-              <PlanPicker />
-              <nav aria-label="Or go straight to" className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-base">
-                {(
-                  [
-                    ["/who-can-receive", m.choose.who],
-                    ["/zakat-al-fitr", m.choose.fitr],
-                    ["/nisab", m.choose.nisab],
-                    ["/ask", m.choose.ask],
-                  ] as const
-                ).map(([path, label]) => (
-                  <Link key={path} href={path} className="font-medium text-pine hover:underline">
-                    {label}
-                  </Link>
-                ))}
-              </nav>
-            </div>
-          ) : (
-            <section className="order-2 lg:order-3 lg:col-span-2" aria-labelledby="choose">
-              <h2 id="choose" className="font-serif text-2xl text-ink sm:text-3xl">
-                {m.chooseTitle}
-              </h2>
-              <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                {(
-                  [
-                    ["/start", m.choose.start, IconCheckCircle],
-                    ["/guide", m.choose.guide, IconCoins],
-                    ["/what-counts", m.choose.counts, IconGoldBar],
-                    ["/who-can-receive", m.choose.who, IconGiving],
-                    ["/zakat-al-fitr", m.choose.fitr, IconCash],
-                    ["/nisab", m.choose.nisab, IconBalance],
-                    ["/missed-years", m.choose.missed, IconYear],
-                    ["/ask", m.choose.ask, IconQuestion],
-                  ] as const
-                ).map(([path, label, Icon]) => (
-                  <li key={path}>
-                    <Link
-                      href={localePath(locale, path)}
-                      className="card flex min-h-[72px] items-center gap-4 px-4 py-3 transition hover:border-pine"
-                    >
-                      <span
-                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-pine/30 bg-pine/5 text-pine"
-                        aria-hidden
-                      >
-                        <Icon className="h-6 w-6" />
-                      </span>
-                      <span className="text-base font-medium text-ink">{label}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-        </section>
-
-        <section
-          className="relative z-10 border-t border-mist bg-paper/60 px-5 py-20 md:px-10"
-          aria-labelledby="features"
-        >
-          <div className="mx-auto max-w-6xl">
-            <p className="label text-brassDeep">{m.featuresEyebrow}</p>
-            <h2 id="features" className="mt-2 max-w-2xl font-serif text-3xl text-ink sm:text-4xl">
-              {m.featuresTitle}
-            </h2>
-            <p className="mt-4 max-w-2xl leading-relaxed text-sage">{m.featuresLede}</p>
-            {/* On a phone, a short list of what it does; the explanations from a tablet up. */}
-            <ul className="mt-8 grid gap-x-10 gap-y-3 sm:mt-12 sm:grid-cols-2 sm:gap-y-10 lg:grid-cols-3">
-              {m.features.map((f) => (
-                <li key={f.title} className="flex gap-3 sm:block sm:border-t sm:border-mist sm:pt-5">
-                  <IconCheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-pine sm:hidden" />
-                  <div>
-                    <h3 className="font-serif text-lg text-ink sm:text-xl">{f.title}</h3>
-                    <p className="mt-2 hidden text-sm leading-relaxed text-sage sm:block">{f.body}</p>
-                  </div>
-                </li>
+              {(
+                [
+                  ["/who-can-receive", m.choose.who],
+                  ["/zakat-al-fitr", m.choose.fitr],
+                  ["/ask", m.choose.ask],
+                ] as const
+              ).map(([path, label]) => (
+                <Link key={path} href={localePath(locale, path)} className="font-medium text-pine hover:underline">
+                  {label}
+                </Link>
               ))}
-            </ul>
-            <Link href="/register" className="btn-primary mt-8 px-6 py-3 text-base sm:mt-10">
-              {m.ctaLedger}
-            </Link>
+            </nav>
+            <RamadanCountdown m={all.ramadan} locale={locale} inEnglish={all.common.inEnglish} className="mt-8 max-w-xl" />
           </div>
-        </section>
 
-        <section className="relative z-10 px-5 py-20 md:px-10" aria-labelledby="honest">
-          <div className="mx-auto grid max-w-6xl gap-12 md:grid-cols-2">
-            <div>
-              <p className="label text-brassDeep">{m.honestEyebrow}</p>
-              <h2 id="honest" className="mt-2 font-serif text-3xl text-ink">
-                {m.honestTitle}
-              </h2>
-              <p className="mt-4 leading-relaxed text-sage">{m.honestBody}</p>
-              <p className="mt-4 text-sm">
-                <Link href="/method" className="text-pine hover:underline">
-                  {all.common.footer.method + inEnglish}
-                </Link>
-                <span className="mx-2 text-sage">·</span>
-                <Link href="/trust" className="text-pine hover:underline">
-                  {all.common.footer.trust + inEnglish}
-                </Link>
-              </p>
-            </div>
-            <div>
-              <p className="label text-brassDeep">{m.privateEyebrow}</p>
-              <h2 className="mt-2 font-serif text-3xl text-ink">{m.privateTitle}</h2>
-              <ul className="mt-4 space-y-2 leading-relaxed text-sage">
-                {m.privateItems.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-              <p className="mt-4 text-sm">
-                <Link href="/privacy" className="text-pine hover:underline">
-                  {m.privacyLink + inEnglish}
-                </Link>
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section
-          className="relative z-10 border-t border-mist bg-paper/60 px-5 py-20 md:px-10"
-          aria-labelledby="questions"
-        >
-          <div className="mx-auto max-w-3xl">
-            <h2 id="questions" className="font-serif text-3xl text-ink">
-              {m.questionsTitle}
-            </h2>
-            <FaqList items={all.faq.slice(0, 5)} />
-            <p className="mt-4 text-sm">
-              <Link href={`${calculator}#faq`} className="text-pine hover:underline">
-                {m.moreQuestions}
-              </Link>
-            </p>
-          </div>
-        </section>
-
-        <section className="relative z-10 px-5 py-24 text-center md:px-10">
-          <h2 className="mx-auto max-w-2xl font-serif text-4xl text-ink">{m.finalTitle}</h2>
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link href={guide} className="btn-primary px-6 py-3 text-base">
-              {m.ctaCalculate}
-            </Link>
-            <Link href="/register" className="btn-ghost px-6 py-3 text-base">
-              {m.ctaLedger}
-            </Link>
-          </div>
+          {/* A worked example beside the question, on a wide screen only. */}
+          <div className="hidden lg:block">{sample}</div>
         </section>
       </main>
 

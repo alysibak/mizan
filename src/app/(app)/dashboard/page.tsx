@@ -3,8 +3,7 @@ import { getCurrentUser } from "@/lib/session";
 import { isDemoUser } from "@/lib/demo";
 import { loadReckoning } from "@/lib/reckoning";
 import { formatHijri } from "@/lib/hijri";
-import { formatMoney, formatPercent } from "@/lib/money";
-import { duePhaseLabel } from "@/lib/giving-window";
+import { formatMoney } from "@/lib/money";
 import Scale from "@/components/Scale";
 import EstimateBanner from "@/components/EstimateBanner";
 import DashboardNotices from "@/components/DashboardNotices";
@@ -13,6 +12,7 @@ import CycleActions from "@/components/CycleActions";
 import LastLetterCard from "@/components/LastLetterCard";
 import { emailEnabled } from "@/lib/email";
 import { FromThisPhoneNotice } from "@/components/FromThisPhone";
+import EverythingElse from "@/components/EverythingElse";
 
 export default async function DashboardPage({
   searchParams,
@@ -25,7 +25,6 @@ export default async function DashboardPage({
     settings,
     assets: assetRows,
     result,
-    window,
     zakatPaid,
     outstanding: zakatOutstanding,
     phase,
@@ -97,9 +96,11 @@ export default async function DashboardPage({
           ? null
           : {
               title: `Your zakat would be about ${formatMoney(result.zakatDue, c)}.`,
-              body: hawl
-                ? `It is due on your zakat day, ${dueDay}: ${hawl.remainingDays} ${hawl.remainingDays === 1 ? "day" : "days"} from now. You may give some of it early.`
-                : "It is due once a full lunar year has passed since you first had the minimum (nisab). Set that day, and Mizan will tell you when.",
+              body:
+                (hawl
+                  ? `It is due on your zakat day, ${dueDay}: ${hawl.remainingDays} ${hawl.remainingDays === 1 ? "day" : "days"} from now. You may give some of it early.`
+                  : "It is due once a full lunar year has passed since you first had the minimum (nisab). Set that day, and Mizan will tell you when.") +
+                (zakatPaid > 0 ? ` You have given ${formatMoney(zakatPaid, c)} so far.` : ""),
             };
 
   return (
@@ -174,7 +175,7 @@ export default async function DashboardPage({
             You have given all of this year’s zakat.
           </p>
           <p className="mt-1 text-sm text-sage">
-            Keep a copy of this year, then start counting the next one.
+            Close the year: Mizan keeps a copy and starts counting the next one.
           </p>
           <CycleActions
             currency={c}
@@ -193,51 +194,6 @@ export default async function DashboardPage({
         standardLabel={settings.nisabStandard}
         variant="panel"
       />
-
-      <dl className="grid gap-6 sm:grid-cols-3">
-        <div>
-          <dt className="label">Your zakat</dt>
-          <dd className="mt-1 font-serif text-2xl text-pine nums">
-            {result.isDue ? formatMoney(result.zakatDue, c) : "None"}
-          </dd>
-          <dd className="mt-1 text-xs text-sage">
-            {result.isDue
-              ? `${formatPercent(result.rate, result.basis === "solar" ? 3 : 1)} of what counts${result.basis === "solar" ? " (solar year)" : ""}${phase === "payable" ? " · due now" : ""}`
-              : duePhaseLabel(phase, Boolean(settings.hawlStartDate))}
-          </dd>
-        </div>
-        <div>
-          <dt className="label">Given · {window.label}</dt>
-          <dd className="mt-1 font-serif text-2xl text-ink nums">
-            {formatMoney(zakatPaid, c)}
-          </dd>
-          <dd className="mt-1 text-xs text-sage" title={window.detail}>
-            {zakatOutstanding > 0 && result.isDue
-              ? `${formatMoney(zakatOutstanding, c)} still to give`
-              : result.isDue
-                ? phase === "payable"
-                  ? "All given for this year"
-                  : "Given early, before your zakat day"
-                : "Nothing due"}
-          </dd>
-        </div>
-        <div>
-          <dt className="label">
-            {result.marginToNisab >= 0 ? "Above the minimum by" : "Short of the minimum by"}
-          </dt>
-          <dd
-            className={
-              "mt-1 font-serif text-2xl nums " +
-              (result.marginToNisab >= 0 ? "text-gain" : "text-sage")
-            }
-          >
-            {formatMoney(Math.abs(result.marginToNisab), c)}
-          </dd>
-          <dd className="mt-1 text-xs text-sage">
-            The minimum (nisab) is set by {settings.nisabStandard}
-          </dd>
-        </div>
-      </dl>
 
       <section className="panel">
         <div className="flex items-center justify-between">
@@ -278,6 +234,8 @@ export default async function DashboardPage({
         )}
       </section>
 
+      <EverythingElse currency={c} />
+
       {/* The demo is read-only: a to-do list there could not be done. */}
       {isDemoUser(user) ? null : (
         <DashboardNotices
@@ -300,8 +258,8 @@ export default async function DashboardPage({
           <p className="label text-brassDeep">When your zakat day comes</p>
           <p className="mt-1 font-serif text-xl text-ink">Close the year, step by step</p>
           <p className="mt-1 text-sm text-sage">
-            Check for anything you forgot, give your zakat, then keep a copy of
-            the year.
+            Check for anything you forgot, give your zakat, then close the
+            year.
           </p>
           <div className="mt-4 flex flex-wrap gap-3">
             <Link href="/tools/reckoning-night" className="btn-primary">

@@ -14,13 +14,11 @@ export function appManifest(locale: Locale): MetadataRoute.Manifest {
   const m = messagesFor(locale);
   const to = (path: string) => localePath(locale, path);
   const shortcuts: MetadataRoute.Manifest["shortcuts"] = [
-    { name: m.landing.choose.start, short_name: m.common.nav.start, url: to("/start"), icons: ICON },
-    { name: m.landing.choose.guide, short_name: m.common.nav.calculator, url: to("/guide"), icons: ICON },
+    { name: m.landing.choose.start, short_name: m.common.nav.start, url: to("/guide"), icons: ICON },
     { name: m.landing.choose.ask, url: to("/ask"), icons: ICON },
-    // The ledger is in English, so only the English app offers it.
-    locale === "en"
-      ? { name: m.common.nav.yourLedger, url: "/dashboard", icons: ICON }
-      : { name: m.landing.choose.fitr, short_name: m.common.footer.fitr, url: to("/zakat-al-fitr"), icons: ICON },
+    { name: m.landing.choose.fitr, short_name: m.common.footer.fitr, url: to("/zakat-al-fitr"), icons: ICON },
+    // My zakat is in English so far, so only the English app offers it.
+    ...(locale === "en" ? [{ name: "My zakat", url: "/my", icons: ICON }] : []),
   ];
   return {
     // One app whichever language it was added in.

@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import ReadAloud from "@/components/ReadAloud";
-import AskSearch from "@/components/public/AskSearch";
-import type { AnswerItem } from "@/components/public/AnswerList";
+import AskSearch, { type AnswerGroup } from "@/components/public/AskSearch";
 import { appliesItems } from "@/components/public/AppliesView";
 import { whoItems } from "@/components/public/WhoCanReceive";
 import { ENGLISH_ANSWERS } from "@/content/english-answers";
@@ -29,49 +28,72 @@ export function askMetadata(locale: Locale): Metadata {
   };
 }
 
-/** Every question the site answers, in one language, each with its page. */
-function allAnswers(locale: Locale): AnswerItem[] {
+/** Every question the site answers, in one language, by topic, each with its page. */
+function answerGroups(locale: Locale): AnswerGroup[] {
   const all = messagesFor(locale);
   const page = (path: string, label: string) => ({ href: localePath(locale, path), label });
   const counts = page("/what-counts", all.applies.nav);
   const who = page("/who-can-receive", all.who.nav);
-  const start = page("/start", all.common.nav.start);
+  const start = page("/guide", all.landing.choose.start);
   const fitr = page("/zakat-al-fitr", all.common.footer.fitr);
   const missed = page("/missed-years", all.missed.nav);
   const calculator = page("/calculator", all.common.footer.calculator);
-  return [
-    ...appliesItems(all.applies).map((item) => ({
-      ...item,
-      key: `counts-${item.key}`,
-      page: { ...counts, href: `${counts.href}#${item.key}` },
-    })),
-    ...whoItems(all.who).map((item) => ({
-      ...item,
-      key: `who-${item.key}`,
-      page: { ...who, href: `${who.href}#${item.key}` },
-    })),
-    ...all.faq.map((f, i) => ({ key: `faq-${i}`, label: f.q, answer: f.a, page: calculator, icon: "question" })),
-    ...all.missed.faq.map((f, i) => ({ key: `missed-${i}`, label: f.q, answer: f.a, page: missed, icon: "missed" })),
-    ...all.fitr.faq.map((f, i) => ({ key: `fitr-${i}`, label: f.q, answer: f.a, page: fitr, icon: "fitr" })),
-    ...all.start.words.map((w, i) => ({
-      key: `word-${i}`,
-      label: w.term,
-      answer: w.meaning,
-      page: start,
-      icon: "word",
-    })),
-    // Pages in English only so far are found by the English search.
-    ...(locale === "en"
-      ? ENGLISH_ANSWERS.map((a) => ({
-          key: `en-${a.key}`,
-          label: a.label,
-          answer: a.answer,
-          page: { href: a.href, label: a.page },
-          icon: a.key,
-          evidence: a.evidence,
-        }))
-      : []),
+  const groups: AnswerGroup[] = [
+    {
+      key: "common",
+      title: all.landing.questionsTitle,
+      items: all.faq.map((f, i) => ({ key: `faq-${i}`, label: f.q, answer: f.a, page: calculator, icon: "question" })),
+    },
+    {
+      key: "counts",
+      title: all.applies.nav,
+      items: appliesItems(all.applies).map((item) => ({
+        ...item,
+        key: `counts-${item.key}`,
+        page: { ...counts, href: `${counts.href}#${item.key}` },
+      })),
+    },
+    {
+      key: "who",
+      title: all.who.nav,
+      items: whoItems(all.who).map((item) => ({
+        ...item,
+        key: `who-${item.key}`,
+        page: { ...who, href: `${who.href}#${item.key}` },
+      })),
+    },
+    {
+      key: "fitr",
+      title: all.common.footer.fitr,
+      items: all.fitr.faq.map((f, i) => ({ key: `fitr-${i}`, label: f.q, answer: f.a, page: fitr, icon: "fitr" })),
+    },
+    {
+      key: "missed",
+      title: all.missed.nav,
+      items: all.missed.faq.map((f, i) => ({ key: `missed-${i}`, label: f.q, answer: f.a, page: missed, icon: "missed" })),
+    },
   ];
+  // Pages in English only so far are found by the English search.
+  if (locale === "en") {
+    groups.push({
+      key: "more",
+      title: "Fasts, interest, family, shop, farm and more",
+      items: ENGLISH_ANSWERS.map((a) => ({
+        key: `en-${a.key}`,
+        label: a.label,
+        answer: a.answer,
+        page: { href: a.href, label: a.page },
+        icon: a.key,
+        evidence: a.evidence,
+      })),
+    });
+  }
+  groups.push({
+    key: "words",
+    title: all.start.wordsTitle,
+    items: all.start.words.map((w, i) => ({ key: `word-${i}`, label: w.term, answer: w.meaning, page: start, icon: "word" })),
+  });
+  return groups;
 }
 
 /** "Ask a question": type a word, see every answer that mentions it. */
@@ -97,7 +119,7 @@ export default function AskView({ locale }: { locale: Locale }) {
         </header>
         <div className="mt-8">
           <AskSearch
-            items={allAnswers(locale)}
+            groups={answerGroups(locale)}
             m={m}
             locale={locale}
             listen={all.common.listen}

@@ -48,9 +48,6 @@ export default function CalculatorView({ locale }: { locale: Locale }) {
             <Link href={localePath(locale, "/guide")} className="font-medium text-pine hover:underline">
               {all.calc.guideLink}
             </Link>
-            <Link href={localePath(locale, "/start")} className="text-pine hover:underline">
-              {all.landing.newHere}
-            </Link>
           </p>
         </header>
 
@@ -90,8 +87,8 @@ export default function CalculatorView({ locale }: { locale: Locale }) {
               {all.common.footer.method + inEnglish}
             </Link>
             {middle}
-            <Link href="/trust" className="text-pine hover:underline">
-              {all.common.footer.trust + inEnglish}
+            <Link href="/method" className="text-pine hover:underline">
+              {all.common.footer.method + inEnglish}
             </Link>
             {after}
           </p>

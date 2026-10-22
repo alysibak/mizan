@@ -45,8 +45,9 @@ export function toolMetadata(copy: ToolPageCopy): Metadata {
 }
 
 /**
- * A free tool's public page: the tool, then what it rests on, then its FAQ.
- * Guides use the same page with a call to the calculator in place of a tool.
+ * A free tool's public page: the tool first, then what it rests on and its
+ * questions, folded. Guides use the same page, open, with a call to the
+ * calculator in place of a tool.
  */
 export default function ToolPage({
   copy,
@@ -77,18 +78,35 @@ export default function ToolPage({
 
         {copy.next?.length ? <NextSteps steps={copy.next} /> : null}
 
-        <div className="mt-16 space-y-10 print:hidden">
-          {copy.sections.map((s) => (
-            <section key={s.heading} className="space-y-3">
-              <h2 className="font-serif text-2xl text-ink">{s.heading}</h2>
-              <div className="space-y-3 text-sm leading-relaxed text-sage">
-                {s.body}
-              </div>
-            </section>
-          ))}
-        </div>
+        {copy.kind === "guide" ? (
+          <div className="mt-16 space-y-10 print:hidden">
+            {copy.sections.map((s) => (
+              <section key={s.heading} className="space-y-3">
+                <h2 className="font-serif text-2xl text-ink">{s.heading}</h2>
+                <div className="space-y-3 text-sm leading-relaxed text-sage">
+                  {s.body}
+                </div>
+              </section>
+            ))}
+          </div>
+        ) : (
+          // On a tool, the reasons are there for whoever wants them, folded.
+          <div className="mt-12 divide-y divide-mist border-y border-mist print:hidden">
+            {copy.sections.map((s) => (
+              <details key={s.heading} className="group">
+                <summary className="flex min-h-[52px] cursor-pointer list-none items-center justify-between gap-4 py-3 [&::-webkit-details-marker]:hidden">
+                  <h2 className="font-serif text-xl text-ink">{s.heading}</h2>
+                  <span className="text-xl text-sage transition group-open:rotate-45" aria-hidden>
+                    +
+                  </span>
+                </summary>
+                <div className="space-y-3 pb-4 text-sm leading-relaxed text-sage">{s.body}</div>
+              </details>
+            ))}
+          </div>
+        )}
 
-        <section className="mt-16 print:hidden" aria-labelledby="faq-title">
+        <section className="mt-12 print:hidden" aria-labelledby="faq-title">
           <h2 id="faq-title" className="font-serif text-3xl text-ink">
             Questions
           </h2>

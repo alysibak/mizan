@@ -78,10 +78,10 @@ describe("locale paths", () => {
   });
 
   it("knows which pages exist in every language", () => {
-    for (const path of ["/", "/start", "/calculator", "/nisab", "/nisab/pkr"]) {
+    for (const path of ["/", "/guide", "/calculator", "/nisab", "/nisab/pkr"]) {
       expect(isLocalizedPath(path), path).toBe(true);
     }
-    for (const path of ["/privacy", "/guides", "/nisab/PKR", "/nisab/pkr/x", "/inheritance"]) {
+    for (const path of ["/privacy", "/guides", "/nisab/PKR", "/nisab/pkr/x", "/start"]) {
       expect(isLocalizedPath(path), path).toBe(false);
     }
   });

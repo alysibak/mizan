@@ -1,10 +1,8 @@
 import Link from "next/link";
 
 const LINKS = [
-  { href: "/guides", label: "Guides" },
-  { href: "/nisab", label: "Nisab today" },
-  { href: "/method", label: "How the numbers are made" },
-  { href: "/trust", label: "What is verified" },
+  { href: "/ask", label: "Questions" },
+  { href: "/method", label: "How it works" },
   { href: "/privacy", label: "Privacy" },
   { href: "/terms", label: "Terms" },
 ];

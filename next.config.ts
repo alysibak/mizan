@@ -41,6 +41,22 @@ const nextConfig: NextConfig = {
   // Silence incorrect workspace-root inference when other lockfiles exist higher up.
   outputFileTracingRoot: path.join(__dirname),
   poweredByHeader: false,
+  // Pages folded into others keep their old links working.
+  async redirects() {
+    return [
+      { source: "/start", destination: "/guide", permanent: true },
+      { source: "/:locale(ar|ur|bn|id|ms|tr|fr)/start", destination: "/:locale/guide", permanent: true },
+      { source: "/trust", destination: "/method", permanent: true },
+      { source: "/halal-stocks", destination: "/what-counts", permanent: true },
+      { source: "/inheritance", destination: "/ask", permanent: true },
+      { source: "/qurbani", destination: "/ask", permanent: true },
+      { source: "/tools", destination: "/year", permanent: false },
+      { source: "/tools/fitr", destination: "/zakat-al-fitr", permanent: false },
+      { source: "/tools/asnaf", destination: "/who-can-receive", permanent: false },
+      { source: "/tools/:tool(what-if|reverse|udhiyah)", destination: "/year", permanent: false },
+      { source: "/:tool(mirath|screening)", destination: "/year", permanent: false },
+    ];
+  },
   async rewrites() {
     return [{ source: "/favicon.ico", destination: "/icon.svg" }];
   },

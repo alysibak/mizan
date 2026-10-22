@@ -10,7 +10,6 @@ import { ENGLISH_TOOL_PATHS } from "@/lib/public-tools";
 
 export const PUBLIC_PATHS = [
   "/",
-  "/start",
   "/guide",
   "/who-can-receive",
   "/calculator",
@@ -25,7 +24,6 @@ export const PUBLIC_PATHS = [
   ...ENGLISH_TOOL_PATHS,
   "/guides",
   "/method",
-  "/trust",
   "/privacy",
   "/terms",
   "/login",

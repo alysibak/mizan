@@ -439,6 +439,12 @@ const en = {
     back: "Back",
     skip: "I don’t have this",
     seeResult: "Show my zakat",
+    have: {
+      title: "What do you have?",
+      body: "Tap everything you have. Not sure? Press “{next}” and you will be asked about each one.",
+      more: "Something else: shares, a business, money owed to you",
+    },
+    howWorked: "How it was worked out",
     difference: "What’s the difference?",
     byWeight: "I know the weight",
     byValue: "I know what it’s worth",

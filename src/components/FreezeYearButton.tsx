@@ -5,12 +5,19 @@ import { useRouter } from "next/navigation";
 import { sendJson } from "@/lib/client-fetch";
 import { setStoredValue } from "@/lib/client-store";
 
+/**
+ * Keep a copy of the year. Once the zakat day has come, the same tap also
+ * starts counting the next year, so closing a year is one thing to do.
+ */
 export default function FreezeYearButton({
   defaultLabel,
   emphasize = false,
+  nextStart = null,
 }: {
   defaultLabel: string;
   emphasize?: boolean;
+  /** The day the next zakat year starts, when this one can be closed now. */
+  nextStart?: string | null;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(emphasize);
@@ -40,6 +47,14 @@ export default function FreezeYearButton({
     const data = res.data;
     // A new year starts the forgotten-wealth checklist fresh.
     setStoredValue("mizan-forgotten-checked", null);
+    if (nextStart) {
+      const rolled = await fetch("/api/settings/roll-hawl", { method: "POST" }).catch(() => null);
+      if (rolled?.ok) {
+        router.push(`/year?rolled=${encodeURIComponent(nextStart)}`);
+        router.refresh();
+        return;
+      }
+    }
     router.push(`/year/snapshots/${data.id}`);
     router.refresh();
   }
@@ -52,11 +67,12 @@ export default function FreezeYearButton({
           className={emphasize ? "btn-primary" : "btn-ghost"}
           onClick={() => setOpen(true)}
         >
-          Keep a copy of this year
+          {nextStart ? "Close this year" : "Keep a copy of this year"}
         </button>
         <p className="mt-2 text-xs text-sage">
-          Saves today’s figures, with a note to yourself for next year if you
-          like.
+          {nextStart
+            ? `Keeps a copy of this year’s figures and starts counting the next year from ${nextStart}.`
+            : "Saves today’s figures, with a note to yourself for next year if you like."}
         </p>
       </div>
     );
@@ -91,7 +107,7 @@ export default function FreezeYearButton({
       {error && <p className="text-sm text-danger">{error}</p>}
       <div className="flex flex-wrap gap-2">
         <button type="submit" className="btn-primary" disabled={busy}>
-          {busy ? "Saving…" : "Keep the copy"}
+          {busy ? "Saving…" : nextStart ? "Close the year" : "Keep the copy"}
         </button>
         {!emphasize && (
           <button

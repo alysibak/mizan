@@ -410,6 +410,12 @@ const tr: Messages = {
     back: "Geri",
     skip: "Bende bu yok",
     seeResult: "Zekâtımı göster",
+    have: {
+      title: "Nelere sahipsiniz?",
+      body: "Sahip olduğunuz her şeye dokunun. Emin değil misiniz? “{next}” düğmesine basın, her birini tek tek soralım.",
+      more: "Başka bir şey: hisse, işletme, size olan alacaklar",
+    },
+    howWorked: "Nasıl hesaplandı",
     difference: "Farkı ne?",
     byWeight: "Ağırlığını biliyorum",
     byValue: "Değerini biliyorum",

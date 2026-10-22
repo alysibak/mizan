@@ -11,10 +11,8 @@ describe("isPublicPath", () => {
       "/fr/nisab",
       "/nisab/pkr",
       "/tr/nisab/try",
-      "/inheritance",
       "/zakat-al-fitr",
-      "/halal-stocks",
-      "/qurbani",
+      "/fasts",
       "/guides",
       "/guides/zakat-on-gold",
     ]) {
@@ -29,10 +27,8 @@ describe("isPublicPath", () => {
       "/ar/dashboard",
       "/settings",
       "/begin",
-      "/mirath",
-      "/screening",
-      "/tools/fitr",
-      "/tools/udhiyah",
+      "/year",
+      "/tools/forgive",
     ]) {
       expect(isPublicPath(p)).toBe(false);
     }

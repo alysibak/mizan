@@ -120,11 +120,11 @@ export default function GivingManager({
             That covers all of this year’s zakat. May Allah accept it from you.
           </p>
           <p className="mt-1 text-sm text-sage">
-            Now keep a copy of this year, then start counting the next one.
+            Now close the year: Mizan keeps a copy and starts counting the next one.
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <Link href="/year#freeze-year" className="btn-primary">
-              Keep a copy of this year
+              Close this year
             </Link>
             <button
               type="button"
@@ -208,7 +208,7 @@ export default function GivingManager({
             <p className="text-xs text-sage">
               Zakat al-Fitr is separate. It does not count toward this year’s
               zakat.{" "}
-              <Link href="/tools/fitr" className="text-pine hover:underline">
+              <Link href="/zakat-al-fitr" className="text-pine hover:underline">
                 Work out the amount
               </Link>
               .
@@ -274,7 +274,7 @@ export default function GivingManager({
                   </select>
                   <p className="mt-1.5 text-xs text-sage">
                     The eight groups the Quran names, for your own record.{" "}
-                    <Link href="/tools/asnaf" className="text-pine underline">
+                    <Link href="/who-can-receive" className="text-pine underline">
                       See the groups
                     </Link>
                     .

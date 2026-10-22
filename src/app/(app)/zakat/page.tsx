@@ -194,8 +194,8 @@ export default async function ZakatPage() {
           <p className="text-xs leading-relaxed text-sage">
             This is an estimate to help you plan. Rulings differ on long-term
             investments, retirement funds, and debt.{" "}
-            <Link href="/trust" className="text-pine hover:underline">
-              What is verified
+            <Link href="/method" className="text-pine hover:underline">
+              How it works
             </Link>
             . For your specific situation, consult a qualified scholar.
           </p>

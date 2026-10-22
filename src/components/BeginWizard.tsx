@@ -340,8 +340,8 @@ function Wizard({
           </p>
           <p className="text-sm leading-relaxed text-sage">
             Read{" "}
-            <Link href="/trust" className="text-pine hover:underline" target="_blank">
-              what is verified
+            <Link href="/method" className="text-pine hover:underline" target="_blank">
+              how it works
             </Link>{" "}
             anytime.
           </p>

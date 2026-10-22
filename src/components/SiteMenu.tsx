@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useId, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { IconMenu, IconQuestion, IconSearch } from "@/components/icons";
@@ -13,17 +13,17 @@ import type { DirectoryGroup } from "@/lib/site-directory";
  * the visitor wants to do, as pictures. A native dialog, so Escape, the
  * back of the screen, and screen readers all behave as expected.
  */
-export default function SiteMenu({
-  labels,
-  groups,
-  search,
-}: {
+export interface MenuProps {
   labels: { open: string; close: string };
   groups: DirectoryGroup[];
   /** The answer search, in the page's language: where it is and its words. */
   search: { action: string; label: string; placeholder: string; button: string };
-}) {
+}
+
+export default function SiteMenu({ labels, groups, search }: MenuProps) {
   const dialog = useRef<HTMLDialogElement>(null);
+  // Signed in, the app has a Menu in its sidebar and in its phone header.
+  const id = useId();
   const pathname = usePathname();
   const close = () => dialog.current?.close();
 
@@ -45,7 +45,7 @@ export default function SiteMenu({
       </button>
       <dialog
         ref={dialog}
-        aria-labelledby="site-menu-title"
+        aria-labelledby={`${id}-title`}
         onClick={(e) => {
           // A tap on the dimmed backdrop, outside the panel, closes it.
           if (e.target === e.currentTarget) close();
@@ -53,7 +53,7 @@ export default function SiteMenu({
         className="m-0 h-full max-h-none w-full max-w-none bg-paper p-0 text-ink backdrop:bg-ink/50 sm:m-auto sm:h-auto sm:max-h-[88vh] sm:max-w-3xl sm:border sm:border-mist"
       >
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-mist bg-paper px-5 py-3">
-          <h2 id="site-menu-title" className="font-serif text-2xl text-ink">
+          <h2 id={`${id}-title`} className="font-serif text-2xl text-ink">
             {labels.open}
           </h2>
           <button
@@ -68,12 +68,12 @@ export default function SiteMenu({
         <div className="space-y-6 px-5 pb-8 pt-5">
           {/* Type a word, see every answer about it. */}
           <form action={search.action} method="get" role="search">
-            <label className="label mb-1.5 block" htmlFor="menu-q">
+            <label className="label mb-1.5 block" htmlFor={`${id}-q`}>
               {search.label}
             </label>
             <div className="flex gap-2">
               <input
-                id="menu-q"
+                id={`${id}-q`}
                 name="q"
                 type="search"
                 enterKeyHint="search"
@@ -87,8 +87,8 @@ export default function SiteMenu({
             </div>
           </form>
           {groups.map((g) => (
-            <section key={g.key} aria-labelledby={`menu-${g.key}`}>
-              <h3 id={`menu-${g.key}`} className="label text-brassDeep">
+            <section key={g.key} aria-labelledby={`${id}-${g.key}`}>
+              <h3 id={`${id}-${g.key}`} className="label text-brassDeep">
                 {g.title}
               </h3>
               <ul className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">

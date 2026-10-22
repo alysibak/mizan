@@ -3,8 +3,7 @@ import { amountParam, formatMoney } from "@/lib/money";
 import type { DuePhase } from "@/lib/giving-window";
 
 /**
- * One way to finish a year everywhere: give, keep a copy, start the next
- * year's count, print if wanted.
+ * One way to finish a year everywhere: give, close the year, print if wanted.
  */
 export default function CycleActions({
   currency,
@@ -78,14 +77,11 @@ export default function CycleActions({
   return (
     <div className={wrap}>
       <Link href="/year#freeze-year" className="btn-primary">
-        Keep a copy of this year
+        Close this year
       </Link>
       <Link href="/statement" className="btn-ghost">
         Print this year
       </Link>
-      <p className="basis-full text-xs text-sage">
-        Then start next year’s count from the copy.
-      </p>
     </div>
   );
 }

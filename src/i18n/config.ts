@@ -56,7 +56,6 @@ export function splitLocale(pathname: string): { locale: Locale; path: string } 
 export function isLocalizedPath(path: string): boolean {
   return (
     path === "/" ||
-    path === "/start" ||
     path === "/guide" ||
     path === "/who-can-receive" ||
     path === "/zakat-al-fitr" ||

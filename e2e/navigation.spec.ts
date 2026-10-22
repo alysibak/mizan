@@ -9,7 +9,7 @@ test("the menu at the top opens everything, grouped by what you want to do", asy
   await page.getByRole("button", { name: "Menu" }).click();
   const menu = page.getByRole("dialog", { name: "Menu" });
   await expect(menu).toBeVisible();
-  for (const group of ["Work out my zakat", "Give it", "Learn", "More tools"]) {
+  for (const group of ["Work out my zakat", "Give it", "Learn"]) {
     await expect(menu.getByRole("heading", { name: group })).toBeVisible();
   }
   await menu.getByRole("link", { name: "Crops and animals" }).click();
@@ -74,22 +74,24 @@ test("someone coming back is offered what they started", async ({ page }) => {
   await page.waitForURL("**/my");
 });
 
-test("a visitor who does not know where to start gets their own plan, in order", async ({ page }) => {
-  await page.goto("/");
-  const picker = page.getByRole("region", { name: "What do you have?" });
-  await picker.getByRole("button", { name: "A shop or business" }).click();
-  await picker.getByRole("button", { name: "Interest from a bank" }).click();
-  await picker.getByRole("button", { name: "Years I did not pay" }).click();
-  await expect(picker.getByRole("button", { name: "A shop or business" })).toHaveAttribute("aria-pressed", "true");
-  const steps = picker.getByRole("list").last().getByRole("link");
-  await expect(steps).toHaveCount(5);
-  await expect(steps.nth(0)).toContainText("Set the bank interest aside first");
-  await expect(steps.nth(1)).toContainText("Work out your shop with your savings");
-  await expect(steps.nth(2)).toContainText("Then catch up on past years");
-  await expect(steps.nth(3)).toContainText("Give it");
-  await expect(steps.nth(4)).toContainText("Keep track in My zakat");
-  await steps.nth(1).click();
-  await page.waitForURL("**/shop");
+test("the guide asks what they have, and points to the pages for the rest", async ({ page }) => {
+  await page.route("**/api/metals?*", (route) =>
+    route.fulfill({ json: { currency: "USD", goldPricePerGram: 100, silverPricePerGram: 1.2, source: "test" } }),
+  );
+  await page.goto("/guide");
+  await page.locator("#guide-currency").selectOption("USD");
+  await page.getByRole("button", { name: "Next" }).click();
+  await page.getByRole("button", { name: "Bank balances" }).click();
+  await page.getByRole("button", { name: "A shop" }).click();
+  await page.getByRole("button", { name: "Years I did not pay" }).click();
+  await expect(page.getByRole("button", { name: "A shop" })).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "Next" }).click();
+  await page.fill("#guide-bank", "10000");
+  await page.getByRole("button", { name: "Next" }).click();
+  await page.getByRole("button", { name: "Show my zakat" }).click();
+  await expect(page.getByRole("heading", { name: /Your zakat is/ })).toBeVisible();
+  await page.getByRole("link", { name: /Catch up on the years you did not pay/ }).click();
+  await page.waitForURL("**/missed-years");
 });
 
 test("a tool ends with where to go next, straight under it", async ({ page }) => {
@@ -113,7 +115,7 @@ test("the menu's search box leads straight to the answers", async ({ page }) => 
 
 test("a near zakat day is announced on every page until dismissed", async ({ page }) => {
   await page.clock.setFixedTime(new Date("2027-02-01T10:00:00"));
-  await page.goto("/start");
+  await page.goto("/guide");
   await expect(page.getByText("Your zakat day is in")).toHaveCount(0);
   await page.evaluate(() => localStorage.setItem("mizan-my-v1", JSON.stringify({ zakatDay: { month: 9, day: 1 } })));
   await page.reload();
@@ -121,7 +123,7 @@ test("a near zakat day is announced on every page until dismissed", async ({ pag
   await page.getByRole("link", { name: "Open My zakat" }).click();
   await page.waitForURL("**/my");
   await expect(page.getByText("Your zakat day is in 7 days.")).toHaveCount(0);
-  await page.goto("/start");
+  await page.goto("/guide");
   await page.getByRole("button", { name: "Hide until next year" }).click();
   await expect(page.getByText("Your zakat day is in")).toHaveCount(0);
   await page.reload();

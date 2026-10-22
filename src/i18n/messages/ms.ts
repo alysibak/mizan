@@ -408,6 +408,12 @@ const ms: Messages = {
     back: "Kembali",
     skip: "Saya tiada ini",
     seeResult: "Tunjukkan zakat saya",
+    have: {
+      title: "Apa yang anda miliki?",
+      body: "Ketik semua yang anda miliki. Tidak pasti? Tekan “{next}”, kami akan bertanya satu demi satu.",
+      more: "Lain-lain: saham, perniagaan, wang yang orang berhutang kepada anda",
+    },
+    howWorked: "Cara ia dikira",
     difference: "Apa bezanya?",
     byWeight: "Saya tahu beratnya",
     byValue: "Saya tahu nilainya",

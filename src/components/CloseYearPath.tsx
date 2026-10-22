@@ -5,14 +5,13 @@ export type CloseYearStep = "pay" | "freeze" | "roll" | "statement";
 
 const STEPS: { id: CloseYearStep; label: string }[] = [
   { id: "pay", label: "Give" },
-  { id: "freeze", label: "Keep a copy" },
-  { id: "roll", label: "Start next year" },
+  { id: "freeze", label: "Close the year" },
   { id: "statement", label: "Print" },
 ];
 
 /**
- * Closing a year in order: give what is left, keep a copy, start next year's
- * count, print if wanted.
+ * Closing a year in order: give what is left, close the year (a copy is kept
+ * and the next year's count starts), print if wanted.
  */
 export default function CloseYearPath({
   current,
@@ -27,13 +26,14 @@ export default function CloseYearPath({
   latestSnapshotId?: string | null;
   compact?: boolean;
 }) {
-  const idx = STEPS.findIndex((s) => s.id === current);
+  // Starting next year's count is part of closing it.
+  const idx = STEPS.findIndex((s) => s.id === (current === "roll" ? "freeze" : current));
 
   return (
     <div className={compact ? "" : "mt-4"}>
       <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-sage">
         {STEPS.map((s, i) => {
-          const active = s.id === current;
+          const active = i === idx;
           const done = i < idx;
           return (
             <li key={s.id} className="flex items-center gap-2">
@@ -64,7 +64,7 @@ export default function CloseYearPath({
         ) : null}
         {current === "pay" && outstanding <= 0 ? (
           <Link href="/year#freeze-year" className="btn-primary">
-            Keep a copy of this year
+            Close this year
           </Link>
         ) : null}
         {current === "freeze" ? (
@@ -97,7 +97,7 @@ export default function CloseYearPath({
         ) : null}
         {current === "roll" && !latestSnapshotId ? (
           <Link href="/year#freeze-year" className="btn-primary">
-            Keep a copy first
+            Close the year first
           </Link>
         ) : null}
         {current === "statement" ? (

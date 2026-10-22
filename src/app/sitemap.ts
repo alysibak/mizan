@@ -15,7 +15,6 @@ const TRANSLATED: { path: string; priority: number; changeFrequency: Freq }[] =
   [
     { path: "/", priority: 1, changeFrequency: "monthly" },
     { path: "/calculator", priority: 0.9, changeFrequency: "monthly" },
-    { path: "/start", priority: 0.9, changeFrequency: "monthly" },
     { path: "/guide", priority: 0.8, changeFrequency: "monthly" },
     { path: "/who-can-receive", priority: 0.8, changeFrequency: "monthly" },
     { path: "/zakat-al-fitr", priority: 0.8, changeFrequency: "monthly" },
@@ -43,7 +42,6 @@ const ENGLISH: { path: string; priority: number; changeFrequency: Freq }[] = [
   { path: "/guides", priority: 0.7, changeFrequency: "monthly" },
   ...GUIDES.map((g) => ({ path: g.path, priority: 0.7, changeFrequency: "monthly" as const })),
   { path: "/method", priority: 0.6, changeFrequency: "monthly" },
-  { path: "/trust", priority: 0.6, changeFrequency: "monthly" },
   { path: "/register", priority: 0.5, changeFrequency: "yearly" },
   { path: "/privacy", priority: 0.3, changeFrequency: "yearly" },
   { path: "/terms", priority: 0.3, changeFrequency: "yearly" },

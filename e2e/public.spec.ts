@@ -19,17 +19,26 @@ const PRICES = {
   source: "test prices",
 };
 
-test("the landing page leads to the step-by-step guide", async ({ page }) => {
+test("the home page is one question and one button, leading to the guide", async ({ page }) => {
   const errors = watchConsole(page);
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Zakat");
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute("content", /opengraph-image/);
   await expectNoHorizontalScroll(page);
   await expectUniqueIds(page);
-  // One question at a time for someone new; the full calculator is in the header.
-  await page.getByRole("link", { name: "Calculate your zakat" }).first().click();
+  // Nothing below the question but the footer: no feature lists, no second sign-up pitch.
+  await expect(page.getByRole("main").getByRole("heading")).toHaveCount(1);
+  await expect(page.getByRole("main").getByRole("link", { name: "Open a free ledger" })).toHaveCount(0);
+  await page.getByRole("link", { name: "Find out if I have to pay" }).first().click();
   await page.waitForURL("**/guide");
   expect(errors).toEqual([]);
+});
+
+test("the old beginner page now opens the guide, in every language", async ({ page }) => {
+  await page.goto("/start");
+  await expect(page).toHaveURL(/\/guide$/);
+  await page.goto("/ur/start");
+  await expect(page).toHaveURL(/\/ur\/guide$/);
 });
 
 test("the calculator answers without an account, and the answer comes along", async ({
@@ -125,8 +134,8 @@ test("legal pages, search files, and a branded 404", async ({ page, request }) =
   for (const [path, heading] of [
     ["/privacy", "Privacy policy"],
     ["/terms", "Terms of use"],
-    ["/method", "The method"],
-    ["/trust", "What is verified"],
+    ["/method", "How Mizan works it out"],
+    ["/trust", "How Mizan works it out"],
   ]) {
     await page.goto(path);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(heading);
@@ -176,6 +185,13 @@ test("signed in, the about pages open inside the app and public pages offer your
   // A session from before the hint existed: the next page view restores it.
   await page.context().clearCookies({ name: "mizan_signed_in" });
   await page.goto("/dashboard");
+  // Signed in, the rest of Mizan is still on Home and in the Menu.
+  await expect(
+    page.getByRole("region", { name: "Everything else" }).getByRole("link", { name: /Zakat al-Fitr/ }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Menu" }).filter({ visible: true }).first().click();
+  await expect(page.getByRole("dialog", { name: "Menu" }).getByRole("link", { name: "Fasts I missed" })).toBeVisible();
+  await page.keyboard.press("Escape");
   const about = page.getByRole("navigation", { name: "About Mizan" });
   await about.getByRole("link", { name: "Privacy" }).click();
   await page.waitForURL("**/privacy");
@@ -184,7 +200,7 @@ test("signed in, the about pages open inside the app and public pages offer your
   await expect(page.getByRole("link", { name: "Home", exact: true }).first()).toBeVisible();
   await expect(page.getByRole("banner").getByRole("link", { name: "Sign in" })).toHaveCount(0);
   await page.goto("/method");
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("The method");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("How Mizan works it out");
   await expect(page.getByRole("link", { name: "Home", exact: true }).first()).toBeVisible();
 
   await page.goto("/calculator");
@@ -202,44 +218,6 @@ test("signed in, the about pages open inside the app and public pages offer your
   await expect(page.getByRole("link", { name: "Home", exact: true })).toHaveCount(0);
 });
 
-test("a beginner is asked three questions and sent on with today’s nisab", async ({ page }) => {
-  const errors = watchConsole(page);
-  await page.route("**/api/metals?*", (route) => route.fulfill({ json: PRICES }));
-  await page.goto("/");
-  await page.getByRole("link", { name: /New to zakat\? Start here/ }).click();
-  await page.waitForURL("**/start");
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Zakat, in plain words");
-  // Pictures do the explaining: one coin in forty, what counts, the year of moons.
-  await expect(page.getByRole("img", { name: /200,000 ÷ 40 = 5,000/ })).toBeVisible();
-  await expect(page.getByRole("listitem").filter({ hasText: "The home you live in" })).toBeVisible();
-  await expect(page.getByRole("img", { name: /about 354 days/ })).toBeVisible();
-
-  await page.locator("#check-currency").selectOption("USD");
-  const check = page.locator("section", { has: page.getByRole("heading", { name: "Do I have to pay zakat?" }) });
-  await check.getByRole("button", { name: "Yes", exact: true }).click();
-  // 595 g × $1.20 = $714
-  await expect(check.getByText(/Are your savings worth more than \S*714\?/)).toBeVisible();
-  await check.getByRole("button", { name: "No", exact: true }).last().click();
-  await expect(check.getByText("You do not have to pay zakat now")).toBeVisible();
-
-  await check.getByRole("button", { name: "Start again" }).click();
-  for (let i = 0; i < 3; i++) await check.getByRole("button", { name: "Yes", exact: true }).nth(i).click();
-  await expect(check.getByText("You probably have to pay zakat")).toBeVisible();
-  await expectNoHorizontalScroll(page);
-  await expectUniqueIds(page);
-
-  await check.getByRole("link", { name: "Work out my zakat" }).click();
-  await page.waitForURL(/\/calculator/);
-  await expect(page.locator("#calc-currency")).toHaveValue("USD");
-  await expect(page.locator("#calc-silver-price")).toHaveValue("1.2");
-  // Everyday holdings first; the rest wait behind one click.
-  await expect(page.locator("#calc-cash")).toBeVisible();
-  await expect(page.locator("#calc-crypto")).toBeHidden();
-  await page.getByText("More kinds of wealth").click();
-  await expect(page.locator("#calc-crypto")).toBeVisible();
-  expect(errors).toEqual([]);
-});
-
 test("the step-by-step guide explains each step and ends with things to do", async ({ page }) => {
   const errors = watchConsole(page);
   await page.route("**/api/metals?*", (route) => route.fulfill({ json: PRICES }));
@@ -250,6 +228,14 @@ test("the step-by-step guide explains each step and ends with things to do", asy
   // 595 g × $1.20 and 85 g × $100
   await expect(page.getByText(/Nisab today: \S*714\.00 on silver, or \S*8,500\.00 on gold/)).toBeVisible();
   await expect(guide.getByText("Step 1 of 9")).toBeVisible();
+  await page.getByRole("button", { name: "Next" }).click();
+
+  // Pictures first: only what they have is asked about.
+  await expect(page.getByRole("heading", { name: "What do you have?" })).toBeFocused();
+  for (const kind of ["Cash in hand", "Bank balances", "Gold you keep as savings"]) {
+    await page.getByRole("button", { name: kind }).click();
+  }
+  await expect(page.getByText("Step 2 of 6")).toBeVisible();
   await page.getByRole("button", { name: "Next" }).click();
 
   await expect(page.getByRole("heading", { name: "How much cash do you have?" })).toBeFocused();
@@ -265,21 +251,20 @@ test("the step-by-step guide explains each step and ends with things to do", asy
   await page.locator("#guide-gold-purity").selectOption("0.75");
   await expect(page.getByText(/Worth about \S*750\.00 at today’s price/)).toBeVisible();
   await page.getByRole("button", { name: "Next" }).click();
-  for (const step of ["Do you wear gold jewellery?", "Do you keep any silver?", "Do you have any of these?"]) {
-    await expect(page.getByRole("heading", { name: step })).toBeVisible();
-    await page.getByRole("button", { name: "I don’t have this" }).click();
-  }
+  // Today's prices are known, so silver is used and the nisab question waits in the answer.
   await page.fill("#guide-debts", "1000");
-  await page.getByRole("button", { name: "Next" }).click();
-  await expect(page.getByRole("heading", { name: "Which nisab do you follow?" })).toBeVisible();
   await page.getByRole("button", { name: "Show my zakat" }).click();
 
   // 2,000 + 18,000 + 750 − 1,000 = 19,750; 2.5% = 493.75
   await expect(page.getByRole("heading", { name: /Your zakat is \S*493\.75/ })).toBeVisible();
-  await expect(page.getByText(/Everything you counted comes to \S*20,750\.00/)).toBeVisible();
   // The same answer as a picture, described for screen readers.
   await expect(page.getByRole("img", { name: /Everything you counted comes to .*493\.75/ })).toBeVisible();
+  // The working is folded away until asked for.
+  await expect(page.getByText(/Everything you counted comes to \S*20,750\.00/)).toBeHidden();
+  await page.getByText("How it was worked out").click();
+  await expect(page.getByText(/Everything you counted comes to \S*20,750\.00/)).toBeVisible();
   await expect(page.getByText(/leaves \S*19,750\.00/)).toBeVisible();
+  await expect(page.getByRole("radio", { name: /Silver/ })).toBeChecked();
   const download = page.waitForEvent("download");
   await page.getByRole("button", { name: "Remind me next year" }).click();
   expect((await download).suggestedFilename()).toBe("zakat-reminder.ics");
@@ -295,8 +280,7 @@ test("the step-by-step guide explains each step and ends with things to do", asy
   await expect(page.getByText("All given. May Allah accept it from you.")).toBeVisible();
 
   // The calculator picks up the same figures.
-  await page.getByRole("link", { name: "Check it in the full calculator" }).click();
-  await page.waitForURL("**/calculator");
+  await page.goto("/calculator");
   await expect(page.locator("#calc-bank")).toHaveValue("18000");
   await expect(page.locator("#result")).toContainText("493.75");
   await expect(page.locator("#calc-given")).toHaveValue("493.75");
@@ -328,14 +312,14 @@ test("who can receive zakat: each person answered, the reason a tap away", async
   await expectNoHorizontalScroll(page);
   await expectUniqueIds(page);
 
-  // The walk-through's answer leads here.
-  await page.goto("/start");
-  await page.getByRole("link", { name: "Can I give zakat to…?" }).first().click();
+  // The home page leads here.
+  await page.goto("/");
+  await page.getByRole("main").getByRole("link", { name: "Check who can receive it" }).click();
   await page.waitForURL("**/who-can-receive");
 });
 
 test("larger text applies everywhere and survives a reload", async ({ page }) => {
-  await page.goto("/start");
+  await page.goto("/guide");
   const html = page.locator("html");
   await expect(html).not.toHaveClass(/text-large/);
   await page.getByRole("button", { name: "Larger text" }).filter({ visible: true }).click();
@@ -350,7 +334,7 @@ test("larger text applies everywhere and survives a reload", async ({ page }) =>
 
 test("the Ramadan countdown, and Zakat al-Fitr while it is Ramadan", async ({ page }) => {
   await page.clock.setFixedTime(new Date("2026-10-11T10:00:00"));
-  await page.goto("/start");
+  await page.goto("/");
   await expect(page.getByText(/Ramadan 1448 begins around .*2027/)).toBeVisible();
   const download = page.waitForEvent("download");
   await page.getByRole("button", { name: "Remind me a week before Ramadan" }).click();
@@ -388,7 +372,7 @@ test("a poster for the mosque, with a code that opens the beginner's page", asyn
   const poster = page.getByRole("article", { name: "کیا آپ پر زکوٰۃ فرض ہے؟" });
   await expect(poster).toBeVisible();
   const code = poster.locator("[role=img][aria-label]");
-  await expect(code).toHaveAttribute("aria-label", /\/ur\/start$/);
+  await expect(code).toHaveAttribute("aria-label", /\/ur\/guide$/);
   await expect(code.locator("svg")).toBeVisible();
   await expectNoHorizontalScroll(page);
 });
@@ -412,8 +396,8 @@ test("gold can be weighed in tola, the unit people in Pakistan know it by", asyn
   await page.goto("/guide");
   await page.locator("#guide-currency").selectOption("PKR");
   await page.getByRole("button", { name: "Next" }).click();
-  await page.getByRole("button", { name: "I don’t have this" }).click();
-  await page.getByRole("button", { name: "I don’t have this" }).click();
+  await page.getByRole("button", { name: "Gold you keep as savings" }).click();
+  await page.getByRole("button", { name: "Next" }).click();
   // Rupees: weights default to tola. 1 tola × 11.6638 g × 36,000 × 0.999 = 419,476.90
   await expect(page.getByText("Weight in tola")).toBeVisible();
   await page.fill("#guide-gold-grams", "1");
@@ -423,7 +407,7 @@ test("gold can be weighed in tola, the unit people in Pakistan know it by", asyn
 });
 
 test("beginner pages are kept for a weak signal; account pages never are", async ({ page }) => {
-  await page.goto("/start");
+  await page.goto("/guide");
   await page.evaluate(() => navigator.serviceWorker.ready);
   await page.reload();
   await page.goto("/ur/guide");
@@ -440,13 +424,11 @@ test("beginner pages are kept for a weak signal; account pages never are", async
     const cache = await caches.open("mizan-v1-pages");
     return (await cache.keys()).map((request) => new URL(request.url).pathname).sort();
   });
-  expect(kept).toEqual(["/start", "/ur", "/ur/guide"]);
+  expect(kept).toEqual(["/guide", "/ur", "/ur/guide"]);
 });
 
 test("someone who missed years adds up what they owe and pays it monthly", async ({ page }) => {
-  await page.goto("/start");
-  await page.getByRole("link", { name: "Add up what you missed" }).click();
-  await page.waitForURL("**/missed-years");
+  await page.goto("/missed-years");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     "Missed some years? You can still put it right",
   );
@@ -538,7 +520,9 @@ test("someone who does not know their gold's weight picks pieces instead", async
   await page.route("**/api/metals?*", (route) => route.fulfill({ json: PRICES }));
   await page.goto("/guide");
   await page.locator("#guide-currency").selectOption("USD");
-  for (let i = 0; i < 3; i++) await page.getByRole("button", { name: "Next" }).click();
+  await page.getByRole("button", { name: "Next" }).click();
+  await page.getByRole("button", { name: "Gold you keep as savings" }).click();
+  await page.getByRole("button", { name: "Next" }).click();
   await expect(page.getByRole("heading", { name: "Do you keep any gold?" })).toBeVisible();
   await page.getByRole("button", { name: "I don’t know the weight" }).click();
   await page.getByRole("button", { name: "Add one: Bangle" }).click();
@@ -564,6 +548,8 @@ test("a large amount is also said in words, so a slipped zero shows", async ({ p
   // In Urdu, in the words people say.
   await page.goto("/ur/guide");
   await page.locator("#guide-currency").selectOption("PKR");
+  // Past the currency and the pictures, asking about everything.
+  await page.locator("button.btn-primary").last().click();
   await page.locator("button.btn-primary").last().click();
   await page.locator("#guide-cash").fill("250000");
   await expect(page.locator("#guide-cash-words")).toHaveText("= 2.5 لاکھ");

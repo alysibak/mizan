@@ -27,7 +27,7 @@ export function posterMetadata(locale: Locale): Metadata {
 export default function PosterView({ locale }: { locale: Locale }) {
   const all = messagesFor(locale);
   const m = all.poster;
-  const target = new URL(localePath(locale, "/start"), siteUrl());
+  const target = new URL(localePath(locale, "/guide"), siteUrl());
   // The box around it carries the label; the drawing itself is decoration.
   const qr = renderSVG(target.toString(), {
     border: 0,

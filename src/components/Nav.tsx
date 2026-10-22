@@ -7,37 +7,33 @@ import {
   IconLedger,
   IconYear,
   IconGiving,
-  IconTools,
   IconSettings,
   IconSignOut,
   IconUsers,
 } from "./icons";
 import { signOut } from "./SignOutButton";
+import SiteMenu, { type MenuProps } from "./SiteMenu";
 
 const LINKS = [
   { href: "/dashboard", label: "Home", Icon: IconBalance, match: ["/dashboard"] },
-  { href: "/assets", label: "What I own", Icon: IconLedger, match: ["/assets"] },
+  { href: "/assets", label: "What I own", Icon: IconLedger, match: ["/assets", "/tools/forgive"] },
   {
     href: "/year",
     label: "Zakat",
     Icon: IconYear,
-    match: ["/year", "/zakat", "/statement"],
+    match: ["/year", "/zakat", "/statement", "/tools/reckoning-night", "/tools/forgotten", "/tools/envelopes"],
   },
   { href: "/giving", label: "Give", Icon: IconGiving, match: ["/giving"] },
-  {
-    href: "/tools",
-    label: "Tools",
-    Icon: IconTools,
-    match: ["/tools", "/screening", "/mirath"],
-  },
 ];
 
 export default function Nav({
   name,
   isAdmin = false,
+  menu,
 }: {
   name: string;
   isAdmin?: boolean;
+  menu: MenuProps;
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -86,6 +82,11 @@ export default function Nav({
         )}
       </nav>
 
+      {/* Everything outside the ledger: Zakat al-Fitr, missed years, questions… */}
+      <div className="mt-6 px-3">
+        <SiteMenu {...menu} />
+      </div>
+
       <div className="mt-auto space-y-0.5 border-t border-mist pt-4">
         <Link
           href="/settings"
@@ -100,16 +101,10 @@ export default function Nav({
           Settings
         </Link>
         <Link
-          href="/trust"
-          className="block border-l-2 border-transparent px-3 py-2 text-xs text-sage hover:text-ink"
-        >
-          What is verified
-        </Link>
-        <Link
           href="/method"
           className="block border-l-2 border-transparent px-3 py-2 text-xs text-sage hover:text-ink"
         >
-          How numbers are made
+          How it works
         </Link>
         <Link
           href="/privacy"

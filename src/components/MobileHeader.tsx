@@ -3,17 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { IconSettings, IconUsers } from "./icons";
+import SiteMenu, { type MenuProps } from "./SiteMenu";
 
 const TITLES: [string, string][] = [
   ["/tools/reckoning-night", "Close the year"],
   ["/tools/forgotten", "Anything forgotten?"],
-  ["/tools/what-if", "If prices change"],
   ["/tools/envelopes", "Give your zakat"],
-  ["/tools/reverse", "Work back"],
   ["/tools/forgive", "Forgive"],
-  ["/tools/udhiyah", "Qurbani"],
-  ["/tools/fitr", "Zakat al-Fitr"],
-  ["/tools/asnaf", "Who can receive"],
   ["/year/snapshots", "Saved year"],
   ["/dashboard", "Home"],
   ["/assets", "What I own"],
@@ -21,18 +17,14 @@ const TITLES: [string, string][] = [
   ["/zakat", "How it is worked out"],
   ["/statement", "Statement"],
   ["/giving", "Give"],
-  ["/tools", "Tools"],
-  ["/screening", "Halal shares"],
-  ["/mirath", "Inheritance"],
   ["/settings", "Settings"],
   ["/admin/users", "Visitors"],
   ["/privacy", "Privacy"],
   ["/terms", "Terms"],
-  ["/method", "Method"],
-  ["/trust", "What is verified"],
+  ["/method", "How it works"],
 ];
 
-export default function MobileHeader({ isAdmin = false }: { isAdmin?: boolean }) {
+export default function MobileHeader({ isAdmin = false, menu }: { isAdmin?: boolean; menu: MenuProps }) {
   const pathname = usePathname();
   const title = TITLES.find(([p]) => pathname.startsWith(p))?.[1] ?? "Mizan";
 
@@ -46,6 +38,7 @@ export default function MobileHeader({ isAdmin = false }: { isAdmin?: boolean })
         <span className="font-serif text-sm text-brassDeep">Mizan</span>
       </div>
       <div className="flex items-center gap-1">
+        <SiteMenu {...menu} />
         {isAdmin && (
           <Link
             href="/admin/users"

@@ -98,7 +98,7 @@ export default async function GivingPage({
             <span className="text-sage">·</span>
           </>
         ) : null}
-        <Link href="/tools/fitr" className="text-pine hover:underline">
+        <Link href="/zakat-al-fitr" className="text-pine hover:underline">
           Work out Zakat al-Fitr
         </Link>
       </div>

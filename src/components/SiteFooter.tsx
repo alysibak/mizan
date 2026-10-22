@@ -2,40 +2,6 @@ import Link from "next/link";
 import { LOCALES, LOCALE_INFO, localePath, type Locale } from "@/i18n/config";
 import { messagesFor } from "@/i18n/messages";
 
-const LEARN = new Set(["/give", "/interest", "/sadaqah", "/quiz", "/fasts"]);
-
-/** The free tools, labelled in `locale` (most of them are in English only). */
-export function toolLinks(locale: Locale): { href: string; label: string }[] {
-  const all = messagesFor(locale);
-  const { footer, inEnglish, nav } = all.common;
-  return [
-    { href: localePath(locale, "/start"), label: nav.start },
-    { href: localePath(locale, "/calculator"), label: footer.calculator },
-    { href: localePath(locale, "/nisab"), label: footer.nisab },
-    { href: localePath(locale, "/what-counts"), label: all.applies.nav },
-    { href: localePath(locale, "/who-can-receive"), label: all.who.nav },
-    { href: localePath(locale, "/zakat-al-fitr"), label: footer.fitr },
-    { href: localePath(locale, "/missed-years"), label: all.missed.nav },
-    { href: "/ramadan", label: footer.ramadan + inEnglish },
-    // English pages not yet named in other languages are listed in English only.
-    ...(locale === "en"
-      ? [
-          { href: "/fasts", label: "Missed fasts" },
-          { href: "/give", label: "Where to give" },
-          { href: "/interest", label: "Bank interest" },
-          { href: "/sadaqah", label: "Sadaqah without money" },
-          { href: "/quiz", label: "Zakat quiz" },
-          { href: "/family", label: "Family zakat" },
-          { href: "/shop", label: "Shop zakat" },
-          { href: "/farm", label: "Crops and animals" },
-        ]
-      : []),
-    { href: "/inheritance", label: footer.inheritance + inEnglish },
-    { href: "/halal-stocks", label: footer.stocks + inEnglish },
-    { href: "/qurbani", label: footer.qurbani + inEnglish },
-  ];
-}
-
 /**
  * Footer for the public pages. `path` is the page's own path when it exists
  * in every language, so the language links lead to the same page; otherwise
@@ -50,38 +16,30 @@ export default function SiteFooter({
 }) {
   const all = messagesFor(locale);
   const { footer, inEnglish } = all.common;
-  // Pages for learning and giving get their own column, so the tools stay findable.
-  const learn = toolLinks(locale).filter((t) => LEARN.has(t.href));
-  const tools = toolLinks(locale).filter((t) => !LEARN.has(t.href));
-  const about = [
+  // A few doors, not a site map: everything else is in the Menu.
+  const zakat = [
+    { href: localePath(locale, "/guide"), label: all.landing.choose.start },
     { href: localePath(locale, "/ask"), label: all.ask.nav },
+    { href: localePath(locale, "/who-can-receive"), label: all.who.nav },
+    { href: localePath(locale, "/zakat-al-fitr"), label: footer.fitr },
+  ];
+  const about = [
     { href: localePath(locale, "/sources"), label: all.sources.nav },
     { href: localePath(locale, "/poster"), label: all.poster.nav },
-    { href: localePath(locale, "/worksheet"), label: all.worksheet.nav },
-    { href: "/guides", label: footer.guides + inEnglish },
     { href: "/method", label: footer.method + inEnglish },
-    { href: "/trust", label: footer.trust + inEnglish },
     { href: "/privacy", label: footer.privacy + inEnglish },
     { href: "/terms", label: footer.terms + inEnglish },
   ];
   return (
     <footer className="relative z-10 border-t border-mist px-5 py-10 text-sm md:px-10 print:hidden">
-      <div
-        className={
-          "mx-auto grid max-w-5xl gap-8 sm:grid-cols-2 " +
-          (learn.length
-            ? "md:grid-cols-[minmax(0,1.4fr)_repeat(4,minmax(0,1fr))]"
-            : "md:grid-cols-[minmax(0,1.4fr)_repeat(3,minmax(0,1fr))]")
-        }
-      >
+      <div className="mx-auto grid max-w-5xl gap-8 sm:grid-cols-2 md:grid-cols-[minmax(0,1.4fr)_repeat(3,minmax(0,1fr))]">
         <div className="max-w-sm sm:col-span-2 md:col-span-1">
           <p className="font-serif text-xl text-ink">Mizan</p>
           <p className="mt-2 text-xs leading-relaxed text-sage">
             {footer.disclaimer}
           </p>
         </div>
-        <LinkColumn title={footer.toolsHeading} links={tools} />
-        {learn.length ? <LinkColumn title="Learn and give" links={learn} /> : null}
+        <LinkColumn title={footer.toolsHeading} links={zakat} />
         <LinkColumn title={footer.aboutHeading} links={about} />
         <nav aria-label={footer.languages}>
           <p className="label mb-2">{footer.languages}</p>

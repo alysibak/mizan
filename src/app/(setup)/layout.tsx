@@ -24,7 +24,7 @@ export default async function SetupLayout({
       <TimezoneSync saved={settings.timezone} />
       <div className="flex items-baseline justify-between gap-4">
         <div>
-          <Link href="/trust" className="font-serif text-2xl text-ink">
+          <Link href="/" className="font-serif text-2xl text-ink">
             Mizan
           </Link>
           <p className="mt-1 text-xs text-sage">Setup · {user.name}</p>

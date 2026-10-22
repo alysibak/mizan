@@ -14,6 +14,10 @@ export default function OpenFromHash() {
       const details = target?.querySelector("details");
       if (!target || !details) return;
       details.open = true;
+      // An answer inside a folded group opens its group too.
+      for (let up = target.parentElement?.closest("details"); up; up = up.parentElement?.closest("details")) {
+        up.open = true;
+      }
       target.scrollIntoView({ block: "start" });
     };
     open();

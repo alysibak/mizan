@@ -29,8 +29,6 @@ expires.**
   everything works with no outside service at all. When a ledger's saved
   prices go stale, the balance page offers today's in one tap; it never
   changes them on its own.
-- Stock screening takes figures by hand, so it never depends on a paid
-  financial data API either.
 
 You can clone this, run `npm install`, and it works. In five years it will still
 work.
@@ -39,20 +37,20 @@ work.
 
 **For everyone, no account**
 
-- **Start here** (`/start`). Zakat for someone who knows nothing about it yet,
-  in short plain sentences: what it is, three yes-or-no questions that answer
-  "do I have to pay?" against today's nisab in their own currency, how much,
-  what counts and what does not, when, to whom, and the words they will meet.
-  The home page and the calculator lead to it first.
-- **Step by step** (`/guide`). The calculator as a conversation for someone
-  who has never done this: one question a screen (currency, cash, bank, gold,
-  jewellery, silver, other wealth, debts, nisab), each saying what to count
-  and why, with "What's the difference?" where scholars or terms differ
-  (interest, karat, worn jewellery, long-term shares, debts, silver or gold
-  nisab). The answer is explained in sentences, and ends with what to do: a
-  calendar reminder for one Islamic year later, print, or keep it in a free
-  ledger. It shares its figures with the calculator, which carries the same
-  explanations beside its own choices.
+- **One question, one button.** The home page asks "Do I have to pay
+  zakat?" and its one button opens the guide. A returning visitor sees what
+  they worked out last time instead. The worked example sits beside the
+  question on a wide screen only.
+- **Step by step** (`/guide`), the one way in. It opens with "What do you
+  have?" as pictures (cash, bank, gold, jewellery, silver, something else;
+  in English also a shop, crops or animals, family money, bank interest and
+  missed years), then asks only about what was tapped, one question a
+  screen, each saying what to count and why. With today's prices known,
+  silver sets the minimum and the gold-or-silver choice waits, folded, in
+  the answer. The answer is a picture and one sentence; how it was worked
+  out is a tap away. It ends with what to do, a calendar reminder, and the
+  pages for anything else they have. The old `/start` page redirects here,
+  in every language.
 - **Can I give zakat to…?** (`/who-can-receive`). Fifteen people a beginner
   asks about (parents, children, a husband or wife, brothers and sisters,
   other relatives, the poor, people in debt, students, charities, mosques, a
@@ -85,8 +83,8 @@ work.
   inside an account are never kept.
 - **A home-screen app in your language.** Added to the home screen from an
   Urdu page, Mizan opens in Urdu (and so on for every language), with
-  long-press shortcuts in that language: Start here, step by step, ask a
-  question, Zakat al-Fitr. It opens on the home page, which sends a
+  long-press shortcuts in that language: find out if I have to pay, ask a
+  question, Zakat al-Fitr (and My zakat in English). It opens on the home page, which sends a
   signed-in visitor on to their ledger.
 - **Amounts in words.** Under every money box, a large amount is also
   written the way people say it: "25 lakh" or "1.2 crore" for rupees and
@@ -240,25 +238,22 @@ work.
   interest and Zakat al-Fitr pages remember what was typed.
 - **Built around what a visitor is trying to do**, not around the footer:
   - A **Menu** button in a top bar that stays in view on every page, in
-    every language, opens everything as pictures grouped by intent: work
-    out my zakat, give it, learn, more tools.
+    every language, opens everything as pictures in three groups: work out
+    my zakat, give it, learn. Signed in, the same Menu sits in the app's
+    header and sidebar, and Home lists everything else (what the phone's
+    tools are keeping, then the tools not used yet), so signing in never
+    hides the rest of Mizan. The footer keeps a few doors only.
   - **Pick up where you left off**: a returning visitor sees, at the top of
     the home page, the zakat they worked out and what is still to give,
     their catch-up plan, their missed fasts, and their family's cards,
     each with one Continue button. Read from the browser only.
-  - **What do you have?** (English home page): tap what is true (cash, gold,
-    a shop, crops or animals, family money, bank interest, missed years,
-    not sure) and get a numbered plan in the order that keeps the sums
-    right: interest set aside first, this year before past years, giving
-    last.
-  - On a phone, the home page's first screen is things to do; the worked
-    example and the Ramadan box come after the choices. There is one
-    chooser (the picture plan in English, the list of tasks elsewhere),
-    the ledger's features are a short list on a phone, and the wall of tool
-    buttons is gone: the Menu and the footer list every tool.
+  - **Questions** (`/ask`) open as a few folded topics (common questions,
+    what counts, who can receive, Zakat al-Fitr, missed years, words);
+    typing searches all of them. Tool pages lead with the tool, and their
+    explanations and questions are folded under their headings.
   - Every new tool ends with **What next?** picture buttons straight under
     the tool, so no page is a dead end. Tool pages no longer end in a wall
-    of every other tool; the Menu and the footer list them.
+    of every other tool; the Menu lists them.
   - **Made for someone unsure**, from walking each journey on a phone: the
     home page's main button opens the one-question-at-a-time guide (the
     full calculator is in the header); each guide step comes to the top of
@@ -320,11 +315,6 @@ work.
   figures in WhatsApp and other apps, and both the calculator and the nisab
   pages have share buttons (the phone's share sheet, or WhatsApp and copy
   link). Shared text never includes anything a visitor typed.
-- **Free tools** (in English). An Islamic inheritance calculator
-  (`/inheritance`, exact Quranic shares with awl, radd, and blocking
-  explained), a halal stock screen with dividend purification
-  (`/halal-stocks`), and qurbani shares (`/qurbani`). Each page explains the
-  rulings it rests on and where the schools differ.
 - **Guides** (`/guides`). Zakat on gold and silver, savings, shares and funds,
   cryptocurrency, pensions, and property: what counts, how to value it, and
   where the schools differ, each ending in the calculator.
@@ -345,11 +335,11 @@ work.
   below nisab, and a private calendar feed so your own calendar app reminds you
   of the reckoning day.
 - **Closing the year, step by step.** Setup wizard, then three steps on the
-  zakat day (anything forgotten, give your zakat with an optional split across
-  the eight groups, keep a copy of the year), a note to next year, starting
-  next year's count, and a printable statement.
-- **Plain words in the account.** The tabs are Home, What I own, Zakat, Give
-  and Tools. Home opens with one sentence: whether zakat is owed, about how
+  zakat day (anything forgotten, give your zakat, close the year). Closing
+  keeps a copy of the year, with a note to next year if wanted, and starts
+  the next year's count in the same tap. A printable statement.
+- **Plain words in the account.** The tabs are Home, What I own, Zakat and
+  Give. Home opens with one sentence: whether zakat is owed, about how
   much, and when. The account pages say "your zakat day", "what counts",
   "keep a copy" and "debts you owe" where they used to say hawl, reckoning,
   freeze and deductible liabilities. Rare fields (reminder dates, notes, who a gift went to)
@@ -359,9 +349,9 @@ work.
   for anyone who wants to). Only zakat clears what is owed for
   the cycle, and a payment after the hawl falls due counts toward that cycle
   only. CSV export for receipts season.
-- **Tools.** Screening (manual, AAOIFI-style), mirath sketch, udhiyah shares,
-  reverse zakat, forgiving a debt (it comes off what you are owed, so it is
-  no longer counted; nothing is written down as charity), and more.
+- **Forgiving a debt**, from What I own when someone owes you money: it
+  comes off what you are owed, so it is no longer counted, and nothing is
+  written down as charity.
 - **Your account.** Change password (signs out other devices), one-time
   recovery codes, two-step sign-in with any authenticator app, sign out
   everywhere, download or restore a full backup, and delete the account with
@@ -374,8 +364,15 @@ work.
   notice. The main pages are audited against WCAG 2.1 AA in light and dark on
   every change.
 
-**Honesty pages:** `/method` (how the numbers are made), `/trust` (what is
-verified and what is not), `/privacy`, and `/terms`.
+**Honesty pages:** `/method` (how it works: the sum, the zakat day, what is
+fixed, what is an estimate, and how to check it yourself; `/trust` redirects
+here), `/privacy`, and `/terms`.
+
+**Removed to keep it simple:** the inheritance calculator, the halal stock
+screen and the qurbani shares (not zakat, and the first two are high-stakes
+for a beginner to rely on), the account's copies of public tools, "work back
+from what you gave" and "if prices change". Their old addresses redirect to
+the nearest useful page.
 
 ## Tech stack
 
@@ -503,7 +500,7 @@ src/
     phone-features.ts  the registry of tools that remember something (pure)
     move.ts            codes and sealing for moving to a new phone
     client-store.ts    browser storage as React state, kept in step
-    nisab.ts · hijri.ts · giving-window.ts · madhhab.ts · screening.ts
+    nisab.ts · hijri.ts · giving-window.ts · madhhab.ts
     farm.ts · family.ts · fitr.ts · missed.ts · interest.ts · fasts.ts
     price-sources.ts   parsing and sanity checks for free price feeds (pure)
     reckoning.ts       one loader for every reckoning screen
@@ -516,15 +513,14 @@ src/
   app/
     page.tsx           landing (static)
     my/                My zakat: the visitor's whole year, on the phone
-    calculator/ guide/ start/ who-can-receive/ what-counts/ missed-years/
+    calculator/ guide/ who-can-receive/ what-counts/ missed-years/
     ask/ sources/ poster/ worksheet/ zakat-al-fitr/ nisab/
                        translated public pages; [locale]/ holds the other
                        seven languages
     shop/ family/ farm/ interest/ give/ ramadan/ sadaqah/ quiz/
                        public tools in English
-    inheritance/ halal-stocks/ qurbani/   free tools (English)
     guides/            zakat on gold, savings, shares, crypto, pensions, property
-    privacy/ terms/ method/ trust/   inside the app's frame when signed in
+    privacy/ terms/ method/   inside the app's frame when signed in
     (auth)/            sign in, register, forgot
     reset/             new password from an emailed link
     (setup)/begin/     setup wizard, which brings the phone's figures along
@@ -612,7 +608,7 @@ npm run build && npm run test:e2e               # Playwright, needs Chromium
 
 Unit tests cover the zakat engine, nisab, Hijri conversion (every day for a
 century round-trips), hawl and payment windows across a roll, cent rounding,
-inheritance shares (awl, radd, Umariyyatan, Mushtaraka), screening, CSV import,
+CSV import,
 metal by weight, the calculator (including amounts typed with a decimal comma
 or Arabic-Indic digits), price-feed parsing, input validation, every language's
 messages against English (placeholders, no gaps), authenticator codes against

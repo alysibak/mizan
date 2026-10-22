@@ -406,6 +406,12 @@ const fr: Messages = {
     back: "Retour",
     skip: "Je n’en ai pas",
     seeResult: "Voir ma zakat",
+    have: {
+      title: "Que possédez-vous ?",
+      body: "Touchez tout ce que vous avez. Pas sûr ? Appuyez sur « {next} » et nous vous demanderons chaque chose.",
+      more: "Autre chose : actions, commerce, argent qu’on vous doit",
+    },
+    howWorked: "Comment c’est calculé",
     difference: "Quelle différence ?",
     byWeight: "Je connais le poids",
     byValue: "Je connais la valeur",

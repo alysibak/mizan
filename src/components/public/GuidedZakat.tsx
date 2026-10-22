@@ -37,6 +37,10 @@ import {
   IconGoldBar,
   IconReceipt,
   IconNecklace,
+  IconShop,
+  IconUsers,
+  IconWheat,
+  IconYear,
 } from "@/components/icons";
 import {
   Choice,
@@ -55,6 +59,7 @@ type GuideMessages = Messages["guide"];
 
 const STEPS = [
   "currency",
+  "have",
   "cash",
   "bank",
   "gold",
@@ -70,6 +75,7 @@ type Step = (typeof STEPS)[number];
 /** A picture for each question, so it is recognised before it is read. */
 const STEP_ICON: Record<Step, (p: { className?: string }) => React.ReactNode> = {
   currency: IconGlobe,
+  have: IconCheckCircle,
   cash: IconCash,
   bank: IconBank,
   gold: IconGoldBar,
@@ -83,6 +89,30 @@ const STEP_ICON: Record<Step, (p: { className?: string }) => React.ReactNode> = 
 
 /** Labels for the read-aloud button. */
 type Speech = { listen: string; stop: string };
+
+/** The kinds of wealth asked about one step each, picked first as pictures. */
+const ASSET_STEPS = ["cash", "bank", "gold", "jewellery", "silver", "more"] as const;
+type AssetStep = (typeof ASSET_STEPS)[number];
+const isAssetStep = (s: Step): s is AssetStep => (ASSET_STEPS as readonly string[]).includes(s);
+
+/**
+ * The rest of what someone may have, which other pages answer better (in
+ * English so far): picked here too, so the answer can point to them.
+ */
+type Also = "shop" | "farm" | "family" | "interest" | "missed";
+const ALSO: {
+  key: Also;
+  label: string;
+  Icon: (p: { className?: string }) => React.ReactNode;
+  href: string;
+  next: string;
+}[] = [
+  { key: "shop", label: "A shop", Icon: IconShop, href: "/shop", next: "Your shop: stock, the till, and money owed to you" },
+  { key: "farm", label: "Crops or farm animals", Icon: IconWheat, href: "/farm", next: "Your harvest and animals, counted on their own" },
+  { key: "family", label: "My family’s money too", Icon: IconUsers, href: "/family", next: "Each person’s zakat, one at a time" },
+  { key: "interest", label: "Interest from a bank", Icon: IconBank, href: "/interest", next: "Bank interest: set it aside and give it away" },
+  { key: "missed", label: "Years I did not pay", Icon: IconYear, href: "/missed-years", next: "Catch up on the years you did not pay" },
+];
 
 /** The rarer kinds of wealth, asked about together in one step. */
 const MORE_FIELDS: CalcFieldKey[] = [
@@ -179,7 +209,21 @@ function Guide({
   const card = useRef<HTMLElement>(null);
   const moved = useRef(false);
   const outcome = useMemo(() => computeDraft(draft), [draft]);
-  const step: Step = STEPS[index];
+  // What they said they have; nothing picked asks about everything.
+  const [have, setHave] = useState<Set<AssetStep>>(() => new Set(ASSET_STEPS.filter((k) => holds(initial, k))));
+  const [also, setAlso] = useState<Set<Also>>(() => new Set());
+  const goldPerGram = parseAmount(draft.goldPrice, draft.decimal);
+  const silverPerGram = parseAmount(draft.silverPrice, draft.decimal);
+  // The nisab question is only a question when today's prices are missing:
+  // otherwise silver is used, and the answer offers gold.
+  const pricesKnown = goldPerGram > 0 && silverPerGram > 0;
+  const steps = STEPS.filter((s) =>
+    isAssetStep(s) ? have.size === 0 || have.has(s) : s === "nisab" ? !pricesKnown : true,
+  );
+  // The list can shrink under the visitor (prices arrive, a picture is
+  // untapped), so the place in it is kept in range.
+  const at = Math.min(index, steps.length - 1);
+  const step: Step = steps[at];
   const c = draft.currency;
   const money = (n: number) => formatMoney(n, c, intl);
 
@@ -256,7 +300,14 @@ function Guide({
 
   function go(to: number) {
     moved.current = true;
-    setIndex(Math.max(0, Math.min(STEPS.length - 1, to)));
+    setIndex(Math.max(0, Math.min(steps.length - 1, to)));
+  }
+
+  function toggle<T>(set: Set<T>, key: T): Set<T> {
+    const next = new Set(set);
+    if (next.has(key)) next.delete(key);
+    else next.add(key);
+    return next;
   }
 
   function changeCurrency(currency: string) {
@@ -283,18 +334,16 @@ function Guide({
       updateIn("amounts", Object.fromEntries(MORE_FIELDS.map((k) => [k, ""])));
     }
     if (step === "debts") update({ debts: "" });
-    go(index + 1);
+    go(at + 1);
   }
 
-  const goldPerGram = parseAmount(draft.goldPrice, draft.decimal);
-  const silverPerGram = parseAmount(draft.silverPrice, draft.decimal);
   const silverNisab = NISAB_SILVER_GRAMS * silverPerGram;
   const goldNisab = NISAB_GOLD_GRAMS * goldPerGram;
   const counted = outcome.lines.reduce((sum, l) => sum + l.amount * l.zakatablePortion, 0);
   const lineValue = (key: CalcFieldKey) =>
     outcome.lines.find((l) => l.key === key)?.amount ?? 0;
   const skippable = ["cash", "bank", "gold", "jewellery", "silver", "more", "debts"].includes(step);
-  const total = STEPS.length - 1;
+  const total = steps.length - 1;
 
   function weighable(key: WeighableKey) {
     const byWeight = draft.byWeight[key] ?? !draft.amounts[key];
@@ -450,6 +499,35 @@ function Guide({
         </div>
       );
       break;
+    case "have":
+      title = m.have.title;
+      body = fmt(m.have.body, { next: m.next });
+      fields = (
+        <ul className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {ASSET_STEPS.map((key) => (
+            <PickTile
+              key={key}
+              on={have.has(key)}
+              label={key === "more" ? m.have.more : calc.fields[key].label}
+              Icon={STEP_ICON[key]}
+              onClick={() => setHave((h) => toggle(h, key))}
+            />
+          ))}
+          {/* The pages these lead to are in English only so far. */}
+          {locale === "en"
+            ? ALSO.map(({ key, label, Icon }) => (
+                <PickTile
+                  key={key}
+                  on={also.has(key)}
+                  label={label}
+                  Icon={Icon}
+                  onClick={() => setAlso((a) => toggle(a, key))}
+                />
+              ))
+            : null}
+        </ul>
+      );
+      break;
     case "cash":
     case "bank":
       title = m.steps[step].title;
@@ -592,6 +670,8 @@ function Guide({
           : m.result.none;
       fields = outcome.needsPrices ? null : (
         <Result
+          also={locale === "en" ? also : null}
+          onStandard={(standard) => update({ standard })}
           m={m}
           calc={calc}
           locale={locale}
@@ -599,7 +679,7 @@ function Guide({
           counted={counted}
           outcome={outcome}
           money={money}
-          onChange={() => go(0)}
+          onChange={() => go(1)}
           onGiven={(v) => update({ given: v })}
           share={share}
         />
@@ -618,11 +698,11 @@ function Guide({
     <section ref={card} aria-labelledby="guide-step" className="card scroll-mt-20 p-5 sm:p-8">
       {step !== "result" ? (
         <div>
-          <p className="label text-brassDeep">{fmt(m.stepOf, { n: index + 1, total })}</p>
+          <p className="label text-brassDeep">{fmt(m.stepOf, { n: at + 1, total })}</p>
           <div className="mt-2 h-1.5 overflow-hidden bg-mist" aria-hidden>
             <div
               className="h-full bg-pine transition-all duration-300"
-              style={{ width: `${Math.round(((index + 1) / total) * 100)}%` }}
+              style={{ width: `${Math.round(((at + 1) / total) * 100)}%` }}
             />
           </div>
         </div>
@@ -662,13 +742,13 @@ function Guide({
           would be one more button that does nearly the same thing. */}
       {step === "result" ? null : (
         <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-mist pt-5">
-          {index > 0 ? (
-            <button type="button" className="btn-ghost px-5" onClick={() => go(index - 1)}>
+          {at > 0 ? (
+            <button type="button" className="btn-ghost px-5" onClick={() => go(at - 1)}>
               {m.back}
             </button>
           ) : null}
-          <button type="button" className="btn-primary px-6 py-3 text-base" onClick={() => go(index + 1)}>
-            {step === "nisab" ? m.seeResult : m.next}
+          <button type="button" className="btn-primary px-6 py-3 text-base" onClick={() => go(at + 1)}>
+            {steps[at + 1] === "result" ? m.seeResult : m.next}
           </button>
           {skippable ? (
             <button
@@ -682,6 +762,47 @@ function Guide({
         </div>
       )}
     </section>
+  );
+}
+
+/** Whether a draft already holds something for this kind of wealth. */
+function holds(draft: CalcDraft, key: AssetStep): boolean {
+  if (key === "more") return MORE_FIELDS.some((k) => Boolean(draft.amounts[k]));
+  if (key === "cash" || key === "bank") return Boolean(draft.amounts[key]);
+  return Boolean(draft.amounts[key] || draft.grams[key]);
+}
+
+function PickTile({
+  on,
+  label,
+  Icon,
+  onClick,
+}: {
+  on: boolean;
+  label: string;
+  Icon: (p: { className?: string }) => React.ReactNode;
+  onClick: () => void;
+}) {
+  return (
+    <li>
+      <button
+        type="button"
+        aria-pressed={on}
+        onClick={onClick}
+        className={
+          "relative flex h-full min-h-[92px] w-full flex-col items-center justify-center gap-2 border-2 px-2 py-3 text-center transition " +
+          (on ? "border-pine bg-pine/10" : "border-mist bg-surface hover:border-sage")
+        }
+      >
+        <Icon className={"h-8 w-8 " + (on ? "text-pine" : "text-sage")} />
+        <span className="text-sm font-medium leading-snug text-ink">{label}</span>
+        {on ? (
+          <span className="absolute end-1.5 top-1.5 text-pine" aria-hidden>
+            <IconCheckCircle className="h-5 w-5" />
+          </span>
+        ) : null}
+      </button>
+    </li>
   );
 }
 
@@ -781,6 +902,8 @@ function Result({
   money,
   onChange,
   onGiven,
+  onStandard,
+  also,
   share,
 }: {
   m: GuideMessages;
@@ -792,6 +915,9 @@ function Result({
   money: (n: number) => string;
   onChange: () => void;
   onGiven: (v: string) => void;
+  onStandard: (standard: "silver" | "gold") => void;
+  /** What else they said they have, where those pages exist (English). */
+  also: Set<Also> | null;
   share: ShareLabels;
 }) {
   const signedIn = useSignedIn();
@@ -799,11 +925,14 @@ function Result({
   const intl = LOCALE_INFO[locale].intl;
   const { result } = outcome;
   const rate = formatPercent(result.rate, draft.basis === "solar" ? 3 : 1, intl);
+  const silverNisab = NISAB_SILVER_GRAMS * parseAmount(draft.silverPrice, draft.decimal);
+  const goldNisab = NISAB_GOLD_GRAMS * parseAmount(draft.goldPrice, draft.decimal);
   // The guide's reminder and My zakat keep one zakat day: the one already
   // chosen, or today, chosen by asking to be reminded.
   const zakatDay = parseMy(myRaw).zakatDay;
   const nextYear = comingZakatDay(zakatDay ?? zakatDayOf(new Date()), new Date());
   const nextYearText = nextYear.toLocaleDateString(intl, { dateStyle: "long", timeZone: "UTC" });
+  const alsoNext = also ? ALSO.filter((a) => also.has(a.key)) : [];
 
   function remind() {
     if (!zakatDay) {
@@ -827,24 +956,24 @@ function Result({
     track("Reminder", { via: "calendar" });
   }
 
-  const sentences = [
+  const verdict = result.isDue
+    ? fmt(m.result.above, {
+        nisab: money(result.nisab),
+        rate,
+        net: money(result.netZakatable),
+        zakat: money(result.zakatDue),
+      })
+    : fmt(m.result.below, { nisab: money(result.nisab) });
+  const working = [
     fmt(m.result.total, { total: money(counted) }),
     outcome.debts > 0
       ? fmt(m.result.debts, { debts: money(outcome.debts), net: money(result.netZakatable) })
       : null,
-    result.isDue
-      ? fmt(m.result.above, {
-          nisab: money(result.nisab),
-          rate,
-          net: money(result.netZakatable),
-          zakat: money(result.zakatDue),
-        })
-      : fmt(m.result.below, { nisab: money(result.nisab) }),
   ].filter((s): s is string => s !== null);
 
   return (
     <div className="mt-4 space-y-6">
-      {/* The answer as a picture first, then the same in sentences. */}
+      {/* The answer as a picture, then in one sentence; the working is a tap away. */}
       <ResultPicture
         counted={counted}
         debts={outcome.debts}
@@ -853,7 +982,7 @@ function Result({
         zakat={result.zakatDue}
         due={result.isDue}
         money={money}
-        summary={sentences.join(" ")}
+        summary={[...working, verdict].join(" ")}
         labels={{
           own: calc.ownTitle,
           debts: calc.debtsDueNow,
@@ -863,85 +992,57 @@ function Result({
           none: calc.noneDue,
         }}
       />
-      <div className="space-y-2 text-base leading-relaxed text-ink">
-        {sentences.map((s) => (
-          <p key={s}>{s}</p>
-        ))}
-        <p className="text-sm text-sage">{m.result.hawl}</p>
-      </div>
+      <p className="text-base leading-relaxed text-ink">{verdict}</p>
 
-      {outcome.lines.length > 0 ? (
-        <dl className="space-y-1.5 border-y border-mist py-4 text-sm">
-          {outcome.lines.map((line) => (
-            <div key={line.key} className="flex justify-between gap-3">
-              <dt className="text-sage">
-                {calc.fields[line.key].label}
-                {line.zakatablePortion === 0 && line.key === "jewellery" ? (
-                  <span className="block text-xs">{calc.jewelleryNo}</span>
-                ) : line.zakatablePortion < 1 ? (
-                  <span className="block text-xs">
-                    {fmt(calc.shareOf, {
-                      share: formatPercent(line.zakatablePortion, 0, intl),
-                      amount: money(line.amount),
-                    })}
-                  </span>
-                ) : null}
-              </dt>
-              <dd className="text-ink nums">
-                {line.zakatablePortion === 0 ? "—" : money(line.amount * line.zakatablePortion)}
-              </dd>
-            </div>
-          ))}
-          {outcome.debts > 0 ? (
-            <div className="flex justify-between gap-3">
-              <dt className="text-sage">{calc.debtsDueNow}</dt>
-              <dd className="text-danger nums">−{money(outcome.debts)}</dd>
+      {result.isDue ? (
+        <div>
+          <h3 className="font-serif text-xl text-ink">{m.result.doTitle}</h3>
+          <ol className="mt-3 list-decimal space-y-1.5 ps-5 text-base leading-relaxed text-sage">
+            {calc.nextSteps.map((s) => (
+              <li key={s}>{s}</li>
+            ))}
+          </ol>
+          {/* My zakat and the giving guide are in English only so far. */}
+          {locale === "en" ? (
+            <div className="mt-3 flex flex-col gap-1.5">
+              <Link href="/my" className="text-base font-medium text-pine hover:underline">
+                Saved in My zakat: note what you give, and get a reminder every year →
+              </Link>
+              <Link href="/give" className="text-base font-medium text-pine hover:underline">
+                Where to give it, and how to choose a charity →
+              </Link>
             </div>
           ) : null}
-        </dl>
-      ) : null}
+          <GivenTracker
+            id="guide-given"
+            due={result.zakatDue}
+            value={draft.given}
+            decimal={draft.decimal}
+            currency={draft.currency}
+            money={money}
+            onChange={onGiven}
+            m={calc}
+            intl={intl}
+          />
+        </div>
+      ) : (
+        <p className="text-base leading-relaxed text-sage">{calc.belowNext}</p>
+      )}
 
-      <div>
-        <h3 className="font-serif text-xl text-ink">{m.result.doTitle}</h3>
-        {result.isDue ? (
-          <>
-            <ol className="mt-3 list-decimal space-y-1.5 ps-5 text-base leading-relaxed text-sage">
-              {calc.nextSteps.map((s) => (
-                <li key={s}>{s}</li>
-              ))}
-            </ol>
-            {/* The giving guide is in English only so far. */}
-            {locale === "en" ? (
-              <div className="mt-3 flex flex-col gap-1.5">
-                <Link href="/my" className="text-base font-medium text-pine hover:underline">
-                  Saved in My zakat: note what you give, and get a reminder every year →
+      {alsoNext.length ? (
+        <div>
+          <h3 className="font-serif text-xl text-ink">Also for you</h3>
+          <ul className="mt-2 space-y-1.5">
+            {alsoNext.map((a) => (
+              <li key={a.key}>
+                <Link href={a.href} className="text-base font-medium text-pine hover:underline">
+                  {a.next} →
                 </Link>
-                <Link href="/give" className="text-base font-medium text-pine hover:underline">
-                  Where to give it, and how to choose a charity →
-                </Link>
-              </div>
-            ) : null}
-            <GivenTracker
-              id="guide-given"
-              due={result.zakatDue}
-              value={draft.given}
-              decimal={draft.decimal}
-              currency={draft.currency}
-              money={money}
-              onChange={onGiven}
-              m={calc}
-              intl={intl}
-            />
-          </>
-        ) : (
-          <p className="mt-3 text-base leading-relaxed text-sage">{calc.belowNext}</p>
-        )}
-        <p className="mt-2 text-sm">
-          <Link href={localePath(locale, "/who-can-receive")} className="text-pine hover:underline">
-            {m.result.who}
-          </Link>
-        </p>
-      </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="border border-mist bg-paper/60 p-4">
@@ -952,34 +1053,91 @@ function Result({
             {fmt(zakatDay ? m.result.reminderHintDay : m.result.reminderHint, { date: nextYearText })}
           </p>
         </div>
-        <div className="border border-mist bg-paper/60 p-4">
-          {signedIn ? (
-            <>
-              <Link href="/assets#from-phone" className="btn-primary w-full">
-                {calc.keepMineCta}
-              </Link>
-              <p className="mt-2 text-xs text-sage">{calc.keepMineBody}</p>
-            </>
-          ) : (
-            <>
-              <Link href="/register?from=calculator" className="btn-primary w-full">
-                {m.result.ledger}
-              </Link>
-              <p className="mt-2 text-xs text-sage">{m.result.ledgerHint}</p>
-            </>
-          )}
-        </div>
+        {signedIn ? (
+          <div className="border border-mist bg-paper/60 p-4">
+            <Link href="/assets#from-phone" className="btn-primary w-full">
+              {calc.keepMineCta}
+            </Link>
+            <p className="mt-2 text-xs text-sage">{calc.keepMineBody}</p>
+          </div>
+        ) : null}
       </div>
 
+      <details className="border-t border-mist pt-4">
+        <summary className="cursor-pointer text-base font-medium text-pine">{m.howWorked}</summary>
+        <div className="mt-3 space-y-4">
+          <div className="space-y-2 text-base leading-relaxed text-ink">
+            {working.map((s) => (
+              <p key={s}>{s}</p>
+            ))}
+            <p className="text-sm text-sage">{m.result.hawl}</p>
+          </div>
+          {outcome.lines.length > 0 ? (
+            <dl className="space-y-1.5 border-y border-mist py-4 text-sm">
+              {outcome.lines.map((line) => (
+                <div key={line.key} className="flex justify-between gap-3">
+                  <dt className="text-sage">
+                    {calc.fields[line.key].label}
+                    {line.zakatablePortion === 0 && line.key === "jewellery" ? (
+                      <span className="block text-xs">{calc.jewelleryNo}</span>
+                    ) : line.zakatablePortion < 1 ? (
+                      <span className="block text-xs">
+                        {fmt(calc.shareOf, {
+                          share: formatPercent(line.zakatablePortion, 0, intl),
+                          amount: money(line.amount),
+                        })}
+                      </span>
+                    ) : null}
+                  </dt>
+                  <dd className="text-ink nums">
+                    {line.zakatablePortion === 0 ? "—" : money(line.amount * line.zakatablePortion)}
+                  </dd>
+                </div>
+              ))}
+              {outcome.debts > 0 ? (
+                <div className="flex justify-between gap-3">
+                  <dt className="text-sage">{calc.debtsDueNow}</dt>
+                  <dd className="text-danger nums">−{money(outcome.debts)}</dd>
+                </div>
+              ) : null}
+            </dl>
+          ) : null}
+          <fieldset>
+            <legend className="text-sm font-medium text-ink">{m.steps.nisab.title}</legend>
+            <p className="mt-1 text-sm text-sage">{m.steps.nisab.body}</p>
+            <div className="mt-2 grid gap-2 sm:grid-cols-2">
+              <Choice
+                name="guide-result-standard"
+                checked={draft.standard === "silver"}
+                onChange={() => onStandard("silver")}
+                title={calc.silverTitle}
+                detail={
+                  silverNisab > 0
+                    ? fmt(calc.silverDetailWithValue, { amount: money(silverNisab) })
+                    : calc.silverDetail
+                }
+              />
+              <Choice
+                name="guide-result-standard"
+                checked={draft.standard === "gold"}
+                onChange={() => onStandard("gold")}
+                title={calc.goldTitle}
+                detail={goldNisab > 0 ? money(goldNisab) : calc.goldDetail}
+              />
+            </div>
+          </fieldset>
+        </div>
+      </details>
+
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
-        <button type="button" className="text-pine hover:underline" onClick={() => window.print()}>
-          {m.result.print}
-        </button>
-        <Link href={localePath(locale, "/calculator")} className="text-pine hover:underline">
-          {m.result.calculator}
+        <Link href={localePath(locale, "/who-can-receive")} className="text-pine hover:underline">
+          {m.result.who}
         </Link>
         <button type="button" className="text-pine hover:underline" onClick={onChange}>
           {m.result.change}
+        </button>
+        <button type="button" className="text-pine hover:underline" onClick={() => window.print()}>
+          {m.result.print}
         </button>
       </div>
 

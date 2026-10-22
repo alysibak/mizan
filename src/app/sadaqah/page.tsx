@@ -21,7 +21,7 @@ const copy: ToolPageCopy = {
           Zakat is a set share of wealth, owed once a year by those who have enough. Sadaqah is any good you give
           freely, at any time, and anyone can give it. If you have no money to give, you still have these. To find
           out whether you owe zakat, start{" "}
-          <Link href="/start" className="text-pine hover:underline">
+          <Link href="/guide" className="text-pine hover:underline">
             here
           </Link>
           .
@@ -30,7 +30,7 @@ const copy: ToolPageCopy = {
     },
   ],
   next: [
-    { href: "/start", label: "Do I owe zakat as well?", icon: "start" },
+    { href: "/guide", label: "Do I owe zakat as well?", icon: "start" },
     { href: "/quiz", label: "Zakat in ten questions", icon: "quiz" },
   ],
   faq: [
