@@ -8,6 +8,7 @@
 import { parseAmount, type DecimalMark } from "./calculator";
 import { FARM_KEY, farmDues, parseFarm } from "./farm";
 import { FASTS_KEY, fastsKept, fastsOwed, parseFasts } from "./fasts";
+import { DEBTS_KEY, debtTotals, parseDebts, repaymentsDue } from "./debts";
 import { FITR_KEY, parseFitr, zakatAlFitr } from "./fitr";
 import { INTEREST_KEY, parseInterest } from "./interest";
 import { MISSED_KEY, missedZakat, parseTally, tallyAmounts } from "./missed";
@@ -42,6 +43,8 @@ export interface PhoneDues {
   /** Missed fasts still to make up, and fidya or oath food still to give. */
   fastsLeft: number;
   fastsToGive: number;
+  /** Repayments you owe that are late or due within a week. */
+  repaymentsDue: number;
 }
 
 interface PhoneFeature {
@@ -174,6 +177,27 @@ export const PHONE_FEATURES: readonly PhoneFeature[] = [
       return { fastsLeft: owed.left, fastsToGive: owed.toGive };
     },
   },
+  {
+    key: "debts",
+    storageKey: DEBTS_KEY,
+    line(raw, ctx) {
+      const notes = parseDebts(raw);
+      if (!notes.length) return null;
+      const t = debtTotals(notes);
+      const parts = [
+        t.owedToYou > 0 ? `${ctx.money(t.owedToYou)} owed to you` : "",
+        t.youOwe > 0 ? `you owe ${ctx.money(t.youOwe)}` : "",
+      ].filter(Boolean);
+      return {
+        key: "debts",
+        icon: "debts",
+        title: "Money lent and borrowed",
+        status: parts.length ? parts.join(" · ") : "All paid back",
+        href: "/debts",
+      };
+    },
+    dues: (raw, ctx) => ({ repaymentsDue: repaymentsDue(parseDebts(raw), ctx.today) }),
+  },
 ];
 
 /** The storage keys of every tool above. */
@@ -186,7 +210,14 @@ export function phoneLines(read: (key: string) => string | null, ctx: PhoneConte
 
 /** What the tools say is still owed. */
 export function phoneDues(read: (key: string) => string | null, ctx: PhoneContext): PhoneDues {
-  const dues: PhoneDues = { missedLeft: 0, interestToGive: 0, farmDue: false, fastsLeft: 0, fastsToGive: 0 };
+  const dues: PhoneDues = {
+    missedLeft: 0,
+    interestToGive: 0,
+    farmDue: false,
+    fastsLeft: 0,
+    fastsToGive: 0,
+    repaymentsDue: 0,
+  };
   for (const f of PHONE_FEATURES) Object.assign(dues, f.dues?.(read(f.storageKey), ctx));
   return dues;
 }

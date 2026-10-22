@@ -72,6 +72,15 @@ const tr: Messages = {
     lede: "Ücretsiz ve gizli bir zekât hesaplayıcı ve defter. Sahip olduklarınızı güncel maden fiyatlarıyla nisaba göre tartın, havlinizi Hicri takvimle izleyin ve her yılı güvenebileceğiniz bir rakamla kapatın.",
     ctaCalculate: "Zekâtınızı hesaplayın",
     ctaLedger: "Ücretsiz defter açın",
+    quick: {
+      label: "Birikiminiz, nakdiniz ve altınınız, hepsi birlikte",
+      nisab: "Zekât {nisab} tutarından başlar: bugünkü nisap.",
+      below: "Zekât gerekmiyor: bugünkü nisabın ({nisab}) altındasınız.",
+      due: "Zekâtınız: yaklaşık {zakat}",
+      dueHint: "{amount} tutarının %2,5’i, üzerinden bir yıl geçince.",
+      exact: "Adım adım kesin cevabı alın",
+      currency: "Para birimi",
+    },
     trustLine:
       "Ücretsiz · Reklamsız · Banka bağlantısı yok · Verilerinizi istediğiniz zaman dışa aktarın veya silin",
     sample: {

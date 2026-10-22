@@ -976,6 +976,43 @@ export const EVIDENCE: Record<string, CaseEvidence> = {
     ],
   },
 
+  // Writing down money lent and borrowed.
+  "write-debts": {
+    evidence: [
+      {
+        strength: "quran",
+        text: "“O you who believe, when you take on a debt for a fixed term, write it down… Do not be weary of writing it, small or large, with its term. That is more just with Allah, stronger as evidence, and more likely to keep you from doubt.”",
+        ref: "Quran 2:282",
+      },
+      {
+        strength: "sahih",
+        text: "“Whoever takes people’s money meaning to repay it, Allah will repay it for him; and whoever takes it meaning to waste it, Allah will waste him.”",
+        ref: "Sahih al-Bukhari, from Abu Hurayrah",
+      },
+    ],
+  },
+
+  // Giving time to someone who cannot pay, or letting the debt go.
+  "forgive-debt": {
+    evidence: [
+      {
+        strength: "quran",
+        text: "“If the one who owes is in hardship, give him time until it eases; and to let it go as charity is better for you, if only you knew.”",
+        ref: "Quran 2:280",
+      },
+      {
+        strength: "sahih",
+        text: "“Whoever gives time to someone in difficulty, or lets him off, Allah will shade him in His shade.”",
+        ref: "Sahih Muslim, from Abu al-Yasar",
+      },
+      {
+        strength: "agreed",
+        text: "A man used to lend to people and tell his servant: when you come to someone in hardship, let it go, so that Allah may let us go. He met Allah, and Allah let him go.",
+        ref: "Sahih al-Bukhari and Sahih Muslim, from Abu Hurayrah",
+      },
+    ],
+  },
+
   // Kaffarah for a broken oath.
   oath: {
     evidence: [

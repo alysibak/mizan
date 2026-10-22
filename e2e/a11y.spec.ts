@@ -40,6 +40,7 @@ for (const scheme of ["light", "dark"] as const) {
         "/ar/guide",
         "/who-can-receive",
         "/fasts",
+        "/debts",
         "/ur/zakat-al-fitr",
         "/what-counts",
         "/missed-years",

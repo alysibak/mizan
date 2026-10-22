@@ -37,10 +37,18 @@ work.
 
 **For everyone, no account**
 
-- **One question, one button.** The home page asks "Do I have to pay
-  zakat?" and its one button opens the guide. A returning visitor sees what
-  they worked out last time instead. The worked example sits beside the
-  question on a wide screen only.
+- **An answer in thirty seconds.** The home page has one box: savings, cash
+  and gold together. As it is typed, the answer appears against today's
+  silver nisab (your zakat, or "no zakat to pay"), in the reader's language
+  and currency. One button leads to the exact answer, step by step. A
+  returning visitor sees what they worked out last time.
+- **Money lent and borrowed** (`/debts`, English). Written down as the
+  Quran asks (2:282) in two taps and an amount: who owes you, who you owe,
+  part payments, a reminder on the pay-back day, "forgive it" (2:280), and a
+  note to send the other person on WhatsApp. It stays on the phone, joins
+  My zakat's list and to-dos (a repayment due), is saved and moved with
+  everything else, and can put what is owed each way into the zakat
+  figures.
 - **Step by step** (`/guide`), the one way in. It opens with "What do you
   have?" as pictures (cash, bank, gold, jewellery, silver, something else;
   in English also a shop, crops or animals, family money, bank interest and

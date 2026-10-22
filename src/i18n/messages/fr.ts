@@ -72,6 +72,15 @@ const fr: Messages = {
     lede: "Un calculateur de zakat et un registre gratuits et privés. Pesez vos biens face au nisab avec les cours des métaux en direct, suivez votre hawl selon le calendrier hégirien, et clôturez chaque année avec un montant fiable.",
     ctaCalculate: "Calculer ma zakat",
     ctaLedger: "Ouvrir un registre gratuit",
+    quick: {
+      label: "Votre épargne, vos espèces et votre or, en tout",
+      nisab: "La zakat commence à {nisab}, le nisab du jour.",
+      below: "Pas de zakat à payer : vous êtes sous le nisab du jour, {nisab}.",
+      due: "Votre zakat : environ {zakat}",
+      dueHint: "2,5 % de {amount}, une fois l’année passée.",
+      exact: "Obtenir la réponse exacte, étape par étape",
+      currency: "Monnaie",
+    },
     trustLine:
       "Gratuit · Sans publicité · Sans lien bancaire · Exportez ou supprimez vos données à tout moment",
     sample: {

@@ -37,10 +37,11 @@ test("every tool page is in the Menu and has no horizontal scroll", async ({ pag
     ["Zakat on my shop", "/shop"],
     ["Crops and animals", "/farm"],
     ["Zakat al-Fitr for my family", "/zakat-al-fitr"],
+    ["Money I lent or borrowed", "/debts"],
   ]) {
     await expect(menu.getByRole("link", { name, exact: true })).toHaveAttribute("href", path);
   }
-  for (const path of ["/ramadan", "/fasts", "/give", "/interest", "/sadaqah", "/quiz", "/family", "/shop", "/farm", "/zakat-al-fitr"]) {
+  for (const path of ["/ramadan", "/fasts", "/give", "/interest", "/sadaqah", "/quiz", "/family", "/shop", "/farm", "/zakat-al-fitr", "/debts"]) {
     await page.goto(path);
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -319,4 +320,44 @@ test("missed fasts: the reason says what to do, the count goes down, and My zaka
   // And Ask finds it.
   await page.goto("/ask?q=fidya");
   await expect(page.getByRole("region", { name: "Answers" }).getByText("Too old or ill to fast: fidya")).toBeVisible();
+});
+
+test("money lent and borrowed: written down in seconds, sent on, and counted for zakat", async ({ page }) => {
+  await page.goto("/debts");
+  await page.getByRole("button", { name: "Someone owes me" }).click();
+  // Straight to the one thing that must be typed.
+  await expect(page.locator("#debt-amount")).toBeFocused();
+  await page.fill("#debt-amount", "5000");
+  await page.fill("#debt-who", "Uncle Ahmed");
+  await page.getByRole("button", { name: "Write it down" }).click();
+  await expect(page.getByText("Written down.", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Send it to Uncle Ahmed" }).or(page.getByRole("group", { name: "Send it to Uncle Ahmed" })),
+  ).toBeVisible();
+
+  await page.getByRole("button", { name: "I owe someone" }).click();
+  await page.fill("#debt-amount", "300");
+  await page.getByRole("button", { name: "Write it down" }).click();
+  await expect(page.locator("p", { hasText: "Owed to you:" })).toContainText("5,000.00");
+  await expect(page.locator("p", { hasText: "You owe:" })).toContainText("300.00");
+
+  const ahmed = page.getByRole("listitem").filter({ hasText: "Uncle Ahmed owes you" });
+  await ahmed.getByRole("button", { name: "Some paid back" }).click();
+  await ahmed.locator("input").fill("1000");
+  await ahmed.getByRole("button", { name: "Save" }).click();
+  await expect(ahmed).toContainText("4,000.00");
+
+  await page.getByRole("button", { name: "Use these in my zakat" }).click();
+  await expect(page.getByText("Added to your zakat figures.")).toBeVisible();
+  const draft = await page.evaluate(() => JSON.parse(localStorage.getItem("mizan-calculator-v1") ?? "{}"));
+  expect(draft.amounts.receivables).toBe("4000");
+  expect(draft.debts).toBe("300");
+
+  await ahmed.getByRole("button", { name: "Forgive it" }).click();
+  await ahmed.getByRole("button", { name: /Forgive the/ }).click();
+  await expect(page.getByText("Paid back or forgiven (1)")).toBeVisible();
+
+  // My zakat keeps it with everything else on this phone.
+  await page.goto("/my");
+  await expect(page.getByText("Money lent and borrowed")).toBeVisible();
 });

@@ -13,6 +13,7 @@ const MORE = [
   { key: "fitr", icon: "fitr", title: "Zakat al-Fitr", status: "For each person, before the Eid prayer", href: "/zakat-al-fitr" },
   { key: "missed", icon: "missed", title: "Years I did not pay", status: "Add them up, and pay a little each month", href: "/missed-years" },
   { key: "who", icon: "who", title: "Who can receive zakat", status: "Your aunt, a neighbour, the mosque?", href: "/who-can-receive" },
+  { key: "debts", icon: "debts", title: "Money lent and borrowed", status: "Write it down in ten seconds", href: "/debts" },
   { key: "interest", icon: "interest", title: "Interest from a bank", status: "Set it aside and give it away", href: "/interest" },
   { key: "fasts", icon: "fasts", title: "Fasts I missed", status: "Make them up, or give instead", href: "/fasts" },
   { key: "ask", icon: "ask", title: "Ask a question", status: "Every answer, with where it comes from", href: "/ask" },

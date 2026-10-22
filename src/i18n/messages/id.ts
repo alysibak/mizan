@@ -72,6 +72,15 @@ const id: Messages = {
     lede: "Kalkulator zakat dan pembukuan yang gratis dan privat. Timbang harta Anda terhadap nisab dengan harga logam terkini, pantau haul dengan kalender Hijriah, dan tutup setiap tahun dengan angka yang bisa Anda percayai.",
     ctaCalculate: "Hitung zakat Anda",
     ctaLedger: "Buka pembukuan gratis",
+    quick: {
+      label: "Tabungan, uang tunai, dan emas Anda, semuanya",
+      nisab: "Zakat mulai dari {nisab}, nisab hari ini.",
+      below: "Tidak ada zakat: Anda di bawah nisab hari ini, {nisab}.",
+      due: "Zakat Anda: sekitar {zakat}",
+      dueHint: "2,5% dari {amount}, setelah dimiliki satu tahun.",
+      exact: "Dapatkan jawaban pastinya, langkah demi langkah",
+      currency: "Mata uang",
+    },
     trustLine: "Gratis · Tanpa iklan · Tanpa koneksi bank · Ekspor atau hapus data Anda kapan saja",
     sample: {
       aria: "Contoh hasil zakat",

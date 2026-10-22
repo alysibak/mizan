@@ -27,6 +27,8 @@ export function hawlCalendar(opts: {
   /** The event's title and note, e.g. in the visitor's language. */
   summary?: string;
   description?: string;
+  /** A stable id for a reminder that is not the zakat day itself. */
+  uid?: string;
 }): string {
   const stamp = (opts.now ?? new Date()).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
   const lines = [
@@ -42,7 +44,7 @@ export function hawlCalendar(opts: {
   if (opts.dueDay) {
     lines.push(
       "BEGIN:VEVENT",
-      `UID:hawl-${icsDay(opts.dueDay)}@mizan.app`,
+      `UID:${opts.uid ?? `hawl-${icsDay(opts.dueDay)}`}@mizan.app`,
       `DTSTAMP:${stamp}`,
       `DTSTART;VALUE=DATE:${icsDay(opts.dueDay)}`,
       `DTEND;VALUE=DATE:${icsDay(nextDay(opts.dueDay))}`,

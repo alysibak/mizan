@@ -186,6 +186,8 @@ export interface Snapshot {
   /** Missed fasts still to make up, and fidya or oath food still to give. */
   fastsLeft?: number;
   fastsToGive?: number;
+  /** Repayments owed that are late or due within a week. */
+  repaymentsDue?: number;
 }
 
 export interface Todo {
@@ -238,6 +240,14 @@ export function todos(s: Snapshot, today: Date): Todo[] {
     }
   }
   if (s.missedLeft > 0.005) list.push({ key: "missed", text: "Keep paying off past years", href: "/missed-years", rank: 6 });
+  if (s.repaymentsDue) {
+    list.push({
+      key: "repay",
+      text: s.repaymentsDue === 1 ? "A repayment you owe is due" : `${s.repaymentsDue} repayments you owe are due`,
+      href: "/debts",
+      rank: 2,
+    });
+  }
   if (s.farmDue) list.push({ key: "farm", text: "Give the share of your harvest or herd", href: "/farm", rank: 7 });
   const fasts = s.fastsLeft ?? 0;
   if (fasts > 0) {

@@ -40,6 +40,7 @@ export function siteDirectory(locale: Locale): DirectoryGroup[] {
           { href: "/farm", label: "Crops and animals", icon: "farm" },
         ]),
         { href: to("/missed-years"), label: choose.missed, icon: "missed" },
+        ...only([{ href: "/debts", label: "Money I lent or borrowed", icon: "debts" }]),
         { href: to("/nisab"), label: choose.nisab, icon: "nisab" },
         ...only([{ href: "/my#move", label: "Move to a new phone", icon: "move" }]),
       ],

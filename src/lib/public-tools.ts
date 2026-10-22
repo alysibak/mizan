@@ -7,6 +7,7 @@ export const ENGLISH_TOOL_PATHS = [
   "/my",
   "/ramadan",
   "/fasts",
+  "/debts",
   "/give",
   "/interest",
   "/sadaqah",

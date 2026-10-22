@@ -5,6 +5,7 @@ import SiteFooter from "@/components/SiteFooter";
 import JsonLd from "@/components/JsonLd";
 import RamadanCountdown from "@/components/public/RamadanCountdown";
 import ResumeCard from "@/components/public/ResumeCard";
+import QuickAnswer from "@/components/public/QuickAnswer";
 import { BalanceScale } from "@/components/public/Visuals";
 import { LOCALE_INFO, fmt, languageAlternates, localePath, type Locale } from "@/i18n/config";
 import { messagesFor } from "@/i18n/messages";
@@ -104,14 +105,10 @@ export default function LandingView({ locale }: { locale: Locale }) {
                 }}
               />
             </div>
-            <Link
-              href={guide}
-              className="animate-fade-up btn-primary mt-8 w-full max-w-xl justify-between px-6 py-4 text-lg sm:w-auto"
-              style={{ animationDelay: "80ms" }}
-            >
-              <span>{m.choose.start}</span>
-              <span aria-hidden className="ms-4 rtl:rotate-180">→</span>
-            </Link>
+            {/* The first thirty seconds: type one number, see the answer. */}
+            <div className="animate-fade-up mt-8 max-w-xl" style={{ animationDelay: "80ms" }}>
+              <QuickAnswer m={m.quick} locale={locale} guideHref={guide} />
+            </div>
             <p className="mt-3 text-sm text-sage">{m.trustLine}</p>
             <nav
               aria-label={m.chooseTitle}

@@ -19,8 +19,9 @@ const PRICES = {
   source: "test prices",
 };
 
-test("the home page is one question and one button, leading to the guide", async ({ page }) => {
+test("the home page answers from one number, then leads to the guide", async ({ page }) => {
   const errors = watchConsole(page);
+  await page.route("**/api/metals?*", (route) => route.fulfill({ json: PRICES }));
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Zakat");
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute("content", /opengraph-image/);
@@ -29,7 +30,15 @@ test("the home page is one question and one button, leading to the guide", async
   // Nothing below the question but the footer: no feature lists, no second sign-up pitch.
   await expect(page.getByRole("main").getByRole("heading")).toHaveCount(1);
   await expect(page.getByRole("main").getByRole("link", { name: "Open a free ledger" })).toHaveCount(0);
-  await page.getByRole("link", { name: "Find out if I have to pay" }).first().click();
+  // Thirty seconds: one number, and the answer appears as it is typed.
+  await page.getByRole("button", { name: /^Money:/ }).click();
+  await page.locator("#quick-currency").selectOption("USD");
+  await expect(page.getByText(/Zakat starts at \S*714\.00/)).toBeVisible();
+  await page.fill("#quick-amount", "500");
+  await expect(page.getByText(/No zakat to pay/)).toBeVisible();
+  await page.fill("#quick-amount", "20000");
+  await expect(page.getByText(/Your zakat: about \S*500\.00/)).toBeVisible();
+  await page.getByRole("link", { name: "Get the exact answer, step by step" }).click();
   await page.waitForURL("**/guide");
   expect(errors).toEqual([]);
 });

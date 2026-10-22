@@ -72,6 +72,15 @@ const ms: Messages = {
     lede: "Kalkulator zakat dan lejar yang percuma dan peribadi. Timbang harta anda dengan nisab menggunakan harga logam semasa, jejak haul anda dengan kalendar Hijrah, dan tutup setiap tahun dengan angka yang boleh anda percayai.",
     ctaCalculate: "Kira zakat anda",
     ctaLedger: "Buka lejar percuma",
+    quick: {
+      label: "Simpanan, wang tunai dan emas anda, semuanya",
+      nisab: "Zakat bermula pada {nisab}, nisab hari ini.",
+      below: "Tiada zakat: anda di bawah nisab hari ini, {nisab}.",
+      due: "Zakat anda: kira-kira {zakat}",
+      dueHint: "2.5% daripada {amount}, selepas dimiliki setahun.",
+      exact: "Dapatkan jawapan tepat, langkah demi langkah",
+      currency: "Mata wang",
+    },
     trustLine:
       "Percuma · Tiada iklan · Tiada sambungan bank · Eksport atau padam data anda bila-bila masa",
     sample: {

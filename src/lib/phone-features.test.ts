@@ -13,7 +13,14 @@ const reader = (store: Record<string, string>) => (key: string) => store[key] ??
 describe("the phone registry", () => {
   it("shows nothing for a phone that keeps nothing", () => {
     expect(phoneLines(reader({}), ctx)).toEqual([]);
-    expect(phoneDues(reader({}), ctx)).toEqual({ missedLeft: 0, interestToGive: 0, farmDue: false, fastsLeft: 0, fastsToGive: 0 });
+    expect(phoneDues(reader({}), ctx)).toEqual({
+      missedLeft: 0,
+      interestToGive: 0,
+      farmDue: false,
+      fastsLeft: 0,
+      fastsToGive: 0,
+      repaymentsDue: 0,
+    });
   });
 
   it("gives each tool that keeps something a line, in order, and what it owes", () => {
@@ -35,7 +42,25 @@ describe("the phone registry", () => {
       farmDue: false,
       fastsLeft: 0,
       fastsToGive: 0,
+      repaymentsDue: 0,
     });
+  });
+
+  it("counts money lent and borrowed, and repayments coming up", () => {
+    const store = {
+      "mizan-debts-v1": JSON.stringify({
+        notes: [
+          { id: "a", kind: "lent", who: "Ali", amount: "500", paid: "100", due: "", made: "2026-10-01", status: "open" },
+          { id: "b", kind: "borrowed", who: "Sara", amount: "80", paid: "", due: "2026-10-24", made: "2026-10-01", status: "open" },
+        ],
+      }),
+    };
+    expect(phoneLines(reader(store), ctx)[0]).toMatchObject({
+      key: "debts",
+      status: "US$400.00 owed to you · you owe US$80.00",
+      href: "/debts",
+    });
+    expect(phoneDues(reader(store), ctx).repaymentsDue).toBe(1);
   });
 
   it("counts interest already given away as nothing owed", () => {

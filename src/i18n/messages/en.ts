@@ -80,6 +80,15 @@ const en = {
     lede: "A free, private zakat calculator and ledger. Weigh what you hold against nisab with live metal prices, keep your hawl on the Hijri calendar, and close each year with a figure you can trust.",
     ctaCalculate: "Calculate your zakat",
     ctaLedger: "Open a free ledger",
+    quick: {
+      label: "Your savings, cash and gold, all together",
+      nisab: "Zakat starts at {nisab}, today’s minimum (nisab).",
+      below: "No zakat to pay: you are below today’s minimum of {nisab}.",
+      due: "Your zakat: about {zakat}",
+      dueHint: "2.5% of {amount}, once you have had it for a year.",
+      exact: "Get the exact answer, step by step",
+      currency: "Money",
+    },
     trustLine: "Free · No ads · No bank linking · Export or delete your data at any time",
     sample: {
       aria: "An example zakat result",
