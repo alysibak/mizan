@@ -6,7 +6,9 @@ import { sendJson } from "@/lib/client-fetch";
 import EmailPanel, { type EmailState } from "@/components/EmailPanel";
 import TwoFactorPanel from "@/components/TwoFactorPanel";
 
-function ChangePassword() {
+/** `hasPassword` false: an account made with Google, setting its first password. */
+function ChangePassword({ hasPassword }: { hasPassword: boolean }) {
+  const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +29,7 @@ function ChangePassword() {
       "/api/account/password",
       "POST",
       {
-        currentPassword: form.get("currentPassword"),
+        currentPassword: form.get("currentPassword") ?? "",
         newPassword: form.get("newPassword"),
       },
       "Could not change your password",
@@ -38,26 +40,36 @@ function ChangePassword() {
       return;
     }
     formEl.reset();
-    setMessage("Password changed. Other devices have been signed out.");
+    setMessage(
+      hasPassword
+        ? "Password changed. Other devices have been signed out."
+        : "Password set. You can now also sign in with your email and this password.",
+    );
+    router.refresh();
   }
 
   return (
     <form onSubmit={submit} className="space-y-3">
-      <h3 className="font-serif text-base text-ink">Change password</h3>
-      <div className="grid gap-3 sm:grid-cols-3">
-        <div>
-          <label className="label mb-1.5" htmlFor="currentPassword">
-            Current
-          </label>
-          <input
-            id="currentPassword"
-            name="currentPassword"
-            type="password"
-            autoComplete="current-password"
-            className="field"
-            required
-          />
-        </div>
+      <h3 className="font-serif text-base text-ink">{hasPassword ? "Change password" : "Set a password"}</h3>
+      {hasPassword ? null : (
+        <p className="text-sm text-sage">You sign in with Google. A password is only needed to sign in without it.</p>
+      )}
+      <div className={"grid gap-3 " + (hasPassword ? "sm:grid-cols-3" : "sm:grid-cols-2")}>
+        {hasPassword ? (
+          <div>
+            <label className="label mb-1.5" htmlFor="currentPassword">
+              Current
+            </label>
+            <input
+              id="currentPassword"
+              name="currentPassword"
+              type="password"
+              autoComplete="current-password"
+              className="field"
+              required
+            />
+          </div>
+        ) : null}
         <div>
           <label className="label mb-1.5" htmlFor="newPassword">
             New
@@ -96,7 +108,7 @@ function ChangePassword() {
       )}
       {message && <p className="text-sm text-gain">{message}</p>}
       <button type="submit" className="btn-ghost" disabled={busy}>
-        {busy ? "Saving…" : "Change password"}
+        {busy ? "Saving…" : hasPassword ? "Change password" : "Set password"}
       </button>
     </form>
   );
@@ -128,7 +140,7 @@ function SignOutOthers() {
   );
 }
 
-function DeleteAccount() {
+function DeleteAccount({ hasPassword }: { hasPassword: boolean }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -146,7 +158,7 @@ function DeleteAccount() {
     const res = await sendJson(
       "/api/account",
       "DELETE",
-      { password: form.get("password") },
+      { password: form.get("password") ?? "" },
       "Could not delete your account",
     );
     if (!res.ok) {
@@ -180,19 +192,21 @@ function DeleteAccount() {
         This cannot be undone. Everything stored for this account is erased.
       </p>
       <div className="grid gap-3 sm:grid-cols-2">
-        <div>
-          <label className="label mb-1.5" htmlFor="deletePassword">
-            Your password
-          </label>
-          <input
-            id="deletePassword"
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            className="field"
-            required
-          />
-        </div>
+        {hasPassword ? (
+          <div>
+            <label className="label mb-1.5" htmlFor="deletePassword">
+              Your password
+            </label>
+            <input
+              id="deletePassword"
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              className="field"
+              required
+            />
+          </div>
+        ) : null}
         <div>
           <label className="label mb-1.5" htmlFor="deleteConfirm">
             Type DELETE
@@ -332,6 +346,7 @@ export default function AccountPanel({
   twoFactor = false,
   twoFactorTurnedOff = false,
   mail = null,
+  hasPassword = true,
 }: {
   email: string;
   hasRecoveryCode: boolean;
@@ -342,12 +357,17 @@ export default function AccountPanel({
   twoFactorTurnedOff?: boolean;
   /** Set when this server sends email. */
   mail?: EmailState | null;
+  /** False for an account made with Google that has not set a password. */
+  hasPassword?: boolean;
 }) {
   return (
     <section id="account" className="card scroll-mt-20 space-y-8 p-5">
       <div>
         <h2 className="font-serif text-lg text-ink">Account</h2>
-        <p className="mt-1 text-sm text-sage">Signed in as {email}.</p>
+        <p className="mt-1 text-sm text-sage">
+          Signed in as {email}
+          {hasPassword ? "" : " with Google"}.
+        </p>
       </div>
       {recovered && (
         <p className="border border-brass/40 bg-brass/5 px-4 py-3 text-sm text-ink" role="status">
@@ -358,11 +378,16 @@ export default function AccountPanel({
         </p>
       )}
       {mail ? <EmailPanel email={email} state={mail} /> : null}
-      <RecoveryCode hasCode={hasRecoveryCode} emailOn={Boolean(mail)} />
-      <TwoFactorPanel enabled={twoFactor} />
-      <ChangePassword />
+      {/* With Google, Google is the way back in and keeps its own two-step sign-in. */}
+      {hasPassword ? (
+        <>
+          <RecoveryCode hasCode={hasRecoveryCode} emailOn={Boolean(mail)} />
+          <TwoFactorPanel enabled={twoFactor} />
+        </>
+      ) : null}
+      <ChangePassword hasPassword={hasPassword} />
       <SignOutOthers />
-      <DeleteAccount />
+      <DeleteAccount hasPassword={hasPassword} />
     </section>
   );
 }

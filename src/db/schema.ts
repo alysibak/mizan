@@ -15,7 +15,11 @@ const now = () =>
 export const users = sqliteTable("users", {
   id: id(),
   email: text("email").notNull().unique(),
+  // Empty for an account made with Google, which has no password until one
+  // is set in Settings.
   passwordHash: text("password_hash").notNull(),
+  // The Google account's stable id ("sub"), once signed in with Google.
+  googleSub: text("google_sub").unique(),
   name: text("name").notNull(),
   // Updated on every successful login (and set at registration).
   lastLoginAt: text("last_login_at"),

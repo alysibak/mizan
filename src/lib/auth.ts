@@ -25,6 +25,11 @@ export async function verifyPassword(
   password: string,
   hash: string,
 ): Promise<boolean> {
+  // An account made with Google has no password: nothing typed can match it.
+  if (!hash.startsWith("$2")) {
+    await equalizeTiming(password);
+    return false;
+  }
   return bcrypt.compare(password, hash);
 }
 
@@ -70,6 +75,19 @@ export async function currentSessionId(): Promise<string | null> {
   const store = await cookies();
   const token = store.get(SESSION_COOKIE)?.value;
   return token ? hashToken(token) : null;
+}
+
+/** When the session making this request began, or null when signed out. */
+export async function currentSessionStart(): Promise<Date | null> {
+  const id = await currentSessionId();
+  if (!id) return null;
+  const [row] = await db
+    .select({ createdAt: sessions.createdAt })
+    .from(sessions)
+    .where(eq(sessions.id, id))
+    .limit(1);
+  // SQLite's CURRENT_TIMESTAMP: "YYYY-MM-DD HH:MM:SS", in UTC.
+  return row ? new Date(`${row.createdAt.replace(" ", "T")}Z`) : null;
 }
 
 export async function destroySession(): Promise<void> {

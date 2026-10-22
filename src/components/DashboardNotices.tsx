@@ -96,9 +96,7 @@ export default function DashboardNotices({
           <p className="label text-pine">Ready</p>
           <p className="mt-1 font-serif text-xl text-ink">You are set up.</p>
           <p className="mt-1 text-base text-sage">
-            Add everything you own on “What I own”: savings, cash, gold. Mizan
-            works out your zakat as you go. When you give zakat, note it on
-            “Give”.
+            Add your savings, cash and gold. Mizan works out your zakat.
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <Link href="/assets" className="btn-primary">

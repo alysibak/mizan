@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 import { sendJson } from "@/lib/client-fetch";
 import { track } from "@/lib/analytics";
 
-/** `emailLinks`: this server can email reset links once the address is confirmed. */
-export default function RegisterForm({ emailLinks = false }: { emailLinks?: boolean }) {
+/** `afterGoogle`: the form sits under "Continue with Google". */
+export default function RegisterForm({ afterGoogle = false }: { afterGoogle?: boolean }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -39,7 +39,7 @@ export default function RegisterForm({ emailLinks = false }: { emailLinks?: bool
 
   return (
     <>
-      <form onSubmit={onSubmit} className="mt-8 space-y-4">
+      <form onSubmit={onSubmit} className={(afterGoogle ? "" : "mt-8 ") + "space-y-4"}>
         <div>
           <label className="label mb-1.5" htmlFor="name">
             Name
@@ -82,12 +82,7 @@ export default function RegisterForm({ emailLinks = false }: { emailLinks?: bool
             maxLength={72}
             className="field"
           />
-          <p className="mt-1.5 text-xs text-sage">
-            8 to 72 characters.{" "}
-            {emailLinks
-              ? "Confirm your email in Settings to be able to reset it by email."
-              : "This server sends no email, so you will save a recovery code once you are in."}
-          </p>
+          <p className="mt-1.5 text-xs text-sage">At least 8 characters.</p>
         </div>
 
         {error && (
@@ -97,7 +92,7 @@ export default function RegisterForm({ emailLinks = false }: { emailLinks?: bool
         )}
 
         <button type="submit" disabled={busy} className="btn-primary w-full py-2.5">
-          {busy ? "Creating…" : "Create account"}
+          {busy ? "Making it…" : "Make my account"}
         </button>
         <p className="text-xs leading-relaxed text-sage">
           By creating an account you agree to the{" "}

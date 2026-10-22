@@ -35,7 +35,9 @@ export default function MobileHeader({ isAdmin = false, menu }: { isAdmin?: bool
     >
       <div className="flex items-baseline gap-2">
         <span className="font-serif text-lg text-ink">{title}</span>
-        <span className="font-serif text-sm text-brassDeep">Mizan</span>
+        <Link href="/" className="font-serif text-sm text-brassDeep underline-offset-2 hover:underline">
+          Mizan
+        </Link>
       </div>
       <div className="flex items-center gap-1">
         <SiteMenu {...menu} />

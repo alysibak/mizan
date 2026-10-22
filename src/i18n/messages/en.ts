@@ -10,8 +10,8 @@ const en = {
       nisab: "Nisab today",
       method: "Method",
       signIn: "Sign in",
-      openLedger: "Open a ledger",
-      yourLedger: "Your ledger",
+      openLedger: "Make an account",
+      yourLedger: "My account",
     },
     footer: {
       ramadan: "Ramadan giving",

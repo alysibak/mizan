@@ -1,19 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { safeNextPath } from "@/lib/redirect";
+import GoogleButton, { OrEmail } from "@/components/GoogleButton";
 
-export default function LoginForm() {
+/** Why a sign-in with Google came back here instead of signing in. */
+const GOOGLE_TROUBLE: Record<string, string> = {
+  failed: "Could not sign in with Google. Try again, or use your email.",
+  taken: "This email is joined to a different Google account. Sign in with your email and password.",
+  busy: "Too many tries. Wait a few minutes, then try again.",
+};
+
+/** `google`: this server offers "Continue with Google". */
+export default function LoginForm({ google = false }: { google?: boolean }) {
   const router = useRouter();
   const params = useSearchParams();
   const next = safeNextPath(params.get("next"));
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(() => GOOGLE_TROUBLE[params.get("google") ?? ""] ?? null);
   const [busy, setBusy] = useState(false);
-  // Set once the password is right and the account has two-step sign-in.
-  const [ticket, setTicket] = useState<string | null>(null);
+  // Set once the password (or Google) is right and the account has two-step
+  // sign-in. Google's way back carries it in the address.
+  const [ticket, setTicket] = useState<string | null>(() => params.get("ticket"));
   const justReset = params.get("reset") === "1";
+
+  // Keep the ticket out of the address bar and history once it is read.
+  useEffect(() => {
+    if (params.get("ticket") || params.get("google")) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("ticket");
+      url.searchParams.delete("google");
+      window.history.replaceState(null, "", url);
+    }
+  }, [params]);
 
   async function onCode(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -124,7 +144,13 @@ export default function LoginForm() {
           Password changed. Sign in with it and the code from your authenticator app.
         </p>
       ) : null}
-      <form onSubmit={onSubmit} className="mt-8 space-y-4">
+      {google ? (
+        <div className="mt-8">
+          <GoogleButton next={params.get("next")} />
+          <OrEmail />
+        </div>
+      ) : null}
+      <form onSubmit={onSubmit} className={(google ? "" : "mt-8 ") + "space-y-4"}>
         <div>
           <label className="label mb-1.5" htmlFor="email">
             Email
@@ -167,15 +193,12 @@ export default function LoginForm() {
         </button>
       </form>
 
-      <p className="mt-4 text-sm">
+      <p className="mt-4 flex flex-wrap justify-between gap-2 text-sm">
         <Link href="/forgot" className="text-pine underline-offset-2 hover:underline">
           Forgot your password?
         </Link>
-      </p>
-      <p className="mt-2 text-sm text-sage">
-        New here?{" "}
         <Link href="/register" className="text-pine underline-offset-2 hover:underline">
-          Create an account
+          New here? Make an account
         </Link>
       </p>
     </>

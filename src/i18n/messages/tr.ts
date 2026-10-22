@@ -8,8 +8,8 @@ const tr: Messages = {
       nisab: "Bugünkü nisap",
       method: "Yöntem",
       signIn: "Giriş yap",
-      openLedger: "Defter aç",
-      yourLedger: "Defteriniz",
+      openLedger: "Hesap aç",
+      yourLedger: "Hesabım",
     },
     footer: {
       ramadan: "Ramazan bağışları",

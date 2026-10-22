@@ -557,6 +557,7 @@ environment variables; with Docker, in `.env` next to `docker-compose.yml`.
 | `DEMO_EMAIL` | Makes that account the read-only, one-click demo. |
 | `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` | Turns on cookieless [Plausible](https://plausible.io) analytics for public pages only, with `Signup`, `Demo`, and `Calculated` events. Build time. |
 | `NEXT_PUBLIC_PLAUSIBLE_SRC` | Script URL for a self-hosted Plausible (defaults to plausible.io, manual mode). |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Turn on "Continue with Google" on sign-in and sign-up. From an OAuth client of type "Web application" in Google Cloud Console, with `{APP_URL}/api/auth/google/callback` as its authorised redirect URI. Off unless both are set. |
 | `EMAIL_FROM` | Sender for optional email, e.g. `Mizan <hello@mizan.example>`. Email is on only when this, `APP_URL`, and a sender below are set. |
 | `RESEND_API_KEY` | Sends through [Resend](https://resend.com)'s HTTP API. |
 | `EMAIL_OUTBOX_FILE` | Development: append each message to this file as JSON instead of sending it. |
@@ -583,6 +584,14 @@ environment variables; with Docker, in `.env` next to `docker-compose.yml`.
   and a right password alone does not reset it. Each code's time step is
   claimed once, atomically, so codes cannot be replayed. A recovery code turns
   two-step off (for a lost phone); an emailed reset never skips it.
+- Continue with Google (optional): OpenID Connect with the code flow, PKCE,
+  state and nonce held in a ten-minute httpOnly cookie. The ID token comes
+  straight from Google's token endpoint; its issuer, audience, expiry, nonce
+  and confirmed email are checked. An existing account with the same email is
+  linked; one already linked to another Google account is refused. Google
+  stands in for the password, never for two-step sign-in. Accounts made with
+  Google have no password; their sensitive changes need a sign-in from the
+  last ten minutes instead.
 - Optional email: links are built from `APP_URL`, never the request's Host
   header. Reset links go only to confirmed addresses, last 30 minutes, work
   once, and are revoked by any password change. A reset request looks the same
@@ -610,7 +619,7 @@ mizan.example {
 ## Testing
 
 ```bash
-npm run lint && npm run typecheck && npm test   # 249 unit tests
+npm run lint && npm run typecheck && npm test   # 329 unit tests
 npm run build && npm run test:e2e               # Playwright, needs Chromium
 ```
 
@@ -620,7 +629,8 @@ CSV import,
 metal by weight, the calculator (including amounts typed with a decimal comma
 or Arabic-Indic digits), price-feed parsing, input validation, every language's
 messages against English (placeholders, no gaps), authenticator codes against
-the RFC 4226 and 6238 vectors, and reminder timing.
+the RFC 4226 and 6238 vectors, reading Google sign-in tokens, and reminder
+timing.
 
 End-to-end tests run the production build on a phone and a desktop: a full
 zakat year, the calculator carried into a new account, the read-only demo,

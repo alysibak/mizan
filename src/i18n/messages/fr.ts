@@ -8,8 +8,8 @@ const fr: Messages = {
       nisab: "Le nisab aujourd’hui",
       method: "Méthode",
       signIn: "Se connecter",
-      openLedger: "Ouvrir un registre",
-      yourLedger: "Votre registre",
+      openLedger: "Créer un compte",
+      yourLedger: "Mon compte",
     },
     footer: {
       ramadan: "Dons du Ramadan",

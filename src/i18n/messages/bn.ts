@@ -8,8 +8,8 @@ const bn: Messages = {
       nisab: "আজকের নিসাব",
       method: "পদ্ধতি",
       signIn: "সাইন ইন",
-      openLedger: "খাতা খুলুন",
-      yourLedger: "আপনার খাতা",
+      openLedger: "অ্যাকাউন্ট খুলুন",
+      yourLedger: "আমার অ্যাকাউন্ট",
     },
     footer: {
       ramadan: "রমজানের দান",

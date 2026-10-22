@@ -8,8 +8,8 @@ const ar: Messages = {
       nisab: "النصاب اليوم",
       method: "المنهجية",
       signIn: "تسجيل الدخول",
-      openLedger: "افتح سجلًا",
-      yourLedger: "سجلّك",
+      openLedger: "أنشئ حسابًا",
+      yourLedger: "حسابي",
     },
     footer: {
       ramadan: "العطاء في رمضان",

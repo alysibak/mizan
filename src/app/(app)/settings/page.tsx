@@ -6,6 +6,7 @@ import DataBackup from "@/components/DataBackup";
 import CalendarFeed from "@/components/CalendarFeed";
 import AccountPanel from "@/components/AccountPanel";
 import { emailEnabled } from "@/lib/email";
+import { hasPassword } from "@/lib/api";
 
 export default async function SettingsPage({
   searchParams,
@@ -39,6 +40,7 @@ export default async function SettingsPage({
       <DataBackup />
       <AccountPanel
         email={user.email}
+        hasPassword={hasPassword(user)}
         hasRecoveryCode={Boolean(user.recoveryCodeHash)}
         recovered={recovered === "1" || recovered === "2fa"}
         twoFactorTurnedOff={recovered === "2fa"}

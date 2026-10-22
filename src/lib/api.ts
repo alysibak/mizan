@@ -4,7 +4,7 @@ import { and, count, eq, isNull, lt, or, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { assets, givingRecords, liabilities, users, yearSnapshots, type User } from "@/db/schema";
 import { getCurrentUser } from "./session";
-import { verifyPassword } from "./auth";
+import { currentSessionStart, verifyPassword } from "./auth";
 import { isDemoUser, DEMO_READ_ONLY } from "./demo";
 import { LOCKOUT_MINUTES, MAX_FAILED_LOGINS, isLocked, lockoutUntil } from "./login-throttle";
 
@@ -75,6 +75,14 @@ export function lockedResponse() {
   });
 }
 
+/** Accounts made with Google have no password until one is set. */
+export function hasPassword(user: Pick<User, "passwordHash">): boolean {
+  return user.passwordHash !== "";
+}
+
+/** How recent a Google sign-in must be to stand in for the password. */
+export const FRESH_SIGN_IN_MINUTES = 10;
+
 /**
  * Re-check the password before a sensitive change (new password, recovery
  * code, deleting the account). Wrong answers share the sign-in failure
@@ -87,6 +95,17 @@ export async function confirmPassword(
   wrong = "That password is not right",
 ): Promise<NextResponse | null> {
   if (isLocked(user.lockedUntil)) return lockedResponse();
+  if (!hasPassword(user)) {
+    // No password to ask for: a sign-in with Google in the last few minutes
+    // stands in for it.
+    const start = await currentSessionStart();
+    if (start && Date.now() - start.getTime() < FRESH_SIGN_IN_MINUTES * 60_000) return null;
+    return errorJson(
+      `For your safety, sign in with Google again, then do this within ${FRESH_SIGN_IN_MINUTES} minutes.`,
+      403,
+    );
+  }
+  if (!password) return errorJson("Enter your password", 400);
   if (await verifyPassword(password, user.passwordHash)) return null;
   await recordFailedPassword(user.id);
   return errorJson(wrong, 403);

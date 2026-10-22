@@ -113,8 +113,13 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Enter your password").max(1000),
 });
 
+// Re-checking the password before a sensitive change. Empty is allowed here
+// for an account made with Google, which has none; confirmPassword asks for
+// it when the account does have one.
+const reCheck = z.string().max(1000);
+
 export const changePasswordSchema = z.object({
-  currentPassword: z.string().min(1, "Enter your current password").max(1000),
+  currentPassword: reCheck,
   newPassword,
 });
 
@@ -148,17 +153,17 @@ export const twoFactorLoginSchema = z.object({
 });
 
 export const twoFactorConfirmSchema = z.object({
-  password: z.string().min(1, "Enter your password").max(1000),
+  password: reCheck,
   code: totpCode,
 });
 
 export const twoFactorDisableSchema = z.object({
-  password: z.string().min(1, "Enter your password").max(1000),
+  password: reCheck,
   code: totpCode,
 });
 
 export const deleteAccountSchema = z.object({
-  password: z.string().min(1, "Enter your password").max(1000),
+  password: reCheck,
 });
 
 export const assetSchema = z.object({

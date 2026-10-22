@@ -11,6 +11,7 @@ import HawlCalendarLink from "@/components/HawlCalendarLink";
 import CycleActions from "@/components/CycleActions";
 import LastLetterCard from "@/components/LastLetterCard";
 import { emailEnabled } from "@/lib/email";
+import { hasPassword } from "@/lib/api";
 import { FromThisPhoneNotice } from "@/components/FromThisPhone";
 import EverythingElse from "@/components/EverythingElse";
 
@@ -67,17 +68,16 @@ export default async function DashboardPage({
       href: "/settings#metal-prices",
     },
     {
-      // Either is a way back in after a forgotten password.
-      done: Boolean(user.recoveryCodeHash) || (emailEnabled() && Boolean(user.emailVerifiedAt)),
+      // Either is a way back in after a forgotten password; with Google,
+      // Google is the way back in.
+      done:
+        !hasPassword(user) ||
+        Boolean(user.recoveryCodeHash) ||
+        (emailEnabled() && Boolean(user.emailVerifiedAt)),
       label: emailEnabled()
         ? "Confirm your email, or save a code in case you forget your password"
         : "Save a code in case you forget your password",
       href: "/settings#account",
-    },
-    {
-      done: settings.madhhab !== "general",
-      label: "Choose your madhhab (optional)",
-      href: "/settings#how-counted",
     },
   ];
 
@@ -98,8 +98,8 @@ export default async function DashboardPage({
               title: `Your zakat would be about ${formatMoney(result.zakatDue, c)}.`,
               body:
                 (hawl
-                  ? `It is due on your zakat day, ${dueDay}: ${hawl.remainingDays} ${hawl.remainingDays === 1 ? "day" : "days"} from now. You may give some of it early.`
-                  : "It is due once a full lunar year has passed since you first had the minimum (nisab). Set that day, and Mizan will tell you when.") +
+                  ? `Due on your zakat day, ${dueDay}: ${hawl.remainingDays} ${hawl.remainingDays === 1 ? "day" : "days"} from now.`
+                  : "Due one lunar year after you first had the minimum (nisab). Set that day, and Mizan will tell you when.") +
                 (zakatPaid > 0 ? ` You have given ${formatMoney(zakatPaid, c)} so far.` : ""),
             };
 
@@ -115,7 +115,8 @@ export default async function DashboardPage({
       {/* The shared demo cannot be added to. */}
       {isDemoUser(user) ? null : <FromThisPhoneNotice />}
 
-      {assetRows.length === 0 && (
+      {/* Just set up, the welcome card below says the same. */}
+      {assetRows.length === 0 && welcome !== "1" && (
         <div className="border border-dashed border-mist px-6 py-8 text-center">
           <p className="text-base text-ink">Nothing added yet.</p>
           <p className="mt-1 text-sm text-sage">
@@ -226,11 +227,7 @@ export default async function DashboardPage({
             </div>
           </div>
         ) : (
-          <p className="mt-3 text-sm text-sage">
-            Not set yet. It is one lunar year after the day you first had the
-            minimum (nisab). Not sure of that day? Pick one you will remember,
-            such as 1 Ramadan, and keep to it every year.
-          </p>
+          <p className="mt-3 text-sm text-sage">Not set yet.</p>
         )}
       </section>
 
@@ -253,7 +250,8 @@ export default async function DashboardPage({
         />
       ) : null}
 
-      {assetRows.length > 0 && (
+      {/* Only near the zakat day: until then it is one more thing to read. */}
+      {assetRows.length > 0 && hawl && !dueNow && (hawl.isComplete || hawl.remainingDays <= 30) && (
         <section className="border border-mist px-5 py-5">
           <p className="label text-brassDeep">When your zakat day comes</p>
           <p className="mt-1 font-serif text-xl text-ink">Close the year, step by step</p>

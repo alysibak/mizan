@@ -8,8 +8,8 @@ const ms: Messages = {
       nisab: "Nisab hari ini",
       method: "Kaedah",
       signIn: "Log masuk",
-      openLedger: "Buka lejar",
-      yourLedger: "Lejar anda",
+      openLedger: "Buat akaun",
+      yourLedger: "Akaun saya",
     },
     footer: {
       ramadan: "Pemberian Ramadan",

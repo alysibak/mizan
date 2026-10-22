@@ -41,7 +41,8 @@ export default function Nav({
   return (
     <aside className="sticky top-0 hidden h-screen w-56 shrink-0 flex-col border-r border-mist bg-paper/80 px-3 py-6 md:flex">
       <div className="mb-10 px-3">
-        <Link href="/dashboard" className="font-serif text-2xl tracking-tight text-ink">
+        {/* The logo leads to all of Mizan, not only the account. */}
+        <Link href="/" className="font-serif text-2xl tracking-tight text-ink">
           Mizan
         </Link>
         <p className="mt-1 text-xs text-sage">{name}</p>

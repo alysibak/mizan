@@ -62,6 +62,11 @@ export default function PrivacyPage() {
             operator, can read it.
           </li>
           <li>
+            If you sign in with Google: Google’s id for your Google account, so
+            it can sign you in again. Mizan asks Google only for your name and
+            email, never your contacts, files or anything else.
+          </li>
+          <li>
             What you enter: holdings, debts, giving records, settings, notes,
             frozen year snapshots, and letters to your future self.
           </li>

@@ -15,6 +15,7 @@ export interface LimitRule {
 export const LIMITS = {
   register: { scope: "register", limit: 5, windowSeconds: 60 * 60 },
   login: { scope: "login", limit: 30, windowSeconds: 15 * 60 },
+  google: { scope: "google", limit: 30, windowSeconds: 15 * 60 },
   recover: { scope: "recover", limit: 10, windowSeconds: 60 * 60 },
   // Anything that sends an email: few per hour, so nobody can use Mizan to
   // flood an inbox.

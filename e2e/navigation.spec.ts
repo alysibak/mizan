@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { daysAgo, registerAndSetUp, uniqueEmail } from "./helpers";
 
 // A visitor never has to scroll to the footer to find their way: the menu is
 // at the top of every page, a returning visitor is offered what they started,
@@ -128,4 +129,19 @@ test("a near zakat day is announced on every page until dismissed", async ({ pag
   await expect(page.getByText("Your zakat day is in")).toHaveCount(0);
   await page.reload();
   await expect(page.getByText("Your zakat day is in")).toHaveCount(0);
+});
+
+test("signed in, the Mizan logo leads home to all of Mizan, and back to the account", async ({ page }) => {
+  // Google is off on this server: no button that could not work.
+  await page.goto("/register");
+  await expect(page.getByRole("link", { name: "Continue with Google" })).toHaveCount(0);
+
+  await registerAndSetUp(page, { email: uniqueEmail("logo"), hawlStart: daysAgo(30), amount: "1000" });
+  await page.goto("/dashboard");
+  await page.getByRole("link", { name: "Mizan", exact: true }).filter({ visible: true }).first().click();
+  await page.waitForURL((url) => url.pathname === "/");
+  const account = page.getByRole("banner").getByRole("link", { name: "My account" });
+  await expect(account).toBeVisible();
+  await account.click();
+  await page.waitForURL("**/dashboard");
 });

@@ -82,7 +82,7 @@ test("the calculator answers without an account, and the answer comes along", as
   await asNewVisitor(page);
   await page.getByRole("link", { name: "Create a free ledger" }).click();
   await page.waitForURL("**/register?from=calculator");
-  await expect(page.getByText("Your calculator figures")).toBeVisible();
+  await expect(page.getByText("Your figures come with you.")).toBeVisible();
   await page.fill("#name", "Calc Test");
   await page.fill("#email", uniqueEmail("calc"));
   await page.fill("#password", PASSWORD);
@@ -214,16 +214,16 @@ test("signed in, the about pages open inside the app and public pages offer your
 
   await page.goto("/calculator");
   const header = page.getByRole("banner");
-  await expect(header.getByRole("link", { name: "Your ledger" })).toBeVisible();
+  await expect(header.getByRole("link", { name: "My account" })).toBeVisible();
   await expect(header.getByRole("link", { name: "Sign in" })).toHaveCount(0);
-  await header.getByRole("link", { name: "Your ledger" }).click();
+  await header.getByRole("link", { name: "My account" }).click();
   await page.waitForURL(/\/dashboard/);
 
   // Signed out, the same pages are public again and offer sign-in.
   await page.evaluate(() => fetch("/api/auth/logout", { method: "POST" }));
   await page.goto("/privacy");
   await expect(page.getByRole("banner").getByRole("link", { name: "Sign in" })).toBeVisible();
-  await expect(page.getByRole("banner").getByRole("link", { name: "Your ledger" })).toHaveCount(0);
+  await expect(page.getByRole("banner").getByRole("link", { name: "My account" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Home", exact: true })).toHaveCount(0);
 });
 

@@ -8,8 +8,8 @@ const ur: Messages = {
       nisab: "آج کا نصاب",
       method: "طریقۂ کار",
       signIn: "سائن اِن",
-      openLedger: "کھاتہ کھولیں",
-      yourLedger: "آپ کا کھاتہ",
+      openLedger: "اکاؤنٹ بنائیں",
+      yourLedger: "میرا اکاؤنٹ",
     },
     footer: {
       ramadan: "رمضان کے عطیات",

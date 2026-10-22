@@ -64,9 +64,10 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Signed-in visitors skip the marketing page and the auth screens, which
-  // lets the landing page be served statically without a database lookup.
-  if (hasSession && (pathname === "/" || pathname === "/login" || pathname === "/register")) {
+  // Signed-in visitors skip the sign-in screens. The home page stays theirs
+  // too: the logo leads there, to all of Mizan, and its header offers
+  // "My account".
+  if (hasSession && (pathname === "/login" || pathname === "/register")) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     url.search = "";
@@ -75,7 +76,7 @@ export function proxy(request: NextRequest) {
 
   // Keep the readable "signed in" hint in step with the session cookie, for
   // sessions that began before the hint existed and for ones that ended
-  // elsewhere. The hint grants nothing; a stale one only shows "Your ledger".
+  // elsewhere. The hint grants nothing; a stale one only shows "My account".
   const response = NextResponse.next();
   const hasHint = request.cookies.get(SIGNED_IN_HINT)?.value === "1";
   if (hasSession && !hasHint) {
