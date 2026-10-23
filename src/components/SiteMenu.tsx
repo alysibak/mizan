@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { IconMenu, IconQuestion, IconSearch } from "@/components/icons";
+import { IconMenu, IconQuestion, IconSearch, IconSpeech } from "@/components/icons";
 import { PAGE_ICONS as ICONS } from "@/components/pageIcons";
 import type { DirectoryGroup } from "@/lib/site-directory";
 import TextSizeToggle from "@/components/TextSizeToggle";
@@ -20,9 +20,11 @@ export interface MenuProps {
   search: { action: string; label: string; placeholder: string; button: string };
   /** "Larger text", in the page's language: the switch sits at the end of the menu. */
   largerText?: string;
+  /** "Report a problem", in the page's language: told which page it came from. */
+  report?: { href: string; label: string };
 }
 
-export default function SiteMenu({ labels, groups, search, largerText }: MenuProps) {
+export default function SiteMenu({ labels, groups, search, largerText, report }: MenuProps) {
   const dialog = useRef<HTMLDialogElement>(null);
   // Signed in, the app has a Menu in its sidebar and in its phone header.
   const id = useId();
@@ -118,6 +120,16 @@ export default function SiteMenu({ labels, groups, search, largerText }: MenuPro
             </section>
           ))}
           {largerText ? <TextSizeToggle label={largerText} withLabel /> : null}
+          {report ? (
+            <Link
+              href={`${report.href}?from=${encodeURIComponent(pathname ?? "/")}`}
+              onClick={close}
+              className="flex min-h-[44px] items-center gap-2 text-base text-pine hover:underline"
+            >
+              <IconSpeech className="h-5 w-5" />
+              {report.label}
+            </Link>
+          ) : null}
         </div>
       </dialog>
     </>

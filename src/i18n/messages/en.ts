@@ -66,6 +66,21 @@ const en = {
       send: "Send",
       thanks: "Thank you. It helps make Mizan easier for everyone.",
     },
+    /** "Report a problem", from the Menu on every page. */
+    report: {
+      nav: "Report a problem",
+      title: "Report a problem",
+      lede: "Tell us what went wrong, in your own words. We read every one.",
+      kind: "What kind of problem?",
+      kinds: { wrong: "An answer looks wrong", broken: "Something does not work", hard: "It is hard to understand", other: "Something else" },
+      what: "What happened?",
+      where: "Which page? (filled in for you)",
+      contact: "Email or phone, if you want a reply (optional)",
+      privacy: "Do not write your amounts, passwords or bank details here.",
+      send: "Send",
+      thanks: "Thank you. We will look at it.",
+      error: "That did not go through. Please try again.",
+    },
   },
 
   landing: {
@@ -461,6 +476,18 @@ const en = {
     next: "Next",
     back: "Back",
     skip: "I don’t have this",
+    /** For someone who does not know an amount: a tip, and the amount marked as a guess. */
+    notSure: "I’m not sure",
+    guess: { tip: "A round guess is fine. Put your best guess above: it is marked as a guess, and you can change it later.", marked: "Marked as a guess", undo: "Undo" },
+    unsure: {
+      cash: "Count the notes in your wallet and at home. If you can’t count it all now, think of what you usually keep, and round it.",
+      bank: "Look at your bank app, a bank slip or the last ATM receipt, or ask at the bank. Add up every account.",
+      gold: "Don’t know the weight? Pick your pieces from the pictures below, or ask a jeweller to weigh them.",
+      jewellery: "Don’t know the weight? Pick your pieces from the pictures below, or ask a jeweller to weigh them.",
+      silver: "Don’t know the weight? A jeweller can weigh it. A rough guess is fine for now.",
+      more: "Shares: look up today’s value in your app or statement. A business: count stock at the price you sell it for, plus the cash in the till. Money owed to you: count only what you expect to get back.",
+      debts: "Count only what you must pay soon: rent or bills due now, this month’s loan payment, or money you must give back now. Not the whole of a long loan like a mortgage.",
+    },
     seeResult: "Show my zakat",
     amountsIn: "Amounts in {currency}",
     changeCurrency: "Change",
@@ -561,6 +588,7 @@ const en = {
       },
     },
     result: {
+      guessed: "Some amounts are guesses: {items}. The answer is close, not exact. Check them before you give.",
       due: "Your zakat is {amount}",
       none: "No zakat is due",
       total: "Everything you counted comes to {total}.",
@@ -761,6 +789,12 @@ const en = {
     title: "Where this comes from",
     lede: "Each rule Mizan uses, and the verse of the Quran or the hadith it rests on, in plain words.",
     note: "Hadith are named by their collection rather than a number, because numbering differs between editions. Gram weights are the common modern conversions of the old measures. For your own situation, ask a scholar.",
+    /** Whether a named scholar has reviewed the rulings: never claimed unless it happened. */
+    review: {
+      none: "No named scholar has reviewed these pages yet. Until one has, take them as a careful starting point, and ask someone of knowledge you trust.",
+      done: "Reviewed by {name} on {date}.",
+      ask: "Are you a scholar who would review them? Please write to {email}.",
+    },
     items: [
       {
         rule: "Zakat is a duty and one of the five pillars of Islam.",

@@ -256,7 +256,159 @@ export const journeyCounts = sqliteTable(
   (t) => [primaryKey({ columns: [t.day, t.step] })],
 );
 
+/**
+ * Mizan Neighbours: a mosque or community group that checks needs near it
+ * and passes on what is given. Mizan never holds the money: givers pay the
+ * partner, using the details it publishes here.
+ */
+export const partners = sqliteTable("partners", {
+  id: id(),
+  slug: text("slug").notNull().unique(),
+  name: text("name").notNull(),
+  city: text("city").notNull(),
+  /** Who they are and how they check each need, in their own words. */
+  about: text("about").notNull().default(""),
+  /** How to pay them: bank or mobile money details, or "at the office". */
+  howToGive: text("how_to_give").notNull().default(""),
+  /** The office's public phone or email, for givers' questions. */
+  contact: text("contact").notNull().default(""),
+  currency: text("currency").notNull().default("USD"),
+  /** A need written by one member is checked and listed by another. */
+  twoPerson: integer("two_person", { mode: "boolean" }).notNull().default(true),
+  status: text("status").notNull().default("active"), // "active" | "paused"
+  /** Made-up partner and needs, shown only when Neighbours is in demo mode. */
+  example: integer("example", { mode: "boolean" }).notNull().default(false),
+  createdAt: now(),
+});
+
+export const partnerMembers = sqliteTable(
+  "partner_members",
+  {
+    partnerId: text("partner_id")
+      .notNull()
+      .references(() => partners.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    role: text("role").notNull().default("member"), // "lead" | "member"
+    createdAt: now(),
+  },
+  (t) => [primaryKey({ columns: [t.partnerId, t.userId] }), index("partner_members_user_idx").on(t.userId)],
+);
+
+/**
+ * A need, as the partner checked it: what is needed, never who needs it.
+ * `received` is everything that reached the partner for it, through Mizan
+ * pledges or given at the office.
+ */
+export const needs = sqliteTable(
+  "needs",
+  {
+    id: id(),
+    partnerId: text("partner_id")
+      .notNull()
+      .references(() => partners.id, { onDelete: "cascade" }),
+    kind: text("kind").notNull(), // see lib/neighbours.ts
+    title: text("title").notNull(),
+    story: text("story").notNull().default(""),
+    amount: real("amount").notNull(),
+    received: real("received").notNull().default(0),
+    /** Whether zakat may go to it, as the partner's scholar decided. */
+    zakat: integer("zakat", { mode: "boolean" }).notNull(),
+    status: text("status").notNull().default("draft"), // "draft" | "open" | "closed" | "removed"
+    /** Off the list for a check: by hand, or by reports from visitors. */
+    paused: integer("paused", { mode: "boolean" }).notNull().default(false),
+    /** How many days it is listed for once published. */
+    days: integer("days").notNull().default(30),
+    createdBy: text("created_by"),
+    approvedBy: text("approved_by"),
+    publishedAt: text("published_at"),
+    expiresAt: text("expires_at"),
+    closedAt: text("closed_at"),
+    /** A line from the partner to everyone who gave, once it is met. */
+    thanks: text("thanks"),
+    createdAt: now(),
+  },
+  (t) => [index("needs_partner_status_idx").on(t.partnerId, t.status)],
+);
+
+/**
+ * A giver's promise. The code goes on their payment so the partner can match
+ * it; name and contact are optional and cleared some weeks after it settles.
+ */
+export const pledges = sqliteTable(
+  "pledges",
+  {
+    id: id(),
+    needId: text("need_id")
+      .notNull()
+      .references(() => needs.id, { onDelete: "cascade" }),
+    code: text("code").notNull().unique(),
+    amount: real("amount").notNull(),
+    /** What actually arrived, once the partner marks it received. */
+    received: real("received"),
+    name: text("name"),
+    contact: text("contact"),
+    status: text("status").notNull().default("pledged"), // "pledged" | "received" | "cancelled"
+    receivedAt: text("received_at"),
+    createdAt: now(),
+  },
+  (t) => [index("pledges_need_idx").on(t.needId)],
+);
+
+/** "Something wrong with this?" from a visitor, for the partner to look at. */
+export const needReports = sqliteTable(
+  "need_reports",
+  {
+    id: id(),
+    needId: text("need_id")
+      .notNull()
+      .references(() => needs.id, { onDelete: "cascade" }),
+    reason: text("reason").notNull(),
+    note: text("note"),
+    status: text("status").notNull().default("open"), // "open" | "dismissed" | "upheld"
+    createdAt: now(),
+  },
+  (t) => [index("need_reports_need_idx").on(t.needId)],
+);
+
+/** What happened to a need and who did it, so a partner can account for it. */
+export const needEvents = sqliteTable(
+  "need_events",
+  {
+    id: id(),
+    needId: text("need_id")
+      .notNull()
+      .references(() => needs.id, { onDelete: "cascade" }),
+    /** The member's name at the time, or "A visitor". */
+    actor: text("actor").notNull(),
+    action: text("action").notNull(),
+    createdAt: now(),
+  },
+  (t) => [index("need_events_need_idx").on(t.needId)],
+);
+
+/** "Report a problem" from any page: what kind, where, and what they said. */
+export const problemReports = sqliteTable(
+  "problem_reports",
+  {
+    id: id(),
+    kind: text("kind").notNull(),
+    page: text("page").notNull(),
+    note: text("note").notNull(),
+    /** Only if they chose to leave a way to reach them. */
+    contact: text("contact"),
+    locale: text("locale").notNull(),
+    status: text("status").notNull().default("open"), // "open" | "done"
+    createdAt: now(),
+  },
+  (t) => [index("problem_reports_created_idx").on(t.createdAt)],
+);
+
 export type User = typeof users.$inferSelect;
+export type Partner = typeof partners.$inferSelect;
+export type Need = typeof needs.$inferSelect;
+export type Pledge = typeof pledges.$inferSelect;
 export type Asset = typeof assets.$inferSelect;
 export type NewAsset = typeof assets.$inferInsert;
 export type Liability = typeof liabilities.$inferSelect;

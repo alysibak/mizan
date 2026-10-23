@@ -30,6 +30,13 @@ export const LIMITS = {
   feedback: { scope: "feedback", limit: 20, windowSeconds: 60 * 60 },
   // Journey counts: a few a visit, so a busy mosque network is never cut off.
   journey: { scope: "journey", limit: 200, windowSeconds: 15 * 60 },
+  // Neighbours: a few promises an hour from one network, and enough lookups
+  // for a giver checking on theirs, but too few to guess anyone else's code.
+  pledge: { scope: "pledge", limit: 10, windowSeconds: 60 * 60 },
+  pledgeLookup: { scope: "pledge-lookup", limit: 60, windowSeconds: 15 * 60 },
+  needReport: { scope: "need-report", limit: 10, windowSeconds: 60 * 60 },
+  // "Report a problem" from any page.
+  problem: { scope: "problem", limit: 10, windowSeconds: 60 * 60 },
 } satisfies Record<string, LimitRule>;
 
 /**

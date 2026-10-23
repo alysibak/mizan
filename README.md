@@ -59,6 +59,13 @@ work.
   out is a tap away. It ends with what to do, a calendar reminder, and the
   pages for anything else they have. The old `/start` page redirects here,
   in every language.
+- **"I'm not sure."** Every amount the guide asks for has it: a tip for that
+  kind of wealth (the bank app or an ATM slip, pieces of gold by picture, only
+  the debts due now), and the amount is kept as a guess, named again in the
+  answer so no one gives on a guess without checking. In every language.
+- **Report a problem** (`/report`), from the Menu and footer of every page,
+  in every language: what kind, what happened, and the page it came from;
+  read on `/admin/feedback`.
 - **Can I give zakat to…?** (`/who-can-receive`). Fifteen people a beginner
   asks about (parents, children, a husband or wife, brothers and sisters,
   other relatives, the poor, people in debt, students, charities, mosques, a
@@ -561,6 +568,8 @@ environment variables; with Docker, in `.env` next to `docker-compose.yml`.
 | `OPERATOR_NAME`, `CONTACT_EMAIL` | Who runs this copy, shown in the privacy policy and terms. Set both before going public. |
 | `ADMIN_EMAIL` | Comma-separated emails that can open `/admin/users` (sign-up counts; never ledger contents) and `/admin/feedback` (answers to “Was this easy?” and how many reached each step). |
 | `DEMO_EMAIL` | Makes that account the read-only, one-click demo. |
+| `NEIGHBOURS` | Mizan Neighbours. Off unless set. `demo` shows a made-up example mosque with made-up needs at `/neighbours` (hidden from the Menu and from search), to show partners how it works; the demo account can open its desk. `on` lists real partners, added on `/admin/partners`, and puts “Help a family near you” in the Menu, the guide's answer, My zakat and Give. Build time, like `APP_URL`. |
+| `REVIEWED_BY`, `REVIEWED_ON` | Once a named scholar has really reviewed the rulings: their name and the date (YYYY-MM-DD), shown on the sources page. Until then it says plainly that no one has. |
 | `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` | Turns on cookieless [Plausible](https://plausible.io) analytics for public pages only, with `Signup`, `Demo`, and `Calculated` events. Build time. |
 | `NEXT_PUBLIC_PLAUSIBLE_SRC` | Script URL for a self-hosted Plausible (defaults to plausible.io, manual mode). |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Turn on "Continue with Google" on sign-in and sign-up. From an OAuth client of type "Web application" in Google Cloud Console, with `{APP_URL}/api/auth/google/callback` as its authorised redirect URI. Off unless both are set. |
@@ -625,7 +634,7 @@ mizan.example {
 ## Testing
 
 ```bash
-npm run lint && npm run typecheck && npm test   # 336 unit tests
+npm run lint && npm run typecheck && npm test   # 360 unit tests
 npm run build && npm run test:e2e               # Playwright, needs Chromium
 ```
 
@@ -645,6 +654,37 @@ language and hreflang, the nisab pages into the calculator, the four free
 tools and guides, email confirmation, reminders and reset links (through a file outbox),
 two-step sign-in end to end, and an axe audit of 38 pages against WCAG 2.1 AA
 in light and dark.
+
+### Mizan Neighbours
+
+Needs near you, each checked in person by a mosque or community group you
+can visit. A visitor chooses a need, promises an amount, and pays the
+mosque directly with a code as the reference; the mosque marks it received
+and passes it on, and the visitor's phone shows that it arrived (and, for
+zakat needs, can count it as zakat given in My zakat). Mizan never holds
+money and never names a family.
+
+The safeguards are built in, not left to good intentions:
+
+- **Who checked it** is on every need. Mizan does not check needs; the
+  partner does, and its scholar decides whether zakat may go to each one.
+- **Two people** by default: a need written by one member is listed by
+  another, and a change to a listed need sends it back for a check.
+- **Nothing that points to a family**: text with phone numbers, emails,
+  links or handles is refused, and the form asks for what is needed, not who.
+- **No overfunding**: no more can be promised than is still needed; a
+  promise holds its place for 7 days, then lapses and frees the room.
+- **Reports**: anyone can report a need; three open reports take it off the
+  list until the partner looks.
+- **Time limits**: needs end after 7 to 90 days unless given more time.
+- **Little kept about givers**: a name and email only if offered, seen only
+  by the partner, and cleared 60 days after the promise is settled.
+- **A record**: every action on a need is logged with who did it.
+
+Partners use an ordinary Mizan account and a desk at `/partner` (no zakat
+setup needed). Each has a public page with what it has met and passed on
+this year, a printable poster with a QR code, and `/neighbours/for-mosques`
+sets out what a partner agrees to. Turn it on with `NEIGHBOURS`.
 
 ### Testing with people
 

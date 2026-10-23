@@ -16,6 +16,7 @@ const PROTECTED = [
   "/year",
   "/tools",
   "/begin",
+  "/partner",
 ];
 
 const UNSAFE_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);

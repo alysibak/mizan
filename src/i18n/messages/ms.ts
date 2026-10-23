@@ -57,6 +57,20 @@ const ms: Messages = {
       send: "Hantar",
       thanks: "Terima kasih. Ini membantu Mizan menjadi lebih mudah untuk semua.",
     },
+    report: {
+      nav: "Laporkan masalah",
+      title: "Laporkan masalah",
+      lede: "Beritahu kami apa yang salah dengan kata-kata anda sendiri. Kami membaca setiap laporan.",
+      kind: "Masalah jenis apa?",
+      kinds: { wrong: "Jawapan nampak salah", broken: "Sesuatu tidak berfungsi", hard: "Sukar difahami", other: "Lain-lain" },
+      what: "Apa yang berlaku?",
+      where: "Halaman mana? (sudah diisi)",
+      contact: "E-mel atau telefon jika mahu balasan (pilihan)",
+      privacy: "Jangan tulis jumlah wang, kata laluan atau butiran bank anda di sini.",
+      send: "Hantar",
+      thanks: "Terima kasih. Kami akan melihatnya.",
+      error: "Tidak berjaya dihantar. Sila cuba lagi.",
+    },
   },
 
   landing: {
@@ -428,6 +442,17 @@ const ms: Messages = {
     next: "Seterusnya",
     back: "Kembali",
     skip: "Saya tiada ini",
+    notSure: "Saya tidak pasti",
+    guess: { tip: "Anggaran kasar sudah memadai. Tulis anggaran terbaik anda di atas: ia akan ditanda sebagai anggaran, dan boleh diubah kemudian.", marked: "Ditanda sebagai anggaran", undo: "Batal" },
+    unsure: {
+      cash: "Kira wang kertas di dalam dompet dan di rumah. Jika belum dapat mengira semuanya, fikirkan berapa yang biasa anda simpan, kemudian bundarkan.",
+      bank: "Lihat aplikasi bank, slip bank atau resit ATM terakhir, atau tanya di bank. Campurkan semua akaun.",
+      gold: "Tidak tahu beratnya? Pilih barang kemas anda daripada gambar di bawah, atau minta kedai emas menimbangnya.",
+      jewellery: "Tidak tahu beratnya? Pilih barang kemas anda daripada gambar di bawah, atau minta kedai emas menimbangnya.",
+      silver: "Tidak tahu beratnya? Kedai emas boleh menimbangnya. Buat masa ini, anggaran sudah memadai.",
+      more: "Saham: lihat nilainya hari ini dalam aplikasi atau penyata. Perniagaan: kira barang pada harga jual, serta wang di laci. Hutang orang kepada anda: kira hanya yang anda jangka akan dibayar balik.",
+      debts: "Kira hanya yang perlu dibayar segera: sewa atau bil yang perlu dibayar sekarang, ansuran bulan ini, atau pinjaman yang perlu dipulangkan sekarang. Jangan kira keseluruhan pinjaman panjang seperti pinjaman rumah.",
+    },
     seeResult: "Tunjukkan zakat saya",
     amountsIn: "Jumlah dalam {currency}",
     changeCurrency: "Tukar",
@@ -520,6 +545,7 @@ const ms: Messages = {
       },
     },
     result: {
+      guessed: "Sesetengah jumlah ialah anggaran: {items}. Jawapannya hampir, belum tepat. Semak dahulu sebelum anda memberi.",
       due: "Zakat anda {amount}",
       none: "Tiada zakat yang wajib",
       total: "Semua yang anda kira berjumlah {total}.",
@@ -708,6 +734,11 @@ const ms: Messages = {
     title: "Dari mana ini datang",
     lede: "Setiap hukum yang digunakan Mizan, bersama ayat al-Quran atau hadis yang menjadi asasnya, dengan bahasa mudah.",
     note: "Hadis dinyatakan mengikut kitabnya, bukan nombornya, kerana penomboran berbeza antara edisi. Berat dalam gram ialah penukaran moden yang biasa bagi ukuran lama. Untuk keadaan anda sendiri, tanyalah ulama.",
+    review: {
+      none: "Belum ada ulama yang dinamakan menyemak halaman ini. Sehingga itu, anggap ia titik mula yang berhati-hati, dan tanya orang berilmu yang anda percayai.",
+      done: "Disemak oleh {name} pada {date}.",
+      ask: "Anda seorang ulama yang sudi menyemaknya? Sila tulis kepada {email}.",
+    },
     items: [
       {
         rule: "Zakat ialah kewajipan dan salah satu daripada lima rukun Islam.",

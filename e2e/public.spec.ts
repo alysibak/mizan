@@ -569,3 +569,19 @@ test("a large amount is also said in words, so a slipped zero shows", async ({ p
   await page.locator("#guide-cash").fill("250000");
   await expect(page.locator("#guide-cash-words")).toHaveText("= 2.5 لاکھ");
 });
+
+test("not knowing an amount is fine: a tip, a guess, and the answer says so", async ({ page }) => {
+  await page.route("**/api/metals?*", (route) => route.fulfill({ json: PRICES }));
+  await page.goto("/guide");
+  await page.getByRole("button", { name: "Money in the bank" }).click();
+  await page.getByRole("button", { name: "Next" }).click();
+  // The bank step: not sure, so a tip, and the amount is kept as a guess.
+  await page.getByRole("button", { name: "I’m not sure" }).click();
+  await expect(page.getByText("Look at your bank app")).toBeVisible();
+  await expect(page.getByText("✓ Marked as a guess")).toBeVisible();
+  await page.fill("#guide-bank", "30000");
+  const show = page.getByRole("button", { name: "Show my zakat" });
+  while (!(await show.isVisible())) await page.getByRole("button", { name: "Next" }).click();
+  await show.click();
+  await expect(page.getByText("Some amounts are guesses: Money in the bank.")).toBeVisible();
+});

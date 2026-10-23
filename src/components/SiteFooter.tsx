@@ -29,6 +29,7 @@ export default function SiteFooter({
     { href: "/method", label: footer.method + inEnglish },
     { href: "/privacy", label: footer.privacy + inEnglish },
     { href: "/terms", label: footer.terms + inEnglish },
+    { href: localePath(locale, "/report"), label: all.common.report.nav },
   ];
   return (
     <footer className="relative z-10 border-t border-mist px-5 py-10 text-sm md:px-10 print:hidden">

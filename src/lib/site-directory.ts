@@ -1,5 +1,6 @@
 import { localePath, type Locale } from "@/i18n/config";
 import { messagesFor } from "@/i18n/messages";
+import { readNeighboursMode } from "@/lib/neighbours";
 
 export interface DirectoryItem {
   href: string;
@@ -26,6 +27,8 @@ export function siteDirectory(locale: Locale): DirectoryGroup[] {
   const to = (path: string) => localePath(locale, path);
   const en = locale === "en";
   const only = (items: DirectoryItem[]) => (en ? items : []);
+  // Needs near you, once real partners are shown (English for now).
+  const neighbours = readNeighboursMode(process.env.NEIGHBOURS) === "on";
   return [
     {
       key: "work",
@@ -48,6 +51,7 @@ export function siteDirectory(locale: Locale): DirectoryGroup[] {
       key: "give",
       title: menu.give,
       items: [
+        ...only(neighbours ? [{ href: "/neighbours", label: "Help a family near you", icon: "neighbours" }] : []),
         { href: to("/who-can-receive"), label: choose.who, icon: "who" },
         ...only([{ href: "/give", label: "Where to give, and which charity", icon: "give" }]),
         { href: to("/zakat-al-fitr"), label: choose.fitr, icon: "fitr" },

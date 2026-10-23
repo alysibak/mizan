@@ -57,6 +57,20 @@ const tr: Messages = {
       send: "Gönder",
       thanks: "Teşekkürler. Bu, Mizan'ı herkes için kolaylaştırıyor.",
     },
+    report: {
+      nav: "Sorun bildir",
+      title: "Sorun bildir",
+      lede: "Neyin yanlış gittiğini kendi sözlerinizle anlatın. Her birini okuyoruz.",
+      kind: "Ne tür bir sorun?",
+      kinds: { wrong: "Bir cevap yanlış görünüyor", broken: "Bir şey çalışmıyor", hard: "Anlaşılması zor", other: "Başka bir şey" },
+      what: "Ne oldu?",
+      where: "Hangi sayfa? (sizin için yazıldı)",
+      contact: "Cevap isterseniz e-posta ya da telefon (isteğe bağlı)",
+      privacy: "Buraya tutarlarınızı, şifrelerinizi veya banka bilgilerinizi yazmayın.",
+      send: "Gönder",
+      thanks: "Teşekkürler. İnceleyeceğiz.",
+      error: "Gönderilemedi. Lütfen tekrar deneyin.",
+    },
   },
 
   landing: {
@@ -430,6 +444,17 @@ const tr: Messages = {
     next: "İleri",
     back: "Geri",
     skip: "Bende bu yok",
+    notSure: "Emin değilim",
+    guess: { tip: "Kabaca bir tahmin yeterli. En iyi tahmininizi yukarıya yazın: tahmin olarak işaretlenir, sonra değiştirebilirsiniz.", marked: "Tahmin olarak işaretlendi", undo: "Geri al" },
+    unsure: {
+      cash: "Cüzdanınızdaki ve evdeki banknotları sayın. Şimdi hepsini sayamıyorsanız genelde ne kadar tuttuğunuzu düşünün ve yuvarlayın.",
+      bank: "Banka uygulamanıza, banka dekontuna ya da son ATM fişine bakın veya bankaya sorun. Bütün hesapları toplayın.",
+      gold: "Ağırlığını bilmiyor musunuz? Aşağıdaki resimlerden parçalarınızı seçin ya da bir kuyumcuya tartırın.",
+      jewellery: "Ağırlığını bilmiyor musunuz? Aşağıdaki resimlerden parçalarınızı seçin ya da bir kuyumcuya tartırın.",
+      silver: "Ağırlığını bilmiyor musunuz? Bir kuyumcu tartabilir. Şimdilik kabaca bir tahmin yeterli.",
+      more: "Hisseler: uygulamada ya da ekstrede bugünkü değerine bakın. İşyeri: malı satış fiyatıyla sayın, kasadaki parayı da ekleyin. Alacaklar: yalnızca geri alacağınızı umduğunuzu sayın.",
+      debts: "Yalnızca yakında ödemeniz gerekenleri sayın: şimdi ödenecek kira ya da faturalar, bu ayın taksiti ya da şimdi geri vermeniz gereken borç. Konut kredisi gibi uzun bir borcun tamamını saymayın.",
+    },
     seeResult: "Zekâtımı göster",
     amountsIn: "Tutarlar {currency} cinsinden",
     changeCurrency: "Değiştir",
@@ -522,6 +547,7 @@ const tr: Messages = {
       },
     },
     result: {
+      guessed: "Bazı tutarlar tahmin: {items}. Cevap yaklaşık, kesin değil. Vermeden önce kontrol edin.",
       due: "Zekâtınız {amount}",
       none: "Zekât gerekmiyor",
       total: "Saydığınız her şeyin toplamı {total}.",
@@ -710,6 +736,11 @@ const tr: Messages = {
     title: "Bu nereden geliyor",
     lede: "Mizan’ın kullandığı her hüküm ve dayandığı âyet ya da hadis, sade bir dille.",
     note: "Hadisler numarayla değil kitabının adıyla verilmiştir, çünkü numaralar baskıdan baskıya değişir. Gram ağırlıklar eski ölçülerin yaygın modern karşılıklarıdır. Kendi durumunuz için bir âlime danışın.",
+    review: {
+      none: "Bu sayfaları henüz adı belli bir âlim gözden geçirmedi. O zamana kadar bunları dikkatli bir başlangıç olarak görün ve güvendiğiniz bir bilgi sahibine sorun.",
+      done: "{name} tarafından {date} tarihinde gözden geçirildi.",
+      ask: "Bunları gözden geçirmek isteyen bir âlim misiniz? Lütfen {email} adresine yazın.",
+    },
     items: [
       {
         rule: "Zekât farzdır ve İslam’ın beş şartından biridir.",

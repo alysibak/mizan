@@ -12,6 +12,7 @@ import { DEBTS_KEY, debtTotals, parseDebts, repaymentsDue } from "./debts";
 import { FITR_KEY, parseFitr, zakatAlFitr } from "./fitr";
 import { INTEREST_KEY, parseInterest } from "./interest";
 import { MISSED_KEY, missedZakat, parseTally, tallyAmounts } from "./missed";
+import { PLEDGES_KEY, parsePledges } from "./neighbours-phone";
 
 export const FAMILY_KEY = "mizan-family-v1";
 
@@ -197,6 +198,21 @@ export const PHONE_FEATURES: readonly PhoneFeature[] = [
       };
     },
     dues: (raw, ctx) => ({ repaymentsDue: repaymentsDue(parseDebts(raw), ctx.today) }),
+  },
+  {
+    key: "pledges",
+    storageKey: PLEDGES_KEY,
+    line(raw) {
+      const n = parsePledges(raw).length;
+      if (!n) return null;
+      return {
+        key: "pledges",
+        icon: "neighbours",
+        title: "Help a family near you",
+        status: n === 1 ? "1 promise: see if it arrived" : `${n} promises: see if they arrived`,
+        href: "/neighbours/mine",
+      };
+    },
   },
 ];
 

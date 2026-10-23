@@ -3,6 +3,7 @@ import Link from "next/link";
 import LegalPage, { LegalSection } from "@/components/LegalPage";
 import { LEGAL_UPDATED, contactEmail, operatorName } from "@/lib/legal";
 import { analyticsConfig } from "@/lib/analytics";
+import { CONTACT_KEEP_DAYS } from "@/lib/neighbours";
 import { emailEnabled } from "@/lib/email";
 
 export const metadata: Metadata = {
@@ -136,6 +137,30 @@ export default function PrivacyPage() {
           your new phone collects it, or after 30 minutes, whichever comes
           first. Attempts are limited per network address, stored as a
           one-way hash.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="Report a problem">
+        <p>
+          If you report a problem, Mizan keeps what kind it is, the page you came from, your words, the page’s
+          language, and an email or phone only if you choose to leave one for a reply. Requests are limited per
+          network address, stored as a one-way hash.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="Helping a family near you (Mizan Neighbours)">
+        <p>
+          Where this site lists needs checked by mosques, a need never names or describes the family: mosques are
+          asked not to, and text with phone numbers, emails or links is refused. When you promise to give, Mizan keeps
+          the amount, the need, and a code for your payment; your name and an email only if you choose to give them,
+          seen only by that mosque and deleted {CONTACT_KEEP_DAYS} days after the promise is settled. Your phone keeps
+          the code and the amount, so you can see when it arrives. Mizan never receives or holds money: you pay the
+          mosque directly.
+        </p>
+        <p>
+          People who run a mosque’s desk use an ordinary Mizan account; Mizan keeps which mosque they belong to and
+          what they did to each need, so the mosque can account for it. Reports about a need keep the reason and any
+          words you add.
         </p>
       </LegalSection>
 

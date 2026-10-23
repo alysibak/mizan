@@ -73,6 +73,11 @@ for (const scheme of ["light", "dark"] as const) {
         "/register",
         "/privacy",
         "/method",
+        "/report",
+        "/ur/report",
+        "/neighbours",
+        "/neighbours/for-mosques",
+        "/neighbours/mine",
       ]) {
         await page.goto(path);
         await page.waitForLoadState("load");
@@ -152,6 +157,7 @@ for (const scheme of ["light", "dark"] as const) {
         "/tools/forgive",
         "/privacy",
         "/method",
+        "/partner",
       ]) {
         await page.goto(path);
         await page.waitForLoadState("load");

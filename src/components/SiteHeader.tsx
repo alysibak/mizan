@@ -54,6 +54,7 @@ export default function SiteHeader({ locale = "en" }: { locale?: Locale }) {
                 button: all.ask.nav,
               }}
               largerText={largerText}
+              report={{ href: localePath(locale, "/report"), label: all.common.report.nav }}
             />
             <LanguageMenu locale={locale} label={language} />
             <AccountLinks

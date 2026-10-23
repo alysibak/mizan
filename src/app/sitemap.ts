@@ -4,6 +4,7 @@ import { CALC_CURRENCIES } from "@/lib/calculator";
 import { ENGLISH_TOOL_PATHS } from "@/lib/public-tools";
 import { GUIDES } from "@/content/guides";
 import { siteUrl } from "@/lib/site";
+import { readNeighboursMode } from "@/lib/neighbours";
 
 // Read at request time, so a self-hosted image picks up its own APP_URL.
 export const dynamic = "force-dynamic";
@@ -67,7 +68,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
       });
     }
   }
-  for (const page of ENGLISH) {
+  const english =
+    readNeighboursMode(process.env.NEIGHBOURS) === "on"
+      ? [
+          ...ENGLISH,
+          { path: "/neighbours", priority: 0.7, changeFrequency: "hourly" as const },
+          { path: "/neighbours/for-mosques", priority: 0.5, changeFrequency: "yearly" as const },
+        ]
+      : ENGLISH;
+  for (const page of english) {
     out.push({
       url: abs(page.path),
       changeFrequency: page.changeFrequency,

@@ -30,6 +30,9 @@ export const PUBLIC_PATHS = [
   "/login",
   "/register",
   "/forgot",
+  "/report",
+  "/neighbours",
+  "/neighbours/for-mosques",
 ];
 
 /** Public pages, in any language: "/ar/calculator" counts like "/calculator". */

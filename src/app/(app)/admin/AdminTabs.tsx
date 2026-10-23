@@ -3,6 +3,7 @@ import Link from "next/link";
 const TABS = [
   ["/admin/users", "Accounts"],
   ["/admin/feedback", "What people said"],
+  ["/admin/partners", "Mosques"],
 ] as const;
 
 /** The two admin pages, side by side. */

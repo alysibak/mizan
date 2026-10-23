@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { neighboursMode } from "@/lib/neighbours-store";
 import { getCurrentUser } from "@/lib/session";
 import { loadReckoning } from "@/lib/reckoning";
 import { formatMoney, sumCents, toCents } from "@/lib/money";
@@ -89,6 +90,16 @@ export default async function GivingPage({
         <Link href="/zakat-al-fitr" className="inline-flex min-h-[44px] items-center text-pine hover:underline">
           Work out Zakat al-Fitr
         </Link>
+        {neighboursMode() === "on" ? (
+          <>
+            <span className="text-sage" aria-hidden>
+              ·
+            </span>
+            <Link href="/neighbours?zakat=1" className="inline-flex min-h-[44px] items-center text-pine hover:underline">
+              Give to a family near you
+            </Link>
+          </>
+        ) : null}
       </div>
     </div>
   );

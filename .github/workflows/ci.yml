@@ -48,6 +48,9 @@ jobs:
         env:
           DATABASE_URL: file:ci.db
           NEXT_TELEMETRY_DISABLED: "1"
+          # The end-to-end tests set up real Neighbours partners; the Menu and
+          # the guide's answer are built with it on, as on a live site.
+          NEIGHBOURS: "on"
       - name: Install browser for end-to-end tests
         run: npx playwright install --with-deps chromium
       - name: End-to-end (phone and desktop, production build)

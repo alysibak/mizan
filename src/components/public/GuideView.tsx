@@ -4,6 +4,7 @@ import SiteFooter from "@/components/SiteFooter";
 import GuidedZakat from "@/components/public/GuidedZakat";
 import { LOCALE_INFO, languageAlternates, localePath, type Locale } from "@/i18n/config";
 import { messagesFor } from "@/i18n/messages";
+import { readNeighboursMode } from "@/lib/neighbours";
 
 export function guideMetadata(locale: Locale): Metadata {
   const m = messagesFor(locale).guide;
@@ -38,6 +39,7 @@ export default function GuideView({ locale }: { locale: Locale }) {
             speech={{ listen: all.common.listen, stop: all.common.stopListening }}
             share={all.common.share}
             easy={all.common.easy}
+            neighbours={locale === "en" && readNeighboursMode(process.env.NEIGHBOURS) === "on"}
             locale={locale}
           />
         </div>

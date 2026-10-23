@@ -3,8 +3,11 @@ import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import ReadAloud from "@/components/ReadAloud";
-import { LOCALE_INFO, languageAlternates, localePath, type Locale } from "@/i18n/config";
+import { LOCALE_INFO, fmt, languageAlternates, localePath, type Locale } from "@/i18n/config";
 import { messagesFor } from "@/i18n/messages";
+import { scholarReview } from "@/lib/review";
+import { contactEmail } from "@/lib/legal";
+import { readableDay } from "@/lib/dates";
 
 const PATH = "/sources";
 
@@ -37,6 +40,7 @@ export default function SourcesView({ locale }: { locale: Locale }) {
           <h1 className="mt-2 font-serif text-4xl leading-tight text-ink sm:text-5xl">{m.title}</h1>
           <p className="mt-4 text-lg leading-relaxed text-sage">{m.lede}</p>
         </header>
+        <ReviewNote locale={locale} m={m.review} />
         <ol className="mt-10 space-y-6">
           {m.items.map((item, i) => (
             <li key={item.rule} className="card p-5">
@@ -66,6 +70,25 @@ export default function SourcesView({ locale }: { locale: Locale }) {
         </div>
       </main>
       <SiteFooter locale={locale} path={PATH} />
+    </div>
+  );
+}
+
+
+/** Who has reviewed these rulings, or plainly that no one has yet. */
+function ReviewNote({ locale, m }: { locale: Locale; m: { none: string; done: string; ask: string } }) {
+  const review = scholarReview();
+  const email = contactEmail();
+  return (
+    <div role="note" className={"mt-6 border-s-4 px-4 py-3 text-base leading-relaxed " + (review ? "border-pine bg-pine/5 text-ink" : "border-brass bg-brass/5 text-ink")}>
+      {review ? (
+        <p>{fmt(m.done, { name: review.by, date: readableDay(review.on, LOCALE_INFO[locale].intl) })}</p>
+      ) : (
+        <>
+          <p>{m.none}</p>
+          {email ? <p className="mt-1 text-sage">{fmt(m.ask, { email })}</p> : null}
+        </>
+      )}
     </div>
   );
 }

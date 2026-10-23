@@ -6,8 +6,9 @@ import { expect, type Page } from "@playwright/test";
 // src/lib/email.ts); reminders run when called with this secret.
 export const OUTBOX = path.join(__dirname, "..", "e2e-outbox.jsonl");
 export const CRON_SECRET = "e2e-cron-secret";
-/** The one account that sees the admin pages. */
+/** The accounts that see the admin pages. */
 export const ADMIN = "admin@mizan.test";
+export const ADMIN_TWO = "admin2@mizan.test";
 
 export interface SentEmail {
   to: string;
@@ -56,6 +57,31 @@ export async function asNewVisitor(page: Page) {
   await page
     .context()
     .setExtraHTTPHeaders({ "x-forwarded-for": `10.${octet()}.${octet()}.${octet()}` });
+}
+
+/** Make an account and stop at setup: all a mosque's desk needs. */
+export async function registerOnly(page: Page, email: string, name = "Amina Test") {
+  await asNewVisitor(page);
+  await page.goto("/register");
+  await page.fill("#name", name);
+  await page.fill("#email", email);
+  await page.fill("#password", PASSWORD);
+  await page.click("button[type=submit]");
+  await page.waitForURL("**/begin");
+}
+
+/** Sign in as the second admin, making the account the first time it is needed. */
+export async function asSecondAdmin(page: Page) {
+  await asNewVisitor(page);
+  await page.goto("/login");
+  await page.fill("#email", ADMIN_TWO);
+  await page.fill("#password", PASSWORD);
+  await page.click("button[type=submit]");
+  // No such account yet: the sign-in stays put, and it is made below.
+  await page.waitForURL(/\/(dashboard|begin)/, { timeout: 8_000 }).catch(() => {});
+  if (!/\/(dashboard|begin)/.test(page.url())) {
+    await registerAndSetUp(page, { email: ADMIN_TWO, hawlStart: daysAgo(30), amount: "100" });
+  }
 }
 
 /** Register and finish setup with real prices, a hawl, and one holding. */

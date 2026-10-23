@@ -10,6 +10,7 @@ import {
   IconDome,
   IconGiving,
   IconGoldBar,
+  IconHome,
   IconLedger,
   IconMoon,
   IconOpenHand,
@@ -19,6 +20,7 @@ import {
   IconReceipt,
   IconShop,
   IconSmile,
+  IconSpeech,
   IconStar,
   IconStatement,
   IconUsers,
@@ -52,4 +54,6 @@ export const PAGE_ICONS: Record<string, ComponentType<{ className?: string }>> =
   nisab: IconBalance,
   poster: IconDome,
   worksheet: IconReceipt,
+  neighbours: IconHome,
+  report: IconSpeech,
 };

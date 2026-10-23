@@ -95,6 +95,9 @@ type Speech = { listen: string; stop: string };
 /** The kinds of wealth asked about one step each, picked first as pictures. */
 const ASSET_STEPS = ["cash", "bank", "gold", "jewellery", "silver", "more"] as const;
 type AssetStep = (typeof ASSET_STEPS)[number];
+/** The steps that ask for an amount someone may not know. */
+type Unsure = AssetStep | "debts";
+const isUnsure = (step: string): step is Unsure => step === "debts" || (ASSET_STEPS as readonly string[]).includes(step);
 const isAssetStep = (s: Step): s is AssetStep => (ASSET_STEPS as readonly string[]).includes(s);
 
 /**
@@ -145,6 +148,7 @@ export default function GuidedZakat({
   speech,
   share,
   easy,
+  neighbours = false,
   locale,
 }: {
   m: GuideMessages;
@@ -152,6 +156,8 @@ export default function GuidedZakat({
   speech: Speech;
   share: ShareLabels;
   easy: EasyLabels;
+  /** Real needs near you are listed (English for now). */
+  neighbours?: boolean;
   locale: Locale;
 }) {
   const hydrated = useHydrated();
@@ -166,6 +172,7 @@ export default function GuidedZakat({
         speech={speech}
         share={share}
         easy={easy}
+        neighbours={neighbours}
         locale={locale}
       />
     );
@@ -180,6 +187,7 @@ export default function GuidedZakat({
       speech={speech}
       share={share}
       easy={easy}
+      neighbours={neighbours}
       locale={locale}
     />
   );
@@ -193,6 +201,7 @@ function Guide({
   speech,
   share,
   easy,
+  neighbours = false,
   locale,
 }: {
   initial: CalcDraft;
@@ -202,6 +211,8 @@ function Guide({
   speech: Speech;
   share: ShareLabels;
   easy: EasyLabels;
+  /** Real needs near you are listed (English for now). */
+  neighbours?: boolean;
   locale: Locale;
 }) {
   const intl = LOCALE_INFO[locale].intl;
@@ -221,6 +232,9 @@ function Guide({
   const [have, setHave] = useState<Set<AssetStep>>(() => new Set(ASSET_STEPS.filter((k) => holds(initial, k))));
   const [also, setAlso] = useState<Set<Also>>(() => new Set());
   const [pickCurrency, setPickCurrency] = useState(false);
+  // Amounts they said they were not sure of: kept as guesses, and named in the answer.
+  const [guessed, setGuessed] = useState<Set<Unsure>>(() => new Set());
+  const [unsureOpen, setUnsureOpen] = useState<Unsure | null>(null);
   // Arrived from the home page's box: its number is already under cash.
   const [fromHome] = useState(() => {
     if (!live) return false;
@@ -362,6 +376,11 @@ function Guide({
       updateIn("amounts", Object.fromEntries(MORE_FIELDS.map((k) => [k, ""])));
     }
     if (step === "debts") update({ debts: "" });
+    if (isUnsure(step)) {
+      const next = new Set(guessed);
+      next.delete(step);
+      setGuessed(next);
+    }
     go(at + 1);
   }
 
@@ -685,6 +704,10 @@ function Guide({
           onGiven={(v) => update({ given: v })}
           share={share}
           easy={easy}
+          neighbours={neighbours}
+          guessed={[...guessed].map((k) =>
+            k === "more" ? m.have.more : k === "debts" ? calc.debtsDueNow : calc.fields[k].label,
+          )}
         />
       );
       break;
@@ -778,6 +801,46 @@ function Guide({
       ) : null}
 
       {fields}
+
+      {/* Not knowing an amount is common: a tip for this kind of wealth, and the
+          amount kept as a guess, named again in the answer. */}
+      {isUnsure(step) ? (
+        unsureOpen === step || guessed.has(step) ? (
+          <div className="mt-5 space-y-2 border-s-4 border-brass bg-brass/5 px-4 py-3" role="note">
+            <p className="text-base leading-relaxed text-ink">{m.unsure[step]}</p>
+            <p className="text-base leading-relaxed text-sage">{m.guess.tip}</p>
+            <p className="flex flex-wrap items-center gap-x-3 text-base">
+              <span className="font-medium text-brassDeep">✓ {m.guess.marked}</span>
+              <button
+                type="button"
+                className="inline-flex min-h-[44px] items-center text-pine underline-offset-2 hover:underline"
+                onClick={() => {
+                  const next = new Set(guessed);
+                  next.delete(step);
+                  setGuessed(next);
+                  setUnsureOpen(null);
+                }}
+              >
+                {m.guess.undo}
+              </button>
+            </p>
+          </div>
+        ) : (
+          <button
+            type="button"
+            className="mt-4 inline-flex min-h-[44px] items-center gap-2 text-base font-medium text-pine underline-offset-2 hover:underline"
+            onClick={() => {
+              setGuessed(new Set(guessed).add(step));
+              setUnsureOpen(step);
+            }}
+          >
+            <span aria-hidden className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-pine text-sm">
+              ?
+            </span>
+            {m.notSure}
+          </button>
+        )
+      ) : null}
 
       {/* The answer has its own "Change my answers"; a Back under it as well
           would be one more button that does nearly the same thing. */}
@@ -952,6 +1015,8 @@ function Result({
   also,
   share,
   easy,
+  neighbours,
+  guessed,
 }: {
   m: GuideMessages;
   calc: CalcMessages;
@@ -967,6 +1032,9 @@ function Result({
   also: Set<Also> | null;
   share: ShareLabels;
   easy: EasyLabels;
+  neighbours: boolean;
+  /** What they marked as a guess, by name. */
+  guessed: string[];
 }) {
   const signedIn = useSignedIn();
   const myRaw = useStoredValue(MY_KEY);
@@ -1039,6 +1107,11 @@ function Result({
         }}
       />
       <p className="text-base leading-relaxed text-ink">{verdict}</p>
+      {guessed.length ? (
+        <p className="border-s-4 border-brass bg-brass/5 px-4 py-3 text-base leading-relaxed text-ink">
+          {fmt(m.result.guessed, { items: guessed.join(", ") })}
+        </p>
+      ) : null}
 
       {result.isDue ? (
         <div>
@@ -1055,6 +1128,11 @@ function Result({
               <Link href="/my" className="text-base font-medium text-pine hover:underline">
                 Saved in My zakat: note what you give, and get a reminder every year →
               </Link>
+              {neighbours ? (
+                <Link href="/neighbours?zakat=1" className="text-base font-medium text-pine hover:underline">
+                  Give it to a family near you, checked by a mosque →
+                </Link>
+              ) : null}
               <Link href="/give" className="text-base font-medium text-pine hover:underline">
                 Where to give it, and how to choose a charity →
               </Link>

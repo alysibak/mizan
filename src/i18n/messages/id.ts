@@ -57,6 +57,20 @@ const id: Messages = {
       send: "Kirim",
       thanks: "Terima kasih. Ini membantu Mizan jadi lebih mudah bagi semua.",
     },
+    report: {
+      nav: "Laporkan masalah",
+      title: "Laporkan masalah",
+      lede: "Ceritakan apa yang salah dengan kata-kata Anda sendiri. Kami membaca setiap laporan.",
+      kind: "Masalah apa?",
+      kinds: { wrong: "Jawabannya tampak salah", broken: "Ada yang tidak berfungsi", hard: "Sulit dipahami", other: "Hal lain" },
+      what: "Apa yang terjadi?",
+      where: "Halaman mana? (sudah diisi)",
+      contact: "Email atau telepon jika ingin dibalas (opsional)",
+      privacy: "Jangan tulis jumlah uang, kata sandi, atau data bank Anda di sini.",
+      send: "Kirim",
+      thanks: "Terima kasih. Kami akan memeriksanya.",
+      error: "Gagal terkirim. Silakan coba lagi.",
+    },
   },
 
   landing: {
@@ -428,6 +442,17 @@ const id: Messages = {
     next: "Lanjut",
     back: "Kembali",
     skip: "Saya tidak punya ini",
+    notSure: "Saya tidak yakin",
+    guess: { tip: "Perkiraan kasar sudah cukup. Tulis perkiraan terbaik Anda di atas: akan ditandai sebagai perkiraan, dan bisa diubah nanti.", marked: "Ditandai sebagai perkiraan", undo: "Batalkan" },
+    unsure: {
+      cash: "Hitung uang kertas di dompet dan di rumah. Jika belum bisa menghitung semuanya, pikirkan berapa yang biasa Anda simpan, lalu bulatkan.",
+      bank: "Lihat aplikasi bank, slip bank, atau struk ATM terakhir, atau tanyakan di bank. Jumlahkan semua rekening.",
+      gold: "Tidak tahu beratnya? Pilih perhiasan Anda dari gambar di bawah, atau minta toko emas menimbangnya.",
+      jewellery: "Tidak tahu beratnya? Pilih perhiasan Anda dari gambar di bawah, atau minta toko emas menimbangnya.",
+      silver: "Tidak tahu beratnya? Toko emas bisa menimbangnya. Untuk sekarang, perkiraan sudah cukup.",
+      more: "Saham: lihat nilainya hari ini di aplikasi atau laporan. Usaha: hitung barang dengan harga jual, ditambah uang di laci. Piutang: hitung hanya yang Anda harapkan kembali.",
+      debts: "Hitung hanya yang harus segera dibayar: sewa atau tagihan yang jatuh tempo, cicilan bulan ini, atau pinjaman yang harus dikembalikan sekarang. Jangan hitung seluruh pinjaman panjang seperti KPR.",
+    },
     seeResult: "Tampilkan zakat saya",
     amountsIn: "Jumlah dalam {currency}",
     changeCurrency: "Ganti",
@@ -520,6 +545,7 @@ const id: Messages = {
       },
     },
     result: {
+      guessed: "Beberapa jumlah adalah perkiraan: {items}. Jawabannya mendekati, belum tepat. Periksa dulu sebelum Anda memberi.",
       due: "Zakat Anda {amount}",
       none: "Tidak ada zakat yang wajib",
       total: "Semua yang Anda hitung berjumlah {total}.",
@@ -708,6 +734,11 @@ const id: Messages = {
     title: "Dari mana ini berasal",
     lede: "Setiap aturan yang dipakai Mizan, beserta ayat Al-Qur’an atau hadis yang menjadi dasarnya, dengan bahasa sederhana.",
     note: "Hadis disebut menurut kitabnya, bukan nomornya, karena penomoran berbeda antar-edisi. Berat dalam gram adalah konversi modern yang umum dari ukuran lama. Untuk keadaan Anda sendiri, tanyakan kepada ulama.",
+    review: {
+      none: "Belum ada ulama yang disebut namanya meninjau halaman ini. Sampai ada, anggap ini titik awal yang hati-hati, dan tanyakan kepada orang berilmu yang Anda percayai.",
+      done: "Ditinjau oleh {name} pada {date}.",
+      ask: "Anda seorang ulama yang bersedia meninjaunya? Silakan tulis ke {email}.",
+    },
     items: [
       {
         rule: "Zakat adalah kewajiban dan salah satu dari lima rukun Islam.",

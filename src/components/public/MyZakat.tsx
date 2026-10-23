@@ -200,7 +200,7 @@ function ZakatDayCard({ my, save }: { my: MyZakat; save: (next: MyZakat) => void
  * My zakat: one person's zakat year, from every page that knows something
  * about it, with what to do next. Kept in this browser only.
  */
-export default function MyZakatHub() {
+export default function MyZakatHub({ neighbours = false }: { neighbours?: boolean }) {
   const hydrated = useHydrated();
   const [visitorCurrency] = useVisitorCurrency();
   const mine = useMyDraft(visitorCurrency);
@@ -481,6 +481,11 @@ export default function MyZakatHub() {
           <p className="mt-2 text-base font-medium text-ink nums" aria-live="polite">
             {money(given)} of {money(due)} · {left > 0.005 ? `${money(left)} left` : "all given"}
           </p>
+          {neighbours && left > 0.005 ? (
+            <Link href="/neighbours?zakat=1" className="mt-2 inline-flex min-h-[44px] items-center text-base font-medium text-pine hover:underline">
+              Give it to a family near you, checked by a mosque →
+            </Link>
+          ) : null}
 
           {plan.length ? (
             <section className="mt-4 border border-brass/50 bg-brass/5 p-4" aria-labelledby="plan-title">

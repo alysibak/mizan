@@ -13,6 +13,7 @@ import LastLetterCard from "@/components/LastLetterCard";
 import { emailEnabled } from "@/lib/email";
 import { hasPassword } from "@/lib/api";
 import { FromThisPhoneNotice } from "@/components/FromThisPhone";
+import { membershipsOf, neighboursMode } from "@/lib/neighbours-store";
 import EverythingElse from "@/components/EverythingElse";
 import EasyCheck from "@/components/EasyCheck";
 import { messagesFor } from "@/i18n/messages";
@@ -24,6 +25,7 @@ export default async function DashboardPage({
 }) {
   const { welcome } = await searchParams;
   const user = (await getCurrentUser())!;
+  const desks = neighboursMode() === "off" ? [] : await membershipsOf(user.id);
   const {
     settings,
     assets: assetRows,
@@ -175,6 +177,19 @@ export default async function DashboardPage({
 
       {/* The shared demo cannot be added to. */}
       {isDemoUser(user) ? null : <FromThisPhoneNotice />}
+
+      {/* People who run a mosque's needs desk find it from Home. */}
+      {desks.length ? (
+        <Link href="/partner" className="flex min-h-[64px] items-center justify-between gap-3 border-2 border-pine/30 bg-pine/5 px-4 py-3 hover:border-pine">
+          <span>
+            <span className="block text-base font-medium text-ink">Mosque desk: {desks[0].partner.name}</span>
+            <span className="block text-sm text-sage">Needs, payments to confirm, and reports</span>
+          </span>
+          <span aria-hidden className="text-xl text-pine">
+            →
+          </span>
+        </Link>
+      ) : null}
 
       <DashboardNotices
         items={checklist}

@@ -1,5 +1,6 @@
 import MyZakatHub from "@/components/public/MyZakat";
 import ToolPage, { toolMetadata, type ToolPageCopy } from "@/components/public/ToolPage";
+import { readNeighboursMode } from "@/lib/neighbours";
 
 const copy: ToolPageCopy = {
   path: "/my",
@@ -32,7 +33,7 @@ export const metadata = toolMetadata(copy);
 export default function MyZakatPage() {
   return (
     <ToolPage copy={copy}>
-      <MyZakatHub />
+      <MyZakatHub neighbours={readNeighboursMode(process.env.NEIGHBOURS) === "on"} />
     </ToolPage>
   );
 }

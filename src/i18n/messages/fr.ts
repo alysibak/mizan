@@ -57,6 +57,20 @@ const fr: Messages = {
       send: "Envoyer",
       thanks: "Merci. Cela aide à rendre Mizan plus simple pour tous.",
     },
+    report: {
+      nav: "Signaler un problème",
+      title: "Signaler un problème",
+      lede: "Dites-nous ce qui n’a pas marché, avec vos mots. Nous lisons chaque message.",
+      kind: "Quel genre de problème ?",
+      kinds: { wrong: "Une réponse semble fausse", broken: "Quelque chose ne marche pas", hard: "C’est difficile à comprendre", other: "Autre chose" },
+      what: "Que s’est-il passé ?",
+      where: "Quelle page ? (remplie pour vous)",
+      contact: "E-mail ou téléphone, si vous voulez une réponse (facultatif)",
+      privacy: "N’écrivez pas ici vos montants, mots de passe ou coordonnées bancaires.",
+      send: "Envoyer",
+      thanks: "Merci. Nous allons regarder.",
+      error: "L’envoi n’a pas abouti. Réessayez.",
+    },
   },
 
   landing: {
@@ -426,6 +440,17 @@ const fr: Messages = {
     next: "Suivant",
     back: "Retour",
     skip: "Je n’en ai pas",
+    notSure: "Je ne suis pas sûr",
+    guess: { tip: "Une estimation suffit. Écrivez votre meilleure estimation ci-dessus : elle sera marquée comme estimation, et vous pourrez la changer plus tard.", marked: "Marqué comme estimation", undo: "Annuler" },
+    unsure: {
+      cash: "Comptez les billets dans votre portefeuille et à la maison. Si vous ne pouvez pas tout compter maintenant, pensez à ce que vous gardez d’habitude, et arrondissez.",
+      bank: "Regardez votre application bancaire, un relevé ou le dernier ticket du distributeur, ou demandez à la banque. Additionnez tous vos comptes.",
+      gold: "Vous ne connaissez pas le poids ? Choisissez vos pièces dans les images ci-dessous, ou faites-les peser par un bijoutier.",
+      jewellery: "Vous ne connaissez pas le poids ? Choisissez vos pièces dans les images ci-dessous, ou faites-les peser par un bijoutier.",
+      silver: "Vous ne connaissez pas le poids ? Un bijoutier peut le peser. Pour l’instant, une estimation suffit.",
+      more: "Actions : regardez leur valeur du jour dans l’application ou le relevé. Commerce : comptez le stock au prix de vente, plus l’argent de la caisse. Argent qu’on vous doit : comptez seulement ce que vous pensez récupérer.",
+      debts: "Comptez seulement ce que vous devez payer bientôt : loyer ou factures dus maintenant, l’échéance de ce mois, ou un emprunt à rendre maintenant. Pas la totalité d’un long prêt comme un crédit immobilier.",
+    },
     seeResult: "Voir ma zakat",
     amountsIn: "Montants en {currency}",
     changeCurrency: "Changer",
@@ -518,6 +543,7 @@ const fr: Messages = {
       },
     },
     result: {
+      guessed: "Certains montants sont estimés : {items}. La réponse est proche, pas exacte. Vérifiez-les avant de donner.",
       due: "Votre zakat : {amount}",
       none: "Aucune zakat n’est due",
       total: "Tout ce que vous avez compté fait {total}.",
@@ -706,6 +732,11 @@ const fr: Messages = {
     title: "D’où cela vient",
     lede: "Chaque règle utilisée par Mizan, avec le verset du Coran ou le hadith sur lequel elle repose, en mots simples.",
     note: "Les hadiths sont cités par recueil plutôt que par numéro, car la numérotation varie selon les éditions. Les poids en grammes sont les conversions modernes courantes des anciennes mesures. Pour votre situation, demandez à un savant.",
+    review: {
+      none: "Aucun savant nommé n’a encore relu ces pages. D’ici là, prenez-les comme un point de départ soigné, et demandez à une personne de savoir en qui vous avez confiance.",
+      done: "Relu par {name} le {date}.",
+      ask: "Vous êtes savant et prêt à les relire ? Écrivez à {email}.",
+    },
     items: [
       {
         rule: "La zakat est une obligation et l’un des cinq piliers de l’islam.",
