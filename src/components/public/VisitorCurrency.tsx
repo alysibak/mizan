@@ -92,7 +92,7 @@ export function KeepRecordNudge({ what }: { what: string }) {
   return (
     <p className="text-sm leading-relaxed text-sage">
       <Link href="/register" className="font-medium text-pine hover:underline">
-        Open a free ledger
+        Make a free account
       </Link>{" "}
       to keep {what} on record beside your zakat, with a statement at the end of
       the year.

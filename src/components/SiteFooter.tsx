@@ -42,7 +42,7 @@ export default function SiteFooter({
         <LinkColumn title={footer.toolsHeading} links={zakat} />
         <LinkColumn title={footer.aboutHeading} links={about} />
         <nav aria-label={footer.languages}>
-          <p className="label mb-2">{footer.languages}</p>
+          <p className="eyebrow mb-2 text-sage">{footer.languages}</p>
           <ul className="grid grid-cols-2 gap-x-6 gap-y-2 md:grid-cols-1">
             {LOCALES.map((l) => (
               <li key={l}>
@@ -77,7 +77,7 @@ function LinkColumn({
 }) {
   return (
     <nav aria-label={title}>
-      <p className="label mb-2">{title}</p>
+      <p className="eyebrow mb-2 text-sage">{title}</p>
       {/* Two to a row on a phone, where the footer is one long column. */}
       <ul className="grid grid-cols-2 gap-x-6 gap-y-2 sm:grid-cols-1">
         {links.map((l) => (

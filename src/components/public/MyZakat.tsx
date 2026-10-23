@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSignedIn } from "@/components/useSignedIn";
 import InstallHint from "@/components/InstallHint";
@@ -214,6 +214,19 @@ export default function MyZakatHub() {
   const fileInput = useRef<HTMLInputElement>(null);
   const signedIn = useSignedIn();
   const [moving, setMoving] = useState(false);
+  // On a first visit the day picker waits until the to-do list asks for it.
+  const [askDay, setAskDay] = useState(() => typeof window !== "undefined" && window.location.hash === "#zakat-day");
+  function openDay() {
+    setAskDay(true);
+    requestAnimationFrame(() => document.getElementById("zakat-day")?.scrollIntoView({ block: "start" }));
+  }
+  useEffect(() => {
+    const onHash = () => {
+      if (window.location.hash === "#zakat-day") openDay();
+    };
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
 
   if (!hydrated) return <div className="card min-h-[24rem]" aria-busy="true" />;
 
@@ -234,6 +247,9 @@ export default function MyZakatHub() {
   const keepsAnything =
     Boolean(my.zakatDay) || started || my.payments.length > 0 || my.history.length > 0 || phoneLines(phone, phoneCtx).length > 0;
   const dues = phoneDues(phone, phoneCtx);
+  // Nothing kept yet: the to-do list says what to do, and the cards that
+  // would repeat it wait until there is something in them.
+  const firstVisit = !keepsAnything && !signedIn;
   const ramadan = ramadanStatus(new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate())));
   const pricesAgeDays = draft.pricesAsOf
     ? Math.floor((today.getTime() - new Date(draft.pricesAsOf).getTime()) / 86_400_000)
@@ -346,6 +362,7 @@ export default function MyZakatHub() {
               <li key={t.key}>
                 <Link
                   href={t.href}
+                  onClick={t.href === "#zakat-day" ? openDay : undefined}
                   className="group flex items-center gap-3 border border-mist bg-surface px-3 py-2.5 transition hover:border-pine"
                 >
                   <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-pine text-sm font-medium text-surface nums" aria-hidden>
@@ -368,17 +385,17 @@ export default function MyZakatHub() {
 
       {/* Someone new here may have it all on another phone already. */}
       {!moving && !keepsAnything ? (
-        <p className="text-base text-sage print:hidden">
-          Used Mizan on another phone?{" "}
-          <button type="button" className="font-medium text-pine hover:underline" onClick={() => setMoving(true)}>
-            Bring everything over with a code
-          </button>{" "}
-          or{" "}
-          <button type="button" className="font-medium text-pine hover:underline" onClick={() => fileInput.current?.click()}>
-            restore a saved copy
-          </button>
-          .
-        </p>
+        <div className="text-base text-sage print:hidden">
+          <p>Used Mizan on another phone?</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <button type="button" className="btn-ghost" onClick={() => setMoving(true)}>
+              Bring everything over with a code
+            </button>
+            <button type="button" className="btn-ghost" onClick={() => fileInput.current?.click()}>
+              Restore a saved copy
+            </button>
+          </div>
+        </div>
       ) : null}
       {restored && !keepsAnything ? (
         <p className="text-sm font-medium text-danger" role="alert">
@@ -386,76 +403,75 @@ export default function MyZakatHub() {
         </p>
       ) : null}
 
-      <Card id="this-year" title="This year’s zakat">
-        {started && !needsPrices ? (
-          <div className="mt-3 grid gap-5 sm:grid-cols-[minmax(0,1fr)_11rem] sm:items-center">
-            <div>
-              <p className="font-serif text-4xl text-pine nums">{result.isDue ? money(result.zakatDue) : "Not due"}</p>
-              <p className="mt-1 text-sm text-sage nums">
-                {result.isDue
-                  ? `2.5% of ${money(result.netZakatable)}, above the nisab of ${money(result.nisab)}.`
-                  : `${money(result.netZakatable)} is below the nisab of ${money(result.nisab)}.`}
-              </p>
-              <ul className="mt-3 space-y-1 text-sm">
-                {outcome.lines.map((l) => (
-                  <li key={l.key} className="flex justify-between gap-3 border-b border-mist/70 pb-1">
-                    <span className="text-sage">{l.label}</span>
-                    <span className="text-ink nums">{money(l.amount * l.zakatablePortion)}</span>
-                  </li>
-                ))}
-                {result.deductibleLiabilities > 0 ? (
-                  <li className="flex justify-between gap-3 border-b border-mist/70 pb-1">
-                    <span className="text-sage">Debts due now</span>
-                    <span className="text-danger nums">−{money(result.deductibleLiabilities)}</span>
-                  </li>
-                ) : null}
-              </ul>
+      {firstVisit ? null : (
+        <Card id="this-year" title="This year’s zakat">
+          {started && !needsPrices ? (
+            <div className="mt-3 grid gap-5 sm:grid-cols-[minmax(0,1fr)_11rem] sm:items-center">
+              <div>
+                <p className="font-serif text-4xl text-pine nums">{result.isDue ? money(result.zakatDue) : "Not due"}</p>
+                <p className="mt-1 text-sm text-sage nums">
+                  {result.isDue
+                    ? `2.5% of ${money(result.netZakatable)}, above the nisab of ${money(result.nisab)}.`
+                    : `${money(result.netZakatable)} is below the nisab of ${money(result.nisab)}.`}
+                </p>
+                <ul className="mt-3 space-y-1 text-sm">
+                  {outcome.lines.map((l) => (
+                    <li key={l.key} className="flex justify-between gap-3 border-b border-mist/70 pb-1">
+                      <span className="text-sage">{l.label}</span>
+                      <span className="text-ink nums">{money(l.amount * l.zakatablePortion)}</span>
+                    </li>
+                  ))}
+                  {result.deductibleLiabilities > 0 ? (
+                    <li className="flex justify-between gap-3 border-b border-mist/70 pb-1">
+                      <span className="text-sage">Debts due now</span>
+                      <span className="text-danger nums">−{money(result.deductibleLiabilities)}</span>
+                    </li>
+                  ) : null}
+                </ul>
+              </div>
+              <BalanceScale net={result.netZakatable} nisab={result.nisab} money={money} labels={{ you: "Yours", nisab: "Nisab" }} />
             </div>
-            <BalanceScale net={result.netZakatable} nisab={result.nisab} money={money} labels={{ you: "Yours", nisab: "Nisab" }} />
-          </div>
-        ) : signedIn && !started ? (
-          <p className="mt-2 text-base text-sage">
-            Your ledger keeps this year’s zakat, worked out from everything you have put in it, and what you have given.
-          </p>
-        ) : (
-          <p className="mt-2 text-base text-sage">
-            {started ? "Today’s gold and silver prices are needed to finish. " : "Nothing worked out yet. "}
-            It takes a few minutes, step by step.
-          </p>
-        )}
-        {signedIn && !started ? (
-          <div className="mt-4 flex flex-wrap gap-3 print:hidden">
-            <Link href="/dashboard" className="btn-primary px-5 py-3 text-base">
-              Open my ledger
-            </Link>
-            <Link href="/giving?type=zakat" className="btn-ghost px-5 py-3 text-base">
-              Note zakat I gave
-            </Link>
-          </div>
-        ) : (
-          // One clear button; everything else as a quiet link beside it.
-          <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-3 print:hidden">
-            {started ? (
-              <Link href="/calculator" className="btn-primary px-5 py-3 text-base">
-                Change my figures
+          ) : signedIn && !started ? (
+            <p className="mt-2 text-base text-sage">
+              Your account keeps this year’s zakat, worked out from everything you have put in it, and what you have given.
+            </p>
+          ) : (
+            <p className="mt-2 text-base text-sage">
+              {started ? "Today’s gold and silver prices are needed to finish. " : "Nothing worked out yet. "}
+              It takes a few minutes, step by step.
+            </p>
+          )}
+          {signedIn && !started ? (
+            <div className="mt-4 flex flex-wrap gap-3 print:hidden">
+              <Link href="/dashboard" className="btn-primary px-5 py-3 text-base">
+                Open my account
               </Link>
-            ) : (
-              <Link href="/guide" className="btn-primary px-5 py-3 text-base">
-                Work it out, step by step
+              <Link href="/giving?type=zakat" className="btn-ghost px-5 py-3 text-base">
+                Note zakat I gave
               </Link>
-            )}
-            {started ? (
-              <Link href="/guide" className="text-base font-medium text-pine hover:underline">
-                Go through it step by step
-              </Link>
-            ) : null}
-            {started && !needsPrices ? <SendSummary text={summary} /> : null}
-            <Link href="/shop" className="text-base font-medium text-pine hover:underline">
-              I have a shop
-            </Link>
-          </div>
-        )}
-      </Card>
+            </div>
+          ) : (
+            // One clear button; everything else as a quiet link beside it.
+            <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-3 print:hidden">
+              {started ? (
+                <Link href="/calculator" className="btn-primary px-5 py-3 text-base">
+                  Change my figures
+                </Link>
+              ) : (
+                <Link href="/guide" className="btn-primary px-5 py-3 text-base">
+                  Work it out, step by step
+                </Link>
+              )}
+              {started ? (
+                <Link href="/guide" className="text-base font-medium text-pine hover:underline">
+                  Go through it step by step
+                </Link>
+              ) : null}
+              {started && !needsPrices ? <SendSummary text={summary} /> : null}
+            </div>
+          )}
+        </Card>
+      )}
 
       {due > 0 ? (
         <Card id="given" title="What you have given">
@@ -575,7 +591,7 @@ export default function MyZakatHub() {
       ) : null}
 
       {/* After the zakat itself, as the to-do list puts it: work it out first. */}
-      <ZakatDayCard my={my} save={save} />
+      {firstVisit && !askDay ? null : <ZakatDayCard my={my} save={save} />}
 
       <section aria-labelledby="also-title">
         <h2 id="also-title" className="font-serif text-2xl text-ink">

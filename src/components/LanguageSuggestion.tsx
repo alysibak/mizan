@@ -52,19 +52,19 @@ export default function LanguageSuggestion({
     <div
       lang={wanted}
       dir={LOCALE_INFO[wanted].dir}
-      className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 border-b border-pine/30 bg-pine/5 px-5 py-2.5 text-sm"
+      className="flex flex-wrap items-center justify-center gap-x-5 border-b border-pine/30 bg-pine/5 px-5 py-0.5 text-sm"
     >
       <Link
         href={localePath(wanted, path)}
         hrefLang={wanted}
-        className="font-medium text-pine underline-offset-2 hover:underline"
+        className="inline-flex min-h-[44px] items-center font-medium text-pine underline-offset-2 hover:underline"
         onClick={() => setStoredValue(CHOSEN_LOCALE_KEY, wanted)}
       >
         {readHere}
       </Link>
       <button
         type="button"
-        className="text-sage hover:text-ink"
+        className="inline-flex min-h-[44px] items-center text-sage hover:text-ink"
         onClick={() => setStoredValue(DISMISSED_KEY, wanted)}
       >
         {notNow}

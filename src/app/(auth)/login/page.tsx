@@ -16,7 +16,7 @@ export default function LoginPage() {
   const hasDemo = Boolean(demoEmail());
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-10">
-      <Link href="/" className="mb-8 font-serif text-xl text-ink">
+      <Link href="/" className="mb-6 inline-flex min-h-[44px] items-center self-start font-serif text-xl text-ink">
         Mizan
       </Link>
       <h1 className="font-serif text-3xl text-ink">Welcome back</h1>

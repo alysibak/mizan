@@ -88,7 +88,7 @@ async function main() {
       label: "Wedding jewellery",
       amount: 4000,
       zakatablePortion: 0,
-      note: "Worn regularly; counted per the school profile you choose.",
+      note: "Worn regularly.",
     },
     { userId: user.id, category: "stocks_trading", label: "Active brokerage", amount: 6000 },
     {

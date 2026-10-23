@@ -32,7 +32,7 @@ export default function ForgottenWealthTool() {
   return (
     <div className="space-y-8">
       <header>
-        <p className="label text-brassDeep">Close the year · step 1 of 3</p>
+        <p className="eyebrow">Close the year · step 1 of 3</p>
         <h1 className="mt-1 font-serif text-3xl text-ink">Anything you forgot?</h1>
         <p className="mt-2 max-w-xl text-base text-sage">
           People often forget these. Tick each one once you have thought about

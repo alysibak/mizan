@@ -19,7 +19,7 @@ export default function EnvelopeTool({
   return (
     <div className="space-y-8">
       <header>
-        <p className="label text-brassDeep">Close the year · step 2 of 3</p>
+        <p className="eyebrow">Close the year · step 2 of 3</p>
         <h1 className="mt-1 font-serif text-3xl text-ink">Give your zakat</h1>
         <p className="mt-2 max-w-xl text-base text-sage">
           Give it to people in need, then note it here. Not sure who may receive

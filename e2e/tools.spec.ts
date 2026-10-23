@@ -16,9 +16,9 @@ test("zakat al-Fitr: per head, with a ledger nudge instead of a signed-in link",
   await page.locator("#tool-currency").selectOption("USD");
   await page.locator("#people").fill("4");
   await page.locator("#perPerson").fill("15");
-  await expect(page.getByText("US$60.00")).toBeVisible();
+  await expect(page.getByText("US$60")).toBeVisible();
   await expect(page.getByRole("link", { name: "Record on Give" })).toHaveCount(0);
-  await page.getByRole("link", { name: "Open a free ledger" }).click();
+  await page.getByRole("link", { name: "Make a free account" }).click();
   await page.waitForURL("**/register");
 });
 
@@ -73,8 +73,8 @@ test("ramadan: a gift spread over the last ten nights, more on the odd ones", as
   const plan = page.getByRole("list", { name: "Your plan, night by night" });
   await expect(plan.getByRole("listitem")).toHaveCount(9);
   await expect(plan.getByRole("listitem").first()).toContainText("Night 21");
-  await expect(plan.getByRole("listitem").first()).toContainText("US$20.00");
-  await expect(plan.getByRole("listitem").nth(1)).toContainText("US$10.00");
+  await expect(plan.getByRole("listitem").first()).toContainText("US$20");
+  await expect(plan.getByRole("listitem").nth(1)).toContainText("US$10");
   await page.getByText("The same every night").click();
   await expect(plan.getByRole("listitem").first()).toContainText("US$15.55");
   const download = page.waitForEvent("download");
@@ -123,7 +123,7 @@ test("family: each person weighed alone, and a warning when pooling misleads", a
   await page.goto("/family");
   await page.locator("#tool-currency").selectOption("USD");
   // Silver nisab: 595 g at 1.2 is US$714.
-  await expect(page.getByText("US$714.00")).toBeVisible();
+  await expect(page.getByText("US$714")).toBeVisible();
 
   const me = page.getByRole("listitem", { name: "Me", exact: true });
   await me.getByLabel("Cash and savings").fill("500");
@@ -131,7 +131,7 @@ test("family: each person weighed alone, and a warning when pooling misleads", a
   const wife = page.getByRole("listitem", { name: "Wife or husband", exact: true });
   await wife.getByLabel("Cash and savings").fill("400");
   await expect(page.getByRole("heading", { name: "No one in your family owes zakat" })).toBeVisible();
-  await expect(page.getByText(/Added together, your family has US\$900\.00/)).toContainText("you and your wife or husband are under the nisab");
+  await expect(page.getByText(/Added together, your family has US\$900\b/)).toContainText("you and your wife or husband are under the nisab");
 
   // 10 g of 22k gold is 916 more: now she owes 2.5% of 1,316.
   await wife.getByLabel("Gold, in grams").fill("10");
@@ -148,7 +148,7 @@ test("family: each person weighed alone, and a warning when pooling misleads", a
   await page.goto("/family");
   const mine = page.getByRole("listitem", { name: "Me", exact: true });
   await expect(mine.getByText("From your own figures")).toBeVisible();
-  await expect(mine.getByText("US$50.00")).toBeVisible();
+  await expect(mine.getByText("US$50")).toBeVisible();
 });
 
 test("quiz: ten picture questions, each answered at once, and a score", async ({ page }) => {
@@ -202,12 +202,12 @@ test("shop: counted with everything else you own, in the same figures as the cal
   await page.locator("#shop-receivables").fill("2000");
   await page.locator("#shop-debts").fill("7000");
   // 30,000 + 5,000 + 2,000 − 7,000 = 30,000; 2.5% is 750.
-  await expect(page.getByRole("heading", { name: "Your zakat: US$750.00" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Your zakat: US$750" })).toBeVisible();
 
   // The same figures are the calculator's: nothing typed twice, nothing counted twice.
   await page.goto("/calculator");
   await expect(page.locator("#calc-cash")).toHaveValue("5000");
-  await expect(page.getByText("US$750.00").first()).toBeVisible();
+  await expect(page.getByText("US$750").first()).toBeVisible();
 
   await page.goto("/shop");
   await page.locator("#shop-business").fill("500");
@@ -235,9 +235,9 @@ test("bank interest: separated from your money, given away, and left out of zaka
   await page.locator("#tool-currency").selectOption("USD");
   await page.locator("#interest-balance").fill("10000");
   await page.locator("#interest-paid").fill("300");
-  await expect(page.getByText("Give away US$300.00")).toBeVisible();
+  await expect(page.getByText("Give away US$300")).toBeVisible();
   await expect(page.getByText("not your zakat")).toBeVisible();
-  await expect(page.getByText("count US$9,700.00 from this account")).toBeVisible();
+  await expect(page.getByText("count US$9,700 from this account")).toBeVisible();
 });
 
 test("guides answer the common questions and lead to the calculator", async ({ page }) => {
@@ -304,18 +304,18 @@ test("missed fasts: the reason says what to do, the count goes down, and My zaka
   await page.locator("#tool-currency").selectOption("USD");
   await page.locator("#fasts-per-day").fill("8");
   await page.locator("#fasts-fidya-days").fill("30");
-  await expect(page.getByText("Fidya: US$240.00 (30 meals)")).toBeVisible();
+  await expect(page.getByText("Fidya: US$240 (30 meals)")).toBeVisible();
   await page.getByRole("button", { name: "I broke a fast on purpose" }).click();
   await page.locator("#fasts-kaffarah").fill("1");
   await expect(page.getByText(/Fast 60 days in a row/)).toBeVisible();
   await page.getByRole("button", { name: "I swore an oath and broke it" }).click();
   await page.locator("#fasts-oaths").fill("1");
-  await expect(page.getByText(/Feed or clothe 10 poor people/)).toContainText("US$80.00");
+  await expect(page.getByText(/Feed or clothe 10 poor people/)).toContainText("US$80");
 
   // My zakat counts what is left and puts it on the list.
   await page.goto("/my");
   await expect(page.getByRole("region", { name: "What to do next" })).toContainText("Make up 3 missed fasts before Ramadan");
-  await expect(page.getByText("3 fasts to make up · US$320.00 to give · 60 days of kaffarah")).toBeVisible();
+  await expect(page.getByText("3 fasts to make up · US$320 to give · 60 days of kaffarah")).toBeVisible();
 
   // And Ask finds it.
   await page.goto("/ask?q=fidya");
@@ -338,14 +338,14 @@ test("money lent and borrowed: written down in seconds, sent on, and counted for
   await page.getByRole("button", { name: "I owe someone" }).click();
   await page.fill("#debt-amount", "300");
   await page.getByRole("button", { name: "Write it down" }).click();
-  await expect(page.locator("p", { hasText: "Owed to you:" })).toContainText("5,000.00");
-  await expect(page.locator("p", { hasText: "You owe:" })).toContainText("300.00");
+  await expect(page.locator("p", { hasText: "Owed to you:" })).toContainText("5,000");
+  await expect(page.locator("p", { hasText: "You owe:" })).toContainText("300");
 
   const ahmed = page.getByRole("listitem").filter({ hasText: "Uncle Ahmed owes you" });
   await ahmed.getByRole("button", { name: "Some paid back" }).click();
   await ahmed.locator("input").fill("1000");
   await ahmed.getByRole("button", { name: "Save" }).click();
-  await expect(ahmed).toContainText("4,000.00");
+  await expect(ahmed).toContainText("4,000");
 
   await page.getByRole("button", { name: "Use these in my zakat" }).click();
   await expect(page.getByText("Added to your zakat figures.")).toBeVisible();

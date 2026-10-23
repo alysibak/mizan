@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { formatMoney } from "@/lib/money";
 import type { SnapshotPayload } from "@/lib/snapshot";
+import { readableDay } from "@/lib/dates";
 
 type Freeze = {
   id: string;
@@ -42,7 +43,7 @@ export default function SnapshotCompare({ freezes }: { freezes: Freeze[] }) {
     <section className="panel">
       <h2 className="font-serif text-xl text-ink">Your last two copies</h2>
       <p className="mt-1 text-sm text-sage">
-        {older.label} ({older.takenAt}) → {newer.label} ({newer.takenAt})
+        {older.label} ({readableDay(older.takenAt)}) → {newer.label} ({readableDay(newer.takenAt)})
       </p>
       <dl className="mt-4 space-y-2 text-sm">
         {rows.map((row) => {

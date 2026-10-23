@@ -163,6 +163,8 @@ export function weightUnitOf(draft: Pick<CalcDraft, "weightUnit" | "currency">):
 }
 
 export const CALC_STORAGE_KEY = "mizan-calculator-v1";
+/** Session note for the guide: it opened with the home page's number. */
+export const FROM_HOME_KEY = "mizan-from-home";
 /** The currency a visitor last picked anywhere on the public pages. */
 export const VISITOR_CURRENCY_KEY = "mizan-visitor-currency";
 

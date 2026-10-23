@@ -22,7 +22,7 @@ export interface DirectoryGroup {
 export function siteDirectory(locale: Locale): DirectoryGroup[] {
   const all = messagesFor(locale);
   const { choose } = all.landing;
-  const { nav, menu } = all.common;
+  const { menu } = all.common;
   const to = (path: string) => localePath(locale, path);
   const en = locale === "en";
   const only = (items: DirectoryItem[]) => (en ? items : []);
@@ -31,9 +31,8 @@ export function siteDirectory(locale: Locale): DirectoryGroup[] {
       key: "work",
       title: menu.work,
       items: [
-        ...only([{ href: "/my", label: "My zakat: my year in one place", icon: "my" }]),
+        ...only([{ href: "/my", label: "My zakat", icon: "my" }]),
         { href: to("/guide"), label: choose.start, icon: "start" },
-        { href: to("/calculator"), label: nav.calculator, icon: "calculator" },
         ...only([
           { href: "/family", label: "Zakat for my family", icon: "family" },
           { href: "/shop", label: "Zakat on my shop", icon: "shop" },

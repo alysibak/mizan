@@ -202,7 +202,7 @@ export interface Todo {
 export function todos(s: Snapshot, today: Date): Todo[] {
   const list: Todo[] = [];
   if (!s.zakat && s.signedIn) {
-    list.push({ key: "ledger", text: "See this year’s zakat in your ledger", href: "/dashboard", rank: 1 });
+    list.push({ key: "ledger", text: "See this year’s zakat in your account", href: "/dashboard", rank: 1 });
   } else if (!s.zakat) {
     list.push({ key: "work", text: "Work out this year’s zakat", href: "/guide", rank: 1 });
   } else {

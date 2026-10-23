@@ -121,7 +121,7 @@ export default function DebtsHelper({ share }: { share: ShareLabels }) {
             Amounts in {currency}.{" "}
             <button
               type="button"
-              className="text-pine underline underline-offset-2"
+              className="inline-flex min-h-[44px] items-center text-pine underline underline-offset-2"
               onClick={() => setChangingCurrency((c) => !c)}
               aria-expanded={changingCurrency}
             >

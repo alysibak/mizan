@@ -43,7 +43,7 @@ export function FromThisPhoneNotice() {
       href="/assets#from-phone"
       className="flex items-center justify-between gap-3 border border-pine/40 bg-pine/5 px-4 py-3 text-sm font-medium text-pine transition hover:border-pine"
     >
-      <span>You have figures on this phone from the calculator or My zakat. Add them to your ledger.</span>
+      <span>You have figures on this phone from the calculator or My zakat. Add them to your account.</span>
       <span aria-hidden>→</span>
     </Link>
   );
@@ -142,7 +142,7 @@ export default function FromThisPhone({ currency }: { currency: string }) {
   }
 
   function forget() {
-    if (!window.confirm("Remove these figures from this phone? Your ledger is not changed.")) return;
+    if (!window.confirm("Remove these figures from this phone? Your account is not changed.")) return;
     setStoredValue(CALC_STORAGE_KEY, null);
     if (payments.length) {
       setStoredValue(MY_KEY, JSON.stringify({ ...parseMy(localStorage.getItem(MY_KEY)), payments: [] }));
@@ -155,7 +155,7 @@ export default function FromThisPhone({ currency }: { currency: string }) {
         From this phone
       </h2>
       <p className="mt-1 text-sm text-sage">
-        You worked these out on the calculator or noted them in My zakat. Untick anything your ledger already has, then
+        You worked these out on the calculator or noted them in My zakat. Untick anything your account already has, then
         add the rest.
       </p>
       <ul className="mt-3 divide-y divide-mist/70 border-y border-mist/70">
@@ -179,7 +179,7 @@ export default function FromThisPhone({ currency }: { currency: string }) {
       </ul>
       {sameCurrency ? null : (
         <p className="mt-3 text-sm text-warn">
-          These are in {phone.currency}, and your ledger counts in {currency}. Open the{" "}
+          These are in {phone.currency}, and your account counts in {currency}. Open the{" "}
           <Link href="/calculator" className="font-medium underline">
             calculator
           </Link>
@@ -198,7 +198,7 @@ export default function FromThisPhone({ currency }: { currency: string }) {
           onClick={() => void add()}
           disabled={busy || !sameCurrency || ticked.length === 0}
         >
-          {busy ? "Adding…" : ticked.length === rows.length ? "Add them to my ledger" : `Add the ${ticked.length} ticked`}
+          {busy ? "Adding…" : ticked.length === rows.length ? "Add them to my account" : `Add the ${ticked.length} ticked`}
         </button>
         <button type="button" className="btn-ghost" onClick={forget} disabled={busy}>
           Remove from this phone

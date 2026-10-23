@@ -1,13 +1,24 @@
 /** A sum in a currency. `locale` is a BCP 47 tag; the app itself uses en-CA. */
-export function formatMoney(amount: number, currency = "CAD", locale = "en-CA"): string {
+/**
+ * Money as people write it: "$1,500", "$2,720.52". A whole amount drops its
+ * ".00". `whole` rounds an estimate to whole money.
+ */
+export function formatMoney(
+  amount: number,
+  currency = "CAD",
+  locale = "en-CA",
+  { whole = false }: { whole?: boolean } = {},
+): string {
+  const value = whole ? Math.round(amount || 0) : amount || 0;
+  const noCents = Math.abs(value - Math.round(value)) < 0.005;
   try {
     return new Intl.NumberFormat(locale, {
       style: "currency",
       currency,
-      maximumFractionDigits: 2,
-    }).format(amount || 0);
+      ...(noCents ? { minimumFractionDigits: 0, maximumFractionDigits: 0 } : { maximumFractionDigits: 2 }),
+    }).format(noCents ? Math.round(value) : value);
   } catch {
-    return `${(amount || 0).toFixed(2)} ${currency}`;
+    return `${noCents ? Math.round(value) : value.toFixed(2)} ${currency}`;
   }
 }
 

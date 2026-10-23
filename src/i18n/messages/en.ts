@@ -79,7 +79,9 @@ const en = {
     title: "Zakat, worked out with care.",
     lede: "A free, private zakat calculator and ledger. Weigh what you hold against nisab with live metal prices, keep your hawl on the Hijri calendar, and close each year with a figure you can trust.",
     ctaCalculate: "Calculate your zakat",
-    ctaLedger: "Open a free ledger",
+    ctaLedger: "Make a free account",
+    /** The home page's heading: the question people arrive with. */
+    question: "How much zakat do I owe?",
     quick: {
       label: "Your savings, cash and gold, all together",
       nisab: "Zakat starts at {nisab}, today’s minimum (nisab).",
@@ -114,7 +116,7 @@ const en = {
         body: "Count the lunar year from the day your wealth crossed nisab, on the tabular or Umm al-Qura calendar, with a reminder in your own calendar app.",
       },
       {
-        title: "A ledger that knows zakat",
+        title: "An account that knows zakat",
         body: "Cash, gold and silver by weight and karat, shares, crypto, business stock, money owed to you, and holdings in other currencies.",
       },
       {
@@ -247,7 +249,7 @@ const en = {
     belowSummarySilver: "{net} is {gap} below the silver nisab of {nisab}.",
     belowSummaryGold: "{net} is {gap} below the gold nisab of {nisab}.",
     shareOf: "{share} of {amount}",
-    netWealth: "Net zakatable wealth",
+    netWealth: "What counts",
     nisabSilver: "Nisab (silver)",
     nisabGold: "Nisab (gold)",
     weightPriceMissing: "Something is entered by weight, but its price per gram is missing.",
@@ -256,17 +258,17 @@ const en = {
     print: "Print or save PDF",
     clear: "Clear",
     clearConfirm: "Clear everything you entered?",
-    keepTitle: "Keep this as a ledger",
+    keepTitle: "Keep this, and get a reminder",
     keepBody:
       "A free account counts your hawl on the Hijri calendar, tells you when zakat falls due, records what you give, and closes each year with a statement. These figures come with you.",
     keepNote: "",
     share: "Share the calculator",
     shareText: "A free, private zakat calculator with today’s gold and silver prices. No sign-up.",
-    keepCta: "Create a free ledger",
-    keepMineTitle: "Add these to your ledger",
+    keepCta: "Make a free account",
+    keepMineTitle: "Add these to my account",
     keepMineBody:
-      "You are signed in. Your ledger shows these figures above what it already holds, so you choose what to add.",
-    keepMineCta: "Add to my ledger",
+      "You are signed in. Your account shows these figures above what it already holds, so you choose what to add.",
+    keepMineCta: "Add to my account",
     barDue: "Zakat due",
     barBelow: "Below nisab",
     byValue: "Enter a value instead",
@@ -362,7 +364,7 @@ const en = {
       "Zakat is only due on savings above nisab. You can still give charity (sadaqah) whenever you like, and it is rewarded. Check again if your savings grow.",
     notYetTitle: "Not yet",
     notYetBody:
-      "Zakat becomes due when your savings have stayed above nisab for one Islamic year. Note today’s date and check again in a year. A free ledger can count the year for you and remind you.",
+      "Zakat becomes due when your savings have stayed above nisab for one Islamic year. Note today’s date and check again in a year. A free account can count the year for you and remind you.",
     yesTitle: "You probably have to pay zakat",
     yesBody:
       "Zakat is 2.5% of your savings: for every 1,000 you have, you give 25. The calculator adds everything up for you in a few minutes.",
@@ -448,7 +450,12 @@ const en = {
     back: "Back",
     skip: "I don’t have this",
     seeResult: "Show my zakat",
+    amountsIn: "Amounts in {currency}",
+    changeCurrency: "Change",
+    onePage: "See it all on one page",
     have: {
+      fromHome: "Your {amount} from the first page is filled in under cash. Tap anything else you have.",
+      yours: "Count only what is yours, not your family’s.",
       title: "What do you have?",
       body: "Tap everything you have. Not sure? Press “{next}” and you will be asked about each one.",
       more: "Something else: shares, a business, money owed to you",
@@ -557,7 +564,7 @@ const en = {
       reminderBody:
         "One Islamic year has passed since you last worked out your zakat. Check the date with your local moon-sighting.",
       print: "Print or save",
-      ledger: "Keep this in a free ledger",
+      ledger: "Keep this in a free account",
       ledgerHint: "It counts your year, records what you give, and reminds you when zakat is due.",
       calculator: "Check it in the full calculator",
       change: "Change my answers",
@@ -918,7 +925,7 @@ const en = {
     total: "Zakat al-Fitr to give",
     schools:
       "Schools differ on giving food or its value in money, and on the size of the measure. Follow the guidance of those you trust; this only does the multiplication.",
-    ledgerLink: "Open a free ledger",
+    ledgerLink: "Make a free account",
     ledgerRest: "to keep it on record beside your zakat, with a statement at the end of the year.",
     sections: [
       {
@@ -1101,8 +1108,8 @@ const en = {
       a: "Zakat is 2.5% for each lunar year. A solar year is about eleven days longer, so if you reckon on a Gregorian date the rate is scaled by 365.25 / 354.367, about 2.577%, to stay fair over time.",
     },
     {
-      q: "Calculator or free ledger: what’s the difference?",
-      a: "The calculator works out this year’s zakat in a few minutes, with no account; your figures stay in your browser. A free ledger keeps the whole year: it remembers when your year began, tells you when zakat is due, records what you give, and keeps your figures safe on any device. Start with the calculator; you can turn it into a ledger at any time.",
+      q: "Calculator or free account: what’s the difference?",
+      a: "The calculator works out this year’s zakat in a few minutes, with no account; your figures stay in your browser. A free account keeps the whole year: it remembers when your year began, tells you when zakat is due, records what you give, and keeps your figures safe on any device. Start with the calculator; you can turn it into a ledger at any time.",
     },
     {
       q: "Is what I type saved or sent anywhere?",

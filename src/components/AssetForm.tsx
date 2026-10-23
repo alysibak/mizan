@@ -14,6 +14,7 @@ import {
 import { formatMoney, toCents } from "@/lib/money";
 import { sendJson } from "@/lib/client-fetch";
 import type { Asset } from "@/db/schema";
+import { IconBank, IconCash, IconCoins, IconGoldBar, IconNecklace, IconOwed, IconQuestion } from "@/components/icons";
 
 const GROUPS: { key: CategoryMeta["group"]; label: string }[] = [
   { key: "liquid", label: "Money" },
@@ -21,6 +22,16 @@ const GROUPS: { key: CategoryMeta["group"]; label: string }[] = [
   { key: "investments", label: "Shares and savings plans" },
   { key: "business", label: "Business" },
   { key: "other", label: "Something else" },
+];
+
+/** The kinds most people have, picked as pictures; the rest are under "Something else". */
+const COMMON_KINDS: { key: string; Icon: (p: { className?: string }) => React.ReactNode }[] = [
+  { key: "bank", Icon: IconBank },
+  { key: "cash", Icon: IconCash },
+  { key: "gold", Icon: IconGoldBar },
+  { key: "jewellery", Icon: IconNecklace },
+  { key: "silver", Icon: IconCoins },
+  { key: "receivables", Icon: IconOwed },
 ];
 
 export type AssetPrices = { goldPricePerGram: number; silverPricePerGram: number };
@@ -58,6 +69,8 @@ export default function AssetForm({
     CATEGORY_LIST[0].key;
 
   const [category, setCategory] = useState<string>(startCategory);
+  // The full list, for anything that is not one of the pictures.
+  const [allKinds, setAllKinds] = useState(() => !COMMON_KINDS.some((k) => k.key === startCategory));
   const [label, setLabel] = useState(asset?.label ?? initialLabel ?? "");
   const [amount, setAmount] = useState(asset ? String(asset.amount) : "");
   const [portion, setPortion] = useState(
@@ -179,8 +192,53 @@ export default function AssetForm({
 
   return (
     <form onSubmit={submit} className="space-y-4">
+      {editing ? null : (
+        <fieldset>
+          <legend className="label mb-2">What is it?</legend>
+          <ul className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {COMMON_KINDS.map(({ key, Icon }) => {
+              const on = !allKinds && category === key;
+              return (
+                <li key={key}>
+                  <button
+                    type="button"
+                    aria-pressed={on}
+                    onClick={() => {
+                      setAllKinds(false);
+                      pickCategory(key);
+                    }}
+                    className={
+                      "flex h-full min-h-[84px] w-full flex-col items-center justify-center gap-2 border-2 px-2 py-3 text-center transition " +
+                      (on ? "border-pine bg-pine/10" : "border-mist bg-surface hover:border-sage")
+                    }
+                  >
+                    <Icon className={"h-7 w-7 " + (on ? "text-pine" : "text-sage")} />
+                    <span className="text-sm font-medium leading-snug text-ink">
+                      {CATEGORY_LIST.find((c) => c.key === key)?.label ?? key}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+            <li>
+              <button
+                type="button"
+                aria-pressed={allKinds}
+                onClick={() => setAllKinds(true)}
+                className={
+                  "flex h-full min-h-[84px] w-full flex-col items-center justify-center gap-2 border-2 px-2 py-3 text-center transition " +
+                  (allKinds ? "border-pine bg-pine/10" : "border-mist bg-surface hover:border-sage")
+                }
+              >
+                <IconQuestion className={"h-7 w-7 " + (allKinds ? "text-pine" : "text-sage")} />
+                <span className="text-sm font-medium leading-snug text-ink">Something else</span>
+              </button>
+            </li>
+          </ul>
+        </fieldset>
+      )}
       <div className="grid gap-4 sm:grid-cols-2">
-        <div>
+        <div className={editing || allKinds ? "" : "hidden"}>
           <label className="label mb-1.5" htmlFor={`${idPrefix}-category`}>
             What kind
           </label>

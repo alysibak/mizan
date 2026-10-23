@@ -14,7 +14,7 @@ export default function GlobalError({
     <html lang="en">
       <body>
         <main className="mx-auto flex min-h-screen max-w-xl flex-col justify-center px-6 py-16">
-          <p className="label text-brassDeep">Mizan</p>
+          <p className="eyebrow">Mizan</p>
           <h1 className="mt-2 font-serif text-3xl text-ink">Mizan could not load</h1>
           <p className="mt-4 leading-relaxed text-sage">
             Nothing you saved has been lost. Please try again in a moment.

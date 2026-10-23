@@ -183,13 +183,13 @@ export async function NisabIndexView({ locale }: { locale: Locale }) {
                     key={code}
                     className="border-b border-mist/70 last:border-0"
                   >
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-1">
                       <Link
                         href={localePath(
                           locale,
                           `/nisab/${code.toLowerCase()}`,
                         )}
-                        className="text-pine hover:underline"
+                        className="inline-flex min-h-[44px] items-center text-pine hover:underline"
                       >
                         {currencyName(code, locale)}
                       </Link>{" "}
@@ -281,7 +281,7 @@ export async function NisabCurrencyView({
       <SiteHeader locale={locale} />
       <main className="mx-auto max-w-4xl px-5 pb-16 pt-6 md:px-10">
         <header className="max-w-2xl">
-          <p className="label text-brassDeep">
+          <p className="eyebrow">
             <Link
               href={localePath(locale, "/nisab")}
               className="hover:text-ink"
@@ -298,7 +298,7 @@ export async function NisabCurrencyView({
           <>
             <dl className="mt-10 grid gap-4 sm:grid-cols-2">
               <div className="card p-6">
-                <dt className="label text-brassDeep">{m.silverLabel}</dt>
+                <dt className="eyebrow">{m.silverLabel}</dt>
                 <dd className="mt-2 font-serif text-4xl text-ink nums">
                   {money(values.silver)}
                 </dd>
@@ -310,7 +310,7 @@ export async function NisabCurrencyView({
                 </dd>
               </div>
               <div className="card p-6">
-                <dt className="label text-brassDeep">{m.goldLabel}</dt>
+                <dt className="eyebrow">{m.goldLabel}</dt>
                 <dd className="mt-2 font-serif text-4xl text-ink nums">
                   {money(values.gold)}
                 </dd>

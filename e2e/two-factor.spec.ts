@@ -42,7 +42,7 @@ test("two-step sign-in: set up, required at sign-in, not skipped by email, off b
 
   let app = authenticator("");
   await test.step("set up with an authenticator app", async () => {
-    await page.goto("/settings");
+    await page.goto("/settings#account");
     await page.getByRole("button", { name: "Set up two-step sign-in" }).click();
     await expect(page.getByRole("img", { name: "QR code for your authenticator app" })).toBeVisible();
     const link = await page.getByRole("link", { name: "Open it in your app" }).getAttribute("href");
@@ -80,7 +80,7 @@ test("two-step sign-in: set up, required at sign-in, not skipped by email, off b
   });
 
   await test.step("an emailed reset link changes the password but still asks for the code", async () => {
-    await page.goto("/settings");
+    await page.goto("/settings#account");
     await page.getByRole("button", { name: "Send a confirmation link" }).click();
     await expect(page.getByText("Sent. Open the link")).toBeVisible();
     await page.goto(linkInEmail(email, "Confirm your email for Mizan")!);
@@ -106,7 +106,7 @@ test("two-step sign-in: set up, required at sign-in, not skipped by email, off b
     await page.click("button[type=submit]");
     await page.waitForURL(/\/dashboard/);
 
-    await page.goto("/settings");
+    await page.goto("/settings#account");
     await page.click("text=Make a recovery code");
     await page.fill("#recoveryPassword", "reset-by-email-pass");
     await page.click("button:has-text('Make code')");

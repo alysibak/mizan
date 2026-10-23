@@ -49,7 +49,7 @@ export default function ForgiveDebtTool({
 
   const header = (
     <header>
-      <p className="label text-brassDeep">Release</p>
+      <p className="eyebrow">Release</p>
       <h1 className="mt-1 font-serif text-3xl text-ink">Forgive a debt</h1>
       <p className="mt-2 max-w-xl text-sm text-sage">
         “If the one who owes is in hardship, give him time until it eases; and to let it go as charity is better for
@@ -81,7 +81,7 @@ export default function ForgiveDebtTool({
       <div className="space-y-8">
         {header}
         <p className="card max-w-lg p-5 text-sm text-sage">
-          Nothing to change: no money owed to you is on your ledger, so none is counted in your zakat.
+          Nothing to change: no money owed to you is in what you own, so none is counted in your zakat.
         </p>
       </div>
     );

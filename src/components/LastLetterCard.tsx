@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { setStoredValue, useHydrated, useStoredValue } from "@/lib/client-store";
+import { readableDay } from "@/lib/dates";
 
 const KEY = "mizan-letter-dismissed";
 
@@ -24,8 +25,8 @@ export default function LastLetterCard({
     <section className="border border-brass/40 bg-brass/5 px-5 py-5">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="label text-brassDeep">Your note from last year</p>
-          <p className="mt-1 text-xs text-sage">Written {takenAt}</p>
+          <p className="eyebrow">Your note from last year</p>
+          <p className="mt-1 text-xs text-sage">Written {readableDay(takenAt)}</p>
           <p className="mt-3 whitespace-pre-wrap font-serif text-lg leading-relaxed text-ink">
             {letter}
           </p>

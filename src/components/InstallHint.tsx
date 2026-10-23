@@ -50,7 +50,7 @@ export default function InstallHint({ pitch, className = "" }: { pitch: string; 
     <section className={"border border-dashed border-mist px-5 py-4 print:hidden " + className} aria-labelledby="install-title">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 id="install-title" className="label text-brassDeep">
+          <h2 id="install-title" className="eyebrow">
             On your home screen
           </h2>
           <p className="mt-1 text-sm text-sage">{pitch}</p>

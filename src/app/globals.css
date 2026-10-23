@@ -55,6 +55,13 @@
     background-blend-mode: multiply;
   }
 
+  /* A folded question or section opens with a thumb-sized tap. */
+  summary {
+    cursor: pointer;
+    min-height: 2.75rem;
+    padding-block: 0.625rem;
+  }
+
   ::selection {
     background-color: rgb(var(--c-brass) / 0.28);
   }
@@ -75,8 +82,15 @@
     @apply border-y border-mist bg-transparent py-5;
   }
 
+  /* A field's name, read before typing: full size, ordinary case. */
   .label {
-    @apply block text-[0.7rem] font-medium uppercase tracking-[0.14em] text-sage;
+    @apply block text-base font-medium text-ink;
+  }
+
+  /* A short section or topic name above a heading. Small, so it never
+     competes with the heading, but never below 13px. */
+  .eyebrow {
+    @apply block text-[0.8125rem] font-semibold uppercase tracking-[0.08em] text-brassDeep;
   }
 
   .field {
@@ -85,8 +99,9 @@
       placeholder:text-sage/80;
   }
 
+  /* Every button is at least 44px tall: easy to hit with a thumb. */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-card px-4 py-2
+    @apply inline-flex min-h-[2.75rem] items-center justify-center gap-2 rounded-card px-4 py-2
       text-sm font-medium transition focus-visible:outline-none
       focus-visible:ring-2 focus-visible:ring-pine/30 disabled:opacity-50
       disabled:pointer-events-none;
@@ -220,13 +235,13 @@
   .script-arabic .font-serif {
     font-family: var(--font-naskh), var(--font-literata), Georgia, serif;
   }
-  .script-arabic .label,
+  .script-arabic .eyebrow,
   .script-arabic [class*="tracking-"] {
     letter-spacing: 0;
     text-transform: none;
   }
-  .script-arabic .label {
-    font-size: 0.8rem;
+  .script-arabic .eyebrow {
+    font-size: 0.9rem;
   }
   .script-arabic h1,
   .script-arabic h2 {

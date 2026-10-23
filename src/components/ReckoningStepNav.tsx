@@ -17,7 +17,7 @@ export default function ReckoningStepNav({
       <div className="flex items-center justify-between gap-3">
         <Link
           href="/tools/reckoning-night"
-          className="label text-brassDeep hover:text-pine"
+          className="eyebrow inline-flex min-h-[44px] items-center hover:text-pine"
         >
           Close the year
         </Link>

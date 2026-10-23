@@ -8,7 +8,7 @@ export type GivingType = (typeof GIVING_TYPES)[number];
 export const GIVING_TYPE_LABELS: Record<GivingType, string> = {
   zakat: "Zakat",
   sadaqah: "Sadaqah",
-  purification: "Purification",
+  purification: "Interest given away",
   fitr: "Zakat al-Fitr",
 };
 

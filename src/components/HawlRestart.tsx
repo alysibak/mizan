@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { sendJson } from "@/lib/client-fetch";
 import type { Madhhab } from "@/lib/madhhab";
+import { readableDay } from "@/lib/dates";
 
 /**
  * Wealth dipped below nisab during the year. Whether that restarts the hawl
@@ -27,7 +28,7 @@ export default function HawlRestart({
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!window.confirm(`Start your zakat year again from ${date}? The year will count from that day.`)) {
+    if (!window.confirm(`Start your zakat year again from ${readableDay(date)}? The year will count from that day.`)) {
       return;
     }
     setBusy(true);
@@ -46,7 +47,7 @@ export default function HawlRestart({
     <div className="mt-5 border-t border-mist pt-4">
       <button
         type="button"
-        className="text-sm text-pine hover:underline"
+        className="inline-flex min-h-[44px] items-center text-sm text-pine hover:underline"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
       >

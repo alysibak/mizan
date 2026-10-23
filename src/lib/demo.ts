@@ -3,7 +3,7 @@
 // never lock, rename, empty, or delete the demo for the next.
 
 export const DEMO_READ_ONLY =
-  "The demo is read-only. Create a free account to keep your own ledger.";
+  "The demo is read-only. Make a free account to keep your own.";
 
 export function demoEmail(): string | null {
   const email = process.env.DEMO_EMAIL?.trim().toLowerCase();

@@ -37,7 +37,7 @@ export default function MobileTabBar() {
               <Link
                 href={href}
                 className={
-                  "flex min-h-[56px] flex-col items-center justify-center gap-1 text-[11px] transition active:bg-mist/40 " +
+                  "flex min-h-[56px] flex-col items-center justify-center gap-1 text-[13px] transition active:bg-mist/40 " +
                   (active ? "text-pine" : "text-sage")
                 }
               >

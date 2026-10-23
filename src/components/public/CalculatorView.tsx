@@ -41,11 +41,11 @@ export default function CalculatorView({ locale }: { locale: Locale }) {
       <SiteHeader locale={locale} />
       <main className="mx-auto max-w-6xl px-5 pb-16 pt-6 md:px-10">
         <header className="max-w-2xl">
-          <p className="label text-brassDeep">{m.eyebrow}</p>
+          <p className="eyebrow">{m.eyebrow}</p>
           <h1 className="mt-2 font-serif text-4xl leading-tight text-ink sm:text-5xl">{m.title}</h1>
           <p className="mt-4 text-base leading-relaxed text-sage">{m.lede}</p>
           <p className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm">
-            <Link href={localePath(locale, "/guide")} className="font-medium text-pine hover:underline">
+            <Link href={localePath(locale, "/guide")} className="inline-flex min-h-[44px] items-center font-medium text-pine hover:underline">
               {all.calc.guideLink}
             </Link>
           </p>

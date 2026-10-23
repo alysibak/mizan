@@ -17,7 +17,7 @@ export default function GuidesIndex() {
       <SiteHeader />
       <main className="mx-auto max-w-3xl px-5 pb-16 pt-6 md:px-10">
         <header className="max-w-2xl">
-          <p className="label text-brassDeep">Guides</p>
+          <p className="eyebrow">Guides</p>
           <h1 className="mt-2 font-serif text-4xl leading-tight text-ink sm:text-5xl">
             Zakat on what you own
           </h1>

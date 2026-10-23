@@ -20,7 +20,7 @@ test("confirm an address, get a hawl reminder once, and reset a password by link
   await registerAndSetUp(page, { email, hawlStart: daysAgo(350), amount: "20000" });
 
   await test.step("confirm the address", async () => {
-    await page.goto("/settings");
+    await page.goto("/settings#account");
     await page.getByRole("button", { name: "Send a confirmation link" }).click();
     await expect(page.getByText("Sent. Open the link")).toBeVisible();
     const link = linkInEmail(email, "Confirm your email for Mizan");

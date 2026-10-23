@@ -71,19 +71,19 @@ export default function FastsPage() {
         <div className="space-y-6">
           <h2 className="font-serif text-xl text-ink">Why</h2>
           <div>
-            <h3 className="label text-brassDeep">Making them up</h3>
+            <h3 className="eyebrow">Making them up</h3>
             <EvidenceFor caseKey="fasts-make-up" />
           </div>
           <div>
-            <h3 className="label text-brassDeep">Fidya</h3>
+            <h3 className="eyebrow">Fidya</h3>
             <EvidenceFor caseKey="fidya" />
           </div>
           <div>
-            <h3 className="label text-brassDeep">Kaffarah</h3>
+            <h3 className="eyebrow">Kaffarah</h3>
             <EvidenceFor caseKey="kaffarah" />
           </div>
           <div>
-            <h3 className="label text-brassDeep">Broken oaths</h3>
+            <h3 className="eyebrow">Broken oaths</h3>
             <EvidenceFor caseKey="oath" />
           </div>
         </div>

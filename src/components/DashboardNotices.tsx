@@ -93,7 +93,7 @@ export default function DashboardNotices({
     <div className="space-y-6">
       {top && welcome ? (
         <section className="border border-pine/40 bg-pine/5 px-5 py-5">
-          <p className="label text-pine">Ready</p>
+          <p className="eyebrow text-pine">Ready</p>
           <p className="mt-1 font-serif text-xl text-ink">You are set up.</p>
           <p className="mt-1 text-base text-sage">
             Add your savings, cash and gold. Mizan works out your zakat.
@@ -117,7 +117,7 @@ export default function DashboardNotices({
         <section className="border border-brass/40 bg-brass/5 px-5 py-4">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="label text-brassDeep">
+              <p className="eyebrow">
                 {metalsReason === "aged"
                   ? "Gold and silver prices are old"
                   : "Check gold and silver prices"}
@@ -136,7 +136,7 @@ export default function DashboardNotices({
                 >
                   {updating ? "Fetching today’s prices…" : "Use today’s prices"}
                 </button>
-                <Link href="/settings" className="text-sm text-pine hover:underline">
+                <Link href="/settings#metal-prices" className="inline-flex min-h-[44px] items-center text-sm text-pine hover:underline">
                   Type them in myself
                 </Link>
               </div>
@@ -161,7 +161,7 @@ export default function DashboardNotices({
         <section className="border border-mist bg-paper px-5 py-5">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="label text-brassDeep">Getting started</p>
+              <p className="eyebrow">Getting started</p>
               <p className="mt-1 font-serif text-lg text-ink">
                 {remaining.length} {remaining.length === 1 ? "thing" : "things"} left to do
               </p>

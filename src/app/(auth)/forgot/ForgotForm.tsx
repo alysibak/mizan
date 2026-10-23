@@ -60,7 +60,7 @@ export default function ForgotForm({ emailLinks }: { emailLinks: boolean }) {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-10">
-      <Link href="/" className="mb-8 font-serif text-xl text-ink">
+      <Link href="/" className="mb-6 inline-flex min-h-[44px] items-center self-start font-serif text-xl text-ink">
         Mizan
       </Link>
       <h1 className="font-serif text-3xl text-ink">Reset your password</h1>

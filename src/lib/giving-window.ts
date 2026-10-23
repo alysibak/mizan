@@ -1,5 +1,5 @@
 import { hawlDueDate, hawlStatus, type HijriCalendar } from "./hijri";
-import { addDays, isoDay } from "./dates";
+import { addDays, isoDay, readableDay } from "./dates";
 import { sumCents, toCents } from "./money";
 
 export type PaymentWindowKind = "hawl" | "gregorian";
@@ -51,7 +51,7 @@ export function paymentWindow(
     }
     const carried =
       start !== cycleStart
-        ? ` Zakat noted up to ${addDays(start, -1)} was counted toward the year you saved before this one.`
+        ? ` Zakat noted up to ${readableDay(addDays(start, -1))} was counted toward the year you saved before this one.`
         : "";
     return {
       kind: "hawl",
@@ -59,7 +59,7 @@ export function paymentWindow(
       start,
       end,
       label: "This zakat year",
-      detail: `Counts the zakat you noted from ${start} to ${end}. Your due day is ${isoDay(status.dueDate)} by the ${calendar === "umalqura" ? "Umm al-Qura" : "standard Hijri"} calendar; the moon where you live may move it by a day.${carried}`,
+      detail: `Counts the zakat you noted from ${readableDay(start)} to ${readableDay(end)}. Your zakat day is ${readableDay(status.dueDate)}; the moon where you live may move it by a day.${carried}`,
     };
   }
 

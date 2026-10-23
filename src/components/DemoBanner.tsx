@@ -32,7 +32,7 @@ export default function DemoBanner() {
         disabled={busy}
         className="btn-primary px-3 py-1.5 text-sm"
       >
-        {busy ? "One moment…" : "Start your own ledger"}
+        {busy ? "One moment…" : "Make my own account"}
       </button>
     </div>
   );

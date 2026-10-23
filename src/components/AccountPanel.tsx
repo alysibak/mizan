@@ -361,14 +361,11 @@ export default function AccountPanel({
   hasPassword?: boolean;
 }) {
   return (
-    <section id="account" className="card scroll-mt-20 space-y-8 p-5">
-      <div>
-        <h2 className="font-serif text-lg text-ink">Account</h2>
-        <p className="mt-1 text-sm text-sage">
-          Signed in as {email}
-          {hasPassword ? "" : " with Google"}.
-        </p>
-      </div>
+    <section className="space-y-8">
+      <p className="text-base text-sage">
+        Signed in as {email}
+        {hasPassword ? "" : " with Google"}.
+      </p>
       {recovered && (
         <p className="border border-brass/40 bg-brass/5 px-4 py-3 text-sm text-ink" role="status">
           Password reset. Your recovery code is used up — make a new one below.

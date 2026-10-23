@@ -6,7 +6,7 @@ export default function NotFound() {
     <div className="min-h-screen">
       <SiteHeader />
       <main className="mx-auto flex max-w-xl flex-col px-6 py-24">
-        <p className="label text-brassDeep">404</p>
+        <p className="eyebrow">404</p>
         <h1 className="mt-2 font-serif text-4xl text-ink">Nothing on this page</h1>
         <p className="mt-4 leading-relaxed text-sage">
           The address may be mistyped, or the page has moved. Your ledger is

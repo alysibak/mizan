@@ -9,9 +9,8 @@ export default function EstimateBanner() {
       className="border border-brass/30 bg-brass/5 px-4 py-3 text-xs leading-relaxed text-sage print:border-mist"
       role="note"
     >
-      <span className="font-medium text-ink">Estimate, not a ruling. </span>
-      Mizan verifies the arithmetic you enter. It does not replace a qualified
-      person of knowledge.{" "}
+      Mizan adds up what you enter. For your own case, ask someone of knowledge
+      you trust.{" "}
       <Link href="/method" className="text-pine hover:underline">
         How it works
       </Link>

@@ -28,16 +28,17 @@ test("a full zakat year on a phone", async ({ page }) => {
     await page.fill("#password", PASSWORD);
     await page.click("button[type=submit]");
     await page.waitForURL("**/begin");
-    await page.click("text=I understand — continue");
+    await page.click("#change-currency");
     await page.selectOption("#currency", "CAD");
-    await page.click("button:has-text('Continue')");
     // Nobody is asked a price they cannot know: it is filled in.
+    await expect(page.getByText("Today’s prices: gold $120, silver $1.50 a gram")).toBeVisible();
+    await page.click("#change-prices");
     await expect(page.locator("#gold")).toHaveValue("120");
     await expect(page.locator("#silver")).toHaveValue("1.5");
     await page.fill("#gold", "90");
     await page.fill("#silver", "1.05");
     await page.click("button:has-text('Continue')");
-    await expect(page.getByText("Enter today’s prices per gram")).toBeVisible();
+    await expect(page.getByText("Enter today’s gold and silver prices for a gram")).toBeVisible();
     await page.getByRole("button", { name: "Sign out" }).click();
     await page.waitForURL((u) => u.pathname === "/");
   });
@@ -63,7 +64,7 @@ test("a full zakat year on a phone", async ({ page }) => {
 
   await test.step("metal by weight follows the gold price", async () => {
     await page.goto("/assets");
-    await page.selectOption("#asset-new-category", "gold");
+    await page.getByRole("button", { name: "Gold coins and bars", exact: true }).click();
     await page.fill("#asset-new-label", "Bangles");
     await page.check("text=Value by weight");
     await page.fill("#asset-new-grams", "10");
@@ -72,16 +73,16 @@ test("a full zakat year on a phone", async ({ page }) => {
     await expect(page.locator("li", { hasText: "Bangles" })).toContainText("1,099.20");
     await expectNoHorizontalScroll(page);
 
-    await page.goto("/settings");
+    await page.goto("/settings#metal-prices");
     await page.fill("#goldPricePerGram", "130");
-    await page.click("button:has-text('Save settings')");
+    await page.click("button:has-text('Save prices')");
     await expect(page.getByText("Saved.")).toBeVisible();
     await page.goto("/assets");
     await expect(page.locator("li", { hasText: "Bangles" })).toContainText("1,190.80");
   });
 
   await test.step("a holding in another currency converts at the user's rate", async () => {
-    await page.selectOption("#asset-new-category", "bank");
+    await page.getByRole("button", { name: "Bank balances", exact: true }).click();
     await page.fill("#asset-new-label", "US account");
     await page.check("text=Held in another currency");
     await page.fill("#asset-new-fcur", "USD");
@@ -94,9 +95,10 @@ test("a full zakat year on a phone", async ({ page }) => {
   });
 
   await test.step("editing a category resets its zakatable portion", async () => {
-    await page.click("button[aria-label='Edit Chequing']");
-    await page.locator("select[id$='-category']").last().selectOption("stocks_longterm");
-    await expect(page.locator("input[id$='-portion']").last()).toHaveValue("0.25");
+    await page.getByRole("button", { name: /^Chequing.*Edit$/ }).click();
+    // The open row's own form, not the add form below it.
+    await page.locator("select[id$='-category']:not([id^='asset-new'])").selectOption("stocks_longterm");
+    await expect(page.locator("input[id$='-portion']:not([id^='asset-new'])")).toHaveValue("0.25");
     await page.click("button:has-text('Cancel')");
   });
 
@@ -107,7 +109,7 @@ test("a full zakat year on a phone", async ({ page }) => {
     await page.waitForURL("**/year?rolled=**");
     await expect(page.getByText("Your next zakat year starts")).toBeVisible();
 
-    await expect(page.locator(".ledger-row", { hasText: "Given ·" })).toContainText("$0.00");
+    await expect(page.locator(".ledger-row", { hasText: "Given ·" })).toContainText("$0");
 
     // The copy is kept, and the year it closed cannot be closed twice.
     const snapshot = await page.locator('a[href^="/year/snapshots/"]').first().getAttribute("href");
@@ -153,7 +155,7 @@ test("a full zakat year on a phone", async ({ page }) => {
   });
 
   await test.step("calendar reminders publish the due day only", async () => {
-    await page.goto("/settings");
+    await page.goto("/settings#reminders");
     await page.click("text=Turn on calendar reminders");
     const url = await page.locator("p.font-mono").first().textContent();
     expect(url).toMatch(/\/api\/calendar\/[A-Za-z0-9_-]+\.ics$/);
@@ -164,11 +166,14 @@ test("a full zakat year on a phone", async ({ page }) => {
   });
 
   await test.step("a recovery code resets a forgotten password once", async () => {
-    await page.goto("/settings");
+    await page.goto("/settings#account");
     await page.click("text=Make a recovery code");
     await page.fill("#recoveryPassword", PASSWORD);
     await page.click("button:has-text('Make code')");
-    const code = (await page.locator("p.select-all.font-mono").last().textContent())!.trim();
+    // Wait for the code itself: the calendar address above is in the same style.
+    const shown = page.locator("p.select-all.font-mono", { hasText: /^[A-Z0-9]{5}-/ });
+    await expect(shown).toBeVisible();
+    const code = (await shown.textContent())!.trim();
     expect(code).toMatch(/^[A-Z0-9]{5}(-[A-Z0-9]{5}){3}$/);
 
     await page.getByRole("button", { name: "Sign out", exact: true }).locator("visible=true").first().click();
@@ -212,7 +217,7 @@ test("a full zakat year on a phone", async ({ page }) => {
   });
 
   await test.step("deleting the account removes it", async () => {
-    await page.goto("/settings");
+    await page.goto("/settings#account");
     await page.click("text=Delete my account…");
     await page.fill("#deletePassword", "brand-new-password");
     await page.fill("#deleteConfirm", "DELETE");

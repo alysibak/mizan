@@ -19,7 +19,9 @@ export default async function GivingPage({
 }) {
   const user = (await getCurrentUser())!;
   const params = await searchParams;
-  const defaultType = parseGivingType(params.type) ?? "zakat";
+  // Sadaqah is given and let go, not noted: an old link to it opens zakat.
+  const asked = parseGivingType(params.type);
+  const defaultType = asked && asked !== "sadaqah" ? asked : "zakat";
   const defaultAmount = parseAmount(params.amount);
   const defaultAsnaf = parseAsnaf(params.asnaf);
 
@@ -39,69 +41,25 @@ export default async function GivingPage({
   const totalPurification = totalOf("purification");
   const totalFitr = totalOf("fitr");
 
+  const money = (n: number) => formatMoney(n, settings.currency);
+  // Everything else given, all years, in one line under the list.
+  const others = [
+    totalZakat > zakatCycle ? `${money(totalZakat)} zakat in all years` : null,
+    totalPurification > 0 ? `${money(totalPurification)} interest given away (not zakat)` : null,
+    totalFitr > 0 ? `${money(totalFitr)} Zakat al-Fitr` : null,
+  ].filter(Boolean);
+
   return (
     <div className="space-y-6">
       <header>
-        <p className="label text-brassDeep">Give</p>
-        <h1 className="mt-1 font-serif text-3xl text-ink">What you have given</h1>
-        <p className="mt-2 text-sm text-sage">
-          Note the zakat you give, so you know what is still to give{" "}
-          {window.label.toLowerCase()}. There is no need to note sadaqah: give
-          it, and let it go.
+        <h1 className="font-serif text-3xl text-ink">What you gave</h1>
+        {/* One line: what is given this year, and what is left. */}
+        <p className="mt-2 text-lg text-ink nums">
+          <span className="text-pine">{money(zakatCycle)} given</span>
+          {outstanding > 0 && result.isDue ? <> · {money(outstanding)} still to give</> : null}
+          <span className="block text-sm text-sage">{window.label}</span>
         </p>
       </header>
-
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="card p-4">
-          <p className="label">Zakat given · {window.label}</p>
-          <p className="mt-1 font-serif text-2xl text-pine nums">
-            {formatMoney(zakatCycle, settings.currency)}
-          </p>
-          <p className="mt-1 text-xs text-sage">
-            {outstanding > 0 && result.isDue
-              ? `${formatMoney(outstanding, settings.currency)} still to give`
-              : "Toward this year’s zakat"}
-          </p>
-        </div>
-        <div className="card p-4">
-          <p className="label">Zakat given, all years</p>
-          <p className="mt-1 font-serif text-2xl text-ink nums">
-            {formatMoney(totalZakat, settings.currency)}
-          </p>
-        </div>
-        {totalPurification > 0 && (
-          <div className="card p-4">
-            <p className="label">Interest given away</p>
-            <p className="mt-1 font-serif text-2xl text-sage nums">
-              {formatMoney(totalPurification, settings.currency)}
-            </p>
-            <p className="mt-1 text-xs text-sage">Not counted as zakat</p>
-          </div>
-        )}
-        {totalFitr > 0 && (
-          <div className="card p-4">
-            <p className="label">Zakat al-Fitr</p>
-            <p className="mt-1 font-serif text-2xl text-ink nums">
-              {formatMoney(totalFitr, settings.currency)}
-            </p>
-            <p className="mt-1 text-xs text-sage">All years · separate from your yearly zakat</p>
-          </div>
-        )}
-      </div>
-
-      <div className="flex flex-wrap gap-3 text-sm">
-        {rows.length > 0 ? (
-          <>
-            <a href="/api/export/giving" className="text-pine hover:underline" download>
-              Download this list
-            </a>
-            <span className="text-sage">·</span>
-          </>
-        ) : null}
-        <Link href="/zakat-al-fitr" className="text-pine hover:underline">
-          Work out Zakat al-Fitr
-        </Link>
-      </div>
 
       <GivingManager
         key={`${defaultType}-${defaultAmount ?? ""}-${defaultAsnaf ?? ""}`}
@@ -114,6 +72,24 @@ export default async function GivingPage({
         cyclePayable={phase === "payable"}
         cleared={params.cleared === "1"}
       />
+
+      {others.length ? <p className="text-sm text-sage nums">Also: {others.join(" · ")}.</p> : null}
+
+      <div className="flex flex-wrap items-center gap-x-3 text-sm">
+        {rows.length > 0 ? (
+          <>
+            <a href="/api/export/giving" className="inline-flex min-h-[44px] items-center text-pine hover:underline" download>
+              Download this list
+            </a>
+            <span className="text-sage" aria-hidden>
+              ·
+            </span>
+          </>
+        ) : null}
+        <Link href="/zakat-al-fitr" className="inline-flex min-h-[44px] items-center text-pine hover:underline">
+          Work out Zakat al-Fitr
+        </Link>
+      </div>
     </div>
   );
 }

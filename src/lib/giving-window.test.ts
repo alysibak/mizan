@@ -10,6 +10,8 @@ import {
   paymentWindow,
   sumZakatInWindow,
 } from "./giving-window";
+import { hawlStatus } from "./hijri";
+import { isoDay } from "./dates";
 
 describe("paymentWindow", () => {
   it("uses Gregorian year when hawl is unset", () => {
@@ -119,7 +121,7 @@ describe("cycle accounting across a roll", () => {
   // 2025-10-02, and the hawl is rolled to the due day.
   const firstStart = "2024-10-01";
   const today = new Date("2025-10-02T12:00:00Z");
-  const due = paymentWindow(firstStart, today).detail.match(/due day is (\d{4}-\d{2}-\d{2})/)![1];
+  const due = isoDay(hawlStatus(firstStart, today, "tabular").dueDate);
   const payment = { type: "zakat", amount: 400, date: "2025-10-01" };
   const freeze = {
     takenAt: "2025-10-02",

@@ -69,21 +69,28 @@ export async function registerAndSetUp(
   await page.click("button[type=submit]");
   await page.waitForURL("**/begin");
 
-  await page.click("text=I understand — continue");
-  // A new ledger starts in the browser's own currency; these accounts count in
-  // Canadian dollars, as a visitor in Canada would see it.
+  // A new account starts in the browser's own currency; these accounts count
+  // in Canadian dollars, as a visitor in Canada would see it.
+  await page.click("#change-currency");
   await page.selectOption("#currency", "CAD");
-  await page.click("button:has-text('Continue')");
-  await page.waitForSelector("#gold");
-  await page.fill("#gold", opts.gold ?? "120");
-  await page.fill("#silver", opts.silver ?? "1.5");
-  await page.click("button:has-text('Continue')");
+  await setPrices(page, opts.gold ?? "120", opts.silver ?? "1.5");
   await page.fill("#hawl", opts.hawlStart);
   await page.click("button:has-text('Continue')");
   await page.fill("#alabel", "Chequing");
   await page.fill("#aamount", opts.amount);
   await page.click("text=Add and finish");
   await page.waitForURL(/\/dashboard/);
+}
+
+/**
+ * Setup's prices: filled in when they could be looked up (then "Change"
+ * opens them), or asked for when they could not.
+ */
+export async function setPrices(page: Page, gold: string, silver: string) {
+  await page.locator("#gold, #change-prices").first().waitFor();
+  if (!(await page.locator("#gold").isVisible())) await page.click("#change-prices");
+  await page.fill("#gold", gold);
+  await page.fill("#silver", silver);
 }
 
 export async function expectNoHorizontalScroll(page: Page) {

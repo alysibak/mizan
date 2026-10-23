@@ -72,6 +72,8 @@ const ms: Messages = {
     lede: "Kalkulator zakat dan lejar yang percuma dan peribadi. Timbang harta anda dengan nisab menggunakan harga logam semasa, jejak haul anda dengan kalendar Hijrah, dan tutup setiap tahun dengan angka yang boleh anda percayai.",
     ctaCalculate: "Kira zakat anda",
     ctaLedger: "Buka lejar percuma",
+    /** The home page's heading: the question people arrive with. */
+    question: "Berapa zakat yang perlu saya bayar?",
     quick: {
       label: "Simpanan, wang tunai dan emas anda, semuanya",
       nisab: "Zakat bermula pada {nisab}, nisab hari ini.",
@@ -417,7 +419,12 @@ const ms: Messages = {
     back: "Kembali",
     skip: "Saya tiada ini",
     seeResult: "Tunjukkan zakat saya",
+    amountsIn: "Jumlah dalam {currency}",
+    changeCurrency: "Tukar",
+    onePage: "Lihat semuanya dalam satu halaman",
     have: {
+      fromHome: "{amount} anda dari halaman pertama sudah diisi sebagai wang tunai. Ketik apa sahaja lain yang anda miliki.",
+      yours: "Kira hanya milik anda sendiri, bukan milik keluarga.",
       title: "Apa yang anda miliki?",
       body: "Ketik semua yang anda miliki. Tidak pasti? Tekan “{next}”, kami akan bertanya satu demi satu.",
       more: "Lain-lain: saham, perniagaan, wang yang orang berhutang kepada anda",

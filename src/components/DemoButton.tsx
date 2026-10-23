@@ -33,7 +33,7 @@ export default function DemoButton({ className }: { className?: string }) {
         disabled={busy}
         className={className ?? "btn-ghost w-full justify-center py-2.5"}
       >
-        {busy ? "Opening the demo…" : "Explore a demo ledger"}
+        {busy ? "Opening the demo…" : "Try a demo account"}
       </button>
       {error ? <p className="mt-2 text-sm text-danger">{error}</p> : null}
     </div>

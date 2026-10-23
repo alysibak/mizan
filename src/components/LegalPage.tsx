@@ -14,7 +14,7 @@ export default function LegalPage({
 }) {
   return (
     <AboutFrame>
-      <p className="label text-brassDeep">{eyebrow}</p>
+      <p className="eyebrow">{eyebrow}</p>
       <h1 className="mt-2 font-serif text-4xl text-ink">{title}</h1>
       <p className="mt-2 text-xs text-sage">Last updated {updated}</p>
       <div className="legal mt-8 space-y-8 text-sm leading-relaxed text-sage">{children}</div>

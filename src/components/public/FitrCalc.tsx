@@ -85,7 +85,7 @@ export default function FitrCalc({
         >
           {result.valid ? (
             <>
-              <p className="label text-pine">{m.total}</p>
+              <p className="eyebrow text-pine">{m.total}</p>
               <p className="mt-1 font-serif text-3xl text-pine nums">{money(result.total)}</p>
               <p className="mt-1 text-sm text-sage nums">
                 {fmt(m.line, { people: count, amount: money(amount) })}

@@ -92,8 +92,8 @@ work.
 - **A home-screen app in your language.** Added to the home screen from an
   Urdu page, Mizan opens in Urdu (and so on for every language), with
   long-press shortcuts in that language: find out if I have to pay, ask a
-  question, Zakat al-Fitr (and My zakat in English). It opens on the home page, which sends a
-  signed-in visitor on to their ledger.
+  question, Zakat al-Fitr (and My zakat in English). It opens on the home page; signed in, the
+  header there offers "My account".
 - **Amounts in words.** Under every money box, a large amount is also
   written the way people say it: "25 lakh" or "1.2 crore" for rupees and
   taka, "2.5 million" elsewhere, and in each language's own words (لاکھ,
@@ -234,7 +234,7 @@ work.
   day, and each noted payment becomes a zakat record in the ledger. Signed
   in, My zakat sends the visitor to their ledger instead of starting again.
 - **From this phone.** Someone already signed in who works out their zakat
-  on the calculator or the guide is offered "Add to my ledger" instead of a
+  on the calculator or the guide is offered "Add to my account" instead of a
   new account. The holdings page lists those figures, and the payments
   noted in My zakat, above what the ledger holds, each with a tick to leave
   out what is already there; the dashboard says when some are waiting.
@@ -274,13 +274,19 @@ work.
     shows the Gregorian date beside each zakat day choice, and offers
     nothing to keep safe until something is kept. The fasts page asks only
     what the chosen reason needs.
-  - **Opening an account in plain words.** The setup steps are "Before we
-    start, Your money, Prices, Zakat day, What you have". The currency is the
-    visitor's own (what they chose on the public pages, or their browser's
-    region), picked by name; today's gold and silver prices are looked up as
-    the step opens, so nobody is asked a price they cannot know; the nisab,
-    calendar and school choices are folded under "How zakat is counted",
-    already set to what most people use.
+  - **Opening an account in two steps.** "When did your zakat year start?"
+    (the last 1 Ramadan, or the day kept in My zakat, filled in), then "What
+    do you have?" picked as pictures. The currency is the visitor's own and
+    today's gold and silver prices are looked up as setup opens, both shown
+    on the first step with "Change" beside them, so nobody is asked a price
+    they cannot know; the nisab, calendar and school keep what most people
+    use, and Settings changes them.
+  - **Readable everywhere.** Field names are full size in ordinary case,
+    nothing is smaller than 14px, every button and folded row is at least
+    44px tall, estimates are shown in whole money, and dates read "19 Oct
+    2026". The home page asks "How much zakat do I owe?" and carries the
+    number typed there into the guide, which no longer asks for the
+    currency. Settings folds into parts that each save on their own.
   - The English "Ask a question" search finds the English-only pages too
     ("goats", "interest", "my shop", "my wife's gold").
 - **Crops and animals** (`/farm`, English): zakat for farmers. The harvest
@@ -423,7 +429,7 @@ password: mizan1234
 
 On a public server, set `DEMO_EMAIL=demo@mizan.app` too. The account then
 refuses every change (so one visitor cannot lock, empty, or delete it for the
-next), and the sign-in page offers **Explore a demo ledger**, which signs
+next), and the sign-in page offers **Try a demo account**, which signs
 visitors in with one click for a day. Re-run the seed now and then to refresh
 its dates.
 

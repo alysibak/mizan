@@ -46,7 +46,8 @@ export default function EverythingElse({ currency }: { currency: string }) {
       <h2 id="else-title" className="font-serif text-xl text-ink">
         Everything else
       </h2>
-      <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+      {/* Two tiles to a row, even on a phone: half the scrolling of a list. */}
+      <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
         {rows.map(({ key, icon, title, status, href, kept: isKept }) => {
           const Icon = PAGE_ICONS[icon] ?? IconQuestion;
           return (
@@ -54,7 +55,7 @@ export default function EverythingElse({ currency }: { currency: string }) {
               <Link
                 href={href}
                 className={
-                  "group flex h-full items-center gap-3 border px-4 py-3 transition hover:border-pine " +
+                  "flex h-full min-h-[112px] flex-col gap-2 border px-3 py-3 transition hover:border-pine " +
                   (isKept ? "border-pine/40 bg-pine/5" : "border-mist bg-surface")
                 }
               >
@@ -64,13 +65,8 @@ export default function EverythingElse({ currency }: { currency: string }) {
                 >
                   <Icon className="h-5 w-5" />
                 </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block text-base font-medium text-ink">{title}</span>
-                  <span className="block text-sm text-sage nums">{status}</span>
-                </span>
-                <span className="text-pine transition group-hover:translate-x-0.5" aria-hidden>
-                  →
-                </span>
+                <span className="block text-base font-medium leading-snug text-ink">{title}</span>
+                <span className="block text-sm text-sage nums">{status}</span>
               </Link>
             </li>
           );

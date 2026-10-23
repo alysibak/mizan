@@ -67,8 +67,8 @@ test("someone coming back is offered what they started", async ({ page }) => {
   });
   await page.reload();
   const back = page.getByRole("region", { name: "Pick up where you left off" });
-  await expect(back.getByText("Your zakat is US$500.00")).toBeVisible();
-  await expect(back.getByText("Still to give: US$300.00")).toBeVisible();
+  await expect(back.getByText("Your zakat is US$500")).toBeVisible();
+  await expect(back.getByText("Still to give: US$300")).toBeVisible();
   // The same words as My zakat, from the one list of what the phone keeps.
   await expect(back.getByText("3 fasts to make up")).toBeVisible();
   await back.getByRole("link", { name: /Your zakat is/ }).click();
@@ -80,8 +80,6 @@ test("the guide asks what they have, and points to the pages for the rest", asyn
     route.fulfill({ json: { currency: "USD", goldPricePerGram: 100, silverPricePerGram: 1.2, source: "test" } }),
   );
   await page.goto("/guide");
-  await page.locator("#guide-currency").selectOption("USD");
-  await page.getByRole("button", { name: "Next" }).click();
   await page.getByRole("button", { name: "Bank balances" }).click();
   await page.getByRole("button", { name: "A shop" }).click();
   await page.getByRole("button", { name: "Years I did not pay" }).click();

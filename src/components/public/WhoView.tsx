@@ -33,7 +33,7 @@ export default function WhoView({ locale }: { locale: Locale }) {
       <SiteHeader locale={locale} />
       <main className="mx-auto max-w-2xl px-5 pb-20 pt-6 md:px-10">
         <header>
-          <p className="label text-brassDeep">{m.eyebrow}</p>
+          <p className="eyebrow">{m.eyebrow}</p>
           <h1 className="mt-2 font-serif text-4xl leading-tight text-ink sm:text-5xl">{m.title}</h1>
           <p className="mt-4 text-lg leading-relaxed text-sage">{m.lede}</p>
         </header>

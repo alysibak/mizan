@@ -33,3 +33,19 @@ export function localIsoDay(d: Date = new Date()): string {
 export function addDays(day: string, days: number): string {
   return isoDay(new Date(Date.parse(`${day}T00:00:00Z`) + days * MS_PER_DAY));
 }
+
+/**
+ * A day as people write it, "19 Oct 2026", from YYYY-MM-DD or a stored
+ * timestamp ("2026-10-19T…" or "2026-10-19 08:00:00"). Read as a calendar
+ * day, so no time zone moves it; anything unreadable comes back unchanged.
+ */
+export function readableDay(value: string | Date, locale = "en-GB"): string {
+  const day = value instanceof Date ? isoDay(value) : value.slice(0, 10);
+  if (!isIsoDay(day)) return String(value);
+  return new Date(`${day}T12:00:00Z`).toLocaleDateString(locale, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}

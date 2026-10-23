@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 export default function MethodPage() {
   return (
     <AboutFrame>
-      <p className="label mt-4 text-brassDeep">How it works</p>
+      <p className="eyebrow mt-4">How it works</p>
       <h1 className="mt-2 font-serif text-4xl text-ink">How Mizan works it out</h1>
 
       <section className="mt-8 border border-pine/30 bg-pine/5 px-5 py-5">

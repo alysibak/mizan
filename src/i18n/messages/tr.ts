@@ -72,6 +72,8 @@ const tr: Messages = {
     lede: "Ücretsiz ve gizli bir zekât hesaplayıcı ve defter. Sahip olduklarınızı güncel maden fiyatlarıyla nisaba göre tartın, havlinizi Hicri takvimle izleyin ve her yılı güvenebileceğiniz bir rakamla kapatın.",
     ctaCalculate: "Zekâtınızı hesaplayın",
     ctaLedger: "Ücretsiz defter açın",
+    /** The home page's heading: the question people arrive with. */
+    question: "Ne kadar zekât vermeliyim?",
     quick: {
       label: "Birikiminiz, nakdiniz ve altınınız, hepsi birlikte",
       nisab: "Zekât {nisab} tutarından başlar: bugünkü nisap.",
@@ -419,7 +421,12 @@ const tr: Messages = {
     back: "Geri",
     skip: "Bende bu yok",
     seeResult: "Zekâtımı göster",
+    amountsIn: "Tutarlar {currency} cinsinden",
+    changeCurrency: "Değiştir",
+    onePage: "Hepsini tek sayfada görün",
     have: {
+      fromHome: "İlk sayfadaki {amount} nakit olarak yazıldı. Sahip olduğunuz başka her şeye dokunun.",
+      yours: "Yalnızca size ait olanı sayın, ailenizinkini değil.",
       title: "Nelere sahipsiniz?",
       body: "Sahip olduğunuz her şeye dokunun. Emin değil misiniz? “{next}” düğmesine basın, her birini tek tek soralım.",
       more: "Başka bir şey: hisse, işletme, size olan alacaklar",

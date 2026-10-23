@@ -9,6 +9,7 @@ import { sendJson } from "@/lib/client-fetch";
 import type { Asset, Liability } from "@/db/schema";
 import AssetImport from "./AssetImport";
 import AssetForm from "./AssetForm";
+import { readableDay } from "@/lib/dates";
 
 function foreignNote(a: Asset): string | null {
   if (!a.foreignCurrency || a.foreignAmount == null || !a.fxRate) return null;
@@ -156,7 +157,7 @@ export default function AssetManager({
   const prices = { goldPricePerGram, silverPricePerGram };
 
   async function remove(kind: "assets" | "liabilities", id: string, label: string) {
-    const what = kind === "assets" ? "from the ledger" : "liability";
+    const what = kind === "assets" ? "from what you own" : "debt";
     if (!window.confirm(`Remove “${label}” ${what}?`)) return;
     setError(null);
     const res = await sendJson(`/api/${kind}/${id}`, "DELETE", undefined, `Could not remove “${label}”`);
@@ -203,7 +204,7 @@ export default function AssetManager({
               const weight = weightNote(a);
               if (editingId === a.id) {
                 return (
-                  <li key={a.id} className="py-4">
+                  <li key={a.id} className="space-y-3 py-4">
                     <AssetForm
                       asset={a}
                       currency={currency}
@@ -215,52 +216,52 @@ export default function AssetManager({
                       }}
                       onCancel={() => setEditingId(null)}
                     />
+                    <button type="button" className="btn-danger" onClick={() => remove("assets", a.id, a.label)}>
+                      Remove “{a.label}”
+                    </button>
                   </li>
                 );
               }
+              // The kind is shown only when the name does not already say it.
+              const kind = m.label.toLowerCase() === a.label.trim().toLowerCase() ? null : m.label;
+              const details = [
+                kind,
+                weight,
+                foreignNote(a),
+                a.zakatablePortion < 1
+                  ? a.zakatablePortion <= 0
+                    ? "not counted"
+                    : `only ${formatPercent(a.zakatablePortion, 0)} is counted`
+                  : null,
+                a.hawlStartDate ? `reminder ${readableDay(a.hawlStartDate)}` : null,
+                a.note,
+              ].filter(Boolean);
               return (
-                <li key={a.id} className="flex items-center justify-between gap-4 py-4">
-                  <div className="min-w-0">
-                    <p className="truncate font-medium text-ink">{a.label}</p>
-                    <p className="text-xs text-sage">
-                      {m.label}
-                      {weight && <> · {weight}</>}
-                      {foreignNote(a) && <> · {foreignNote(a)}</>}
-                      {a.zakatablePortion < 1 && (
-                        <> · {formatPercent(a.zakatablePortion, 0)} counts</>
-                      )}
-                      {a.hawlStartDate && <> · reminder {a.hawlStartDate}</>}
-                      {a.note && <> · {a.note}</>}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="text-right">
-                      <p className="font-medium text-ink nums">
-                        {formatMoney(a.amount, currency)}
-                      </p>
-                      {a.zakatablePortion < 1 && (
-                        <p className="text-xs text-brassDeep nums">
-                          {formatMoney(zakatable, currency)} counted
-                        </p>
-                      )}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setEditingId(a.id)}
-                      className="text-sm text-pine hover:underline"
-                      aria-label={`Edit ${a.label}`}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => remove("assets", a.id, a.label)}
-                      className="-m-2 p-2 text-lg leading-none text-sage transition hover:text-danger"
-                      aria-label={`Remove ${a.label}`}
-                    >
-                      &times;
-                    </button>
-                  </div>
+                <li key={a.id}>
+                  {/* The whole row opens it for changes; removing is inside, away from a stray tap. */}
+                  <button
+                    type="button"
+                    onClick={() => setEditingId(a.id)}
+                    className="flex min-h-[3.5rem] w-full items-center justify-between gap-4 py-3 text-left transition hover:bg-mist/30"
+                  >
+                    <span className="min-w-0">
+                      <span className="block truncate font-medium text-ink">{a.label}</span>
+                      {details.length > 0 ? (
+                        <span className="block text-xs text-sage">{details.join(" · ")}</span>
+                      ) : null}
+                    </span>
+                    <span className="flex shrink-0 items-center gap-3">
+                      <span className="text-right">
+                        <span className="block font-medium text-ink nums">{formatMoney(a.amount, currency)}</span>
+                        {a.zakatablePortion < 1 && (
+                          <span className="block text-xs text-brassDeep nums">
+                            {formatMoney(zakatable, currency)} counted
+                          </span>
+                        )}
+                      </span>
+                      <span className="text-sm text-pine">Edit</span>
+                    </span>
+                  </button>
                 </li>
               );
             })}
@@ -294,12 +295,16 @@ export default function AssetManager({
 
       <section>
         <h2 className="mb-1 font-serif text-lg text-ink">Debts you owe</h2>
-        <p className="mb-4 text-sm text-sage">
-          Money you must pay back soon, such as a bill or this month’s loan
-          payment, is taken off what counts. Scholars differ on long loans such
-          as a mortgage: untick “Take it off” for those if that is what you
-          follow.
+        <p className="mb-2 text-sm text-sage">
+          Bills and payments due soon are taken off what counts.
         </p>
+        <details className="mb-4 text-sm text-sage">
+          <summary className="text-pine">A long loan, like a mortgage?</summary>
+          <p className="mt-1">
+            Scholars differ on long loans. Many take off only this month’s
+            payment. Untick “Take it off” for the rest if that is what you follow.
+          </p>
+        </details>
 
         <LiabilityForm onSaved={() => router.refresh()} />
 
@@ -308,7 +313,7 @@ export default function AssetManager({
             {liabilities.map((l) => {
               if (editingLiabilityId === l.id) {
                 return (
-                  <li key={l.id} className="py-4">
+                  <li key={l.id} className="space-y-3 py-4">
                     <LiabilityForm
                       liability={l}
                       onSaved={() => {
@@ -317,43 +322,31 @@ export default function AssetManager({
                       }}
                       onCancel={() => setEditingLiabilityId(null)}
                     />
+                    <button type="button" className="btn-danger" onClick={() => remove("liabilities", l.id, l.label)}>
+                      Remove “{l.label}”
+                    </button>
                   </li>
                 );
               }
               return (
-                <li key={l.id} className="flex items-center justify-between gap-4 py-4">
-                  <div className="min-w-0">
-                    <p className="truncate font-medium text-ink">{l.label}</p>
-                    <p className="text-xs text-sage">
-                      {l.deductible ? "Taken off" : "Not taken off"}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <p
-                      className={
-                        "font-medium nums " + (l.deductible ? "text-danger" : "text-sage")
-                      }
-                    >
-                      {l.deductible ? "−" : ""}
-                      {formatMoney(l.amount, currency)}
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => setEditingLiabilityId(l.id)}
-                      className="text-sm text-pine hover:underline"
-                      aria-label={`Edit ${l.label}`}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => remove("liabilities", l.id, l.label)}
-                      className="-m-2 p-2 text-lg leading-none text-sage transition hover:text-danger"
-                      aria-label={`Remove ${l.label}`}
-                    >
-                      &times;
-                    </button>
-                  </div>
+                <li key={l.id}>
+                  <button
+                    type="button"
+                    onClick={() => setEditingLiabilityId(l.id)}
+                    className="flex min-h-[3.5rem] w-full items-center justify-between gap-4 py-3 text-left transition hover:bg-mist/30"
+                  >
+                    <span className="min-w-0">
+                      <span className="block truncate font-medium text-ink">{l.label}</span>
+                      <span className="block text-xs text-sage">{l.deductible ? "Taken off" : "Not taken off"}</span>
+                    </span>
+                    <span className="flex shrink-0 items-center gap-3">
+                      <span className={"font-medium nums " + (l.deductible ? "text-danger" : "text-sage")}>
+                        {l.deductible ? "−" : ""}
+                        {formatMoney(l.amount, currency)}
+                      </span>
+                      <span className="text-sm text-pine">Edit</span>
+                    </span>
+                  </button>
                 </li>
               );
             })}

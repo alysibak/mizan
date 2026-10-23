@@ -28,7 +28,7 @@ export default function AccountLinks({
   // new ones meet "Open a free ledger" on the page itself.
   return (
     <>
-      <Link href="/login" className="whitespace-nowrap text-sage hover:text-ink">
+      <Link href="/login" className="inline-flex min-h-[44px] items-center whitespace-nowrap text-sage hover:text-ink">
         {signIn}
       </Link>
       <Link href="/register" className="btn-primary hidden whitespace-nowrap sm:inline-flex">

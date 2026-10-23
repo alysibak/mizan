@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { IconMenu, IconQuestion, IconSearch } from "@/components/icons";
 import { PAGE_ICONS as ICONS } from "@/components/pageIcons";
 import type { DirectoryGroup } from "@/lib/site-directory";
-
+import TextSizeToggle from "@/components/TextSizeToggle";
 
 /**
  * "Menu" at the top of every page: everything Mizan does, grouped by what
@@ -18,9 +18,11 @@ export interface MenuProps {
   groups: DirectoryGroup[];
   /** The answer search, in the page's language: where it is and its words. */
   search: { action: string; label: string; placeholder: string; button: string };
+  /** "Larger text", in the page's language: the switch sits at the end of the menu. */
+  largerText?: string;
 }
 
-export default function SiteMenu({ labels, groups, search }: MenuProps) {
+export default function SiteMenu({ labels, groups, search, largerText }: MenuProps) {
   const dialog = useRef<HTMLDialogElement>(null);
   // Signed in, the app has a Menu in its sidebar and in its phone header.
   const id = useId();
@@ -38,7 +40,7 @@ export default function SiteMenu({ labels, groups, search }: MenuProps) {
         type="button"
         aria-haspopup="dialog"
         onClick={() => dialog.current?.showModal()}
-        className="inline-flex min-h-[40px] items-center gap-1.5 border border-pine/40 px-2.5 text-sm font-medium text-pine transition hover:border-pine hover:bg-pine/5"
+        className="inline-flex min-h-[44px] items-center gap-1.5 border border-pine/40 px-2.5 text-sm font-medium text-pine transition hover:border-pine hover:bg-pine/5"
       >
         <IconMenu className="h-5 w-5" />
         {labels.open}
@@ -88,7 +90,7 @@ export default function SiteMenu({ labels, groups, search }: MenuProps) {
           </form>
           {groups.map((g) => (
             <section key={g.key} aria-labelledby={`${id}-${g.key}`}>
-              <h3 id={`${id}-${g.key}`} className="label text-brassDeep">
+              <h3 id={`${id}-${g.key}`} className="eyebrow">
                 {g.title}
               </h3>
               <ul className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -115,6 +117,7 @@ export default function SiteMenu({ labels, groups, search }: MenuProps) {
               </ul>
             </section>
           ))}
+          {largerText ? <TextSizeToggle label={largerText} withLabel /> : null}
         </div>
       </dialog>
     </>

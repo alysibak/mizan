@@ -133,7 +133,7 @@ export default function MissedTally({
             />
           </div>
           <p className="text-xs leading-relaxed text-sage">{m.sameHint}</p>
-          <button type="button" className="text-sm font-medium text-pine hover:underline" onClick={showDifferent}>
+          <button type="button" className="inline-flex min-h-[44px] items-center text-sm font-medium text-pine hover:underline" onClick={showDifferent}>
             {m.differentButton}
           </button>
         </div>
@@ -160,7 +160,7 @@ export default function MissedTally({
       >
         {result.valid ? (
           <>
-            <p className="label text-pine">{m.total}</p>
+            <p className="eyebrow text-pine">{m.total}</p>
             <p className="mt-1 font-serif text-3xl text-pine nums">{money(result.total)}</p>
             <p className="mt-1 text-sm text-sage">{m.line}</p>
             {months > 1 ? (

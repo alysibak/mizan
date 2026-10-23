@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { addDays, isIsoDay, isoDay, localIsoDay } from "./dates";
+import { addDays, isIsoDay, isoDay, localIsoDay, readableDay } from "./dates";
 
 describe("isIsoDay", () => {
   it("accepts real calendar days", () => {
@@ -28,5 +28,17 @@ describe("isoDay / localIsoDay", () => {
   it("formats as YYYY-MM-DD", () => {
     expect(isoDay(new Date("2026-10-02T23:30:00Z"))).toBe("2026-10-02");
     expect(localIsoDay(new Date(2026, 0, 5, 23, 0))).toBe("2026-01-05");
+  });
+});
+
+describe("readableDay", () => {
+  it("writes a stored day the way people do", () => {
+    expect(readableDay("2026-10-19")).toBe("19 Oct 2026");
+    expect(readableDay("2026-10-19 23:30:00")).toBe("19 Oct 2026");
+    expect(readableDay(new Date("2026-01-02T00:00:00Z"))).toBe("2 Jan 2026");
+  });
+
+  it("leaves anything else as it was", () => {
+    expect(readableDay("soon")).toBe("soon");
   });
 });

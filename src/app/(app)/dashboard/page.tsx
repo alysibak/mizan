@@ -90,58 +90,49 @@ export default async function DashboardPage({
       : phase === "below_nisab"
         ? {
             title: "No zakat to pay right now.",
-            body: `What counts for zakat, ${formatMoney(result.netZakatable, c)}, is below the minimum (nisab) of ${formatMoney(result.nisab, c)}.`,
+            body: `What counts for zakat, ${formatMoney(result.netZakatable, c, undefined, { whole: true })}, is below the minimum (nisab) of ${formatMoney(result.nisab, c, undefined, { whole: true })}.`,
           }
         : phase === "payable"
           ? null
           : {
-              title: `Your zakat would be about ${formatMoney(result.zakatDue, c)}.`,
+              title: `Your zakat would be about ${formatMoney(result.zakatDue, c, undefined, { whole: true })}.`,
               body:
                 (hawl
-                  ? `Due on your zakat day, ${dueDay}: ${hawl.remainingDays} ${hawl.remainingDays === 1 ? "day" : "days"} from now.`
+                  ? `Due on your zakat day, ${dueDay}.`
                   : "Due one lunar year after you first had the minimum (nisab). Set that day, and Mizan will tell you when.") +
                 (zakatPaid > 0 ? ` You have given ${formatMoney(zakatPaid, c)} so far.` : ""),
             };
 
+  const allGiven = phase === "payable" && zakatOutstanding === 0 && result.isDue;
+  // The page's heading is the answer itself: what is owed, or what to do first.
+  const heading =
+    assetRows.length === 0
+      ? "Nothing added yet"
+      : dueNow
+        ? `Zakat to give now: ${formatMoney(zakatOutstanding, c)}`
+        : allGiven
+          ? "You have given all of this year’s zakat."
+          : (answer?.title ?? "Your zakat");
+
   return (
     <div className="space-y-10">
-      <header>
-        <p className="label text-brassDeep">Your zakat</p>
-        <h1 className="mt-1 font-serif text-3xl text-ink">
-          {user.name.split(" ")[0]}
-        </h1>
-      </header>
-
-      {/* The shared demo cannot be added to. */}
-      {isDemoUser(user) ? null : <FromThisPhoneNotice />}
+      <h1 className="font-serif text-3xl leading-tight text-ink nums sm:text-4xl">{heading}</h1>
 
       {/* Just set up, the welcome card below says the same. */}
       {assetRows.length === 0 && welcome !== "1" && (
-        <div className="border border-dashed border-mist px-6 py-8 text-center">
-          <p className="text-base text-ink">Nothing added yet.</p>
-          <p className="mt-1 text-sm text-sage">
+        <div className="-mt-6">
+          <p className="text-base text-sage">
             Add your savings, cash and gold, and Mizan works out your zakat.
           </p>
-          <Link href="/assets" className="btn-primary mt-4">
+          <Link href="/assets" className="btn-primary mt-4 w-full py-3 text-base sm:w-auto">
             Add what I own
           </Link>
         </div>
       )}
 
-      <DashboardNotices
-        items={checklist}
-        metalsStale={metalsStale}
-        metalsReason={metals.reason}
-        metalsAgeDays={metals.ageDays}
-        welcome={welcome === "1"}
-        part="top"
-        currency={settings.currency}
-      />
-
       {answer ? (
-        <section className="border border-pine/40 bg-pine/5 px-5 py-5">
-          <p className="font-serif text-2xl text-ink nums">{answer.title}</p>
-          <p className="mt-2 text-base text-sage">{answer.body}</p>
+        <section className="-mt-6">
+          <p className="text-base text-sage">{answer.body}</p>
           {!hawl && phase !== "below_nisab" ? (
             <Link href="/settings#zakat-day" className="btn-primary mt-4">
               Set my zakat day
@@ -151,12 +142,8 @@ export default async function DashboardPage({
       ) : null}
 
       {dueNow && (
-        <section className="border border-pine bg-pine/5 px-5 py-5">
-          <p className="label text-pine">Zakat to give now</p>
-          <p className="mt-1 font-serif text-3xl text-ink nums">
-            {formatMoney(zakatOutstanding, c)}
-          </p>
-          <p className="mt-1 text-base text-sage">
+        <section className="-mt-6">
+          <p className="text-base text-sage">
             Your zakat day has come, and you have more than the minimum (nisab).
           </p>
           <CycleActions
@@ -169,13 +156,9 @@ export default async function DashboardPage({
         </section>
       )}
 
-      {phase === "payable" && zakatOutstanding === 0 && result.isDue && (
-        <section className="border border-pine/40 bg-pine/5 px-5 py-5">
-          <p className="label text-pine">All given</p>
-          <p className="mt-1 font-serif text-xl text-ink">
-            You have given all of this year’s zakat.
-          </p>
-          <p className="mt-1 text-sm text-sage">
+      {allGiven && (
+        <section className="-mt-6">
+          <p className="text-base text-sage">
             Close the year: Mizan keeps a copy and starts counting the next one.
           </p>
           <CycleActions
@@ -188,6 +171,19 @@ export default async function DashboardPage({
         </section>
       )}
 
+      {/* The shared demo cannot be added to. */}
+      {isDemoUser(user) ? null : <FromThisPhoneNotice />}
+
+      <DashboardNotices
+        items={checklist}
+        metalsStale={metalsStale}
+        metalsReason={metals.reason}
+        metalsAgeDays={metals.ageDays}
+        welcome={welcome === "1"}
+        part="top"
+        currency={settings.currency}
+      />
+
       <Scale
         net={result.netZakatable}
         nisab={result.nisab}
@@ -199,7 +195,7 @@ export default async function DashboardPage({
       <section className="panel">
         <div className="flex items-center justify-between">
           <h2 className="font-serif text-lg text-ink">Your zakat day</h2>
-          <Link href={hawl ? "/year" : "/settings#zakat-day"} className="text-sm text-pine hover:underline">
+          <Link href={hawl ? "/year" : "/settings#zakat-day"} className="inline-flex min-h-[44px] items-center text-sm text-pine hover:underline">
             {hawl ? "See this year" : "Set it"}
           </Link>
         </div>
@@ -253,7 +249,7 @@ export default async function DashboardPage({
       {/* Only near the zakat day: until then it is one more thing to read. */}
       {assetRows.length > 0 && hawl && !dueNow && (hawl.isComplete || hawl.remainingDays <= 30) && (
         <section className="border border-mist px-5 py-5">
-          <p className="label text-brassDeep">When your zakat day comes</p>
+          <p className="eyebrow">When your zakat day comes</p>
           <p className="mt-1 font-serif text-xl text-ink">Close the year, step by step</p>
           <p className="mt-1 text-sm text-sage">
             Check for anything you forgot, give your zakat, then close the

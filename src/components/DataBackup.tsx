@@ -58,7 +58,7 @@ export default function DataBackup() {
 
   return (
     <section className="card p-5">
-      <h2 className="font-serif text-lg text-ink">Take this ledger with you</h2>
+      <h2 className="font-serif text-lg text-ink">Take your figures with you</h2>
       <p className="mt-1 text-sm text-sage">
         One file with everything: what you own, your debts, what you gave, the
         years you kept, and your settings. Keep it somewhere safe; it does not

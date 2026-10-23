@@ -42,7 +42,7 @@ export default function Nav({
     <aside className="sticky top-0 hidden h-screen w-56 shrink-0 flex-col border-r border-mist bg-paper/80 px-3 py-6 md:flex">
       <div className="mb-10 px-3">
         {/* The logo leads to all of Mizan, not only the account. */}
-        <Link href="/" className="font-serif text-2xl tracking-tight text-ink">
+        <Link href="/" className="inline-flex min-h-[44px] items-center font-serif text-2xl tracking-tight text-ink">
           Mizan
         </Link>
         <p className="mt-1 text-xs text-sage">{name}</p>
@@ -103,13 +103,13 @@ export default function Nav({
         </Link>
         <Link
           href="/method"
-          className="block border-l-2 border-transparent px-3 py-2 text-xs text-sage hover:text-ink"
+          className="flex min-h-[44px] items-center border-l-2 border-transparent px-3 text-sm text-sage hover:text-ink"
         >
           How it works
         </Link>
         <Link
           href="/privacy"
-          className="block border-l-2 border-transparent px-3 py-2 text-xs text-sage hover:text-ink"
+          className="flex min-h-[44px] items-center border-l-2 border-transparent px-3 text-sm text-sage hover:text-ink"
         >
           Privacy
         </Link>

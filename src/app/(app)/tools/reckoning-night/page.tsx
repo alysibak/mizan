@@ -5,7 +5,7 @@ export default function ReckoningNightPage() {
   return (
     <div className="space-y-10">
       <header>
-        <p className="label text-brassDeep">When your zakat day comes</p>
+        <p className="eyebrow">When your zakat day comes</p>
         <h1 className="mt-1 font-serif text-4xl text-ink">Close the year</h1>
         <p className="mt-3 max-w-lg text-base leading-relaxed text-sage">
           Three short steps. Check for anything you forgot, give your zakat,

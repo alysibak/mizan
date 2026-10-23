@@ -72,6 +72,8 @@ const id: Messages = {
     lede: "Kalkulator zakat dan pembukuan yang gratis dan privat. Timbang harta Anda terhadap nisab dengan harga logam terkini, pantau haul dengan kalender Hijriah, dan tutup setiap tahun dengan angka yang bisa Anda percayai.",
     ctaCalculate: "Hitung zakat Anda",
     ctaLedger: "Buka pembukuan gratis",
+    /** The home page's heading: the question people arrive with. */
+    question: "Berapa zakat yang harus saya bayar?",
     quick: {
       label: "Tabungan, uang tunai, dan emas Anda, semuanya",
       nisab: "Zakat mulai dari {nisab}, nisab hari ini.",
@@ -417,7 +419,12 @@ const id: Messages = {
     back: "Kembali",
     skip: "Saya tidak punya ini",
     seeResult: "Tampilkan zakat saya",
+    amountsIn: "Jumlah dalam {currency}",
+    changeCurrency: "Ganti",
+    onePage: "Lihat semuanya dalam satu halaman",
     have: {
+      fromHome: "{amount} dari halaman pertama sudah diisi sebagai uang tunai. Ketuk apa saja lainnya yang Anda miliki.",
+      yours: "Hitung hanya milik Anda sendiri, bukan milik keluarga.",
       title: "Apa saja yang Anda miliki?",
       body: "Ketuk semua yang Anda miliki. Tidak yakin? Tekan “{next}”, kami akan menanyakannya satu per satu.",
       more: "Lainnya: saham, usaha, uang yang dipinjam orang dari Anda",

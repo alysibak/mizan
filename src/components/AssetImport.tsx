@@ -103,7 +103,7 @@ export default function AssetImport({
         </label>
         <button
           type="button"
-          className="text-sm text-pine hover:underline"
+          className="inline-flex min-h-[44px] items-center text-sm text-pine hover:underline"
           onClick={() => {
             setText(SAMPLE_CSV);
             runParse(SAMPLE_CSV);

@@ -34,6 +34,7 @@ export default function AppShell({
     labels: { open: en.common.menu.open, close: en.common.menu.close },
     groups: siteDirectory("en"),
     search: { action: "/ask", label: en.ask.searchLabel, placeholder: en.ask.placeholder, button: en.ask.nav },
+    largerText: en.common.largerText,
   };
 
   return (

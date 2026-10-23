@@ -22,7 +22,7 @@ test("Arabic reads right to left and takes Arabic-Indic digits", async ({ page }
   await page.fill("#calc-cash", "٥٠٠٠٠"); // 50,000 in Arabic-Indic digits
   await page.fill("#calc-bank", "١٠٠٠٠٠");
   // 150,000 × 2.5% = 3,750
-  await expect(page.locator("#result")).toContainText("3,750.00");
+  await expect(page.locator("#result")).toContainText("3,750");
   await expectNoHorizontalScroll(page);
   await expectUniqueIds(page);
   expect(errors).toEqual([]);
@@ -157,7 +157,7 @@ test("pages read themselves aloud where the device has a voice for the language"
   await listen.click();
   await expect(page.getByRole("button", { name: "روکیں" }).first()).toBeVisible();
   const spoken = await page.evaluate(() => (window as unknown as { spoken: string }).spoken);
-  expect(spoken).toContain("آپ کون سی کرنسی استعمال کرتے ہیں؟");
+  expect(spoken).toContain("آپ کے پاس کیا ہے؟");
 
   // No French voice on this device: no button, rather than French read in Urdu.
   await page.goto("/fr/guide");

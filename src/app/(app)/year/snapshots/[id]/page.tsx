@@ -6,7 +6,7 @@ import { yearSnapshots } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
 import { loadReckoning } from "@/lib/reckoning";
 import { parseSnapshotPayload } from "@/lib/snapshot";
-import { isoDay } from "@/lib/dates";
+import { isoDay, readableDay } from "@/lib/dates";
 import { formatMoney, formatPercent } from "@/lib/money";
 import { categoryMeta } from "@/lib/categories";
 import DeleteSnapshotButton from "@/components/DeleteSnapshotButton";
@@ -80,9 +80,9 @@ export default async function SnapshotPage({ params }: Ctx) {
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="font-serif text-2xl text-ink print:text-3xl">Mizan</p>
-          <p className="label mt-3 text-brassDeep">A year you kept</p>
+          <p className="eyebrow mt-3">A year you kept</p>
           <h1 className="mt-1 font-serif text-3xl text-ink">{row.label}</h1>
-          <p className="mt-2 text-sm text-sage">Kept on {row.takenAt}</p>
+          <p className="mt-2 text-sm text-sage">Kept on {readableDay(row.takenAt)}</p>
         </div>
         <div className="flex gap-2 print:hidden">
           <PrintButton />
@@ -97,7 +97,7 @@ export default async function SnapshotPage({ params }: Ctx) {
 
       {payload.letterToNextYear ? (
         <section className="border border-brass/40 bg-brass/5 px-5 py-6">
-          <p className="label text-brassDeep">Your note</p>
+          <p className="eyebrow">Your note</p>
           <p className="mt-3 whitespace-pre-wrap font-serif text-lg leading-relaxed text-ink">
             {payload.letterToNextYear}
           </p>

@@ -12,7 +12,7 @@ export default function ErrorPage({
 }) {
   return (
     <main className="mx-auto flex min-h-[70vh] max-w-xl flex-col justify-center px-6 py-16">
-      <p className="label text-brassDeep">Something went wrong</p>
+      <p className="eyebrow">Something went wrong</p>
       <h1 className="mt-2 font-serif text-3xl text-ink">This page could not be shown</h1>
       <p className="mt-4 leading-relaxed text-sage">
         Nothing you saved has been lost. Try again; if it keeps happening, check

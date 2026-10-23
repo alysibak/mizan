@@ -18,7 +18,9 @@ export default function LoginForm({ google = false }: { google?: boolean }) {
   const router = useRouter();
   const params = useSearchParams();
   const next = safeNextPath(params.get("next"));
-  const [error, setError] = useState<string | null>(() => GOOGLE_TROUBLE[params.get("google") ?? ""] ?? null);
+  const [error, setError] = useState<string | null>(null);
+  // Why Google sent them back, shown above everything else on the page.
+  const [googleTrouble] = useState<string | null>(() => GOOGLE_TROUBLE[params.get("google") ?? ""] ?? null);
   const [busy, setBusy] = useState(false);
   // Set once the password (or Google) is right and the account has two-step
   // sign-in. Google's way back carries it in the address.
@@ -144,6 +146,14 @@ export default function LoginForm({ google = false }: { google?: boolean }) {
           Password changed. Sign in with it and the code from your authenticator app.
         </p>
       ) : null}
+      {googleTrouble ? (
+        <p
+          className="mt-6 rounded-lg border border-danger/30 bg-danger/5 px-3 py-2 text-base text-danger"
+          role="alert"
+        >
+          {googleTrouble}
+        </p>
+      ) : null}
       {google ? (
         <div className="mt-8">
           <GoogleButton next={params.get("next")} />
@@ -194,10 +204,10 @@ export default function LoginForm({ google = false }: { google?: boolean }) {
       </form>
 
       <p className="mt-4 flex flex-wrap justify-between gap-2 text-sm">
-        <Link href="/forgot" className="text-pine underline-offset-2 hover:underline">
+        <Link href="/forgot" className="inline-flex min-h-[44px] items-center text-pine underline-offset-2 hover:underline">
           Forgot your password?
         </Link>
-        <Link href="/register" className="text-pine underline-offset-2 hover:underline">
+        <Link href="/register" className="inline-flex min-h-[44px] items-center text-pine underline-offset-2 hover:underline">
           New here? Make an account
         </Link>
       </p>

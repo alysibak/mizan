@@ -49,7 +49,7 @@ export default function QuizGame({ rounds }: { rounds: QuizRound[] }) {
     const missed = rounds.filter((r, i) => picks[i] !== r.yes);
     return (
       <section className="card space-y-5 p-5 text-center sm:p-8" aria-labelledby="quiz-score">
-        <p className="label text-brassDeep">Your score</p>
+        <p className="eyebrow">Your score</p>
         <h2 id="quiz-score" className="font-serif text-5xl text-pine nums">
           {score} of {rounds.length}
         </h2>

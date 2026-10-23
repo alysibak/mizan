@@ -106,7 +106,7 @@ export default function AskView({ locale }: { locale: Locale }) {
       <main className="mx-auto max-w-3xl px-5 pb-16 pt-6 md:px-10">
         <header className="max-w-2xl">
           <div className="flex items-center justify-between gap-3">
-            <p className="label text-brassDeep">{m.eyebrow}</p>
+            <p className="eyebrow">{m.eyebrow}</p>
             <ReadAloud
               text={`${m.title}. ${m.lede}`}
               lang={locale}

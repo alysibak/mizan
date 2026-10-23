@@ -5,7 +5,7 @@ import { yearSnapshots } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
 import { loadReckoning } from "@/lib/reckoning";
 import { hawlStatus, formatHijri } from "@/lib/hijri";
-import { isIsoDay, isoDay } from "@/lib/dates";
+import { isIsoDay, isoDay, readableDay } from "@/lib/dates";
 import { formatMoney, formatPercent } from "@/lib/money";
 import FreezeYearButton from "@/components/FreezeYearButton";
 import SnapshotCompare from "@/components/SnapshotCompare";
@@ -58,7 +58,7 @@ export default async function YearPage({
     phase === "payable" && result.isDue && outstanding === 0 && zakatPaid > 0;
   const freezeLabel =
     window.kind === "hawl"
-      ? `Zakat year from ${window.cycleStart}`
+      ? `Zakat year from ${readableDay(window.cycleStart)}`
       : `Zakat ${window.cycleStart.slice(0, 4)}`;
 
   const perAssetHawl = assetRows
@@ -78,12 +78,8 @@ export default async function YearPage({
   return (
     <div className="space-y-10">
       <header>
-        <p className="label text-brassDeep">Zakat</p>
-        <h1 className="mt-1 font-serif text-3xl text-ink">This year’s zakat</h1>
-        <p className="mt-2 max-w-xl text-base text-sage">
-          How much, what you have given, and when it is due. When you have
-          given it all, close the year.
-        </p>
+        <h1 className="font-serif text-3xl text-ink">This year’s zakat</h1>
+        <p className="mt-2 max-w-xl text-base text-sage">How much, what you have given, and when it is due.</p>
         {madhhab !== "general" ? (
           <p className="mt-1 text-xs text-sage">Counted the {MADHHAB_LABELS[madhhab]} way.</p>
         ) : null}
@@ -91,7 +87,7 @@ export default async function YearPage({
 
       {rolled && isIsoDay(rolled) && hawl && isoDay(hawl.startDate) === rolled ? (
         <section className="border border-pine/40 bg-pine/5 px-5 py-5" role="status">
-          <p className="label text-pine">A new year</p>
+          <p className="eyebrow text-pine">A new year</p>
           <p className="mt-1 font-serif text-xl text-ink">Your next zakat year starts {rolled}.</p>
           <p className="mt-1 text-sm text-sage">
             Last year’s copy is kept below, under “Years you kept”. Open it to
@@ -100,11 +96,9 @@ export default async function YearPage({
         </section>
       ) : null}
 
-      <EstimateBanner />
-
       {cycleMet && (
         <section className="border border-pine bg-pine/5 px-5 py-6">
-          <p className="label text-pine">All given</p>
+          <p className="eyebrow text-pine">All given</p>
           <p className="mt-2 font-serif text-2xl text-ink">
             You have given all of this year’s zakat.
           </p>
@@ -123,7 +117,7 @@ export default async function YearPage({
 
       {(dueNow || (anyAssetDue && phase === "payable" && outstanding > 0)) && (
         <section className="border border-pine bg-pine/5 px-5 py-6">
-          <p className="label text-pine">
+          <p className="eyebrow text-pine">
             {dueNow ? "Your zakat day has come" : "A reminder date on something you own has come"}
           </p>
           <p className="mt-2 font-serif text-3xl text-ink nums">
@@ -139,87 +133,6 @@ export default async function YearPage({
             latestSnapshotId={latestSnapshotId}
             frozenThisCycle={frozenThisCycle}
           />
-        </section>
-      )}
-
-      <section className="panel">
-        <div className="flex items-center justify-between gap-4">
-          <h2 className="font-serif text-xl text-ink">Your zakat day</h2>
-          <Link href="/settings#zakat-day" className="text-sm text-pine hover:underline">
-            {hawl ? "Change it" : "Set it"}
-          </Link>
-        </div>
-        {hawl ? (
-          <div className="mt-4">
-            <div className="flex items-baseline justify-between text-sm">
-              <span className="text-sage">
-                {formatHijri(hawl.dueDate, calendar)}
-              </span>
-              <span className="font-medium text-ink">
-                {hawl.isComplete
-                  ? "It has come"
-                  : `${hawl.remainingDays} ${hawl.remainingDays === 1 ? "day" : "days"} left`}
-              </span>
-            </div>
-            <div className="mt-3 h-1.5 overflow-hidden bg-mist">
-              <div
-                className="h-full bg-pine transition-all duration-700"
-                style={{ width: `${Math.round(hawl.progress * 100)}%` }}
-              />
-            </div>
-            <p className="mt-3 text-xs text-sage">
-              Your zakat year began {formatHijri(hawl.startDate, calendar)}. It is
-              due on {hawl.dueDate.toISOString().slice(0, 10)}, if you still have
-              more than the minimum (nisab) then. The moon where you live may
-              move it by a day.
-            </p>
-            <div className="mt-3">
-              <HawlCalendarLink dueDate={hawl.dueDate.toISOString().slice(0, 10)} />
-            </div>
-            {!hawl.isComplete && (
-              <HawlRestart
-                madhhab={madhhab}
-                hawlStart={isoDay(hawl.startDate)}
-                today={isoDay(today)}
-              />
-            )}
-          </div>
-        ) : (
-          <p className="mt-3 text-sm text-sage">
-            Not set yet. It is one lunar year after the day you first had the
-            minimum (nisab). Not sure of that day? Pick one you will remember,
-            such as 1 Ramadan, and keep to it every year.
-          </p>
-        )}
-      </section>
-
-      {perAssetHawl.length > 0 && (
-        <section className="panel">
-          <h2 className="font-serif text-xl text-ink">Reminder dates</h2>
-          <p className="mt-1 text-sm text-sage">
-            Dates you put on some of the things you own. They are reminders only:
-            your zakat is still worked out on your zakat day.
-          </p>
-          <ul className="mt-4 divide-y divide-mist border-t border-mist">
-            {perAssetHawl.map((a) => (
-              <li key={a.id} className="ledger-row">
-                <div>
-                  <p className="text-ink">{a.label}</p>
-                  <p className="text-xs text-sage">
-                    Due {formatHijri(a.status.dueDate, calendar)}
-                  </p>
-                </div>
-                <p className="text-sm text-ink">
-                  {a.status.isComplete
-                    ? "Come"
-                    : `${a.status.remainingDays} days left`}
-                </p>
-              </li>
-            ))}
-          </ul>
-          <Link href="/assets" className="mt-3 inline-block text-sm text-pine hover:underline">
-            Change them on “What I own”
-          </Link>
         </section>
       )}
 
@@ -263,6 +176,83 @@ export default async function YearPage({
         </div>
       </section>
 
+      <section className="panel">
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="font-serif text-xl text-ink">Your zakat day</h2>
+          <Link href="/settings#zakat-day" className="inline-flex min-h-[44px] items-center text-sm text-pine hover:underline">
+            {hawl ? "Change it" : "Set it"}
+          </Link>
+        </div>
+        {hawl ? (
+          <div className="mt-4">
+            <div className="flex items-baseline justify-between text-sm">
+              <span className="text-sage">
+                {formatHijri(hawl.dueDate, calendar)}
+              </span>
+              <span className="font-medium text-ink">
+                {hawl.isComplete
+                  ? "It has come"
+                  : `${hawl.remainingDays} ${hawl.remainingDays === 1 ? "day" : "days"} left`}
+              </span>
+            </div>
+            <div className="mt-3 h-1.5 overflow-hidden bg-mist">
+              <div
+                className="h-full bg-pine transition-all duration-700"
+                style={{ width: `${Math.round(hawl.progress * 100)}%` }}
+              />
+            </div>
+            <p className="mt-3 text-xs text-sage">
+              Your zakat year began {formatHijri(hawl.startDate, calendar)}. It is
+              due on {readableDay(hawl.dueDate)}, if you still have
+              more than the minimum (nisab) then. The moon where you live may
+              move it by a day.
+            </p>
+            <div className="mt-3">
+              <HawlCalendarLink dueDate={hawl.dueDate.toISOString().slice(0, 10)} />
+            </div>
+            {!hawl.isComplete && (
+              <HawlRestart
+                madhhab={madhhab}
+                hawlStart={isoDay(hawl.startDate)}
+                today={isoDay(today)}
+              />
+            )}
+          </div>
+        ) : (
+          <p className="mt-3 text-sm text-sage">Not set yet.</p>
+        )}
+      </section>
+
+      {perAssetHawl.length > 0 && (
+        <section className="panel">
+          <h2 className="font-serif text-xl text-ink">Reminder dates</h2>
+          <p className="mt-1 text-sm text-sage">
+            Dates you put on some of the things you own. They are reminders only:
+            your zakat is still worked out on your zakat day.
+          </p>
+          <ul className="mt-4 divide-y divide-mist border-t border-mist">
+            {perAssetHawl.map((a) => (
+              <li key={a.id} className="ledger-row">
+                <div>
+                  <p className="text-ink">{a.label}</p>
+                  <p className="text-xs text-sage">
+                    Due {formatHijri(a.status.dueDate, calendar)}
+                  </p>
+                </div>
+                <p className="text-sm text-ink">
+                  {a.status.isComplete
+                    ? "Come"
+                    : `${a.status.remainingDays} days left`}
+                </p>
+              </li>
+            ))}
+          </ul>
+          <Link href="/assets" className="mt-3 inline-block text-sm text-pine hover:underline">
+            Change them on “What I own”
+          </Link>
+        </section>
+      )}
+
       <SnapshotCompare freezes={recentFreezes.slice(0, 2)} />
 
       <section id="freeze-year" className="panel space-y-6">
@@ -305,7 +295,7 @@ export default async function YearPage({
                 >
                   <div>
                     <p className="font-medium text-ink">{s.label}</p>
-                    <p className="text-xs text-sage">{s.takenAt}</p>
+                    <p className="text-xs text-sage">{readableDay(s.takenAt)}</p>
                   </div>
                   <span className="text-sm text-pine">Open</span>
                 </Link>
@@ -315,6 +305,7 @@ export default async function YearPage({
           </div>
         )}
       </section>
+      <EstimateBanner />
     </div>
   );
 }

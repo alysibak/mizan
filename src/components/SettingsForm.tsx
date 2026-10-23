@@ -16,15 +16,19 @@ import {
   type Madhhab,
 } from "@/lib/madhhab";
 import type { Settings } from "@/db/schema";
-import { COMMON_CURRENCIES } from "@/lib/currencies";
+import { CurrencyOptions } from "@/components/public/VisitorCurrency";
+import SettingsGroup from "@/components/SettingsGroup";
 import { METALS_STALE_DAYS, metalsFreshness } from "@/lib/giving-window";
 import { sendJson } from "@/lib/client-fetch";
+import { readableDay } from "@/lib/dates";
 
 export default function SettingsForm({ settings }: { settings: Settings }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // Which part was saved last, so its "Saved." shows beside its own button.
+  const [saved, setSaved] = useState<string | null>(null);
+  const [error, setError] = useState<{ part: string; text: string } | null>(null);
+  const [part, setPart] = useState("zakat-day");
 
   const [gold, setGold] = useState(settings.goldPricePerGram);
   const [silver, setSilver] = useState(settings.silverPricePerGram);
@@ -60,26 +64,29 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
     setPriceHint(
       `Suggested from ${data.source}${
         data.asOf ? ` (${new Date(data.asOf).toLocaleString()})` : ""
-      }. Review, then save. This does not change your ledger until you save.`,
+      }. Review, then save. Nothing changes until you save.`,
     );
   }
 
-  async function saveSettings(payload: Record<string, unknown>) {
+  async function saveSettings(payload: Record<string, unknown>, from = part) {
     setError(null);
-    setSaved(false);
+    setSaved(null);
     setBusy(true);
     const res = await sendJson("/api/settings", "PUT", payload, "Could not save settings");
     setBusy(false);
     if (res.ok) {
-      setSaved(true);
+      setSaved(from);
       router.refresh();
     } else {
-      setError(res.error);
+      setError({ part: from, text: res.error });
     }
   }
 
   async function save(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    // Each part has its own Save button; all of the form is sent, as one.
+    const from = (e.nativeEvent as SubmitEvent).submitter?.getAttribute("data-part") ?? part;
+    setPart(from);
     const form = new FormData(e.currentTarget);
     await saveSettings({
       currency: form.get("currency"),
@@ -92,7 +99,7 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
       hijriCalendar: form.get("hijriCalendar"),
       setupComplete: settings.setupComplete,
       trustedAckAt: settings.trustedAckAt,
-    });
+    }, from);
   }
 
   async function confirmMetals() {
@@ -107,20 +114,38 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
       setupComplete: settings.setupComplete,
       trustedAckAt: settings.trustedAckAt,
       touchMetals: true,
-    });
+    }, "metal-prices");
   }
 
+  /** The Save button at the end of one part, with that part's result beside it. */
+  const saveRow = (id: string, label: string) => (
+    <div className="flex flex-wrap items-center gap-4">
+      <button type="submit" data-part={id} disabled={busy} className="btn-primary">
+        {busy && part === id ? "Saving…" : label}
+      </button>
+      {saved === id ? <span className="text-base text-gain">Saved.</span> : null}
+      {error?.part === id ? (
+        <span className="text-base text-danger" role="alert">
+          {error.text}
+        </span>
+      ) : null}
+    </div>
+  );
+  const money = (n: number) => formatMoney(n, settings.currency);
+
   return (
-    <form onSubmit={save} className="space-y-8">
-      {/* Zakat day */}
-      <section id="zakat-day" className="card scroll-mt-20 p-5">
-        <h2 className="font-serif text-lg text-ink">Your zakat day</h2>
-        <p className="mt-1 text-sm text-sage">
-          Your zakat is due one lunar year after the day you first had the
-          minimum (nisab), and on that day every year after. Not sure of the
-          day? Pick one you will remember, such as 1 Ramadan, and keep to it.
+    <form onSubmit={save} className="border-t border-mist">
+      <SettingsGroup
+        id="zakat-day"
+        title="Your zakat day"
+        now={settings.hawlStartDate ? `Your year began ${readableDay(settings.hawlStartDate)}` : "Not set yet"}
+        open={!settings.hawlStartDate}
+      >
+        <p className="text-base text-sage">
+          Zakat is due a lunar year after the day you first had the minimum
+          (nisab). Not sure? Many people keep 1 Ramadan.
         </p>
-        <div className="mt-4 max-w-xs">
+        <div className="max-w-xs">
           <label className="label mb-1.5" htmlFor="hawlStartDate">
             Your zakat year began on
           </label>
@@ -134,7 +159,7 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
         </div>
         <div className="mt-4 max-w-xs">
           <label className="label mb-1.5" htmlFor="hijriCalendar">
-            Hijri calendar
+            Islamic calendar
           </label>
           <select
             id="hijriCalendar"
@@ -142,27 +167,29 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
             className="field"
             defaultValue={settings.hijriCalendar}
           >
-            <option value="tabular">Standard (worked out)</option>
-            <option value="umalqura">Umm al-Qura (Saudi)</option>
+            <option value="tabular">Worked out (used in most places)</option>
+            <option value="umalqura">Saudi calendar (Umm al-Qura)</option>
           </select>
           <p className="mt-1.5 text-xs text-sage">
-            Umm al-Qura matches many printed calendars. Either may be a day off
-            from the moon where you live.
+            Either may be a day off from the moon where you live.
           </p>
         </div>
-      </section>
+        {saveRow("zakat-day", "Save zakat day")}
+      </SettingsGroup>
 
-      {/* Metal prices */}
-      <section id="metal-prices" className="card scroll-mt-20 p-5">
-        <h2 className="font-serif text-lg text-ink">Gold and silver prices</h2>
-        <p className="mt-1 text-sm text-sage">
+      <SettingsGroup
+        id="metal-prices"
+        title="Gold and silver prices"
+        now={`Gold ${money(settings.goldPricePerGram)}, silver ${money(settings.silverPricePerGram)} a gram`}
+        open={freshness.stale}
+      >
+        <p className="text-base text-sage">
           The minimum (nisab) is a weight of gold or silver, so it moves with
-          their prices. Tap below for today’s prices, or type your own. Nothing
-          is saved until you press Save.
+          their prices.
         </p>
-        <p className="mt-2 text-xs text-sage">
+        <p className="text-sm text-sage">
           {settings.metalsUpdatedAt
-            ? `Last saved ${settings.metalsUpdatedAt.slice(0, 10)}. Check them at least every ${METALS_STALE_DAYS} days.`
+            ? `Last saved ${readableDay(settings.metalsUpdatedAt)}. Check them at least every ${METALS_STALE_DAYS} days.`
             : "Not saved yet. Check them before you trust the minimum (nisab)."}
           {freshness.stale && freshness.reason === "aged"
             ? ` These are ${freshness.ageDays} days old.`
@@ -173,14 +200,14 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
         </p>
         <button
           type="button"
-          className="btn-ghost mt-3"
+          className="btn-ghost"
           onClick={suggestPrices}
           disabled={lookingUp || currency.length !== 3}
         >
           {lookingUp ? "Looking up…" : `Get today’s prices in ${currency}`}
         </button>
-        {priceHint && <p className="mt-2 text-xs text-sage">{priceHint}</p>}
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        {priceHint && <p className="text-sm text-sage">{priceHint}</p>}
+        <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label className="label mb-1.5" htmlFor="goldPricePerGram">
               Gold, per gram ({currency})
@@ -231,52 +258,36 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
         freshness.reason !== "defaults" ? (
           <button
             type="button"
-            className="btn-ghost mt-4"
+            className="btn-ghost"
             disabled={busy}
             onClick={() => void confirmMetals()}
           >
             These prices are still right
           </button>
         ) : null}
-      </section>
+        {saveRow("metal-prices", "Save prices")}
+      </SettingsGroup>
 
-      {/* How zakat is counted */}
-      <section id="how-counted" className="card scroll-mt-20 p-5">
-        <h2 className="font-serif text-lg text-ink">How zakat is counted</h2>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+      <SettingsGroup
+        id="how-counted"
+        title="How zakat is counted"
+        now={`${settings.currency} · minimum by ${settings.nisabStandard} · ${MADHHAB_LABELS[parseMadhhab(settings.madhhab)]}`}
+      >
+        <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label className="label mb-1.5" htmlFor="currency">
               Your money
             </label>
-            <input
+            <select
               id="currency"
               name="currency"
-              maxLength={3}
-              autoCapitalize="characters"
-              autoComplete="off"
-              className="field uppercase"
+              className="field"
               value={currency}
-              onChange={(e) => setCurrency(e.target.value.toUpperCase())}
-            />
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {COMMON_CURRENCIES.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  className={
-                    "btn-ghost px-2.5 py-1 text-xs " +
-                    (currency === c ? "border-pine text-pine" : "")
-                  }
-                  onClick={() => setCurrency(c)}
-                >
-                  {c}
-                </button>
-              ))}
-            </div>
-            <p className="mt-1.5 text-xs text-sage">
-              A three-letter code, such as PKR, USD, GBP or AED. Changing it only
-              changes the label: amounts and prices are not converted.
-            </p>
+              onChange={(e) => setCurrency(e.target.value)}
+            >
+              <CurrencyOptions value={currency} />
+            </select>
+            <p className="mt-1.5 text-xs text-sage">Amounts are not converted, only labelled.</p>
           </div>
           <div>
             <label className="label mb-1.5" htmlFor="nisabStandard">
@@ -344,15 +355,8 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
             </Link>
           </p>
         </div>
-      </section>
-
-      <div className="flex items-center gap-4">
-        <button type="submit" disabled={busy} className="btn-primary">
-          {busy ? "Saving…" : "Save settings"}
-        </button>
-        {saved && <span className="text-sm text-gain">Saved.</span>}
-        {error && <span className="text-sm text-danger">{error}</span>}
-      </div>
+        {saveRow("how-counted", "Save these")}
+      </SettingsGroup>
     </form>
   );
 }

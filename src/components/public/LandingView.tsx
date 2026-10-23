@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PAGE_ICONS } from "@/components/pageIcons";
+import { IconQuestion } from "@/components/icons";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import JsonLd from "@/components/JsonLd";
@@ -28,8 +30,8 @@ export function landingMetadata(locale: Locale): Metadata {
 }
 
 /**
- * The home page in one language. Static: signed-in visitors are sent to their
- * balance by the proxy, so it never touches the database.
+ * The home page in one language. Static, so it never touches the database;
+ * a signed-in visitor sees "My account" in the header.
  */
 export default function LandingView({ locale }: { locale: Locale }) {
   const all = messagesFor(locale);
@@ -55,6 +57,10 @@ export default function LandingView({ locale }: { locale: Locale }) {
                 style={{ animationDelay: "220ms" }}
                 aria-label={m.sample.aria}
               >
+                {/* Said first and plainly, so it is never read as the visitor's own answer. */}
+                <p className="mb-3 inline-block bg-brass/15 px-2 py-1 text-sm font-semibold text-brassDeep">
+                  {m.sample.caption}
+                </p>
                 {/* The balance that gives Mizan its name, on the example's figures. */}
                 <BalanceScale
                   net={24490}
@@ -62,7 +68,7 @@ export default function LandingView({ locale }: { locale: Locale }) {
                   money={money}
                   labels={{ you: all.calc.netWealth, nisab: all.calc.nisabSilver }}
                 />
-                <p className="label mt-2 text-pine">{m.sample.due}</p>
+                <p className="eyebrow mt-2 text-pine">{m.sample.due}</p>
                 <p className="mt-1 font-serif text-4xl text-pine nums">{money(612.25)}</p>
                 <p className="mt-1 text-xs text-sage">{fmt(m.sample.summary, { net: money(24490) })}</p>
                 <dl className="mt-5 space-y-1.5 border-t border-mist pt-4 text-sm">
@@ -73,7 +79,6 @@ export default function LandingView({ locale }: { locale: Locale }) {
                     </div>
                   ))}
                 </dl>
-                <figcaption className="mt-4 text-xs text-sage">{m.sample.caption}</figcaption>
               </figure>
   );
 
@@ -86,11 +91,9 @@ export default function LandingView({ locale }: { locale: Locale }) {
       <main>
         <section className="relative z-10 mx-auto grid max-w-6xl items-center gap-12 px-5 pb-20 pt-10 md:px-10 lg:grid-cols-[minmax(0,1fr)_26rem] lg:pt-16">
           <div>
-            <p className="animate-fade-up font-serif text-sm tracking-[0.2em] text-brassDeep">
-              {m.eyebrow}
-            </p>
-            <h1 className="animate-fade-up mt-4 font-serif text-5xl leading-[1.08] tracking-tight text-ink sm:text-6xl md:text-7xl">
-              {m.title}
+            {/* The question people arrive with; the box under it answers it. */}
+            <h1 className="animate-fade-up font-serif text-4xl leading-[1.1] tracking-tight text-ink sm:text-5xl md:text-6xl">
+              {m.question}
             </h1>
             <div className="mt-6 max-w-xl empty:hidden">
               <ResumeCard
@@ -106,28 +109,48 @@ export default function LandingView({ locale }: { locale: Locale }) {
               />
             </div>
             {/* The first thirty seconds: type one number, see the answer. */}
-            <div className="animate-fade-up mt-8 max-w-xl" style={{ animationDelay: "80ms" }}>
+            <div className="animate-fade-up mt-6 max-w-xl" style={{ animationDelay: "80ms" }}>
               <QuickAnswer m={m.quick} locale={locale} guideHref={guide} />
             </div>
             <p className="mt-3 text-sm text-sage">{m.trustLine}</p>
-            <nav
-              aria-label={m.chooseTitle}
-              className="animate-fade-up mt-8 flex flex-wrap gap-x-6 gap-y-3 text-base"
-              style={{ animationDelay: "140ms" }}
-            >
-              {(
-                [
-                  ["/who-can-receive", m.choose.who],
-                  ["/zakat-al-fitr", m.choose.fitr],
-                  ["/ask", m.choose.ask],
-                ] as const
-              ).map(([path, label]) => (
-                <Link key={path} href={localePath(locale, path)} className="font-medium text-pine hover:underline">
-                  {label}
-                </Link>
-              ))}
+            {/* Three more answers, as pictures to tap. */}
+            <nav aria-label={m.chooseTitle} className="animate-fade-up mt-8 max-w-xl" style={{ animationDelay: "140ms" }}>
+              <ul className="grid grid-cols-3 gap-2">
+                {(
+                  [
+                    ["/who-can-receive", m.choose.who, "who"],
+                    ["/zakat-al-fitr", m.choose.fitr, "fitr"],
+                    ["/ask", m.choose.ask, "ask"],
+                  ] as const
+                ).map(([path, label, icon]) => {
+                  const Icon = PAGE_ICONS[icon] ?? IconQuestion;
+                  return (
+                    <li key={path}>
+                      <Link
+                        href={localePath(locale, path)}
+                        className="card flex h-full min-h-[96px] flex-col items-center justify-center gap-2 px-2 py-3 text-center transition hover:border-pine"
+                      >
+                        <span
+                          className="flex h-10 w-10 items-center justify-center rounded-full border border-pine/30 bg-pine/5 text-pine"
+                          aria-hidden
+                        >
+                          <Icon className="h-5 w-5" />
+                        </span>
+                        <span className="text-sm font-medium leading-snug text-ink">{label}</span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
             </nav>
-            <RamadanCountdown m={all.ramadan} locale={locale} inEnglish={all.common.inEnglish} className="mt-8 max-w-xl" />
+            <RamadanCountdown
+              m={all.ramadan}
+              locale={locale}
+              inEnglish={all.common.inEnglish}
+              planLink={false}
+              compact
+              className="mt-6 max-w-xl"
+            />
           </div>
 
           {/* A worked example beside the question, on a wide screen only. */}

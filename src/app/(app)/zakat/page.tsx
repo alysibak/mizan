@@ -59,8 +59,7 @@ export default async function ZakatPage() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="label text-brassDeep">Zakat</p>
-        <h1 className="mt-1 font-serif text-3xl text-ink">How your zakat is worked out</h1>
+        <h1 className="font-serif text-3xl text-ink">How your zakat is worked out</h1>
         <p className="mt-2 text-sm text-sage">
           The minimum (nisab) is set by {settings.nisabStandard}, and the year is
           counted by the {settings.calendarBasis === "solar" ? "solar" : "lunar"} calendar. You can change
@@ -71,8 +70,6 @@ export default async function ZakatPage() {
           .
         </p>
       </header>
-
-      <EstimateBanner />
 
       {assetRows.length === 0 ? (
         <div className="card border-dashed p-6 text-center">
@@ -150,7 +147,7 @@ export default async function ZakatPage() {
           >
             {r.isDue ? (
               <>
-                <p className="label text-pine">
+                <p className="eyebrow text-pine">
                   {phase === "payable" ? "4. Zakat due" : "4. Your zakat, so far"}
                 </p>
                 <p className="mt-1 font-serif text-4xl text-pine nums">
@@ -178,7 +175,7 @@ export default async function ZakatPage() {
               </>
             ) : (
               <>
-                <p className="label text-sage">No zakat due</p>
+                <p className="eyebrow text-sage">No zakat due</p>
                 <p className="mt-1 font-serif text-2xl text-ink">
                   Below the minimum (nisab)
                 </p>
@@ -201,6 +198,7 @@ export default async function ZakatPage() {
           </p>
         </>
       )}
+      <EstimateBanner />
     </div>
   );
 }

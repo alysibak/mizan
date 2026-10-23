@@ -42,6 +42,7 @@ export default function RamadanCountdown({
   className = "",
   planLink = true,
   inEnglish = "",
+  compact = false,
 }: {
   m: Messages["ramadan"];
   locale: Locale;
@@ -50,6 +51,8 @@ export default function RamadanCountdown({
   planLink?: boolean;
   /** Marks that link as English on pages in other languages. */
   inEnglish?: string;
+  /** One line and one button, as on the home page. */
+  compact?: boolean;
 }) {
   const hydrated = useHydrated();
   if (!hydrated) return null;
@@ -81,6 +84,27 @@ export default function RamadanCountdown({
     track("Reminder", { via: "ramadan" });
   }
 
+  if (compact) {
+    return (
+      <div className={"flex flex-wrap items-center gap-x-4 gap-y-2 border border-brass/50 bg-paper/80 px-4 py-3 " + className}>
+        <p className="min-w-0 flex-1 text-base text-ink">
+          {status.inRamadan
+            ? fmt(m.during, { day: status.day ?? 1, date: date(status.eid) })
+            : fmt(m.before, { year: status.hijriYear, date: date(status.start), when })}
+        </p>
+        {status.inRamadan ? (
+          <Link href={localePath(locale, "/zakat-al-fitr")} className="btn-ghost">
+            {m.fitrLink}
+          </Link>
+        ) : status.daysUntil > 7 ? (
+          <button type="button" className="btn-ghost" onClick={remind}>
+            {m.remind}
+          </button>
+        ) : null}
+      </div>
+    );
+  }
+
   return (
     <div className={"border border-brass/50 bg-paper/80 px-4 py-3 text-sm " + className}>
       <p className="text-ink">
@@ -92,16 +116,16 @@ export default function RamadanCountdown({
       <p className="mt-1 text-sage">{status.inRamadan ? m.duringHint : m.hint}</p>
       <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1">
         {status.inRamadan ? (
-          <Link href={localePath(locale, "/zakat-al-fitr")} className="font-medium text-pine hover:underline">
+          <Link href={localePath(locale, "/zakat-al-fitr")} className="inline-flex min-h-[44px] items-center font-medium text-pine hover:underline">
             {m.fitrLink}
           </Link>
         ) : status.daysUntil > 7 ? (
-          <button type="button" className="font-medium text-pine underline-offset-2 hover:underline" onClick={remind}>
+          <button type="button" className="inline-flex min-h-[44px] items-center font-medium text-pine underline-offset-2 hover:underline" onClick={remind}>
             {m.remind}
           </button>
         ) : null}
         {planLink ? (
-          <Link href="/ramadan" className="font-medium text-pine hover:underline">
+          <Link href="/ramadan" className="inline-flex min-h-[44px] items-center font-medium text-pine hover:underline">
             {m.plan}
             {inEnglish}
           </Link>

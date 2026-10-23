@@ -84,7 +84,7 @@ export default function GoldPicker({
               <div className="flex cursor-pointer flex-col items-center gap-1" onClick={() => change(key, 1)}>
                 <Icon className={"h-9 w-9 " + (n > 0 ? "text-brassDeep" : "text-sage")} />
                 <span className="text-xs leading-snug text-ink">{name}</span>
-                <span className="text-[11px] text-sage nums">
+                <span className="text-[13px] text-sage nums">
                   ~{inUnit(each, unit)} {unitLabel}
                 </span>
               </div>

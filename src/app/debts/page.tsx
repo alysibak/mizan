@@ -40,7 +40,7 @@ const copy: ToolPageCopy = {
   ],
   next: [
     { href: "/guide", label: "Work out my zakat", icon: "guide" },
-    { href: "/my", label: "My zakat: my year in one place", icon: "my" },
+    { href: "/my", label: "My zakat", icon: "my" },
   ],
   faq: [
     {

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { formatMoney } from "@/lib/money";
 import { ASNAF, asnafLabel } from "@/lib/asnaf";
 import { givingTypeLabel, type GivingType } from "@/lib/giving";
-import { localIsoDay } from "@/lib/dates";
+import { localIsoDay, readableDay } from "@/lib/dates";
 import { sendJson } from "@/lib/client-fetch";
 import { useHydrated } from "@/lib/client-store";
 import type { GivingRecord } from "@/db/schema";
@@ -115,7 +115,7 @@ export default function GivingManager({
     <div className="space-y-8">
       {justCleared && (
         <section className="border border-pine/40 bg-pine/5 px-5 py-5">
-          <p className="label text-pine">All given</p>
+          <p className="eyebrow text-pine">All given</p>
           <p className="mt-1 font-serif text-xl text-ink">
             That covers all of this year’s zakat. May Allah accept it from you.
           </p>
@@ -184,8 +184,6 @@ export default function GivingManager({
                 <option value="zakat">Zakat (the yearly 2.5%)</option>
                 <option value="fitr">Zakat al-Fitr (before Eid)</option>
                 <option value="purification">Interest given away</option>
-                {/* Never needed: kept for anyone who still wants to note it. */}
-                <option value="sadaqah">Sadaqah (no need to note it)</option>
               </select>
             </div>
             <div>
@@ -314,7 +312,7 @@ export default function GivingManager({
                     {r.recipient || givingTypeLabel(r.type)}
                   </p>
                   <p className="text-xs text-sage">
-                    {r.date}
+                    {readableDay(r.date)}
                     {r.asnaf ? ` · ${asnafLabel(r.asnaf)}` : ""}
                     {r.note ? ` · ${r.note}` : ""}
                   </p>
@@ -333,8 +331,8 @@ export default function GivingManager({
                     onClick={() =>
                       removeRecord(r.id, formatMoney(r.amount, currency))
                     }
-                    className="-m-2 p-2 text-lg leading-none text-sage transition hover:text-danger"
-                    aria-label={`Remove ${givingTypeLabel(r.type)} of ${formatMoney(r.amount, currency)} on ${r.date}`}
+                    className="-me-2 flex h-11 w-11 items-center justify-center text-xl leading-none text-sage transition hover:text-danger"
+                    aria-label={`Remove ${givingTypeLabel(r.type)} of ${formatMoney(r.amount, currency)} on ${readableDay(r.date)}`}
                   >
                     &times;
                   </button>

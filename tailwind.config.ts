@@ -28,6 +28,11 @@ const config: Config = {
         sans: ["var(--font-source)", "ui-sans-serif", "system-ui", "sans-serif"],
         mono: ["ui-monospace", "SFMono-Regular", "Menlo", "Consolas", "monospace"],
       },
+      // The smallest text anywhere is 14px: "xs" is kept as a name, at the
+      // size of "sm", so small print stays readable on a phone.
+      fontSize: {
+        xs: ["0.875rem", { lineHeight: "1.25rem" }],
+      },
       borderRadius: {
         card: "4px",
       },

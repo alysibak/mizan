@@ -72,6 +72,8 @@ const fr: Messages = {
     lede: "Un calculateur de zakat et un registre gratuits et privés. Pesez vos biens face au nisab avec les cours des métaux en direct, suivez votre hawl selon le calendrier hégirien, et clôturez chaque année avec un montant fiable.",
     ctaCalculate: "Calculer ma zakat",
     ctaLedger: "Ouvrir un registre gratuit",
+    /** The home page's heading: the question people arrive with. */
+    question: "Combien de zakat dois-je donner ?",
     quick: {
       label: "Votre épargne, vos espèces et votre or, en tout",
       nisab: "La zakat commence à {nisab}, le nisab du jour.",
@@ -415,7 +417,12 @@ const fr: Messages = {
     back: "Retour",
     skip: "Je n’en ai pas",
     seeResult: "Voir ma zakat",
+    amountsIn: "Montants en {currency}",
+    changeCurrency: "Changer",
+    onePage: "Tout voir sur une seule page",
     have: {
+      fromHome: "Vos {amount} de la première page sont notés en espèces. Touchez tout ce que vous avez d’autre.",
+      yours: "Ne comptez que ce qui est à vous, pas à votre famille.",
       title: "Que possédez-vous ?",
       body: "Touchez tout ce que vous avez. Pas sûr ? Appuyez sur « {next} » et nous vous demanderons chaque chose.",
       more: "Autre chose : actions, commerce, argent qu’on vous doit",

@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   CALC_FIELDS,
   CALC_STORAGE_KEY,
+  FROM_HOME_KEY,
   DEFAULT_PORTION_PERCENT,
   VISITOR_CURRENCY_KEY,
   computeDraft,
@@ -33,7 +34,6 @@ import {
   IconCheckCircle,
   IconChart,
   IconCoins,
-  IconGlobe,
   IconGoldBar,
   IconReceipt,
   IconNecklace,
@@ -57,8 +57,9 @@ import { useSignedIn } from "@/components/useSignedIn";
 
 type GuideMessages = Messages["guide"];
 
+// The currency is not a question: it is guessed from the phone and shown
+// above every step, with "Change" beside it.
 const STEPS = [
-  "currency",
   "have",
   "cash",
   "bank",
@@ -74,7 +75,6 @@ type Step = (typeof STEPS)[number];
 
 /** A picture for each question, so it is recognised before it is read. */
 const STEP_ICON: Record<Step, (p: { className?: string }) => React.ReactNode> = {
-  currency: IconGlobe,
   have: IconCheckCircle,
   cash: IconCash,
   bank: IconBank,
@@ -212,6 +212,24 @@ function Guide({
   // What they said they have; nothing picked asks about everything.
   const [have, setHave] = useState<Set<AssetStep>>(() => new Set(ASSET_STEPS.filter((k) => holds(initial, k))));
   const [also, setAlso] = useState<Set<Also>>(() => new Set());
+  const [pickCurrency, setPickCurrency] = useState(false);
+  // Arrived from the home page's box: its number is already under cash.
+  const [fromHome] = useState(() => {
+    if (!live) return false;
+    try {
+      return sessionStorage.getItem(FROM_HOME_KEY) === "1";
+    } catch {
+      return false;
+    }
+  });
+  // Said once: coming back to the guide later starts as usual.
+  useEffect(() => {
+    try {
+      sessionStorage.removeItem(FROM_HOME_KEY);
+    } catch {
+      /* nothing kept, nothing to clear */
+    }
+  }, []);
   const goldPerGram = parseAmount(draft.goldPrice, draft.decimal);
   const silverPerGram = parseAmount(draft.silverPrice, draft.decimal);
   // The nisab question is only a question when today's prices are missing:
@@ -468,64 +486,38 @@ function Guide({
   let fields: ReactNode = null;
 
   switch (step) {
-    case "currency":
-      title = m.steps.currency.title;
-      body = m.steps.currency.body;
-      fields = (
-        <div className="mt-5">
-          <label className="sr-only" htmlFor="guide-currency">
-            {calc.yourCurrency}
-          </label>
-          <select
-            id="guide-currency"
-            className="field text-base sm:max-w-sm"
-            value={c}
-            onChange={(e) => changeCurrency(e.target.value)}
-          >
-            <CurrencyOptions value={c} locale={locale} />
-          </select>
-          <p className="mt-4 border-s-2 border-brass ps-3 text-sm leading-relaxed text-ink">
-            {m.steps.currency.yours}
-          </p>
-          <p className="mt-4 text-sm leading-relaxed text-ink" aria-live="polite">
-            {prices === "loading"
-              ? m.steps.currency.loading
-              : silverNisab > 0 && goldNisab > 0
-                ? fmt(m.steps.currency.nisab, { silver: money(silverNisab), gold: money(goldNisab) })
-                : prices === "error"
-                  ? m.steps.currency.unavailable
-                  : null}
-          </p>
-        </div>
-      );
-      break;
     case "have":
       title = m.have.title;
-      body = fmt(m.have.body, { next: m.next });
+      body = fromHome && draft.amounts.cash
+        ? fmt(m.have.fromHome, { amount: money(parseAmount(draft.amounts.cash, draft.decimal)) })
+        : fmt(m.have.body, { next: m.next });
       fields = (
-        <ul className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {ASSET_STEPS.map((key) => (
-            <PickTile
-              key={key}
-              on={have.has(key)}
-              label={key === "more" ? m.have.more : calc.fields[key].label}
-              Icon={STEP_ICON[key]}
-              onClick={() => setHave((h) => toggle(h, key))}
-            />
-          ))}
-          {/* The pages these lead to are in English only so far. */}
-          {locale === "en"
-            ? ALSO.map(({ key, label, Icon }) => (
-                <PickTile
-                  key={key}
-                  on={also.has(key)}
-                  label={label}
-                  Icon={Icon}
-                  onClick={() => setAlso((a) => toggle(a, key))}
-                />
-              ))
-            : null}
-        </ul>
+        <>
+          <p className="mt-3 border-s-2 border-brass ps-3 text-sm text-ink">{m.have.yours}</p>
+          <ul className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {ASSET_STEPS.map((key) => (
+              <PickTile
+                key={key}
+                on={have.has(key)}
+                label={key === "more" ? m.have.more : calc.fields[key].label}
+                Icon={STEP_ICON[key]}
+                onClick={() => setHave((h) => toggle(h, key))}
+              />
+            ))}
+            {/* The pages these lead to are in English only so far. */}
+            {locale === "en"
+              ? ALSO.map(({ key, label, Icon }) => (
+                  <PickTile
+                    key={key}
+                    on={also.has(key)}
+                    label={label}
+                    Icon={Icon}
+                    onClick={() => setAlso((a) => toggle(a, key))}
+                  />
+                ))
+              : null}
+          </ul>
+        </>
       );
       break;
     case "cash":
@@ -698,13 +690,51 @@ function Guide({
     <section ref={card} aria-labelledby="guide-step" className="card scroll-mt-20 p-5 sm:p-8">
       {step !== "result" ? (
         <div>
-          <p className="label text-brassDeep">{fmt(m.stepOf, { n: at + 1, total })}</p>
-          <div className="mt-2 h-1.5 overflow-hidden bg-mist" aria-hidden>
-            <div
-              className="h-full bg-pine transition-all duration-300"
-              style={{ width: `${Math.round(((at + 1) / total) * 100)}%` }}
-            />
+          <div className="flex flex-wrap items-center justify-between gap-x-4">
+            <p className="sr-only">{fmt(m.stepOf, { n: at + 1, total })}</p>
+            {/* Dots, not "1 of 9": where they are, without counting what is left. */}
+            <ol className="flex gap-1.5" aria-hidden>
+              {Array.from({ length: total }, (_, i) => (
+                <li key={i} className={"h-2 w-2 rounded-full " + (i <= at ? "bg-pine" : "bg-mist")} />
+              ))}
+            </ol>
+            <p className="text-sm text-sage">
+              {fmt(m.amountsIn, { currency: c })} ·{" "}
+              <button
+                id="guide-change-currency"
+                type="button"
+                className="inline-flex min-h-[44px] items-center text-pine underline underline-offset-2"
+                aria-expanded={pickCurrency}
+                onClick={() => setPickCurrency((p) => !p)}
+              >
+                {m.changeCurrency}
+              </button>
+            </p>
           </div>
+          {pickCurrency ? (
+            <div className="mt-2 sm:max-w-sm">
+              <label className="sr-only" htmlFor="guide-currency">
+                {calc.yourCurrency}
+              </label>
+              <select
+                id="guide-currency"
+                className="field text-base"
+                value={c}
+                onChange={(e) => {
+                  changeCurrency(e.target.value);
+                  setPickCurrency(false);
+                }}
+              >
+                <CurrencyOptions value={c} locale={locale} />
+              </select>
+            </div>
+          ) : null}
+          {/* Without today's prices, the minimum is asked for before the answer. */}
+          {prices === "error" && at === 0 ? (
+            <p className="mt-2 text-sm text-sage" role="status">
+              {m.steps.currency.unavailable}
+            </p>
+          ) : null}
         </div>
       ) : null}
 
@@ -741,22 +771,27 @@ function Guide({
       {/* The answer has its own "Change my answers"; a Back under it as well
           would be one more button that does nearly the same thing. */}
       {step === "result" ? null : (
-        <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-mist pt-5">
-          {at > 0 ? (
-            <button type="button" className="btn-ghost px-5" onClick={() => go(at - 1)}>
-              {m.back}
-            </button>
-          ) : null}
-          <button type="button" className="btn-primary px-6 py-3 text-base" onClick={() => go(at + 1)}>
+        <div className="mt-8 flex flex-col gap-2 border-t border-mist pt-5 sm:flex-row sm:items-center sm:gap-3">
+          {/* On a phone, Next is full width and comes first, under the thumb. */}
+          <button
+            type="button"
+            className="btn-primary w-full px-6 py-3 text-base sm:order-2 sm:w-auto"
+            onClick={() => go(at + 1)}
+          >
             {steps[at + 1] === "result" ? m.seeResult : m.next}
           </button>
           {skippable ? (
             <button
               type="button"
-              className="text-sm text-pine underline-offset-2 hover:underline"
+              className="min-h-[44px] text-base text-pine underline-offset-2 hover:underline sm:order-3"
               onClick={skip}
             >
               {m.skip}
+            </button>
+          ) : null}
+          {at > 0 ? (
+            <button type="button" className="btn-ghost px-5 sm:order-1" onClick={() => go(at - 1)}>
+              {m.back}
             </button>
           ) : null}
         </div>
@@ -1072,6 +1107,13 @@ function Result({
             ))}
             <p className="text-sm text-sage">{m.result.hawl}</p>
           </div>
+          {/* The calculator: every question on one page, for anyone who wants it. */}
+          <Link
+            href={localePath(locale, "/calculator")}
+            className="inline-flex min-h-[44px] items-center text-base font-medium text-pine hover:underline"
+          >
+            {m.onePage} →
+          </Link>
           {outcome.lines.length > 0 ? (
             <dl className="space-y-1.5 border-y border-mist py-4 text-sm">
               {outcome.lines.map((line) => (

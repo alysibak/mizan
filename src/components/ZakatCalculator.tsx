@@ -41,6 +41,7 @@ import { CurrencyOptions } from "@/components/public/VisitorCurrency";
 import { LOCALE_INFO, fmt, type Locale } from "@/i18n/config";
 import type { Messages } from "@/i18n/messages/en";
 import { useSignedIn } from "@/components/useSignedIn";
+import { AmountWords, MoneyInput } from "@/components/MoneyInput";
 
 export type CalcMessages = Messages["calc"];
 type Explanations = Messages["guide"]["steps"];
@@ -339,7 +340,7 @@ function Calculator({
       <div className="space-y-10 print:hidden">
         {/* 1. Currency, with today's prices filled in for it */}
         <section aria-labelledby="calc-currency-title" className="card p-5 sm:p-6">
-          <p className="label text-brassDeep">{fmt(m.step, { n: 1 })}</p>
+          <p className="eyebrow">{fmt(m.step, { n: 1 })}</p>
           <h2 id="calc-currency-title" className="mt-1 font-serif text-xl text-ink">
             <label htmlFor="calc-currency">{m.yourCurrency}</label>
           </h2>
@@ -395,7 +396,7 @@ function Calculator({
               {price.status !== "loading" ? (
                 <button
                   type="button"
-                  className="text-pine underline-offset-2 hover:underline"
+                  className="inline-flex min-h-[44px] items-center text-pine underline-offset-2 hover:underline"
                   onClick={() => fetchPrices(c)}
                 >
                   {draft.pricesAsOf ? m.refreshPrices : m.fetchPrices}
@@ -434,7 +435,7 @@ function Calculator({
 
         {/* 2. Holdings */}
         <section aria-labelledby="calc-own" className="card p-5 sm:p-6">
-          <p className="label text-brassDeep">{fmt(m.step, { n: 2 })}</p>
+          <p className="eyebrow">{fmt(m.step, { n: 2 })}</p>
           <h2 id="calc-own" className="mt-1 font-serif text-xl text-ink">
             {m.ownTitle}
           </h2>
@@ -459,7 +460,7 @@ function Calculator({
 
         {/* 3. Debts */}
         <section aria-labelledby="calc-owe" className="card p-5 sm:p-6">
-          <p className="label text-brassDeep">{fmt(m.step, { n: 3 })}</p>
+          <p className="eyebrow">{fmt(m.step, { n: 3 })}</p>
           <h2 id="calc-owe" className="mt-1 font-serif text-xl text-ink">
             {m.oweTitle}
           </h2>
@@ -542,7 +543,7 @@ function Calculator({
         className="scroll-mt-24 lg:sticky lg:top-24"
       >
         <div className="card border-pine/40 p-5 sm:p-6">
-          <p className="label text-pine" id="calc-result">
+          <p className="eyebrow text-pine" id="calc-result">
             {m.resultLabel}
           </p>
           {!outcome.needsPrices && !empty ? (
@@ -891,61 +892,9 @@ export function GivenTracker({
   );
 }
 
-export function MoneyInput({
-  id,
-  label,
-  currency,
-  value,
-  onChange,
-  intl,
-  decimal,
-}: {
-  id: string;
-  label: string;
-  currency: string;
-  value: string;
-  onChange: (v: string) => void;
-  /** The page's number format; with it, a large amount is also said in words. */
-  intl?: string;
-  /** The decimal mark the amount was typed with, if not the page's own. */
-  decimal?: CalcDraft["decimal"];
-}) {
-  const words = intl ? amountInWords(parseAmount(value, decimal ?? decimalMarkFor(intl)), intl, currency) : null;
-  return (
-    <div>
-      <label className="label mb-1.5" htmlFor={id}>
-        {label}
-      </label>
-      <div className="relative">
-        <span className="pointer-events-none absolute inset-y-0 start-3 flex items-center text-xs text-sage">
-          {currency}
-        </span>
-        <input
-          id={id}
-          type="text"
-          inputMode="decimal"
-          autoComplete="off"
-          placeholder="0"
-          className="field ps-12 nums"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          aria-describedby={words ? `${id}-words` : undefined}
-        />
-      </div>
-      <AmountWords id={`${id}-words`} words={words} />
-    </div>
-  );
-}
-
-/** "= 25 lakh" under a money box, to catch a slipped zero. */
-export function AmountWords({ id, words }: { id: string; words: string | null }) {
-  if (!words) return null;
-  return (
-    <p id={id} className="mt-1 text-sm text-pine nums">
-      {words.startsWith("≈") ? words : `= ${words}`}
-    </p>
-  );
-}
+// The money field lives in its own small file, so pages that need only it
+// do not load the whole calculator.
+export { AmountWords, MoneyInput };
 
 function PriceInput(props: {
   id: string;
@@ -1014,7 +963,7 @@ function HoldingField({
         {weighKey ? (
           <button
             type="button"
-            className="mt-1 text-xs text-pine underline-offset-2 hover:underline"
+            className="inline-flex min-h-[44px] items-center text-sm text-pine underline-offset-2 hover:underline"
             onClick={() => onByWeight(!byWeight)}
           >
             {byWeight ? m.byValue : m.byWeight}

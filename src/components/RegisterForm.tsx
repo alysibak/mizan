@@ -6,7 +6,10 @@ import { useRouter } from "next/navigation";
 import { sendJson } from "@/lib/client-fetch";
 import { track } from "@/lib/analytics";
 
-/** `afterGoogle`: the form sits under "Continue with Google". */
+/**
+ * `afterGoogle`: the form sits under "Continue with Google", folded, so the
+ * one-tap way is the obvious one; the page then shows "Sign in" itself.
+ */
 export default function RegisterForm({ afterGoogle = false }: { afterGoogle?: boolean }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
@@ -39,7 +42,7 @@ export default function RegisterForm({ afterGoogle = false }: { afterGoogle?: bo
 
   return (
     <>
-      <form onSubmit={onSubmit} className={(afterGoogle ? "" : "mt-8 ") + "space-y-4"}>
+      <form onSubmit={onSubmit} className={(afterGoogle ? "mt-4 " : "mt-8 ") + "space-y-4"}>
         <div>
           <label className="label mb-1.5" htmlFor="name">
             Name
@@ -107,12 +110,14 @@ export default function RegisterForm({ afterGoogle = false }: { afterGoogle?: bo
         </p>
       </form>
 
-      <p className="mt-6 text-sm text-sage">
-        Already have an account?{" "}
-        <Link href="/login" className="text-pine underline-offset-2 hover:underline">
-          Sign in
-        </Link>
-      </p>
+      {afterGoogle ? null : (
+        <p className="mt-6 text-sm text-sage">
+          Already have an account?{" "}
+          <Link href="/login" className="text-pine underline-offset-2 hover:underline">
+            Sign in
+          </Link>
+        </p>
+      )}
     </>
   );
 }

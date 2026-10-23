@@ -58,7 +58,7 @@ export function TodaysDeed({ share }: { share: ShareLabels }) {
   const Icon = DEED_ICONS[deed.key];
   return (
     <section className="card border-brass/50 p-5 text-center sm:p-8" aria-labelledby="today-deed">
-      <p className="label text-brassDeep">{skip === 0 ? "Today’s sadaqah" : "Or this one"}</p>
+      <p className="eyebrow">{skip === 0 ? "Today’s sadaqah" : "Or this one"}</p>
       <span className="mx-auto mt-4 flex h-24 w-24 items-center justify-center rounded-full border border-brass/50 bg-brass/10 text-brassDeep" aria-hidden>
         {Icon ? <Icon className="h-12 w-12" /> : null}
       </span>

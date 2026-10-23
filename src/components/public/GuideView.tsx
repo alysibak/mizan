@@ -29,12 +29,9 @@ export default function GuideView({ locale }: { locale: Locale }) {
     <div className="min-h-screen">
       <SiteHeader locale={locale} />
       <main className="mx-auto max-w-2xl px-5 pb-20 pt-6 md:px-10">
-        <header>
-          <p className="label text-brassDeep">{m.eyebrow}</p>
-          <h1 className="mt-2 font-serif text-4xl leading-tight text-ink sm:text-5xl">{m.title}</h1>
-          <p className="mt-4 text-lg leading-relaxed text-sage">{m.lede}</p>
-        </header>
-        <div className="mt-8">
+        {/* The first question is the page: a title, then straight to it. */}
+        <h1 className="font-serif text-3xl leading-tight text-ink sm:text-4xl">{m.title}</h1>
+        <div className="mt-5">
           <GuidedZakat
             m={m}
             calc={all.calc}
