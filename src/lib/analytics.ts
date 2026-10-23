@@ -1,5 +1,6 @@
 import { splitLocale } from "@/i18n/config";
 import { ENGLISH_TOOL_PATHS } from "@/lib/public-tools";
+import type { JourneyStep } from "@/lib/feedback";
 
 // Optional, cookieless page and conversion counts (Plausible or a
 // self-hosted Plausible-compatible server). Off unless
@@ -70,4 +71,32 @@ export function send(event: string, options?: { u?: string; props?: Record<strin
 /** Count a conversion such as "Signup". A no-op when analytics is off. */
 export function track(event: string, props?: Record<string, string>): void {
   send(event, props ? { props } : undefined);
+}
+
+/**
+ * One more for a step of the main journey, kept by Mizan itself so the
+ * admin page can show where people stop. Once per step per tab, so a reload
+ * is not a second visitor. Only the step's name is sent.
+ */
+export function countStep(step: JourneyStep): void {
+  if (typeof window === "undefined") return;
+  try {
+    const key = `mizan-step-${step}`;
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, "1");
+  } catch {
+    /* private mode: counted, perhaps twice */
+  }
+  const body = JSON.stringify({ step });
+  try {
+    if (navigator.sendBeacon?.("/api/journey", new Blob([body], { type: "application/json" }))) return;
+  } catch {
+    /* fall through to fetch */
+  }
+  fetch("/api/journey", {
+    method: "POST",
+    body,
+    headers: { "content-type": "application/json" },
+    keepalive: true,
+  }).catch(() => {});
 }

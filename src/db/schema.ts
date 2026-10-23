@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { sqliteTable, text, real, integer, index } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, real, integer, index, primaryKey } from "drizzle-orm/sqlite-core";
 import { randomUUID } from "crypto";
 
 const id = () =>
@@ -226,6 +226,34 @@ export const phoneMoves = sqliteTable(
     createdAt: now(),
   },
   (t) => [index("phone_moves_expires_idx").on(t.expiresAt)],
+);
+
+/**
+ * "Was this easy?" at the end of a task: the answer, an optional line, and
+ * which page. Nothing ties it to a person: no account, no address, no amounts.
+ */
+export const feedback = sqliteTable(
+  "feedback",
+  {
+    id: id(),
+    page: text("page").notNull(),
+    easy: integer("easy", { mode: "boolean" }).notNull(),
+    note: text("note"),
+    locale: text("locale").notNull(),
+    createdAt: now(),
+  },
+  (t) => [index("feedback_created_idx").on(t.createdAt)],
+);
+
+/** How many reached each step of the main journey each day, and nothing else. */
+export const journeyCounts = sqliteTable(
+  "journey_counts",
+  {
+    day: text("day").notNull(),
+    step: text("step").notNull(),
+    count: integer("count").notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.day, t.step] })],
 );
 
 export type User = typeof users.$inferSelect;

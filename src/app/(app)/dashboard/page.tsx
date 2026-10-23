@@ -14,6 +14,8 @@ import { emailEnabled } from "@/lib/email";
 import { hasPassword } from "@/lib/api";
 import { FromThisPhoneNotice } from "@/components/FromThisPhone";
 import EverythingElse from "@/components/EverythingElse";
+import EasyCheck from "@/components/EasyCheck";
+import { messagesFor } from "@/i18n/messages";
 
 export default async function DashboardPage({
   searchParams,
@@ -268,6 +270,7 @@ export default async function DashboardPage({
         </section>
       )}
 
+      <EasyCheck page="account" locale="en" m={messagesFor("en").common.easy} />
       <EstimateBanner />
     </div>
   );

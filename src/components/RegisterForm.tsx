@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { sendJson } from "@/lib/client-fetch";
-import { track } from "@/lib/analytics";
+import { countStep, track } from "@/lib/analytics";
 
 /**
  * `afterGoogle`: the form sits under "Continue with Google", folded, so the
@@ -32,6 +32,7 @@ export default function RegisterForm({ afterGoogle = false }: { afterGoogle?: bo
     );
     if (res.ok) {
       track("Signup");
+      countStep("signup");
       router.push("/begin");
       router.refresh();
     } else {

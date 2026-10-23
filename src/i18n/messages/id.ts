@@ -48,6 +48,15 @@ const id: Messages = {
       tools: "Alat lainnya",
     },
     resume: { title: "Lanjutkan yang terakhir", continue: "Lanjutkan" },
+    easy: {
+      question: "Apakah ini mudah?",
+      yes: "Ya",
+      no: "Kurang",
+      askYes: "Terima kasih. Ada yang ingin ditambahkan? Boleh dilewati.",
+      askNo: "Maaf. Bagian mana yang sulit?",
+      send: "Kirim",
+      thanks: "Terima kasih. Ini membantu Mizan jadi lebih mudah bagi semua.",
+    },
   },
 
   landing: {
@@ -192,6 +201,7 @@ const id: Messages = {
     guideLink: "Lebih suka satu pertanyaan sekali? Ikuti langkah demi langkah",
     givenTitle: "Sudah diberikan",
     givenHint: "Jika Anda membayar zakat secara bertahap, catat yang sudah Anda berikan. Tersimpan di perangkat ini saja.",
+    givenFold: "Memberikannya bertahap?",
     stillToGive: "Masih perlu diberikan: {amount}",
     allGiven: "Semua sudah diberikan. Semoga Allah menerimanya.",
     acceptDua: "“Ya Tuhan kami, terimalah (amal) dari kami. Sungguh, Engkaulah Yang Maha Mendengar, Maha Mengetahui.” (QS. Al-Baqarah 2:127)",

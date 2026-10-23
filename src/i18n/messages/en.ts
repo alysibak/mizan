@@ -56,6 +56,16 @@ const en = {
     },
     /** For someone coming back to something they started. */
     resume: { title: "Pick up where you left off", continue: "Continue" },
+    /** A two-tap question at the end of a task, for making Mizan easier. */
+    easy: {
+      question: "Was this easy?",
+      yes: "Yes",
+      no: "Not really",
+      askYes: "Thank you. Anything to add? You can skip this.",
+      askNo: "Sorry about that. What was hard?",
+      send: "Send",
+      thanks: "Thank you. It helps make Mizan easier for everyone.",
+    },
   },
 
   landing: {
@@ -202,6 +212,8 @@ const en = {
     guideLink: "Prefer one question at a time? Go step by step",
     givenTitle: "Given so far",
     givenHint: "If you give your zakat in parts, note what you have given. It stays on this device.",
+    /** Opens the "given so far" box; it stays folded until something is noted. */
+    givenFold: "Giving it in parts?",
     stillToGive: "Still to give: {amount}",
     allGiven: "All given. May Allah accept it from you.",
     /** Under the prayer for acceptance (2:127), shown in Arabic once all is given. */

@@ -283,7 +283,10 @@ test("the step-by-step guide explains each step and ends with things to do", asy
   const kept = await page.evaluate(() => JSON.parse(localStorage.getItem("mizan-my-v1") ?? "{}"));
   expect(kept.zakatDay).toMatchObject({ month: expect.any(Number), day: expect.any(Number) });
 
-  // Giving in parts: what is left, then a word when it is all given.
+  // Giving in parts, folded for those who give it all at once: what is left,
+  // then a word when it is all given.
+  await expect(page.locator("#guide-given")).toBeHidden();
+  await page.getByText("Giving it in parts?").click();
   await page.fill("#guide-given", "200");
   await expect(page.getByText(/Still to give: \S*293\.75/)).toBeVisible();
   await page.fill("#guide-given", "493.75");
@@ -459,9 +462,10 @@ test("someone who missed years adds up what they owe and pays it monthly", async
   await page.getByLabel("3 years ago").fill("");
   await expect(page.getByText("US$500")).toBeVisible();
 
+  await page.getByText("Giving it in parts?").click();
   await page.fill("#missed-given", "200");
   await expect(page.getByText("Still to give: US$300")).toBeVisible();
-  // Kept on this device for the next visit.
+  // Kept on this device for the next visit, and open since something is noted.
   await page.reload();
   await expect(page.getByText("Still to give: US$300")).toBeVisible();
 });

@@ -856,9 +856,16 @@ export function GivenTracker({
   const given = parseAmount(value, decimal);
   const left = Math.max(0, due - given);
   const share = due > 0 ? Math.min(1, given / due) : 0;
+  // Folded for the many who give it all at once; open once something is noted.
+  const [opened, setOpened] = useState(false);
   return (
-    <div className="mt-5 border-t border-mist pt-4">
-      <div className="max-w-[15rem]">
+    <details
+      className="mt-5 border-t border-mist pt-2"
+      open={opened || given > 0}
+      onToggle={(e) => setOpened(e.currentTarget.open)}
+    >
+      <summary className="text-base font-medium text-pine">{m.givenFold}</summary>
+      <div className="mt-2 max-w-[15rem]">
         <MoneyInput
           id={id}
           label={m.givenTitle}
@@ -888,7 +895,7 @@ export function GivenTracker({
           ) : null}
         </>
       ) : null}
-    </div>
+    </details>
   );
 }
 

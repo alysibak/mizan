@@ -180,7 +180,6 @@ export function ResultPicture({
   debts,
   net,
   nisab,
-  zakat,
   due,
   money,
   labels,
@@ -190,73 +189,57 @@ export function ResultPicture({
   debts: number;
   net: number;
   nisab: number;
-  zakat: number;
   due: boolean;
   money: (n: number) => string;
-  labels: { own: string; debts: string; net: string; nisab: string; zakat: string; none: string };
+  labels: { own: string; debts: string; net: string; nisab: string };
   /** The same answer in words, for screen readers. */
   summary: string;
 }) {
   const scale = Math.max(counted, nisab, 1) * 1.08;
   const pct = (n: number) => `${Math.max(0, Math.min(100, (n / scale) * 100)).toFixed(2)}%`;
-  const rows: { label: string; value: number; bar: string; shown: string }[] = [
-    { label: labels.own, value: counted, bar: "bg-sage/50", shown: money(counted) },
-  ];
-  // With no debts, what is left equals what is owned: one bar, not two the same.
-  if (debts > 0) {
-    rows.push({ label: labels.debts, value: debts, bar: "bg-danger/60", shown: `− ${money(debts)}` });
-    rows.push({ label: labels.net, value: net, bar: due ? "bg-pine" : "bg-sage", shown: money(net) });
-  } else {
-    rows[0].bar = due ? "bg-pine" : "bg-sage";
-  }
+  // The heading above already says the answer. The scale shows it; the bars
+  // only when debts change what counts, so the subtraction can be seen.
+  const rows: { label: string; value: number; bar: string; shown: string }[] =
+    debts > 0
+      ? [
+          { label: labels.own, value: counted, bar: "bg-sage/50", shown: money(counted) },
+          { label: labels.debts, value: debts, bar: "bg-danger/60", shown: `− ${money(debts)}` },
+          { label: labels.net, value: net, bar: due ? "bg-pine" : "bg-sage", shown: money(net) },
+        ]
+      : [];
 
   return (
     <figure role="img" aria-label={summary} className="card p-4 sm:p-5">
       <BalanceScale
-        className="mb-4"
         net={net}
         nisab={nisab}
         money={money}
         labels={{ you: debts > 0 ? labels.net : labels.own, nisab: labels.nisab }}
       />
-      <div className="relative space-y-4 pt-8" aria-hidden>
-        {/* The nisab line runs down through every bar. */}
-        <div
-          className="absolute bottom-0 top-0 border-s-2 border-dashed border-brass"
-          style={{ insetInlineStart: pct(nisab) }}
-        >
-          <span className="absolute -top-0.5 start-1.5 whitespace-nowrap text-xs font-medium text-brassDeep nums">
-            {labels.nisab} · {money(nisab)}
-          </span>
-        </div>
-        {rows.map((row) => (
-          <div key={row.label}>
-            <div className="flex items-baseline justify-between gap-3 text-sm">
-              <span className="text-sage">{row.label}</span>
-              <span className="font-medium text-ink nums">{row.shown}</span>
-            </div>
-            <div className="mt-1 h-4 bg-mist/50">
-              <div className={"h-full " + row.bar} style={{ width: pct(row.value) }} />
-            </div>
+      {rows.length ? (
+        <div className="relative mt-4 space-y-4 pt-8" aria-hidden>
+          {/* The nisab line runs down through every bar. */}
+          <div
+            className="absolute bottom-0 top-0 border-s-2 border-dashed border-brass"
+            style={{ insetInlineStart: pct(nisab) }}
+          >
+            <span className="absolute -top-0.5 start-1.5 whitespace-nowrap text-xs font-medium text-brassDeep nums">
+              {labels.nisab} · {money(nisab)}
+            </span>
           </div>
-        ))}
-      </div>
-      <div className="mt-5 flex items-center gap-4 border-t border-mist pt-4" aria-hidden>
-        <span
-          className={
-            "flex h-12 w-12 shrink-0 items-center justify-center rounded-full font-serif text-lg " +
-            (due ? "bg-brass text-surface" : "border-2 border-dashed border-sage text-sage")
-          }
-        >
-          {due ? "1/40" : "0"}
-        </span>
-        <div>
-          <p className="text-sm text-sage">{labels.zakat}</p>
-          <p className={"font-serif text-2xl nums " + (due ? "text-pine" : "text-sage")}>
-            {due ? money(zakat) : labels.none}
-          </p>
+          {rows.map((row) => (
+            <div key={row.label}>
+              <div className="flex items-baseline justify-between gap-3 text-sm">
+                <span className="text-sage">{row.label}</span>
+                <span className="font-medium text-ink nums">{row.shown}</span>
+              </div>
+              <div className="mt-1 h-4 bg-mist/50">
+                <div className={"h-full " + row.bar} style={{ width: pct(row.value) }} />
+              </div>
+            </div>
+          ))}
         </div>
-      </div>
+      ) : null}
     </figure>
   );
 }

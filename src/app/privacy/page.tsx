@@ -139,6 +139,19 @@ export default function PrivacyPage() {
         </p>
       </LegalSection>
 
+      <LegalSection title="“Was this easy?” and step counts">
+        <p>
+          If you answer “Was this easy?”, Mizan keeps your answer, any words
+          you add, the page you were on, and its language. Nothing else goes
+          with it: not your account, your network address, or any amount.
+          Separately, Mizan counts how many people reach each step of working
+          out zakat (the home page, the guide, its answer, making an account)
+          as one number per step per day, with nothing about who. Both help
+          make Mizan easier to use. Requests are limited per network address,
+          stored as a one-way hash.
+        </p>
+      </LegalSection>
+
       {analytics ? (
         <LegalSection title="Visit counts">
           <p>

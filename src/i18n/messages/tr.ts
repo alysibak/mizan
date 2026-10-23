@@ -48,6 +48,15 @@ const tr: Messages = {
       tools: "Diğer araçlar",
     },
     resume: { title: "Kaldığınız yerden devam edin", continue: "Devam et" },
+    easy: {
+      question: "Bu kolay mıydı?",
+      yes: "Evet",
+      no: "Pek değil",
+      askYes: "Teşekkürler. Eklemek istediğiniz bir şey var mı? Bunu atlayabilirsiniz.",
+      askNo: "Üzgünüz. Ne zordu?",
+      send: "Gönder",
+      thanks: "Teşekkürler. Bu, Mizan'ı herkes için kolaylaştırıyor.",
+    },
   },
 
   landing: {
@@ -192,6 +201,7 @@ const tr: Messages = {
     guideLink: "Her seferinde tek soru mu istersiniz? Adım adım ilerleyin",
     givenTitle: "Şimdiye kadar verilen",
     givenHint: "Zekâtınızı parça parça veriyorsanız verdiğinizi not edin. Yalnızca bu cihazda kalır.",
+    givenFold: "Parça parça mı veriyorsunuz?",
     stillToGive: "Verilecek kalan: {amount}",
     allGiven: "Hepsi verildi. Allah kabul etsin.",
     acceptDua: "“Rabbimiz! Bizden kabul buyur. Şüphesiz sen hakkıyla işitensin, hakkıyla bilensin.” (Bakara 2:127)",

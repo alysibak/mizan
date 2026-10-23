@@ -26,6 +26,10 @@ export const LIMITS = {
   // code that finding someone else's is hopeless.
   moveSend: { scope: "move-send", limit: 10, windowSeconds: 60 * 60 },
   moveFetch: { scope: "move-fetch", limit: 20, windowSeconds: 15 * 60 },
+  // "Was this easy?": a tap and a line per question, a handful of questions.
+  feedback: { scope: "feedback", limit: 20, windowSeconds: 60 * 60 },
+  // Journey counts: a few a visit, so a busy mosque network is never cut off.
+  journey: { scope: "journey", limit: 200, windowSeconds: 15 * 60 },
 } satisfies Record<string, LimitRule>;
 
 /**

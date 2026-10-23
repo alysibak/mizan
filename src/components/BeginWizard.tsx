@@ -9,6 +9,7 @@ import { formatMoney } from "@/lib/money";
 import { metalsLookLikeDefaults } from "@/lib/giving-window";
 import { CurrencySelect } from "@/components/public/VisitorCurrency";
 import { sendJson } from "@/lib/client-fetch";
+import { countStep } from "@/lib/analytics";
 import { readStoredValue, setStoredValue, useHydrated } from "@/lib/client-store";
 import { readableDay } from "@/lib/dates";
 import {
@@ -260,6 +261,7 @@ function Wizard({
         setupComplete: true,
       });
       setStoredValue(STEP_KEY, null);
+      countStep("setup");
       router.push("/dashboard?welcome=1");
       router.refresh();
     } catch (e) {

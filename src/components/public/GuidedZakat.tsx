@@ -21,10 +21,11 @@ import { formatMoney, formatPercent } from "@/lib/money";
 import { readStoredValue, setStoredValue, useHydrated, useStoredValue } from "@/lib/client-store";
 import { MY_KEY, comingZakatDay, parseMy, zakatDayOf } from "@/lib/my-zakat";
 import { hawlCalendar } from "@/lib/ics";
-import { track } from "@/lib/analytics";
+import { countStep, track } from "@/lib/analytics";
 import { CurrencyOptions } from "@/components/public/VisitorCurrency";
 import ShareButton, { type ShareLabels } from "@/components/public/ShareButton";
 import ReadAloud from "@/components/ReadAloud";
+import EasyCheck from "@/components/EasyCheck";
 import { ResultPicture } from "@/components/public/Visuals";
 import GoldPicker from "@/components/public/GoldPicker";
 import {
@@ -56,6 +57,7 @@ import type { Messages } from "@/i18n/messages/en";
 import { useSignedIn } from "@/components/useSignedIn";
 
 type GuideMessages = Messages["guide"];
+type EasyLabels = Messages["common"]["easy"];
 
 // The currency is not a question: it is guessed from the phone and shown
 // above every step, with "Change" beside it.
@@ -142,12 +144,14 @@ export default function GuidedZakat({
   calc,
   speech,
   share,
+  easy,
   locale,
 }: {
   m: GuideMessages;
   calc: CalcMessages;
   speech: Speech;
   share: ShareLabels;
+  easy: EasyLabels;
   locale: Locale;
 }) {
   const hydrated = useHydrated();
@@ -161,6 +165,7 @@ export default function GuidedZakat({
         calc={calc}
         speech={speech}
         share={share}
+        easy={easy}
         locale={locale}
       />
     );
@@ -174,6 +179,7 @@ export default function GuidedZakat({
       calc={calc}
       speech={speech}
       share={share}
+      easy={easy}
       locale={locale}
     />
   );
@@ -186,6 +192,7 @@ function Guide({
   calc,
   speech,
   share,
+  easy,
   locale,
 }: {
   initial: CalcDraft;
@@ -194,6 +201,7 @@ function Guide({
   calc: CalcMessages;
   speech: Speech;
   share: ShareLabels;
+  easy: EasyLabels;
   locale: Locale;
 }) {
   const intl = LOCALE_INFO[locale].intl;
@@ -224,6 +232,7 @@ function Guide({
   });
   // Said once: coming back to the guide later starts as usual.
   useEffect(() => {
+    countStep("guide");
     try {
       sessionStorage.removeItem(FROM_HOME_KEY);
     } catch {
@@ -314,6 +323,7 @@ function Guide({
     if (step !== "result" || reached.current) return;
     reached.current = true;
     track("Guided");
+    countStep("answer");
   }, [step]);
 
   function go(to: number) {
@@ -674,6 +684,7 @@ function Guide({
           onChange={() => go(1)}
           onGiven={(v) => update({ given: v })}
           share={share}
+          easy={easy}
         />
       );
       break;
@@ -940,6 +951,7 @@ function Result({
   onStandard,
   also,
   share,
+  easy,
 }: {
   m: GuideMessages;
   calc: CalcMessages;
@@ -954,6 +966,7 @@ function Result({
   /** What else they said they have, where those pages exist (English). */
   also: Set<Also> | null;
   share: ShareLabels;
+  easy: EasyLabels;
 }) {
   const signedIn = useSignedIn();
   const myRaw = useStoredValue(MY_KEY);
@@ -989,6 +1002,7 @@ function Result({
     // Revoking at once can cancel the download in Safari and Firefox.
     setTimeout(() => URL.revokeObjectURL(url), 1000);
     track("Reminder", { via: "calendar" });
+    countStep("reminder");
   }
 
   const verdict = result.isDue
@@ -1014,7 +1028,6 @@ function Result({
         debts={outcome.debts}
         net={result.netZakatable}
         nisab={result.nisab}
-        zakat={result.zakatDue}
         due={result.isDue}
         money={money}
         summary={[...working, verdict].join(" ")}
@@ -1023,8 +1036,6 @@ function Result({
           debts: calc.debtsDueNow,
           net: calc.netWealth,
           nisab: draft.standard === "gold" ? calc.nisabGold : calc.nisabSilver,
-          zakat: calc.resultLabel,
-          none: calc.noneDue,
         }}
       />
       <p className="text-base leading-relaxed text-ink">{verdict}</p>
@@ -1032,8 +1043,9 @@ function Result({
       {result.isDue ? (
         <div>
           <h3 className="font-serif text-xl text-ink">{m.result.doTitle}</h3>
+          {/* The last step, counting again in a year, is the reminder below. */}
           <ol className="mt-3 list-decimal space-y-1.5 ps-5 text-base leading-relaxed text-sage">
-            {calc.nextSteps.map((s) => (
+            {calc.nextSteps.slice(0, 2).map((s) => (
               <li key={s}>{s}</li>
             ))}
           </ol>
@@ -1191,6 +1203,8 @@ function Result({
           labels={share}
         />
       </div>
+
+      <EasyCheck page="guide" locale={locale} m={easy} />
     </div>
   );
 }

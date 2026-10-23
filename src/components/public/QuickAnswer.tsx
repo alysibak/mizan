@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CurrencySelect, useVisitorCurrency } from "@/components/public/VisitorCurrency";
 import { useMetalPrices } from "@/components/public/useMetalPrices";
@@ -17,6 +17,7 @@ import {
 } from "@/lib/calculator";
 import { setStoredValue, useStoredValue } from "@/lib/client-store";
 import { formatMoney } from "@/lib/money";
+import { countStep } from "@/lib/analytics";
 import { ZAKAT_RATE_LUNAR } from "@/lib/zakat";
 import { LOCALE_INFO, fmt, type Locale } from "@/i18n/config";
 import type { Messages } from "@/i18n/messages/en";
@@ -39,6 +40,7 @@ export default function QuickAnswer({
   const [currency, setCurrency] = useVisitorCurrency();
   const [amount, setAmount] = useState("");
   const [picking, setPicking] = useState(false);
+  useEffect(() => countStep("home"), []);
   const prices = useMetalPrices(currency);
   const stored = parseDraft(useStoredValue(CALC_STORAGE_KEY));
   const intl = LOCALE_INFO[locale].intl;
@@ -71,7 +73,10 @@ export default function QuickAnswer({
           label={m.label}
           currency={currency}
           value={amount}
-          onChange={setAmount}
+          onChange={(v) => {
+            setAmount(v);
+            if (parseAmount(v, decimal) > 0) countStep("typed");
+          }}
           intl={intl}
           currencyButton={{ label: m.currency, open: picking, onClick: () => setPicking((p) => !p) }}
         />

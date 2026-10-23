@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
 import { isAdmin } from "@/lib/admin";
+import AdminTabs from "../AdminTabs";
 
 const PAGE_SIZE = 100;
 
@@ -58,10 +59,10 @@ export default async function AdminUsersPage({
 
   return (
     <div className="space-y-8">
-      <header>
-        <p className="eyebrow">Admin</p>
-        <h1 className="mt-1 font-serif text-3xl text-ink">Who has entered</h1>
-        <p className="mt-2 max-w-xl text-sm text-sage">
+      <header className="space-y-4">
+        <h1 className="font-serif text-3xl text-ink">Who has entered</h1>
+        <AdminTabs current="/admin/users" />
+        <p className="max-w-xl text-sm text-sage">
           Accounts that registered on Mizan, with when they signed up and when
           they last signed in (UTC). Only visible to you. Ledgers stay private:
           nothing here shows what anyone holds or gives.

@@ -48,6 +48,15 @@ const fr: Messages = {
       tools: "Autres outils",
     },
     resume: { title: "Reprendre là où vous en étiez", continue: "Continuer" },
+    easy: {
+      question: "Était-ce facile ?",
+      yes: "Oui",
+      no: "Pas vraiment",
+      askYes: "Merci. Quelque chose à ajouter ? Vous pouvez passer.",
+      askNo: "Désolé. Qu’est-ce qui était difficile ?",
+      send: "Envoyer",
+      thanks: "Merci. Cela aide à rendre Mizan plus simple pour tous.",
+    },
   },
 
   landing: {
@@ -193,6 +202,7 @@ const fr: Messages = {
     guideLink: "Une question à la fois ? Avancez pas à pas",
     givenTitle: "Déjà donné",
     givenHint: "Si vous versez votre zakat en plusieurs fois, notez ce que vous avez donné. Cela reste sur cet appareil.",
+    givenFold: "Vous la donnez en plusieurs fois ?",
     stillToGive: "Reste à donner : {amount}",
     allGiven: "Tout est donné. Qu’Allah l’accepte de vous.",
     acceptDua: "« Notre Seigneur, accepte ceci de notre part. C’est Toi qui entends tout et qui sais tout. » (Coran 2:127)",

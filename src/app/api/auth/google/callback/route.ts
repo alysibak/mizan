@@ -6,6 +6,7 @@ import { db } from "@/db";
 import { settings, users, type User } from "@/db/schema";
 import { createSession, purgeExpiredSessions } from "@/lib/auth";
 import { GOOGLE_COOKIE, exchangeCode, googleConfig, readIdToken, type GoogleIdentity, type GoogleStart } from "@/lib/google";
+import { addToJourney } from "@/lib/journey-store";
 import { createToken } from "@/lib/one-time-tokens";
 import { LIMITS, overLimit } from "@/lib/rate-limit";
 import { safeNextPath } from "@/lib/redirect";
@@ -91,6 +92,7 @@ export async function GET(request: Request) {
   const found = await accountFor(who).catch(() => null);
   if (!found) return back("taken");
   const { user, isNew } = found;
+  if (isNew) await addToJourney("signup").catch(() => {});
   const next = safeNextPath(start.next, isNew ? "/begin" : "/dashboard");
 
   // Google stands in for the password, not for the authenticator app.

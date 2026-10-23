@@ -649,3 +649,12 @@ export const IconSearch = ({ className = "h-6 w-6" }: P) => (
     <path d="m16 16 4.5 4.5" />
   </Glyph>
 );
+
+/** A puzzled face, for "not really". */
+export const IconPuzzled = ({ className = "h-6 w-6" }: P) => (
+  <Glyph className={className}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M8.5 16c1-.8 2.2-1.2 3.5-1.2s2.5.4 3.5 1.2" />
+    <path d="M9 9.5h.01M15 9.5h.01" strokeWidth={2.4} />
+  </Glyph>
+);

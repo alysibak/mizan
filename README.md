@@ -559,7 +559,7 @@ environment variables; with Docker, in `.env` next to `docker-compose.yml`.
 | `DATABASE_AUTH_TOKEN` | Turso token (ignored for `file:` URLs) |
 | `APP_URL` | Public address, e.g. `https://mizan.example`. Used for canonical links, social cards, the sitemap, and calendar-feed links. Needed at **build** time for the static pages; Vercel falls back to its production domain. |
 | `OPERATOR_NAME`, `CONTACT_EMAIL` | Who runs this copy, shown in the privacy policy and terms. Set both before going public. |
-| `ADMIN_EMAIL` | Comma-separated emails that can open `/admin/users` (sign-up counts; never ledger contents). |
+| `ADMIN_EMAIL` | Comma-separated emails that can open `/admin/users` (sign-up counts; never ledger contents) and `/admin/feedback` (answers to “Was this easy?” and how many reached each step). |
 | `DEMO_EMAIL` | Makes that account the read-only, one-click demo. |
 | `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` | Turns on cookieless [Plausible](https://plausible.io) analytics for public pages only, with `Signup`, `Demo`, and `Calculated` events. Build time. |
 | `NEXT_PUBLIC_PLAUSIBLE_SRC` | Script URL for a self-hosted Plausible (defaults to plausible.io, manual mode). |
@@ -625,7 +625,7 @@ mizan.example {
 ## Testing
 
 ```bash
-npm run lint && npm run typecheck && npm test   # 329 unit tests
+npm run lint && npm run typecheck && npm test   # 336 unit tests
 npm run build && npm run test:e2e               # Playwright, needs Chromium
 ```
 
@@ -645,6 +645,16 @@ language and hreflang, the nisab pages into the calculator, the four free
 tools and guides, email confirmation, reminders and reset links (through a file outbox),
 two-step sign-in end to end, and an axe audit of 38 pages against WCAG 2.1 AA
 in light and dark.
+
+### Testing with people
+
+At the end of the guide's answer, and on Home in an account, Mizan asks
+“Was this easy?” once: two faces to tap, then a line if the person wants to
+say more. Set `ADMIN_EMAIL` to your own address, sign in, and open
+`/admin/feedback` to read the answers, and to see how many people reached
+each step: the home page, a number typed there, the guide, its answer, a
+reminder, an account, its setup. The counts are one number per step per day,
+with nothing about who.
 
 CI (`.github/workflows/ci.yml`) runs all of that on every push to `master` and
 every pull request, plus a runtime dependency audit, a fresh migration, a

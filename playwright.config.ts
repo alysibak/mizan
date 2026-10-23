@@ -1,5 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
-import { CRON_SECRET, OUTBOX } from "./e2e/helpers";
+import { ADMIN, CRON_SECRET, OUTBOX } from "./e2e/helpers";
 
 // End-to-end checks against a production build: `npm run build` first, then
 // `npm run test:e2e`. Each run starts from an empty database with the
@@ -42,6 +42,7 @@ export default defineConfig({
       EMAIL_FROM: "Mizan <hello@mizan.test>",
       EMAIL_OUTBOX_FILE: OUTBOX,
       CRON_SECRET,
+      ADMIN_EMAIL: ADMIN,
       NEXT_TELEMETRY_DISABLED: "1",
     },
   },

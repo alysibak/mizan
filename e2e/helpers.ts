@@ -6,6 +6,8 @@ import { expect, type Page } from "@playwright/test";
 // src/lib/email.ts); reminders run when called with this secret.
 export const OUTBOX = path.join(__dirname, "..", "e2e-outbox.jsonl");
 export const CRON_SECRET = "e2e-cron-secret";
+/** The one account that sees the admin pages. */
+export const ADMIN = "admin@mizan.test";
 
 export interface SentEmail {
   to: string;
