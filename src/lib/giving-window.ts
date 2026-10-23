@@ -59,7 +59,8 @@ export function paymentWindow(
       start,
       end,
       label: "This zakat year",
-      detail: `Counts the zakat you noted from ${readableDay(start)} to ${readableDay(end)}. Your zakat day is ${readableDay(status.dueDate)}; the moon where you live may move it by a day.${carried}`,
+      // The zakat day itself is shown beside this, with its moon caveat.
+      detail: `Counts the zakat you noted from ${readableDay(start)} to ${readableDay(end)}.${carried}`,
     };
   }
 

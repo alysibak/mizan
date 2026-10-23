@@ -33,7 +33,7 @@ export interface CategoryMeta {
 export const CATEGORIES: Record<CategoryKey, CategoryMeta> = {
   cash: {
     key: "cash",
-    label: "Cash on hand",
+    label: "Cash in hand",
     group: "liquid",
     defaultZakatablePortion: 1,
     portionEditable: false,
@@ -41,11 +41,11 @@ export const CATEGORIES: Record<CategoryKey, CategoryMeta> = {
   },
   bank: {
     key: "bank",
-    label: "Bank balances",
+    label: "Money in the bank",
     group: "liquid",
     defaultZakatablePortion: 1,
     portionEditable: false,
-    note: "Bank balances count in full. Any interest is not yours to keep: give it away separately, and do not count it here.",
+    note: "Money in the bank counts in full. Any interest is not yours to keep: give it away separately, and do not count it here.",
   },
   gold: {
     key: "gold",

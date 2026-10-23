@@ -157,7 +157,7 @@ export default async function YearPage({
             </dd>
           </div>
           <div className="ledger-row">
-            <dt className="text-sage">Given · {window.label}</dt>
+            <dt className="text-sage">Given so far</dt>
             <dd className="nums">{formatMoney(zakatPaid, c)}</dd>
           </div>
           <div className="ledger-row">

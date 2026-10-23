@@ -82,7 +82,7 @@ test("a full zakat year on a phone", async ({ page }) => {
   });
 
   await test.step("a holding in another currency converts at the user's rate", async () => {
-    await page.getByRole("button", { name: "Bank balances", exact: true }).click();
+    await page.getByRole("button", { name: "Money in the bank", exact: true }).click();
     await page.fill("#asset-new-label", "US account");
     await page.check("text=Held in another currency");
     await page.fill("#asset-new-fcur", "USD");
@@ -109,7 +109,7 @@ test("a full zakat year on a phone", async ({ page }) => {
     await page.waitForURL("**/year?rolled=**");
     await expect(page.getByText("Your next zakat year starts")).toBeVisible();
 
-    await expect(page.locator(".ledger-row", { hasText: "Given ·" })).toContainText("$0");
+    await expect(page.locator(".ledger-row", { hasText: "Given so far" })).toContainText("$0");
 
     // The copy is kept, and the year it closed cannot be closed twice.
     const snapshot = await page.locator('a[href^="/year/snapshots/"]').first().getAttribute("href");

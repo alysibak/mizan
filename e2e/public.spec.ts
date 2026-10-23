@@ -106,7 +106,7 @@ test("the calculator answers without an account, and the answer comes along", as
 
   await page.goto("/assets");
   // Rows are buttons that open them for changes.
-  await expect(page.getByRole("button", { name: /^Bank balances.*Edit$/ })).toContainText("18,000");
+  await expect(page.getByRole("button", { name: /^Money in the bank.*Edit$/ })).toContainText("18,000");
   await expect(page.getByRole("button", { name: /^Gold you keep as savings.*Edit$/ })).toContainText("3,750");
   await expect(page.getByRole("button", { name: /^Debts due now.*Edit$/ })).toContainText("1,000");
   await page.goto("/zakat");
@@ -242,7 +242,7 @@ test("the step-by-step guide explains each step and ends with things to do", asy
   await expect(guide.getByText("Step 1 of 8")).toBeAttached();
 
   // Pictures first: only what they have is asked about.
-  for (const kind of ["Cash in hand", "Bank balances", "Gold you keep as savings"]) {
+  for (const kind of ["Cash in hand", "Money in the bank", "Gold you keep as savings"]) {
     await page.getByRole("button", { name: kind }).click();
   }
   await expect(page.getByText("Step 1 of 5")).toBeAttached();

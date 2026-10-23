@@ -246,7 +246,7 @@ describe("draftToLedger", () => {
       }),
     );
     expect(out.assets).toEqual([
-      { category: "bank", label: "Bank balances", amount: 9000, zakatablePortion: 1 },
+      { category: "bank", label: "Money in the bank", amount: 9000, zakatablePortion: 1 },
       {
         category: "jewellery",
         label: "Gold jewellery you wear",

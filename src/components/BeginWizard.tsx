@@ -49,10 +49,10 @@ function resumeStep(): number {
 /** The kinds a first holding is picked from, as pictures. */
 const FIRST_KINDS = [
   { value: "bank", label: "Money in the bank", Icon: IconBank },
-  { value: "cash", label: "Cash at home", Icon: IconCash },
-  { value: "gold", label: "Gold coins or bars", Icon: IconGoldBar },
-  { value: "silver", label: "Silver", Icon: IconCoins },
-  { value: "receivables", label: "Money owed to me", Icon: IconOwed },
+  { value: "cash", label: "Cash in hand", Icon: IconCash },
+  { value: "gold", label: "Gold coins and bars", Icon: IconGoldBar },
+  { value: "silver", label: "Silver coins and bars", Icon: IconCoins },
+  { value: "receivables", label: "Money owed to you", Icon: IconOwed },
   { value: "other", label: "Something else", Icon: IconQuestion },
 ] as const;
 

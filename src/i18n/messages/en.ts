@@ -303,7 +303,7 @@ const en = {
     fields: {
       cash: { label: "Cash in hand", hint: "Notes and coins at home or in your wallet." },
       bank: {
-        label: "Bank balances",
+        label: "Money in the bank",
         hint: "Current, savings and deposit accounts. Leave out interest earned: give it away separately.",
       },
       gold: {

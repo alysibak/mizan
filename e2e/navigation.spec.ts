@@ -80,7 +80,7 @@ test("the guide asks what they have, and points to the pages for the rest", asyn
     route.fulfill({ json: { currency: "USD", goldPricePerGram: 100, silverPricePerGram: 1.2, source: "test" } }),
   );
   await page.goto("/guide");
-  await page.getByRole("button", { name: "Bank balances" }).click();
+  await page.getByRole("button", { name: "Money in the bank" }).click();
   await page.getByRole("button", { name: "A shop" }).click();
   await page.getByRole("button", { name: "Years I did not pay" }).click();
   await expect(page.getByRole("button", { name: "A shop" })).toHaveAttribute("aria-pressed", "true");

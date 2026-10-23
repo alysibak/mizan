@@ -106,17 +106,27 @@ export default async function ZakatPage() {
           {/* Deductions and net */}
           <section className="card p-5">
             <h2 className="font-serif text-lg text-ink">2. Take off debts you owe</h2>
-            <div className="mt-2 divide-y divide-mist">
-              <Row
-                label="Debts taken off"
-                value={"-" + formatMoney(r.deductibleLiabilities, c)}
-                accent="danger"
-              />
-              <Row
-                label="What counts, after debts"
-                value={formatMoney(r.netZakatable, c)}
-              />
-            </div>
+            {r.deductibleLiabilities > 0 ? (
+              <div className="mt-2 divide-y divide-mist">
+                <Row
+                  label="Debts taken off"
+                  value={"−" + formatMoney(r.deductibleLiabilities, c)}
+                  accent="danger"
+                />
+                <Row
+                  label="What counts, after debts"
+                  value={formatMoney(r.netZakatable, c)}
+                />
+              </div>
+            ) : (
+              // Nothing to take off: no line of zeros.
+              <p className="mt-2 text-base text-sage">
+                None added, so nothing is taken off.{" "}
+                <Link href="/assets#debts" className="text-pine underline underline-offset-2">
+                  Add a debt
+                </Link>
+              </p>
+            )}
           </section>
 
           {/* Nisab comparison */}

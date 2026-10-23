@@ -17,6 +17,7 @@ export default function DashboardNotices({
   metalsReason = null,
   metalsAgeDays = null,
   welcome = false,
+  hasAssets = false,
   part = "all",
   currency = "USD",
 }: {
@@ -26,6 +27,8 @@ export default function DashboardNotices({
   metalsAgeDays?: number | null;
   /** Setup just finished (the wizard lands on /dashboard?welcome=1). */
   welcome?: boolean;
+  /** Something was added in setup, so the welcome asks for the rest. */
+  hasAssets?: boolean;
   /**
    * "top": what needs attention before reading the figures (the welcome and
    * stale prices). "bottom": the getting-started list and install hint.
@@ -81,12 +84,15 @@ export default function DashboardNotices({
   }
 
   const remaining = items.filter((i) => !i.done);
+  const checklistShown = !checklistHidden && remaining.length > 0;
+  // One thing at a time: the home-screen tip waits for the list to be done.
+  const installShown = install && hydrated && !checklistShown;
   const top = part !== "bottom";
   const bottom = part !== "top";
 
   const shown =
     (top && (welcome || (metalsStale && !metalsHidden))) ||
-    (bottom && ((!checklistHidden && remaining.length > 0) || install));
+    (bottom && (checklistShown || installShown));
   if (!shown) return null;
 
   return (
@@ -96,15 +102,17 @@ export default function DashboardNotices({
           <p className="eyebrow text-pine">Ready</p>
           <p className="mt-1 font-serif text-xl text-ink">You are set up.</p>
           <p className="mt-1 text-base text-sage">
-            Add your savings, cash and gold. Mizan works out your zakat.
+            {hasAssets
+              ? "Add anything else you own, such as cash at home or gold. Mizan adds it up."
+              : "Add your savings, cash and gold. Mizan works out your zakat."}
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <Link href="/assets" className="btn-primary">
-              Add what I own
+              {hasAssets ? "Add more" : "Add what I own"}
             </Link>
             <button
               type="button"
-              className="text-xs text-sage hover:text-ink"
+              className="inline-flex min-h-[44px] items-center px-2 text-sm text-sage hover:text-ink"
               onClick={dismissWelcome}
             >
               Dismiss
@@ -148,7 +156,7 @@ export default function DashboardNotices({
             </div>
             <button
               type="button"
-              className="shrink-0 text-xs text-sage hover:text-ink"
+              className="inline-flex min-h-[44px] shrink-0 items-center px-2 text-sm text-sage hover:text-ink"
               onClick={() => setMetalsHidden(true)}
             >
               Dismiss
@@ -157,7 +165,7 @@ export default function DashboardNotices({
         </section>
       ) : null}
 
-      {bottom && !checklistHidden && remaining.length > 0 ? (
+      {bottom && checklistShown ? (
         <section className="border border-mist bg-paper px-5 py-5">
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -168,7 +176,7 @@ export default function DashboardNotices({
             </div>
             <button
               type="button"
-              className="text-xs text-sage hover:text-ink"
+              className="inline-flex min-h-[44px] items-center px-2 text-sm text-sage hover:text-ink"
               onClick={() => setStoredValue(CHECKLIST_KEY, "1")}
             >
               Dismiss
@@ -193,7 +201,7 @@ export default function DashboardNotices({
         </section>
       ) : null}
 
-      {bottom ? (
+      {bottom && installShown ? (
         <InstallHint pitch="Put Mizan on your home screen, so it opens like an app. No app store needed." />
       ) : null}
     </div>

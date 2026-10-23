@@ -182,6 +182,7 @@ export default async function DashboardPage({
         metalsReason={metals.reason}
         metalsAgeDays={metals.ageDays}
         welcome={welcome === "1"}
+        hasAssets={assetRows.length > 0}
         part="top"
         currency={settings.currency}
       />

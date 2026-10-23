@@ -293,7 +293,7 @@ export default function AssetManager({
         </div>
       </section>
 
-      <section>
+      <section id="debts" className="scroll-mt-20">
         <h2 className="mb-1 font-serif text-lg text-ink">Debts you owe</h2>
         <p className="mb-2 text-sm text-sage">
           Bills and payments due soon are taken off what counts.

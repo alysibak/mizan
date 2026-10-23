@@ -189,10 +189,10 @@ test("someone already signed in adds what they worked out on this phone to the l
   const card = page.getByRole("region", { name: "From this phone" });
   await expect(card.getByRole("checkbox")).toHaveCount(3);
   // The bank balance is already in the ledger as "Chequing": leave it out.
-  await card.getByRole("checkbox", { name: /Bank balances/ }).uncheck();
+  await card.getByRole("checkbox", { name: /Money in the bank/ }).uncheck();
   await card.getByRole("button", { name: "Add the 2 ticked" }).click();
   await expect(page.getByRole("status").filter({ hasText: "Added" })).toBeVisible();
-  await expect(page.locator("li", { hasText: "Cash in hand" })).toContainText("2,000");
+  await expect(page.getByRole("button", { name: /^Cash in hand.*Edit$/ })).toContainText("2,000");
   // Only the one bank account the ledger already had.
   await expect(page.getByRole("button", { name: /Edit$/ })).toHaveCount(2);
 

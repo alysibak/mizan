@@ -45,7 +45,7 @@ export const CALC_FIELDS: CalcField[] = [
   {
     key: "bank",
     category: "bank",
-    label: "Bank balances",
+    label: "Money in the bank",
     hint: "Current, savings and deposit accounts. Leave out interest earned: give it away separately.",
   },
   {
