@@ -3,6 +3,7 @@ import { Literata, Source_Sans_3 } from "next/font/google";
 import "./globals.css";
 import PwaSetup from "@/components/PwaSetup";
 import Analytics from "@/components/Analytics";
+import CrashReporter from "@/components/CrashReporter";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE, siteUrl } from "@/lib/site";
 
 const literata = Literata({
@@ -96,6 +97,7 @@ export default function RootLayout({
         {children}
         <PwaSetup />
         <Analytics />
+        <CrashReporter />
       </body>
     </html>
   );

@@ -7,6 +7,7 @@ import ShareButton from "@/components/public/ShareButton";
 import { ExampleBanner, NeedBar, NeedIcon, ZakatBadge, progressWords, stateWords } from "@/components/neighbours/NeedBits";
 import PledgeBox from "@/components/neighbours/PledgeBox";
 import ReportNeed from "@/components/neighbours/ReportNeed";
+import ReadAloud from "@/components/ReadAloud";
 import { kindLabel } from "@/lib/neighbours";
 import { ensureExample, neighboursMode, publicNeed } from "@/lib/neighbours-store";
 import { formatMoney } from "@/lib/money";
@@ -61,7 +62,23 @@ export default async function NeedPage({ params }: Props) {
           </div>
         </header>
 
-        <ZakatBadge zakat={need.zakat} />
+        <div className="flex flex-wrap items-center gap-3">
+          <ZakatBadge zakat={need.zakat} />
+          <ReadAloud
+            text={[
+              need.title,
+              `Checked in person by ${partner.name}, ${partner.city}.`,
+              need.zakat ? "Zakat can go here." : "Charity only, not zakat.",
+              need.story,
+              progressWords(progress, need.amount, partner.currency),
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            lang="en"
+            listen={messagesFor("en").common.listen}
+            stop={messagesFor("en").common.stopListening}
+          />
+        </div>
 
         {need.story ? <p className="whitespace-pre-line text-lg leading-relaxed text-ink">{need.story}</p> : null}
 
@@ -88,6 +105,7 @@ export default async function NeedPage({ params }: Props) {
             currency={partner.currency}
             room={progress.room}
             zakat={need.zakat}
+            easy={messagesFor("en").common.easy}
           />
         ) : null}
 

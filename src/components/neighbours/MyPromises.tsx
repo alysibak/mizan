@@ -4,12 +4,13 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { readStoredValue, setStoredValue, useHydrated, useStoredValue } from "@/lib/client-store";
 import { formatMoney } from "@/lib/money";
-import { showPledgeCode } from "@/lib/neighbours";
+import { PLEDGE_HOLD_DAYS, readTime, showPledgeCode } from "@/lib/neighbours";
 import { PLEDGES_KEY, forgetPledge, markNoted, parsePledges, writePledges, type KeptPledge } from "@/lib/neighbours-phone";
 import { MY_KEY, addPayment, parseMy } from "@/lib/my-zakat";
 
 interface Status {
   status: "pledged" | "received" | "lapsed" | "cancelled";
+  createdAt: string;
   received: number | null;
   receivedAt: string | null;
   need: { thanks: string | null };
@@ -92,6 +93,9 @@ export default function MyPromises() {
             <p className={"text-base font-medium " + (known?.status === "received" ? "text-pine" : "text-ink")} aria-live="polite">
               {known ? WORDS[known.status] : s === "unknown" ? "Could not check just now" : "Checking…"}
             </p>
+            {known?.status === "pledged" ? (
+              <p className="text-base text-sage">{payWithin(known.createdAt)}</p>
+            ) : null}
             {known?.status === "received" && known.need.thanks ? (
               <blockquote className="border-s-4 border-brass bg-brass/5 px-3 py-2 text-base text-ink">
                 {known.need.thanks}
@@ -121,4 +125,10 @@ export default function MyPromises() {
       })}
     </ul>
   );
+}
+
+/** "Please pay within 5 days", counted from when the promise was made. */
+function payWithin(createdAt: string): string {
+  const left = Math.max(1, Math.ceil(PLEDGE_HOLD_DAYS - (Date.now() - readTime(createdAt).getTime()) / 86_400_000));
+  return left === 1 ? "Please pay by tomorrow, or the place goes to someone else." : `Please pay within ${left} days.`;
 }

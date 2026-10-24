@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
+import { crashNote, sendCrash } from "@/lib/crash-report";
 
 /** Shown when a page fails to render. The digest matches the server log line. */
 export default function ErrorPage({
@@ -10,6 +12,9 @@ export default function ErrorPage({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    sendCrash(crashNote(`${error.name}: ${error.message}${error.digest ? ` [${error.digest}]` : ""}`));
+  }, [error]);
   return (
     <main className="mx-auto flex min-h-[70vh] max-w-xl flex-col justify-center px-6 py-16">
       <p className="eyebrow">Something went wrong</p>

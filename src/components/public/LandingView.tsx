@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PAGE_ICONS } from "@/components/pageIcons";
+import { readNeighboursMode } from "@/lib/neighbours";
 import { IconQuestion } from "@/components/icons";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
@@ -38,6 +39,8 @@ export default function LandingView({ locale }: { locale: Locale }) {
   const m = all.landing;
   const intl = LOCALE_INFO[locale].intl;
   const money = (n: number) => formatMoney(n, "USD", intl);
+  // Needs near you, once real partners are listed (English for now).
+  const neighbours = locale === "en" && readNeighboursMode(process.env.NEIGHBOURS) === "on";
   // The main button opens the one-question-at-a-time guide: someone new is
   // asked one thing at a time instead of meeting every field at once. The
   // full calculator is a tap away in the header and from the guide.
@@ -115,9 +118,10 @@ export default function LandingView({ locale }: { locale: Locale }) {
             <p className="mt-3 text-sm text-sage">{m.trustLine}</p>
             {/* Three more answers, as pictures to tap. */}
             <nav aria-label={m.chooseTitle} className="animate-fade-up mt-8 max-w-xl" style={{ animationDelay: "140ms" }}>
-              <ul className="grid grid-cols-3 gap-2">
+              <ul className={"grid gap-2 " + (neighbours ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3")}>
                 {(
                   [
+                    ...(neighbours ? ([["/neighbours", "Help a family near you", "neighbours"]] as const) : []),
                     ["/who-can-receive", m.choose.who, "who"],
                     ["/zakat-al-fitr", m.choose.fitr, "fitr"],
                     ["/ask", m.choose.ask, "ask"],

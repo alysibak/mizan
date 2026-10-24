@@ -65,7 +65,8 @@ work.
   answer so no one gives on a guess without checking. In every language.
 - **Report a problem** (`/report`), from the Menu and footer of every page,
   in every language: what kind, what happened, and the page it came from;
-  read on `/admin/feedback`.
+  read on `/admin/feedback`. When a page breaks in someone's browser, it
+  reports itself there too: the error and the page, never what was typed.
 - **Can I give zakat to…?** (`/who-can-receive`). Fifteen people a beginner
   asks about (parents, children, a husband or wife, brothers and sisters,
   other relatives, the poor, people in debt, students, charities, mosques, a
@@ -680,6 +681,12 @@ The safeguards are built in, not left to good intentions:
 - **Little kept about givers**: a name and email only if offered, seen only
   by the partner, and cleared 60 days after the promise is settled.
 - **A record**: every action on a need is logged with who did it.
+
+Givers can send the promise and its code to their own WhatsApp, and see
+how many days are left to pay. Each morning (with the reminder run) a desk
+with something waiting gets one email: payments on the way, promises that
+lapsed, reports, needs to check, needs ending within three days. The desk
+downloads everything received as CSV for the mosque's own accounts.
 
 Partners use an ordinary Mizan account and a desk at `/partner` (no zakat
 setup needed). Each has a public page with what it has met and passed on

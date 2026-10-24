@@ -9,12 +9,13 @@ import { JOURNEY_LABELS, JOURNEY_STEPS, countDay } from "@/lib/feedback";
 import { LOCALE_INFO, type Locale } from "@/i18n/config";
 import AdminTabs from "../AdminTabs";
 
-const PLACES: Record<string, string> = { guide: "Guide answer", account: "Account Home" };
+const PLACES: Record<string, string> = { guide: "Guide answer", account: "Account Home", neighbours: "After a promise" };
 const PROBLEM_LABELS: Record<string, string> = {
   wrong: "An answer looks wrong",
   broken: "Something does not work",
   hard: "Hard to understand",
   other: "Something else",
+  crash: "The page broke (sent by the page itself)",
 };
 
 function when(iso: string): string {

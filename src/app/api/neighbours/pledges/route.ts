@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { pledges } from "@/db/schema";
 import { errorJson, readJson } from "@/lib/api";
@@ -27,6 +27,7 @@ export async function POST(request: Request) {
       409,
     );
   }
+  if (pledge.amount < 1) return errorJson("Please give at least 1.", 400);
   if (pledge.amount > found.progress.room) {
     return errorJson(
       `Only ${formatMoney(found.progress.room, found.partner.currency)} is still needed. Please give that or less.`,
@@ -37,15 +38,25 @@ export async function POST(request: Request) {
   // A fresh code, tried again in the unlikely case it is taken.
   for (let attempt = 0; attempt < 3; attempt++) {
     const code = pledgeCode();
-    const [taken] = await db.select({ id: pledges.id }).from(pledges).where(and(eq(pledges.code, code))).limit(1);
+    const [taken] = await db.select({ id: pledges.id }).from(pledges).where(eq(pledges.code, code)).limit(1);
     if (taken) continue;
-    await db.insert(pledges).values({
-      needId: pledge.needId,
-      code,
-      amount: pledge.amount,
-      name: pledge.name || null,
-      contact: pledge.contact || null,
-    });
+    const [made] = await db
+      .insert(pledges)
+      .values({
+        needId: pledge.needId,
+        code,
+        amount: pledge.amount,
+        name: pledge.name || null,
+        contact: pledge.contact || null,
+      })
+      .returning({ id: pledges.id });
+    // Two promises at the same moment could both have seen room for
+    // themselves: look again, and take this one back if it is now too much.
+    const after = await publicNeed(pledge.needId);
+    if (after && after.progress.received + after.progress.pledged > after.need.amount + 0.005) {
+      await db.delete(pledges).where(eq(pledges.id, made.id));
+      return errorJson("Someone promised the rest just now. Please look again.", 409);
+    }
     await logEvent(pledge.needId, "A visitor", `Promised ${formatMoney(pledge.amount, found.partner.currency)}`);
     await tellMembers(found.partner.id, "A new pledge on Mizan Neighbours", [
       `Someone promised ${formatMoney(pledge.amount, found.partner.currency)} for “${found.need.title}”.`,

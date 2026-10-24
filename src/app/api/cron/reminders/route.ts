@@ -9,6 +9,7 @@ import { hawlDueDate, parseHijriCalendar } from "@/lib/hijri";
 import { isIsoDay } from "@/lib/dates";
 import { isDemoUser } from "@/lib/demo";
 import { userToday } from "@/lib/today";
+import { sendDeskDigests, tidyNeighbours } from "@/lib/neighbours-store";
 
 export const dynamic = "force-dynamic";
 // A large user base takes a while to go through.
@@ -32,6 +33,8 @@ function authorized(request: Request): boolean {
  */
 export async function GET(request: Request) {
   if (!authorized(request)) return new Response("Not found", { status: 404 });
+  // Neighbours keeps little, and only for as long as it is needed.
+  await tidyNeighbours();
   if (!emailEnabled()) return NextResponse.json({ checked: 0, sent: 0, email: "off" });
 
   const rows = await db
@@ -96,5 +99,6 @@ export async function GET(request: Request) {
       }),
     );
   }
-  return NextResponse.json({ checked: rows.length, sent, failed });
+  const desks = await sendDeskDigests();
+  return NextResponse.json({ checked: rows.length, sent, failed, desks });
 }

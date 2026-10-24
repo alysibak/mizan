@@ -6,7 +6,9 @@ import { LOCALES, type Locale } from "@/i18n/config";
 import { cleanText } from "@/lib/neighbours";
 
 export const PROBLEM_KINDS = ["wrong", "broken", "hard", "other"] as const;
-export type ProblemKind = (typeof PROBLEM_KINDS)[number];
+/** Sent by the page itself when it breaks (see lib/crash-report). */
+const SENT_KINDS = [...PROBLEM_KINDS, "crash"] as const;
+export type ProblemKind = (typeof SENT_KINDS)[number];
 export const PROBLEM_NOTE_MAX = 1000;
 
 export interface ProblemInput {
@@ -25,7 +27,7 @@ function samePagePath(v: unknown): string {
 
 export function readProblem(body: unknown): { problem: ProblemInput } | { error: string } {
   const b = (body && typeof body === "object" ? body : {}) as Record<string, unknown>;
-  if (!(PROBLEM_KINDS as readonly string[]).includes(b.kind as string)) return { error: "Choose what kind of problem." };
+  if (!(SENT_KINDS as readonly string[]).includes(b.kind as string)) return { error: "Choose what kind of problem." };
   const note = cleanText(b.note, PROBLEM_NOTE_MAX);
   if (note.length < 3) return { error: "Say what happened, in a few words." };
   const contact = cleanText(b.contact, 120).replace(/\n/g, " ");

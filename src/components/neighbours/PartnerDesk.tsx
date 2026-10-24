@@ -146,6 +146,13 @@ export default function PartnerDesk({
             <Link href="/neighbours/for-mosques" className="inline-flex min-h-[44px] items-center text-pine hover:underline">
               What you agreed to
             </Link>
+            <a
+              href={`/api/neighbours/manage/partner/${partner.id}/received`}
+              download
+              className="inline-flex min-h-[44px] items-center text-pine hover:underline"
+            >
+              Download what was received
+            </a>
           </p>
         </header>
 

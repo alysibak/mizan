@@ -1,6 +1,8 @@
 "use client";
 
 import "./globals.css";
+import { useEffect } from "react";
+import { crashNote, sendCrash } from "@/lib/crash-report";
 
 /** Last resort when the root layout itself fails. Keeps its own <html>. */
 export default function GlobalError({
@@ -10,6 +12,9 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    sendCrash(crashNote(`${error.name}: ${error.message}${error.digest ? ` [${error.digest}]` : ""}`));
+  }, [error]);
   return (
     <html lang="en">
       <body>

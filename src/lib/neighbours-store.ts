@@ -21,6 +21,7 @@ import {
   isListed,
   needProgress,
   needState,
+  pledgeHolds,
   readNeighboursMode,
   readTime,
   sqlTime,
@@ -226,6 +227,56 @@ export async function tellGiver(contact: string | null, lines: string[]): Promis
   await sendEmail({ to: contact, subject: "It arrived. May Allah reward you.", text: [...lines, "", "Mizan Neighbours"].join("\n") }).catch(
     () => false,
   );
+}
+
+/**
+ * Once a day, each mosque's desk hears what is waiting for it: payments to
+ * confirm, promises that lapsed, reports, needs to check, needs ending soon.
+ * Nothing is sent to a desk with nothing waiting.
+ */
+export async function sendDeskDigests(now = new Date()): Promise<number> {
+  if (neighboursMode() !== "on") return 0;
+  const active = await db
+    .select({ id: partners.id })
+    .from(partners)
+    .where(and(eq(partners.status, "active"), eq(partners.example, false)));
+  let sent = 0;
+  for (const { id } of active) {
+    const desk = await partnerDesk(id, now);
+    const waiting = desk.flatMap((d) => d.pledges.filter((p) => p.status === "pledged" && pledgeHolds(p, now))).length;
+    const lapsed = desk.flatMap((d) => d.pledges.filter((p) => p.status === "pledged" && !pledgeHolds(p, now))).length;
+    const reports = desk.reduce((n, d) => n + d.reports.length, 0);
+    const drafts = desk.filter((d) => d.state === "draft").length;
+    const ending = desk.filter((d) => (d.state === "open" || d.state === "covered") && (d.daysLeft ?? 99) <= 3).length;
+    const lines = [
+      waiting ? `${waiting} ${waiting === 1 ? "payment is" : "payments are"} on the way: mark each one received when it arrives.` : "",
+      lapsed ? `${lapsed} ${lapsed === 1 ? "promise" : "promises"} lapsed with nothing marked received: cancel ${lapsed === 1 ? "it" : "them"}, or mark ${lapsed === 1 ? "it" : "them"} received if the money came.` : "",
+      reports ? `${reports} ${reports === 1 ? "report needs" : "reports need"} an answer.` : "",
+      drafts ? `${drafts} ${drafts === 1 ? "need is" : "needs are"} waiting to be checked and listed.` : "",
+      ending ? `${ending} ${ending === 1 ? "need ends" : "needs end"} within 3 days: give ${ending === 1 ? "it" : "them"} more time, or close ${ending === 1 ? "it" : "them"}.` : "",
+    ].filter(Boolean);
+    if (!lines.length) continue;
+    await tellMembers(id, "Your mosque desk today", lines);
+    sent += 1;
+  }
+  return sent;
+}
+
+/** Daily tidy: givers' contacts cleared on time, and visitors' tries on the example dropped. */
+export async function tidyNeighbours(now = new Date()): Promise<void> {
+  await forgetOldContacts(now);
+  const examples = await db.select({ id: needs.id }).from(needs).innerJoin(partners, eq(needs.partnerId, partners.id)).where(eq(partners.example, true));
+  if (examples.length) {
+    await db
+      .delete(pledges)
+      .where(
+        and(
+          inArray(pledges.needId, examples.map((e) => e.id)),
+          sql`${pledges.code} not like ${`${EXAMPLE_CODE}%`}`,
+          lt(pledges.createdAt, sqlTime(new Date(now.getTime() - 86_400_000))),
+        ),
+      );
+  }
 }
 
 const EXAMPLE_SLUG = "example-mosque";

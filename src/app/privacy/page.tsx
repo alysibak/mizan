@@ -143,8 +143,9 @@ export default function PrivacyPage() {
       <LegalSection title="Report a problem">
         <p>
           If you report a problem, Mizan keeps what kind it is, the page you came from, your words, the page’s
-          language, and an email or phone only if you choose to leave one for a reply. Requests are limited per
-          network address, stored as a one-way hash.
+          language, and an email or phone only if you choose to leave one for a reply. If a page breaks, your
+          browser sends the error’s message and the page’s address, so it can be fixed: nothing you typed. Requests
+          are limited per network address, stored as a one-way hash.
         </p>
       </LegalSection>
 

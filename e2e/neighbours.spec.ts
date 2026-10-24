@@ -80,8 +80,10 @@ test("a mosque lists a checked need, a visitor promises and pays, and hears it a
     route.fulfill({ json: { currency: "USD", goldPricePerGram: 100, silverPricePerGram: 1.2, source: "test" } }),
   );
   await giver.goto("/");
+  // On the home page, and in the Menu.
+  await expect(giver.getByRole("main").getByRole("link", { name: "Help a family near you" })).toBeVisible();
   await giver.getByRole("button", { name: "Menu" }).click();
-  await giver.getByRole("link", { name: "Help a family near you" }).click();
+  await giver.getByRole("dialog").getByRole("link", { name: "Help a family near you" }).click();
   await giver.waitForURL("**/neighbours");
   await expectNoHorizontalScroll(giver);
   const card = giver.getByRole("link", { name: /Rent for a family of four/ });
@@ -101,8 +103,14 @@ test("a mosque lists a checked need, a visitor promises and pays, and hears it a
   await expect(giver.getByText("Bank transfer to Masjid Al-Test")).toBeVisible();
   const code = (await giver.locator("p.font-mono").first().innerText()).trim();
   expect(code).toMatch(/^[2-9A-HJ-NP-Z]{4}-[2-9A-HJ-NP-Z]{4}$/);
+  // A copy for their own WhatsApp, so the code is not lost.
+  await expect(giver.getByRole("link", { name: "Send it to my WhatsApp" })).toHaveAttribute(
+    "href",
+    new RegExp(`^https://wa\\.me/\\?text=.*${code}`),
+  );
   await giver.getByRole("link", { name: "See what I promised" }).click();
   await expect(giver.getByText("Waiting for your payment")).toBeVisible();
+  await expect(giver.getByText("Please pay within 7 days.")).toBeVisible();
 
   // The money arrives at the mosque, which marks it received.
   await lead.goto("/partner");
@@ -112,6 +120,12 @@ test("a mosque lists a checked need, a visitor promises and pays, and hears it a
   await row.getByRole("button", { name: "It arrived" }).click();
   await expect(lead.locator(`[data-code='${code.replace("-", "")}']`)).toContainText("Received $400");
   expect(emailsTo(giverEmail).at(-1)?.text).toContain("reached Masjid Al-Test");
+  // What arrived, for the mosque's own accounts.
+  const csv = await lead.request.get(
+    (await lead.getByRole("link", { name: "Download what was received" }).getAttribute("href"))!,
+  );
+  expect(csv.headers()["content-type"]).toContain("text/csv");
+  expect(await csv.text()).toContain(`Rent for a family of four,zakat,${code},400.00,CAD`);
 
   // The giver hears it arrived, and counts it as zakat given.
   await giver.reload();

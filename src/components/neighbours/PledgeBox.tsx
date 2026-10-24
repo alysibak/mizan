@@ -8,6 +8,8 @@ import { readStoredValue, setStoredValue } from "@/lib/client-store";
 import { formatMoney } from "@/lib/money";
 import { PLEDGE_HOLD_DAYS, showPledgeCode } from "@/lib/neighbours";
 import { PLEDGES_KEY, keepPledge, parsePledges, writePledges } from "@/lib/neighbours-phone";
+import EasyCheck from "@/components/EasyCheck";
+import type { Messages } from "@/i18n/messages/en";
 
 /**
  * "I'll give this": how much, and, only if they want, a name and a way to
@@ -21,6 +23,7 @@ export default function PledgeBox({
   currency,
   room,
   zakat,
+  easy,
 }: {
   needId: string;
   title: string;
@@ -28,6 +31,8 @@ export default function PledgeBox({
   currency: string;
   room: number;
   zakat: boolean;
+  /** "Was this easy?", asked once a promise is made. */
+  easy?: Messages["common"]["easy"];
 }) {
   const [amount, setAmount] = useState("");
   const [name, setName] = useState("");
@@ -103,9 +108,30 @@ export default function PledgeBox({
           Please pay within {PLEDGE_HOLD_DAYS} days, or your place goes to someone else. The code is kept on this
           phone.
         </p>
-        <Link href="/neighbours/mine" className="btn-primary">
-          See what I promised
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link href="/neighbours/mine" className="btn-primary">
+            See what I promised
+          </Link>
+          {/* A copy in WhatsApp, the app they already keep, so the code is not lost. */}
+          <a
+            className="btn-ghost"
+            target="_blank"
+            rel="noopener noreferrer"
+            href={`https://wa.me/?text=${encodeURIComponent(
+              [
+                `Mizan: I promised ${money(done.amount)} to ${partner} for “${title}”.`,
+                `My code: ${showPledgeCode(done.code)}`,
+                done.howToGive ? `How to pay: ${done.howToGive}` : "",
+                `Pay within ${PLEDGE_HOLD_DAYS} days.`,
+              ]
+                .filter(Boolean)
+                .join("\n"),
+            )}`}
+          >
+            Send it to my WhatsApp
+          </a>
+        </div>
+        {easy ? <EasyCheck page="neighbours" locale="en" m={easy} /> : null}
       </section>
     );
   }

@@ -5,8 +5,8 @@
  */
 import { LOCALES, type Locale } from "@/i18n/config";
 
-/** Where the question is asked: the guide's answer, and Home in an account. */
-export const FEEDBACK_PAGES = ["guide", "account"] as const;
+/** Where the question is asked: the guide's answer, Home in an account, and after a promise to a family. */
+export const FEEDBACK_PAGES = ["guide", "account", "neighbours"] as const;
 export type FeedbackPage = (typeof FEEDBACK_PAGES)[number];
 
 export const NOTE_MAX = 500;

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { and, count, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { partnerMembers, partners, users } from "@/db/schema";
+import { needs, partnerMembers, partners, users } from "@/db/schema";
 import { errorJson, readJson } from "@/lib/api";
 import { cleanText } from "@/lib/neighbours";
 import { partnerGate } from "@/lib/neighbours-gate";
@@ -19,6 +19,12 @@ export async function PATCH(request: Request, { params }: Params) {
   const currency = typeof b.currency === "string" ? b.currency.trim().toUpperCase() : "";
   if (name.length < 2 || city.length < 2) return errorJson("Enter the name and the city.", 400);
   if (!/^[A-Z]{3}$/.test(currency)) return errorJson("Choose a currency.", 400);
+  if (currency !== gate.partner.currency) {
+    const [written] = await db.select({ n: count() }).from(needs).where(eq(needs.partnerId, gate.partner.id));
+    if ((written?.n ?? 0) > 0) {
+      return errorJson("The currency cannot change once needs are written: their amounts are in it.", 409);
+    }
+  }
   await db
     .update(partners)
     .set({
