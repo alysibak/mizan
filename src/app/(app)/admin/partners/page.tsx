@@ -31,9 +31,9 @@ export default async function AdminPartnersPage() {
         <AdminTabs current="/admin/partners" />
         <p className="max-w-xl text-base text-sage">
           {mode === "off"
-            ? "Neighbours is off. Set NEIGHBOURS=demo to show the made-up example, or NEIGHBOURS=on to show real partners."
+            ? "Neighbours is off (NEIGHBOURS=off)."
             : mode === "demo"
-              ? "Neighbours shows the made-up example only (NEIGHBOURS=demo). Real partners can be set up here and shown with NEIGHBOURS=on."
+              ? "Neighbours shows the made-up example only, at /neighbours. Real partners can be set up here and shown with NEIGHBOURS=on."
               : "Neighbours is on: real partners are shown."}{" "}
           <Link href="/neighbours/for-mosques" className="text-pine underline underline-offset-2">
             What partners agree to

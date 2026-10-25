@@ -12,12 +12,13 @@ import { CODE_LENGTH, makeCode, readCode, showCode } from "./move";
 export type NeighboursMode = "off" | "demo" | "on";
 
 /**
- * Off unless the deployment turns it on. "demo" shows made-up needs from an
- * example mosque, to show partners how it works; "on" shows real partners.
+ * Unless the deployment says otherwise, the example: made-up needs from an
+ * example mosque at /neighbours, out of the Menu and search, to show
+ * partners how it works. "on" lists real partners; "off" hides it all.
  */
 export function readNeighboursMode(raw: string | undefined): NeighboursMode {
   const v = raw?.trim().toLowerCase();
-  return v === "on" || v === "demo" ? v : "off";
+  return v === "on" || v === "off" ? v : "demo";
 }
 
 export const NEED_KINDS = [

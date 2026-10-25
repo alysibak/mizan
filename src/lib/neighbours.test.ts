@@ -20,13 +20,13 @@ import {
 const now = new Date("2026-10-23T12:00:00Z");
 const ago = (days: number) => sqlTime(new Date(now.getTime() - days * 86_400_000));
 
-describe("neighbours is off unless turned on", () => {
+describe("neighbours shows the example unless told otherwise", () => {
   it("reads the setting", () => {
-    expect(readNeighboursMode(undefined)).toBe("off");
-    expect(readNeighboursMode("")).toBe("off");
-    expect(readNeighboursMode("yes")).toBe("off");
+    expect(readNeighboursMode(undefined)).toBe("demo");
+    expect(readNeighboursMode("")).toBe("demo");
+    expect(readNeighboursMode("yes")).toBe("demo");
     expect(readNeighboursMode(" ON ")).toBe("on");
-    expect(readNeighboursMode("demo")).toBe("demo");
+    expect(readNeighboursMode("off")).toBe("off");
   });
 });
 

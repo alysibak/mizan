@@ -569,7 +569,7 @@ environment variables; with Docker, in `.env` next to `docker-compose.yml`.
 | `OPERATOR_NAME`, `CONTACT_EMAIL` | Who runs this copy, shown in the privacy policy and terms. Set both before going public. |
 | `ADMIN_EMAIL` | Comma-separated emails that can open `/admin/users` (sign-up counts; never ledger contents) and `/admin/feedback` (answers to “Was this easy?” and how many reached each step). |
 | `DEMO_EMAIL` | Makes that account the read-only, one-click demo. |
-| `NEIGHBOURS` | Mizan Neighbours. Off unless set. `demo` shows a made-up example mosque with made-up needs at `/neighbours` (hidden from the Menu and from search), to show partners how it works; the demo account can open its desk. `on` lists real partners, added on `/admin/partners`, and puts “Help a family near you” in the Menu, the guide's answer, My zakat and Give. Build time, like `APP_URL`. |
+| `NEIGHBOURS` | Mizan Neighbours. Unset (or `demo`), it shows a made-up example mosque with made-up needs at `/neighbours`, hidden from the Menu and from search, to show partners how it works; the demo account can open its desk. `off` hides it all. `on` lists real partners, added on `/admin/partners`, and puts “Help a family near you” in the Menu, the guide's answer, My zakat and Give. Build time, like `APP_URL`. |
 | `REVIEWED_BY`, `REVIEWED_ON` | Once a named scholar has really reviewed the rulings: their name and the date (YYYY-MM-DD), shown on the sources page. Until then it says plainly that no one has. |
 | `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` | Turns on cookieless [Plausible](https://plausible.io) analytics for public pages only, with `Signup`, `Demo`, and `Calculated` events. Build time. |
 | `NEXT_PUBLIC_PLAUSIBLE_SRC` | Script URL for a self-hosted Plausible (defaults to plausible.io, manual mode). |
@@ -691,7 +691,8 @@ downloads everything received as CSV for the mosque's own accounts.
 Partners use an ordinary Mizan account and a desk at `/partner` (no zakat
 setup needed). Each has a public page with what it has met and passed on
 this year, a printable poster with a QR code, and `/neighbours/for-mosques`
-sets out what a partner agrees to. Turn it on with `NEIGHBOURS`.
+sets out what a partner agrees to. Until `NEIGHBOURS=on`, only the made-up
+example shows, at `/neighbours`.
 
 ### Testing with people
 
