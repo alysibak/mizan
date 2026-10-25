@@ -121,17 +121,18 @@ export async function partnerBySlug(slug: string): Promise<Partner | null> {
   return p && shownPartner(p) ? p : null;
 }
 
-/** What a partner has done, for its page: needs met and money passed on this Gregorian year. */
+/** What a partner has done, for its page: needs met and money passed on this Gregorian year, and how much of it was zakat. */
 export async function partnerTotals(partnerId: string, now = new Date()) {
   const from = `${now.getUTCFullYear()}-01-01`;
   const [row] = await db
     .select({
       met: sql<number>`sum(case when ${needs.received} >= ${needs.amount} then 1 else 0 end)`,
       passedOn: sql<number>`coalesce(sum(${needs.received}), 0)`,
+      zakat: sql<number>`coalesce(sum(case when ${needs.zakat} then ${needs.received} else 0 end), 0)`,
     })
     .from(needs)
     .where(and(eq(needs.partnerId, partnerId), ne(needs.status, "draft"), ne(needs.status, "removed"), sql`${needs.createdAt} >= ${from}`));
-  return { met: Number(row?.met ?? 0), passedOn: Number(row?.passedOn ?? 0) };
+  return { met: Number(row?.met ?? 0), passedOn: Number(row?.passedOn ?? 0), zakat: Number(row?.zakat ?? 0) };
 }
 
 /** The partners this person helps run. */

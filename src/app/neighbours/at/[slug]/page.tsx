@@ -54,6 +54,12 @@ export default async function PartnerPage({ params }: Props) {
             <dd className="font-serif text-3xl text-ink nums">{formatMoney(totals.passedOn, partner.currency, "en-CA", { whole: true })}</dd>
           </div>
         </dl>
+        {/* Where zakat went, so givers can see it was kept for zakat needs. */}
+        {totals.zakat > 0 ? (
+          <p className="-mt-2 text-base text-sage">
+            Of this, {formatMoney(totals.zakat, partner.currency, "en-CA", { whole: true })} was zakat.
+          </p>
+        ) : null}
 
         <section aria-labelledby="open-needs" className="space-y-3">
           <h2 id="open-needs" className="font-serif text-2xl text-ink">

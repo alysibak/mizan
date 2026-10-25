@@ -151,6 +151,7 @@ test("a mosque lists a checked need, a visitor promises and pays, and hears it a
   await second.getByRole("link", { name: "Masjid Al-Test" }).click();
   await expect(second.getByText("Our committee meets each family")).toBeVisible();
   await expect(second.getByText("$400").first()).toBeVisible();
+  await expect(second.getByText("Of this, $400 was zakat.")).toBeVisible();
 
   // Three reports take it off the list until the mosque looks.
   for (let i = 0; i < 3; i++) {
